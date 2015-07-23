@@ -61,6 +61,112 @@ void GensWindowPrivate::initMenuBar(void)
 	ui.actionHelpAbout->setMenuRole(QAction::AboutRole);
 	// TODO: Set standard shortcuts?
 	// TODO: Rename "Quit" to "Exit" on Windows.
+
+	// Create QSignalMappers and QActionGroups for submenus
+	// with lots of similar items.
+	QSignalMapper *mapper;
+	QActionGroup *actgrp;
+
+	// Graphcs, Resolution.
+	mapper = new QSignalMapper(q);
+	mapper->setMapping(ui.actionGraphicsResolution1x, 1);
+	mapper->setMapping(ui.actionGraphicsResolution2x, 2);
+	mapper->setMapping(ui.actionGraphicsResolution3x, 3);
+	mapper->setMapping(ui.actionGraphicsResolution4x, 4);
+
+	QObject::connect(ui.actionGraphicsResolution1x, SIGNAL(triggered()),
+		mapper, SLOT(map()), Qt::UniqueConnection);
+	QObject::connect(ui.actionGraphicsResolution2x, SIGNAL(triggered()),
+		mapper, SLOT(map()), Qt::UniqueConnection);
+	QObject::connect(ui.actionGraphicsResolution3x, SIGNAL(triggered()),
+		mapper, SLOT(map()), Qt::UniqueConnection);
+	QObject::connect(ui.actionGraphicsResolution4x, SIGNAL(triggered()),
+		mapper, SLOT(map()), Qt::UniqueConnection);
+
+	QObject::connect(mapper, SIGNAL(mapped(int)),
+		q, SLOT(map_actionGraphicsResolution_triggered(int)),
+		Qt::UniqueConnection);
+
+	// Graphics, Color Depth.
+	mapper = new QSignalMapper(q);
+	mapper->setMapping(ui.actionGraphicsBpp15, MdFb::BPP_15);
+	mapper->setMapping(ui.actionGraphicsBpp16, MdFb::BPP_16);
+	mapper->setMapping(ui.actionGraphicsBpp32, MdFb::BPP_32);
+
+	QObject::connect(ui.actionGraphicsBpp15, SIGNAL(triggered()),
+		mapper, SLOT(map()), Qt::UniqueConnection);
+	QObject::connect(ui.actionGraphicsBpp16, SIGNAL(triggered()),
+		mapper, SLOT(map()), Qt::UniqueConnection);
+	QObject::connect(ui.actionGraphicsBpp32, SIGNAL(triggered()),
+		mapper, SLOT(map()), Qt::UniqueConnection);
+
+	QObject::connect(mapper, SIGNAL(mapped(int)),
+		q, SLOT(map_actionGraphicsBpp_triggered(int)),
+		Qt::UniqueConnection);
+
+	actgrp = new QActionGroup(q);
+	actgrp->setExclusive(true);
+	actgrp->addAction(ui.actionGraphicsBpp15);
+	actgrp->addAction(ui.actionGraphicsBpp16);
+	actgrp->addAction(ui.actionGraphicsBpp32);
+
+	// Graphics, Stretch Mode.
+	mapper = new QSignalMapper(q);
+	mapper->setMapping(ui.actionGraphicsStretchNone, STRETCH_NONE);
+	mapper->setMapping(ui.actionGraphicsStretchHorizontal, STRETCH_H);
+	mapper->setMapping(ui.actionGraphicsStretchVertical, STRETCH_V);
+	mapper->setMapping(ui.actionGraphicsStretchFull, STRETCH_FULL);
+
+	QObject::connect(ui.actionGraphicsStretchNone, SIGNAL(triggered()),
+		mapper, SLOT(map()), Qt::UniqueConnection);
+	QObject::connect(ui.actionGraphicsStretchHorizontal, SIGNAL(triggered()),
+		mapper, SLOT(map()), Qt::UniqueConnection);
+	QObject::connect(ui.actionGraphicsStretchVertical, SIGNAL(triggered()),
+		mapper, SLOT(map()), Qt::UniqueConnection);
+	QObject::connect(ui.actionGraphicsStretchFull, SIGNAL(triggered()),
+		mapper, SLOT(map()), Qt::UniqueConnection);
+
+	QObject::connect(mapper, SIGNAL(mapped(int)),
+		q, SLOT(map_actionGraphicsStretch_triggered(int)),
+		Qt::UniqueConnection);
+
+	actgrp = new QActionGroup(q);
+	actgrp->setExclusive(true);
+	actgrp->addAction(ui.actionGraphicsStretchNone);
+	actgrp->addAction(ui.actionGraphicsStretchHorizontal);
+	actgrp->addAction(ui.actionGraphicsStretchVertical);
+	actgrp->addAction(ui.actionGraphicsStretchFull);
+
+	// System, Region.
+	mapper = new QSignalMapper(q);
+	mapper->setMapping(ui.actionSystemRegionAuto, SysVersion::REGION_AUTO);
+	mapper->setMapping(ui.actionSystemRegionJPN, SysVersion::REGION_JP_NTSC);
+	mapper->setMapping(ui.actionSystemRegionAsia, SysVersion::REGION_ASIA_PAL);
+	mapper->setMapping(ui.actionSystemRegionUSA, SysVersion::REGION_US_NTSC);
+	mapper->setMapping(ui.actionSystemRegionEUR, SysVersion::REGION_EU_PAL);
+
+	QObject::connect(ui.actionSystemRegionAuto, SIGNAL(triggered()),
+		mapper, SLOT(map()), Qt::UniqueConnection);
+	QObject::connect(ui.actionSystemRegionJPN, SIGNAL(triggered()),
+		mapper, SLOT(map()), Qt::UniqueConnection);
+	QObject::connect(ui.actionSystemRegionAsia, SIGNAL(triggered()),
+		mapper, SLOT(map()), Qt::UniqueConnection);
+	QObject::connect(ui.actionSystemRegionUSA, SIGNAL(triggered()),
+		mapper, SLOT(map()), Qt::UniqueConnection);
+	QObject::connect(ui.actionSystemRegionEUR, SIGNAL(triggered()),
+		mapper, SLOT(map()), Qt::UniqueConnection);
+
+	QObject::connect(mapper, SIGNAL(mapped(int)),
+		q, SLOT(map_actionSystemRegion_triggered(int)),
+		Qt::UniqueConnection);
+
+	actgrp = new QActionGroup(q);
+	actgrp->setExclusive(true);
+	actgrp->addAction(ui.actionSystemRegionAuto);
+	actgrp->addAction(ui.actionSystemRegionJPN);
+	actgrp->addAction(ui.actionSystemRegionAsia);
+	actgrp->addAction(ui.actionSystemRegionUSA);
+	actgrp->addAction(ui.actionSystemRegionEUR);
 }
 
 /**

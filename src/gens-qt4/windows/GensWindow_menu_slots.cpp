@@ -23,6 +23,13 @@
 
 #include "GensWindow.hpp"
 
+// C includes. (C++ namespace)
+#include <cassert>
+
+// LibGens includes.
+#include "libgens/MD/SysVersion.hpp"
+using LibGens::SysVersion;
+
 // Other windows.
 #include "windows/AboutDialog.hpp"
 #include "windows/CtrlConfigWindow.hpp"
@@ -86,45 +93,22 @@ void GensWindow::on_actionGraphicsShowMenuBar_toggled(bool checked)
 }
 
 // TODO: Base menu function?
-//void GensWindow::on_mnuGraphicsResolution_triggered(void);
-// TODO: SignalMapper?
 // TODO: Make auto-exclusive, and add a 'custom' item?
-void GensWindow::on_actionGraphicsResolution1x_triggered(void)
-{
-	this->rescale(1);
-}
-
-void GensWindow::on_actionGraphicsResolution2x_triggered(void)
-{
-	this->rescale(2);
-}
-
-void GensWindow::on_actionGraphicsResolution3x_triggered(void)
-{
-	this->rescale(3);
-}
-
-void GensWindow::on_actionGraphicsResolution4x_triggered(void)
+//void GensWindow::on_mnuGraphicsResolution_triggered(void);
+void GensWindow::map_actionGraphicsResolution_triggered(int scale)
 {
 	this->rescale(4);
+	assert(scale >= 1 && scale <= 4);
+	this->rescale(scale);
 }
 
 // TODO: Base menu function?
 //void GensWindow::on_mnuGraphicsBpp_triggered(void);
-// TODO: SignalMapper?
-void GensWindow::on_actionGraphicsBpp15_triggered(void)
-{
-	this->setBpp(LibGens::MdFb::BPP_15);
-}
-
-void GensWindow::on_actionGraphicsBpp16_triggered(void)
-{
-	this->setBpp(LibGens::MdFb::BPP_16);
-}
-
-void GensWindow::on_actionGraphicsBpp32_triggered(void)
-{
-	this->setBpp(LibGens::MdFb::BPP_32);
+void GensWindow::map_actionGraphicsBpp_triggered(int bpp)
+ {
+	assert(bpp >= LibGens::MdFb::BPP_15 &&
+	       bpp <  LibGens::MdFb::BPP_MAX);
+	this->setBpp((LibGens::MdFb::ColorDepth)bpp);
 }
 
 // FIXME: Need to manually find the mnuGraphicsStretch QAction
@@ -140,32 +124,11 @@ void GensWindow::on_mnuGraphicsStretch_triggered(void)
 }
 #endif
 
-// TODO: SignalMapper?
-void GensWindow::on_actionGraphicsStretchNone_triggered(void)
+void GensWindow::map_actionGraphicsStretch_triggered(int stretchMode)
 {
+	assert(stretchMode >= STRETCH_NONE && stretchMode <= STRETCH_FULL);
 	Q_D(GensWindow);
-	/* TODO: Move to init function. */
-	// TODO: Add action groups to init function.
-	d->ui.mnuGraphicsStretch->menuAction()->setShortcut(QKeySequence(QLatin1String("Shift+F2")));
-	d->vBackend->setStretchMode(STRETCH_NONE);
-}
-
-void GensWindow::on_actionGraphicsStretchHorizontal_triggered(void)
-{
-	Q_D(GensWindow);
-	d->vBackend->setStretchMode(STRETCH_H);
-}
-
-void GensWindow::on_actionGraphicsStretchVertical_triggered(void)
-{
-	Q_D(GensWindow);
-	d->vBackend->setStretchMode(STRETCH_V);
-}
-
-void GensWindow::on_actionGraphicsStretchFull_triggered(void)
-{
-	Q_D(GensWindow);
-	d->vBackend->setStretchMode(STRETCH_FULL);
+	d->vBackend->setStretchMode((StretchMode_t)stretchMode);
 }
 
 void GensWindow::on_actionGraphicsScreenshot_triggered(void)
@@ -190,30 +153,11 @@ void GensWindow::on_mnuSystemRegion_triggered(void)
 }
 #endif
 
-void GensWindow::on_actionSystemRegionAuto_triggered(void)
-{
-	gqt4_cfg->set(QLatin1String("System/regionCode"), (int)LibGens::SysVersion::REGION_AUTO);
-}
-
-void GensWindow::on_actionSystemRegionJPN_triggered(void)
-{
-	gqt4_cfg->set(QLatin1String("System/regionCode"), (int)LibGens::SysVersion::REGION_JP_NTSC);
-}
-
-void GensWindow::on_actionSystemRegionAsia_triggered(void)
-{
-	gqt4_cfg->set(QLatin1String("System/regionCode"), (int)LibGens::SysVersion::REGION_ASIA_PAL);
-}
-
-void GensWindow::on_actionSystemRegionUSA_triggered(void)
+void GensWindow::map_actionSystemRegion_triggered(int region)
 {
 	// TODO: Rename to JPN/ASIA/USA/EUR?
-	gqt4_cfg->set(QLatin1String("System/regionCode"), (int)LibGens::SysVersion::REGION_US_NTSC);
-}
-
-void GensWindow::on_actionSystemRegionEUR_triggered(void)
-{
-	gqt4_cfg->set(QLatin1String("System/regionCode"), (int)LibGens::SysVersion::REGION_EU_PAL);
+	assert(region >= SysVersion::REGION_AUTO && region <= SysVersion::REGION_EU_PAL);
+	gqt4_cfg->set(QLatin1String("System/regionCode"), region);
 }
 
 void GensWindow::on_actionSystemHardReset_triggered(void)

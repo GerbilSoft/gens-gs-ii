@@ -182,31 +182,20 @@ class GensWindow : public QMainWindow
 		// Graphics
 		void on_actionGraphicsShowMenuBar_toggled(bool checked);
 		//void on_mnuGraphicsResolution_triggered(void);
-		void on_actionGraphicsResolution1x_triggered(void);
-		void on_actionGraphicsResolution2x_triggered(void);
-		void on_actionGraphicsResolution3x_triggered(void);
-		void on_actionGraphicsResolution4x_triggered(void);
+		void map_actionGraphicsResolution_triggered(int scale);
 		//void on_mnuGraphicsBpp_triggered(void);
-		void on_actionGraphicsBpp15_triggered(void);
-		void on_actionGraphicsBpp16_triggered(void);
-		void on_actionGraphicsBpp32_triggered(void);
+		void map_actionGraphicsBpp_triggered(int bpp);
 		//void on_mnuGraphicsStretch_triggered(void);
-		void on_actionGraphicsStretchNone_triggered(void);
-		void on_actionGraphicsStretchHorizontal_triggered(void);
-		void on_actionGraphicsStretchVertical_triggered(void);
-		void on_actionGraphicsStretchFull_triggered(void);
+		void map_actionGraphicsStretch_triggered(int stretchMode);
 		void on_actionGraphicsScreenshot_triggered(void);
 
 		// System
 		//void on_mnuSystemRegion_triggered(void);
-		void on_actionSystemRegionAuto_triggered(void);
-		void on_actionSystemRegionJPN_triggered(void);
-		void on_actionSystemRegionAsia_triggered(void);
-		void on_actionSystemRegionUSA_triggered(void);
-		void on_actionSystemRegionEUR_triggered(void);
+		void map_actionSystemRegion_triggered(int region);
 		void on_actionSystemHardReset_triggered(void);
 		void on_actionSystemSoftReset_triggered(void);
 		void on_actionSystemPause_toggled(bool checked);
+		// TODO: Signal mapper for CPU reset options?
 		void on_actionSystemResetM68K_triggered(void);
 		void on_actionSystemResetS68K_triggered(void);
 		void on_actionSystemResetMSH2_triggered(void);
