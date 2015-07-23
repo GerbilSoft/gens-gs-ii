@@ -50,6 +50,7 @@ class PngWriter
 	public:
 		/**
 		 * Write an image to a PNG file.
+		 * No metadata other than creation time will be saved.
 		 * @param img_data	[in] Image data.
 		 * @param filename	[in] PNG file.
 		 * @return 0 on success; negative errno on error.
@@ -71,8 +72,9 @@ class PngWriter
 
 		/**
 		 * Write an image to a PNG file in a ZIP file.
-		 * @param img_data Image data.
-		 * @param zfile ZIP file. (Must have a file open for writing.)
+		 * No metadata other than creation time will be saved.
+		 * @param img_data	[in] Image data.
+		 * @param zfile		[in] ZIP file. (Must have a file open for writing.)
 		 * @return 0 on success; negative errno on error.
 		 */
 		int writeToZip(const _Zomg_Img_Data_t *img_data, zipFile zfile);
