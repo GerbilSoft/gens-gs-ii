@@ -221,40 +221,10 @@ void GensWindow::on_actionOptionsControllers_triggered(void)
 }
 
 // SoundTest; remove this later.
-void GensWindow::on_actionSound11_triggered(void)
+void GensWindow::map_actionSound_triggered(int freq)
 {
 	Q_D(GensWindow);
-	d->emuManager->setAudioRate(11025);
-}
-
-void GensWindow::on_actionSound16_triggered(void)
-{
-	Q_D(GensWindow);
-	d->emuManager->setAudioRate(16000);
-}
-
-void GensWindow::on_actionSound22_triggered(void)
-{
-	Q_D(GensWindow);
-	d->emuManager->setAudioRate(22050);
-}
-
-void GensWindow::on_actionSound32_triggered(void)
-{
-	Q_D(GensWindow);
-	d->emuManager->setAudioRate(32000);
-}
-
-void GensWindow::on_actionSound44_triggered(void)
-{
-	Q_D(GensWindow);
-	d->emuManager->setAudioRate(44100);
-}
-
-void GensWindow::on_actionSound48_triggered(void)
-{
-	Q_D(GensWindow);
-	d->emuManager->setAudioRate(48000);
+	d->emuManager->setAudioRate(freq);
 }
 
 void GensWindow::on_actionSoundMono_triggered(void)
@@ -285,54 +255,11 @@ void GensWindow::on_actionNoMenuFastBlur_toggled(bool checked)
 	d->vBackend->setFastBlur(checked);
 }
 
-void GensWindow::on_actionNoMenuSaveSlot0_triggered(void)
-{
-	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 0);
-}
-
-void GensWindow::on_actionNoMenuSaveSlot1_triggered(void)
-{
-	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 1);
-}
-
-void GensWindow::on_actionNoMenuSaveSlot2_triggered(void)
-{
-	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 2);
-}
-
-void GensWindow::on_actionNoMenuSaveSlot3_triggered(void)
-{
-	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 3);
-}
-
-void GensWindow::on_actionNoMenuSaveSlot4_triggered(void)
-{
-	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 4);
-}
-
-void GensWindow::on_actionNoMenuSaveSlot5_triggered(void)
-{
-	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 5);
-}
-
-void GensWindow::on_actionNoMenuSaveSlot6_triggered(void)
-{
-	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 6);
-}
-
-void GensWindow::on_actionNoMenuSaveSlot7_triggered(void)
-{
-	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 7);
-}
-
-void GensWindow::on_actionNoMenuSaveSlot8_triggered(void)
-{
-	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 8);
-}
-
-void GensWindow::on_actionNoMenuSaveSlot9_triggered(void)
+void GensWindow::map_actionNoMenuSaveSlot_triggered(int saveSlot)
 {
 	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 9);
+	assert(saveSlot >= 0 && saveSlot <= 9);
+	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), saveSlot);
 }
 
 void GensWindow::on_actionNoMenuSaveSlotPrev_triggered(void)

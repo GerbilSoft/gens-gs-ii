@@ -206,12 +206,7 @@ class GensWindow : public QMainWindow
 		void on_actionOptionsSRAM_toggled(bool checked);
 		void on_actionOptionsControllers_triggered(void);
 		// SoundTest; remove this later.
-		void on_actionSound11_triggered(void);
-		void on_actionSound16_triggered(void);
-		void on_actionSound22_triggered(void);
-		void on_actionSound32_triggered(void);
-		void on_actionSound44_triggered(void);
-		void on_actionSound48_triggered(void);
+		void map_actionSound_triggered(int freq);
 		void on_actionSoundMono_triggered(void);
 		void on_actionSoundStereo_triggered(void);
 
@@ -220,16 +215,7 @@ class GensWindow : public QMainWindow
 
 		// Non-Menu Actions
 		void on_actionNoMenuFastBlur_toggled(bool checked);
-		void on_actionNoMenuSaveSlot0_triggered(void);
-		void on_actionNoMenuSaveSlot1_triggered(void);
-		void on_actionNoMenuSaveSlot2_triggered(void);
-		void on_actionNoMenuSaveSlot3_triggered(void);
-		void on_actionNoMenuSaveSlot4_triggered(void);
-		void on_actionNoMenuSaveSlot5_triggered(void);
-		void on_actionNoMenuSaveSlot6_triggered(void);
-		void on_actionNoMenuSaveSlot7_triggered(void);
-		void on_actionNoMenuSaveSlot8_triggered(void);
-		void on_actionNoMenuSaveSlot9_triggered(void);
+		void map_actionNoMenuSaveSlot_triggered(int saveSlot);
 		void on_actionNoMenuSaveSlotPrev_triggered(void);
 		void on_actionNoMenuSaveSlotNext_triggered(void);
 		void on_actionNoMenuLoadStateFrom_triggered(void);

@@ -120,6 +120,30 @@ void GensWindowPrivate::initMenuBar(void)
 	doMappingExc(ui.actionSystemRegionAsia, SysVersion::REGION_ASIA_PAL, SIGNAL(triggered()));
 	doMappingExc(ui.actionSystemRegionUSA,  SysVersion::REGION_US_NTSC,  SIGNAL(triggered()));
 	doMappingExc(ui.actionSystemRegionEUR,  SysVersion::REGION_EU_PAL,   SIGNAL(triggered()));
+
+	// Options, SoundTest.
+	initMapper(SLOT(map_actionSound_triggered(int)));
+	initActGrp();
+	doMappingExc(ui.actionSound11, 11025, SIGNAL(triggered()));
+	doMappingExc(ui.actionSound16, 16000, SIGNAL(triggered()));
+	doMappingExc(ui.actionSound22, 22050, SIGNAL(triggered()));
+	doMappingExc(ui.actionSound32, 32000, SIGNAL(triggered()));
+	doMappingExc(ui.actionSound44, 44100, SIGNAL(triggered()));
+	doMappingExc(ui.actionSound48, 48000, SIGNAL(triggered()));
+
+	// Non-Menu Actions.
+	initMapper(SLOT(map_actionNoMenuSaveSlot));
+	initActGrp();
+	doMappingExc(ui.actionNoMenuSaveSlot0, 0, SIGNAL(triggered()));
+	doMappingExc(ui.actionNoMenuSaveSlot1, 1, SIGNAL(triggered()));
+	doMappingExc(ui.actionNoMenuSaveSlot2, 2, SIGNAL(triggered()));
+	doMappingExc(ui.actionNoMenuSaveSlot3, 3, SIGNAL(triggered()));
+	doMappingExc(ui.actionNoMenuSaveSlot4, 4, SIGNAL(triggered()));
+	doMappingExc(ui.actionNoMenuSaveSlot5, 5, SIGNAL(triggered()));
+	doMappingExc(ui.actionNoMenuSaveSlot6, 6, SIGNAL(triggered()));
+	doMappingExc(ui.actionNoMenuSaveSlot7, 7, SIGNAL(triggered()));
+	doMappingExc(ui.actionNoMenuSaveSlot8, 8, SIGNAL(triggered()));
+	doMappingExc(ui.actionNoMenuSaveSlot9, 9, SIGNAL(triggered()));
 }
 
 /**
