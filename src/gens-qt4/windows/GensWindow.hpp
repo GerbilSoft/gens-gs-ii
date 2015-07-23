@@ -228,6 +228,23 @@ class GensWindow : public QMainWindow
 
 		// Help
 		void on_actionHelpAbout_triggered(void);
+
+		// Non-Menu Actions
+		void on_actionNoMenuFastBlur_toggled(bool checked);
+		void on_actionNoMenuSaveSlot0_triggered(void);
+		void on_actionNoMenuSaveSlot1_triggered(void);
+		void on_actionNoMenuSaveSlot2_triggered(void);
+		void on_actionNoMenuSaveSlot3_triggered(void);
+		void on_actionNoMenuSaveSlot4_triggered(void);
+		void on_actionNoMenuSaveSlot5_triggered(void);
+		void on_actionNoMenuSaveSlot6_triggered(void);
+		void on_actionNoMenuSaveSlot7_triggered(void);
+		void on_actionNoMenuSaveSlot8_triggered(void);
+		void on_actionNoMenuSaveSlot9_triggered(void);
+		void on_actionNoMenuSaveSlotPrev_triggered(void);
+		void on_actionNoMenuSaveSlotNext_triggered(void);
+		void on_actionNoMenuLoadStateFrom_triggered(void);
+		void on_actionNoMenuSaveStateAs_triggered(void);
 };
 
 }

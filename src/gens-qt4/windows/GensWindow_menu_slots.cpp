@@ -332,15 +332,87 @@ void GensWindow::on_actionHelpAbout_triggered(void)
 	AboutDialog::ShowSingle(this);
 }
 
-// TODO: Non-menu actions.
+/** Non-Menu Actions **/
+// FIXME: Not being triggered in the UI...
 
-#if 0
-/** VBackend properties. **/
-void GensWindow::toggleFastBlur(void)
+void GensWindow::on_actionNoMenuFastBlur_toggled(bool checked)
 {
 	Q_D(GensWindow);
-	d->vBackend->setFastBlur(!d->vBackend->fastBlur());
+	d->vBackend->setFastBlur(checked);
 }
-#endif
+
+void GensWindow::on_actionNoMenuSaveSlot0_triggered(void)
+{
+	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 0);
+}
+
+void GensWindow::on_actionNoMenuSaveSlot1_triggered(void)
+{
+	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 1);
+}
+
+void GensWindow::on_actionNoMenuSaveSlot2_triggered(void)
+{
+	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 2);
+}
+
+void GensWindow::on_actionNoMenuSaveSlot3_triggered(void)
+{
+	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 3);
+}
+
+void GensWindow::on_actionNoMenuSaveSlot4_triggered(void)
+{
+	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 4);
+}
+
+void GensWindow::on_actionNoMenuSaveSlot5_triggered(void)
+{
+	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 5);
+}
+
+void GensWindow::on_actionNoMenuSaveSlot6_triggered(void)
+{
+	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 6);
+}
+
+void GensWindow::on_actionNoMenuSaveSlot7_triggered(void)
+{
+	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 7);
+}
+
+void GensWindow::on_actionNoMenuSaveSlot8_triggered(void)
+{
+	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 8);
+}
+
+void GensWindow::on_actionNoMenuSaveSlot9_triggered(void)
+{
+	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 9);
+}
+
+void GensWindow::on_actionNoMenuSaveSlotPrev_triggered(void)
+{
+	int saveSlot = gqt4_cfg->getInt(QLatin1String("Savestates/saveSlot"));
+	saveSlot = ((saveSlot + 9) % 10);
+	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), saveSlot);
+}
+
+void GensWindow::on_actionNoMenuSaveSlotNext_triggered(void)
+{
+	int saveSlot = gqt4_cfg->getInt(QLatin1String("Savestates/saveSlot"));
+	saveSlot = ((saveSlot + 1) % 10);
+	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), saveSlot);
+}
+
+void GensWindow::on_actionNoMenuLoadStateFrom_triggered(void)
+{
+	// TODO (wasn't implemented in GensActions)
+}
+
+void GensWindow::on_actionNoMenuSaveStateAs_triggered(void)
+{
+	// TODO (wasn't implemented in GensActions)
+}
 
 }
