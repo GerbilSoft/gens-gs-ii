@@ -37,7 +37,7 @@
     <addaction name="actionFileGeneralConfiguration"/>
     <addaction name="actionFileSegaCDControlPanel"/>
     <addaction name="separator"/>
-    <addaction name="actionFileExit"/>
+    <addaction name="actionFileQuit"/>
    </widget>
    <widget class="QMenu" name="mnuGraphics">
     <property name="title">
@@ -185,9 +185,9 @@
     <string>Sega C&amp;D Control Panel</string>
    </property>
   </action>
-  <action name="actionFileExit">
+  <action name="actionFileQuit">
    <property name="text">
-    <string>E&amp;xit</string>
+    <string>&amp;Quit</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>

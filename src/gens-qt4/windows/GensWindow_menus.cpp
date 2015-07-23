@@ -68,7 +68,7 @@ void GensWindow::on_actionFileSegaCDControlPanel_triggered(void)
 	McdControlWindow::ShowSingle(this);
 }
 
-void GensWindow::on_actionFileExit_triggered(void)
+void GensWindow::on_actionFileQuit_triggered(void)
 {
 	Q_D(GensWindow);
 	setIdleThreadAllowed(false);

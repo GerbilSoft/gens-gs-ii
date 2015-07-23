@@ -177,7 +177,7 @@ class GensWindow : public QMainWindow
 		void on_actionFileLoadState_triggered(void);
 		void on_actionFileGeneralConfiguration_triggered(void);
 		void on_actionFileSegaCDControlPanel_triggered(void);
-		void on_actionFileExit_triggered(void);
+		void on_actionFileQuit_triggered(void);
 
 		// Graphics
 		void on_actionGraphicsShowMenuBar_toggled(bool checked);
