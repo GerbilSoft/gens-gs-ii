@@ -90,6 +90,19 @@ void GensWindowPrivate::initMenuBar(void)
 		actgrp->addAction(_widget); \
 	} while (0)
 
+	// Macros for connecting the base item for submenus.
+	#define doBaseMenu(_menu, _slot) do { \
+		QAction *action = (_menu)->menuAction(); \
+		QObject::connect(action, SIGNAL(triggered()), \
+			q, (_slot), Qt::UniqueConnection); \
+	} while (0)
+	#define doBaseMenuKey(_menu, _slot, _shortcut) do { \
+		QAction *action = (_menu)->menuAction(); \
+		QObject::connect(action, SIGNAL(triggered()), \
+			q, (_slot), Qt::UniqueConnection); \
+		action->setShortcut(QKeySequence(_shortcut)); \
+	} while (0)
+
 	// Graphics, Resolution.
 	initMapper(SLOT(map_actionGraphicsResolution_triggered(int)));
 	doMapping(ui.actionGraphicsResolution1x, 1, SIGNAL(triggered()));
@@ -112,13 +125,9 @@ void GensWindowPrivate::initMenuBar(void)
 	doMappingExc(ui.actionGraphicsStretchHorizontal, STRETCH_H,    SIGNAL(triggered()));
 	doMappingExc(ui.actionGraphicsStretchVertical,   STRETCH_V,    SIGNAL(triggered()));
 	doMappingExc(ui.actionGraphicsStretchFull,       STRETCH_FULL, SIGNAL(triggered()));
-
-	QAction *action = ui.mnuGraphicsStretch->menuAction();
-	QObject::connect(action, SIGNAL(triggered()),
-		q, SLOT(mnu_mnuGraphicsStretch_triggered()),
-		Qt::UniqueConnection);
-	// TODO: Set this here?
-	action->setShortcut(QKeySequence(GensWindow::tr("Shift+F2")));
+	doBaseMenuKey(ui.mnuGraphicsStretch,
+		SLOT(mnu_mnuGraphicsStretch_triggered()),
+		GensWindow::tr("Shift+F2"));
 
 	// System, Region.
 	initMapper(SLOT(map_actionSystemRegion_triggered(int)));
@@ -128,13 +137,9 @@ void GensWindowPrivate::initMenuBar(void)
 	doMappingExc(ui.actionSystemRegionAsia, SysVersion::REGION_ASIA_PAL, SIGNAL(triggered()));
 	doMappingExc(ui.actionSystemRegionUSA,  SysVersion::REGION_US_NTSC,  SIGNAL(triggered()));
 	doMappingExc(ui.actionSystemRegionEUR,  SysVersion::REGION_EU_PAL,   SIGNAL(triggered()));
-
-	action = ui.mnuSystemRegion->menuAction();
-	QObject::connect(action, SIGNAL(triggered()),
-		q, SLOT(mnu_mnuSystemRegion_triggered()),
-		Qt::UniqueConnection);
-	// TODO: Set this here?
-	action->setShortcut(QKeySequence(GensWindow::tr("Shift+F3")));
+	doBaseMenuKey(ui.mnuSystemRegion,
+		SLOT(mnu_mnuSystemRegion_triggered()),
+		GensWindow::tr("Shift+F3"));
 
 	// Options, SoundTest.
 	initMapper(SLOT(map_actionSound_triggered(int)));
