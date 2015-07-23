@@ -268,6 +268,7 @@ int Metadata::toPngData(png_structp png_ptr, png_infop info_ptr, int metaFlags) 
 	/** "Description" field. **/
 
 	// Emulator information.
+	ostringstream desc;
 	if ((metaFlags & MF_Emulator) && !d->creatorInfo.creator.empty()) {
 		desc << "Emulator: " << d->creatorInfo.creator << '\n';
 		if (!d->creatorInfo.creatorVersion.empty()) {
@@ -292,7 +293,6 @@ int Metadata::toPngData(png_structp png_ptr, png_infop info_ptr, int metaFlags) 
 	// System.
 	// NOTE: This is required for ZOMG.ini, so we'll
 	// always save it in screenshots as well.
-	ostringstream desc;
 	if (!d->systemId.empty()) {
 		desc << "System: " << d->systemId << '\n';
 	}
