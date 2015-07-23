@@ -524,6 +524,14 @@ void EmuManager::doScreenShot(void)
 	img_data.w = fb->imgWidth();
 	img_data.h = fb->imgHeight();
 
+	// Aspect ratio.
+	// Vertical is always 4.
+	// Horizontal is 4 for H40, 5 for H32.
+	// TODO: Handle Interlaced mode 2x rendering?
+	img_data.phys_y = 4;
+	// TODO: Formula to automatically scale for any width?
+	img_data.phys_x = (img_data.w == 256 ? 5 : 4);
+
 	const MdFb::ColorDepth bpp = fb->bpp();
 	if (bpp == MdFb::BPP_32) {
 		img_data.data = (void*)(fb->lineBuf32(imgYStart) + imgXStart);

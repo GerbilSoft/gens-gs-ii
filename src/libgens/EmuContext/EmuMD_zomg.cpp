@@ -274,6 +274,14 @@ int EmuMD::zomgSave(const utf8_str *filename) const
 	img_data.w = m_vdp->getHPix();
 	img_data.h = m_vdp->getVPix();
 
+	// Aspect ratio.
+	// Vertical is always 4.
+	// Horizontal is 4 for H40, 5 for H32.
+	// TODO: Handle Interlaced mode 2x rendering?
+	img_data.phys_y = 4;
+	// TODO: Formula to automatically scale for any width?
+	img_data.phys_x = (img_data.w == 256 ? 5 : 4);
+
 	const MdFb::ColorDepth bpp = fb->bpp();
 	if (bpp == MdFb::BPP_32) {
 		img_data.data = (void*)(fb->lineBuf32(startY) + startX);
@@ -285,6 +293,7 @@ int EmuMD::zomgSave(const utf8_str *filename) const
 		img_data.bpp = (bpp == MdFb::BPP_16 ? 16 : 15);
 	}
 
+	// TODO: ROM metadata.
 	zomg.savePreview(&img_data);
 	fb->unref();
 

@@ -155,6 +155,16 @@ const std::string getConfigDir(const utf8_str *subdir)
  */
 int doScreenShot(const MdFb *fb, const Rom *rom)
 {
+	/**
+	 * TODO: This code is duplicated in four places:
+	 * - GensSdl::Config
+	 * - GensQt4::EmuManager
+	 * - LibGens::EmuMD
+	 * - LibGens::EmuPico
+	 *
+	 * Consolidate it into a LibGens function?
+	 */
+
 	const string configDir = getConfigDir("Screenshots");
 	if (configDir.empty() || !fb || !rom)
 		return -EINVAL;
@@ -190,6 +200,14 @@ int doScreenShot(const MdFb *fb, const Rom *rom)
 	img_data.w = fb->imgWidth();
 	img_data.h = fb->imgHeight();
 
+	// Aspect ratio.
+	// Vertical is always 4.
+	// Horizontal is 4 for H40, 5 for H32.
+	// TODO: Handle Interlaced mode 2x rendering?
+	img_data.phys_y = 4;
+	// TODO: Formula to automatically scale for any width?
+	img_data.phys_x = (img_data.w == 256 ? 5 : 4);
+
 	const MdFb::ColorDepth bpp = fb->bpp();
 	if (bpp == MdFb::BPP_32) {
 		img_data.data = (void*)(fb->lineBuf32(imgYStart) + imgXStart);
@@ -203,6 +221,7 @@ int doScreenShot(const MdFb *fb, const Rom *rom)
 
 	// Set up metadata.
 	Metadata metadata;
+	// TODO: Get system from Rom.
 	metadata.setSystemId("MD");	// TODO: Pass MDP system ID directly.
 	//metadata.setRegion();		// TODO: Get region code.
 	metadata.setRomFilename(basename);	// TODO: With extension; also, z_file?
