@@ -42,20 +42,43 @@ using std::string;
 
 namespace LibGens {
 
-/**
- * Save a screenshot to a file.
- * File will be in PNG format.
- * TODO: Metadata flags parameter.
- * @param fb		[in] MD framebuffer.
- * @param rom		[in] ROM object. (Needed for some metadata.)
- * @param filename	[in] Filename for the screenshot.
- * @return 0 on success; negative errno on error.
- */
-int Screenshot::toFile(const MdFb *fb, const Rom *rom, const utf8_str *filename)
+class ScreenshotPrivate
 {
-	if (!fb || !filename || !filename[0])
-		return -EINVAL;
+	private:
+		// Static class.
+		ScreenshotPrivate() { }
+		~ScreenshotPrivate() { }
 
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		ScreenshotPrivate(const ScreenshotPrivate &);
+		ScreenshotPrivate &operator=(const ScreenshotPrivate &);
+
+	public:
+		/**
+		 * Internal screenshot function.
+		 * @param img_data	[out] Image data.
+		 * @param metadata	[out, opt] Extra metadata.
+		 * @param fb		[in] MD framebuffer.
+		 * @param rom		[in] ROM object. (Needed for some metadata.
+		 */
+		static void toImgData(Zomg_Img_Data_t *img_data,
+				Metadata *metadata,
+				const MdFb *fb, const Rom *rom);
+};
+
+/**
+ * Internal screenshot function.
+ * @param img_data	[out] Image data.
+ * @param metadata	[out, opt] Extra metadata.
+ * @param fb		[in] MD framebuffer.
+ * @param rom		[in] ROM object. (Needed for some metadata.
+ */
+void ScreenshotPrivate::toImgData(Zomg_Img_Data_t *img_data,
+				Metadata *metadata,
+				const MdFb *fb, const Rom *rom)
+{
 	// Take the screenshot.
 	fb->ref();
 	const int imgXStart = fb->imgXStart();
@@ -63,32 +86,28 @@ int Screenshot::toFile(const MdFb *fb, const Rom *rom, const utf8_str *filename)
 
 	// TODO: Option to save the full framebuffer, not just active display?
 	// NOTE: Zeroing the struct in case new stuff is added later.
-	Zomg_Img_Data_t img_data;
-	memset(&img_data, 0, sizeof(img_data));
-	img_data.w = fb->imgWidth();
-	img_data.h = fb->imgHeight();
+	memset(img_data, 0, sizeof(*img_data));
+	img_data->w = fb->imgWidth();
+	img_data->h = fb->imgHeight();
 
 	// Aspect ratio.
 	// Vertical is always 4.
 	// Horizontal is 4 for H40, 5 for H32.
 	// TODO: Handle Interlaced mode 2x rendering?
-	img_data.phys_y = 4;
+	img_data->phys_y = 4;
 	// TODO: Formula to automatically scale for any width?
-	img_data.phys_x = (img_data.w == 256 ? 5 : 4);
+	img_data->phys_x = (img_data->w == 256 ? 5 : 4);
 
 	const MdFb::ColorDepth bpp = fb->bpp();
 	if (bpp == MdFb::BPP_32) {
-		img_data.data = (void*)(fb->lineBuf32(imgYStart) + imgXStart);
-		img_data.pitch = (fb->pxPitch() * sizeof(uint32_t));
-		img_data.bpp = 32;
+		img_data->data = (void*)(fb->lineBuf32(imgYStart) + imgXStart);
+		img_data->pitch = (fb->pxPitch() * sizeof(uint32_t));
+		img_data->bpp = 32;
 	} else {
-		img_data.data = (void*)(fb->lineBuf16(imgYStart) + imgXStart);
-		img_data.pitch = (fb->pxPitch() * sizeof(uint16_t));
-		img_data.bpp = (bpp == MdFb::BPP_16 ? 16 : 15);
+		img_data->data = (void*)(fb->lineBuf16(imgYStart) + imgXStart);
+		img_data->pitch = (fb->pxPitch() * sizeof(uint16_t));
+		img_data->bpp = (bpp == MdFb::BPP_16 ? 16 : 15);
 	}
-
-	// Set up metadata.
-	Metadata metadata;
 
 	// System ID.
 	// TODO: Pass the MDP system ID directly.
@@ -132,15 +151,35 @@ int Screenshot::toFile(const MdFb *fb, const Rom *rom, const utf8_str *filename)
 	}
 
 	if (sysId != nullptr) {
-		metadata.setSystemId(string(sysId));
+		metadata->setSystemId(string(sysId));
 	};
 
 	//metadata.setRegion();		// TODO: Get region code.
 	// TODO: Save ROM filename with extension; also, z_file?
-	metadata.setRomFilename(rom->filenameBaseNoExt());
-	metadata.setRomCrc32(rom->rom_crc32());
-	//metadata.setRomSize(rom->romSize());	// TODO; also, include SMD header?
+	metadata->setRomFilename(rom->filenameBaseNoExt());
+	metadata->setRomCrc32(rom->rom_crc32());
+	//metadata->setRomSize(rom->romSize());	// TODO; also, include SMD header?
 	// TODO: Add more metadata.
+}
+
+/**
+ * Save a screenshot to a file.
+ * File will be in PNG format.
+ * TODO: Metadata flags parameter.
+ * @param fb		[in] MD framebuffer.
+ * @param rom		[in] ROM object. (Needed for some metadata.)
+ * @param filename	[in] Filename for the screenshot.
+ * @return 0 on success; negative errno on error.
+ */
+int Screenshot::toFile(const MdFb *fb, const Rom *rom, const utf8_str *filename)
+{
+	if (!fb || !filename || !filename[0])
+		return -EINVAL;
+
+	// TODO: metaFlags.
+	Zomg_Img_Data_t img_data;
+	Metadata metadata;
+	ScreenshotPrivate::toImgData(&img_data, &metadata, fb, rom);
 
 	// Write the PNG image.
 	// TODO: Do UTF-8 filenames work with libpng on Windows?
