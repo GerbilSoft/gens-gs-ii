@@ -26,6 +26,7 @@
 namespace LibGens { namespace IO {
 
 Device::Device()
+	: m_type(IoManager::IOT_NONE)
 {
 	// TODO: Add pointer-based 'copy' constructor
 	// to copy MD-side data.
@@ -68,7 +69,7 @@ void Device::resetDev(void) {
 // Should be overridden by subclasses.
 IoManager::IoType_t Device::type(void) const
 {
-	return IoManager::IOT_NONE;
+	return m_type;
 }
 
 /**

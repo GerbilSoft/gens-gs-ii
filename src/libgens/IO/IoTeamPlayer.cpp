@@ -35,6 +35,8 @@ namespace LibGens { namespace IO {
 IoTeamPlayer::IoTeamPlayer()
 	: Device()
 {
+	m_type = IoManager::IOT_TEAMPLAYER;
+
 	// No controllers are associated initially.
 	memset(pads, 0, sizeof(pads));
 	memset(padTypes, 0, sizeof(padTypes));
@@ -52,15 +54,6 @@ void IoTeamPlayer::resetDev(void)
 {
 	Device::resetDev();	// TODO: typedef super?
 	rebuildCtrlIndexTable();
-}
-
-/**
- * Device type.
- * Should be overridden by subclasses.
- */
-IoManager::IoType_t IoTeamPlayer::type(void) const
-{
-	return IoManager::IOT_TEAMPLAYER;
 }
 
 /**

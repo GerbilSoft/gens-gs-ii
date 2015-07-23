@@ -59,9 +59,12 @@ class Device
 		 */
 		virtual void resetDev(void);
 
-		// Device type.
-		// Should be overridden by subclasses.
-		virtual IoManager::IoType_t type(void) const;
+		/**
+		 * Device type.
+		 * Subclasses must set m_type in their constructor.
+		 * @return Device type.
+		 */
+		IoManager::IoType_t type(void) const;
 
 		// Device-side variables.
 		int counter;			// Internal counter.
@@ -86,6 +89,12 @@ class Device
 		};
 
 	protected:
+		/**
+		 * Device type.
+		 * Subclasses must set this field in their constructor.
+		 */
+		IoManager::IoType_t m_type;
+
 		/**
 		 * Controller bitfield.
 		 * Format:

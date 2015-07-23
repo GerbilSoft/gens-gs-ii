@@ -41,6 +41,8 @@ namespace LibGens { namespace IO {
 IoMasterTap::IoMasterTap()
 	: Device()
 {
+	m_type = IoManager::IOT_MASTERTAP;
+
 	// No controllers are associated initially.
 	memset(pads, 0, sizeof(pads));
 
@@ -59,15 +61,6 @@ void IoMasterTap::resetDev(void)
 {
 	Device::resetDev();	// TODO: typedef super?
 	this->scanlines = 0;
-}
-
-/**
- * Device type.
- * Should be overridden by subclasses.
- */
-IoManager::IoType_t IoMasterTap::type(void) const
-{
-	return IoManager::IOT_MASTERTAP;
 }
 
 /**

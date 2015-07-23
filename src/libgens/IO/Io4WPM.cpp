@@ -31,17 +31,10 @@ namespace LibGens { namespace IO {
 Io4WPM::Io4WPM()
 	: Device()
 {
+	m_type = IoManager::IOT_4WP_MASTER;
+
 	// No slave device is associated initially.
 	slave = nullptr;
-}
-
-/**
- * Device type.
- * Should be overridden by subclasses.
- */
-IoManager::IoType_t Io4WPM::type(void) const
-{
-	return IoManager::IOT_4WP_MASTER;
 }
 
 /**

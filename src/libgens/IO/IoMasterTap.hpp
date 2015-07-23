@@ -57,12 +57,6 @@ class IoMasterTap : public Device
 		virtual void resetDev(void) final;
 
 		/**
-		 * Device type.
-		 * Should be overridden by subclasses.
-		 */
-		virtual IoManager::IoType_t type(void) const final;
-
-		/**
 		 * Update the I/O device.
 		 * Runs the internal device update.
 		 */

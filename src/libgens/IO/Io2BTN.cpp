@@ -28,6 +28,8 @@ namespace LibGens { namespace IO {
 Io2BTN::Io2BTN()
 	: Device()
 {
+	m_type = IoManager::IOT_2BTN;
+
 	// resetDev() can't be called from the base constructor.
 	resetDev();
 }
@@ -42,15 +44,6 @@ Io2BTN::Io2BTN()
 void Io2BTN::resetDev(void)
 {
 	this->pause = false;
-}
-
-/**
- * Device type.
- * Should be overridden by subclasses.
- */
-IoManager::IoType_t Io2BTN::type(void) const
-{
-	return IoManager::IOT_2BTN;
 }
 
 /**

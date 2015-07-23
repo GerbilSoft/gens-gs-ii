@@ -32,7 +32,9 @@ namespace LibGens { namespace IO {
 IoPico::IoPico()
 	: Device()
 	, m_page_num(0)
-{ }
+{
+	m_type = IoManager::IOT_PICO;
+}
 
 /**
  * Reset Device data that only affects the device
@@ -45,15 +47,6 @@ void IoPico::resetDev(void)
 {
 	Device::resetDev();	// TODO: typedef super?
 	m_page_num = 0;		// Reset to title page.
-}
-
-/**
- * Device type.
- * Should be overridden by subclasses.
- */
-IoManager::IoType_t IoPico::type(void) const
-{
-	return IoManager::IOT_PICO;
 }
 
 /**

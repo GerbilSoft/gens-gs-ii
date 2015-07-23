@@ -27,15 +27,8 @@ namespace LibGens { namespace IO {
 
 Io3BTN::Io3BTN()
 	: Device()
-{ }
-
-/**
- * Device type.
- * Should be overridden by subclasses.
- */
-IoManager::IoType_t Io3BTN::type(void) const
 {
-	return IoManager::IOT_3BTN;
+	m_type = IoManager::IOT_3BTN;
 }
 
 /**
