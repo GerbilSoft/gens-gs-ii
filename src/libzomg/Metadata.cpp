@@ -194,6 +194,7 @@ std::string Metadata::toZomgIni(int metaFlags) const
 	d->WriteValue(oss, "FileType", "Zipped Original Memory from Genesis");
 	// TODO: Get the ZomgVersion from somewhere.
 	d->WriteValue(oss, "Version", "0.1-DEV-UNSTABLE");
+	d->WriteValue(oss, "System", d->systemId);
 
 	// System metadata.
 	if (metaFlags & MF_Emulator) {
@@ -214,7 +215,6 @@ std::string Metadata::toZomgIni(int metaFlags) const
 	}
 
 	// ROM metadata.
-	d->WriteValue(oss, "System", d->systemId);
 	if (metaFlags & MF_RomInfo) {
 		d->WriteValue(oss, "ROM", d->romFilename);
 		d->WriteValue(oss, "ROM_CRC32", d->romCrc32, 8, true);
