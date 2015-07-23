@@ -169,12 +169,26 @@ int PngReaderPrivate::readFromPng(png_structp png_ptr, png_infop info_ptr,
 
 	// Read the PNG image header.
 	int bit_depth, color_type;
-	png_get_IHDR(png_ptr, info_ptr, &img_data->w, &img_data->h, &bit_depth, &color_type,
+	png_get_IHDR(png_ptr, info_ptr,
+		     &img_data->w, &img_data->h,
+		     &bit_depth, &color_type,
 		     nullptr, nullptr, nullptr);
 	if (img_data->w <= 0 || img_data->h <= 0) {
 		// Invalid image size.
 		// TODO: Better error code?
 		return -EINVAL;
+	}
+
+	// Check for pHYs.
+	if (png_get_valid(png_ptr, info_ptr, PNG_INFO_pHYs)) {
+		// TODO: Only if unit_type == PNG_RESOLUTION_UNKNOWN?
+		png_get_pHYs(png_ptr, info_ptr,
+			     &img_data->phys_x, &img_data->phys_y,
+			     nullptr);
+	} else {
+		// No pHYs.
+		img_data->phys_x = 0;
+		img_data->phys_y = 0;
 	}
 
 	// Apply some conversions to ensure the returned

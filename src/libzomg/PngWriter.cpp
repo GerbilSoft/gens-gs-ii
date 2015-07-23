@@ -313,6 +313,13 @@ int PngWriterPrivate::writeToPng(png_structp png_ptr, png_infop info_ptr,
 		}
 	}
 
+	// Write the pHYs chunk.
+	if (img_data->phys_x > 0 && img_data->phys_y > 0) {
+		png_set_pHYs(png_ptr, info_ptr,
+			     img_data->phys_x, img_data->phys_y,
+			     PNG_RESOLUTION_UNKNOWN);
+	}
+
 	// PNG metadata.
 	if (metadata) {
 		metadata->toPngData(png_ptr, info_ptr, metaFlags);
