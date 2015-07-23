@@ -67,10 +67,7 @@ SET(libgens_SRCS
 	sound/PsgDebug.cpp
 	sound/Ym2612.cpp
 	macros/log_msg.c
-	Util/byteswap.c
 	Rom.cpp
-	Util/gens_siginfo.c
-	Util/cpuflags.c
 	Effects/CrazyEffect.cpp
 	Effects/PausedEffect.cpp
 	Effects/FastBlur.cpp
@@ -81,12 +78,25 @@ SET(libgens_SRCS
 	lg_osd.c
 	sound/SoundMgr.cpp
 	Data/32X/fw_32x.c
-	Util/MdFb.cpp
 	Cartridge/RomCartridgeMD.cpp
 	Save/EEPRomI2C.cpp
 	Save/EEPRomI2C_File.cpp
 	Save/EEPRomI2C_DB.cpp
 	Save/EEPRomI2C_Debug.cpp
+	)
+
+SET(libgens_UTIL_SRCS
+	Util/byteswap.c
+	Util/gens_siginfo.c
+	Util/cpuflags.c
+	Util/MdFb.cpp
+	)
+
+SET(libgens_UTIL_H
+	Util/byteswap.h
+	Util/gens_siginfo.h
+	Util/cpuflags.h
+	Util/MdFb.hpp
 	)
 
 # OS-specific timing functions.
@@ -272,16 +282,12 @@ ENDIF()
 
 ADD_LIBRARY(gens STATIC
 	${libgens_SRCS}
-	${libgens_TIMING_SRCS}
-	${libgens_TIMING_H}
-	${libgens_EMUCONTEXT_SRCS}
-	${libgens_EMUCONTEXT_H}
-	${libgens_VDP_SRCS}
-	${libgens_VDP_H}
-	${libgens_IO_SRCS}
-	${libgens_IO_H}
-	${libgens_DECOMPRESSOR_SRCS}
-	${libgens_DECOMPRESSOR_H}
+	${libgens_UTIL_SRCS} ${libgens_UTIL_H}
+	${libgens_TIMING_SRCS} ${libgens_TIMING_H}
+	${libgens_EMUCONTEXT_SRCS} ${libgens_EMUCONTEXT_H}
+	${libgens_VDP_SRCS} ${libgens_VDP_H}
+	${libgens_IO_SRCS} ${libgens_IO_H}
+	${libgens_DECOMPRESSOR_SRCS} ${libgens_DECOMPRESSOR_H}
 	${libgens_COMPAT_SRCS}
 	)
 INCLUDE(SetMSVCDebugPath)
