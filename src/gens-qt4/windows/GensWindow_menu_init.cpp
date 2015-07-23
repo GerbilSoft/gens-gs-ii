@@ -73,10 +73,9 @@ void GensWindowPrivate::initMenuBar(void)
 		QObject::connect(mapper, SIGNAL(mapped(int)), \
 			q, (_slot), Qt::UniqueConnection); \
 	} while (0)
-	// TODO: Remove _signal? (It's always triggered()...)
-	#define doMapping(_widget, _id, _signal) do { \
+	#define doMapping(_widget, _id) do { \
 		mapper->setMapping((_widget), (_id)); \
-		QObject::connect((_widget), (_signal), mapper, \
+		QObject::connect((_widget), SIGNAL(triggered()), mapper, \
 			SLOT(map()), Qt::UniqueConnection); \
 	} while (0)
 
@@ -85,8 +84,8 @@ void GensWindowPrivate::initMenuBar(void)
 		actgrp = new QActionGroup(q); \
 		actgrp->setExclusive(true); \
 	} while (0)
-	#define doMappingExc(_widget, _id, _signal) do { \
-		doMapping(_widget, _id, _signal); \
+	#define doMappingExc(_widget, _id) do { \
+		doMapping((_widget), (_id)); \
 		actgrp->addAction(_widget); \
 	} while (0)
 
@@ -105,26 +104,26 @@ void GensWindowPrivate::initMenuBar(void)
 
 	// Graphics, Resolution.
 	initMapper(SLOT(map_actionGraphicsResolution_triggered(int)));
-	doMapping(ui.actionGraphicsResolution1x, 1, SIGNAL(triggered()));
-	doMapping(ui.actionGraphicsResolution2x, 2, SIGNAL(triggered()));
-	doMapping(ui.actionGraphicsResolution3x, 3, SIGNAL(triggered()));
-	doMapping(ui.actionGraphicsResolution4x, 4, SIGNAL(triggered()));
+	doMapping(ui.actionGraphicsResolution1x, 1);
+	doMapping(ui.actionGraphicsResolution2x, 2);
+	doMapping(ui.actionGraphicsResolution3x, 3);
+	doMapping(ui.actionGraphicsResolution4x, 4);
 	// TODO: QActionGroup?
 
 	// Graphics, Color Depth.
 	initMapper(SLOT(map_actionGraphicsBpp_triggered(int)));
 	initActGrp();
-	doMappingExc(ui.actionGraphicsBpp15, MdFb::BPP_15, SIGNAL(triggered()));
-	doMappingExc(ui.actionGraphicsBpp16, MdFb::BPP_16, SIGNAL(triggered()));
-	doMappingExc(ui.actionGraphicsBpp32, MdFb::BPP_32, SIGNAL(triggered()));
+	doMappingExc(ui.actionGraphicsBpp15, MdFb::BPP_15);
+	doMappingExc(ui.actionGraphicsBpp16, MdFb::BPP_16);
+	doMappingExc(ui.actionGraphicsBpp32, MdFb::BPP_32);
 
 	// Graphics, Stretch Mode.
 	initMapper(SLOT(map_actionGraphicsStretch_triggered(int)));
 	initActGrp();
-	doMappingExc(ui.actionGraphicsStretchNone,       STRETCH_NONE, SIGNAL(triggered()));
-	doMappingExc(ui.actionGraphicsStretchHorizontal, STRETCH_H,    SIGNAL(triggered()));
-	doMappingExc(ui.actionGraphicsStretchVertical,   STRETCH_V,    SIGNAL(triggered()));
-	doMappingExc(ui.actionGraphicsStretchFull,       STRETCH_FULL, SIGNAL(triggered()));
+	doMappingExc(ui.actionGraphicsStretchNone,       STRETCH_NONE);
+	doMappingExc(ui.actionGraphicsStretchHorizontal, STRETCH_H);
+	doMappingExc(ui.actionGraphicsStretchVertical,   STRETCH_V);
+	doMappingExc(ui.actionGraphicsStretchFull,       STRETCH_FULL);
 	doBaseMenuKey(ui.mnuGraphicsStretch,
 		SLOT(mnu_mnuGraphicsStretch_triggered()),
 		GensWindow::tr("Shift+F2"));
@@ -132,11 +131,11 @@ void GensWindowPrivate::initMenuBar(void)
 	// System, Region.
 	initMapper(SLOT(map_actionSystemRegion_triggered(int)));
 	initActGrp();
-	doMappingExc(ui.actionSystemRegionAuto, SysVersion::REGION_AUTO,     SIGNAL(triggered()));
-	doMappingExc(ui.actionSystemRegionJPN,  SysVersion::REGION_JP_NTSC,  SIGNAL(triggered()));
-	doMappingExc(ui.actionSystemRegionAsia, SysVersion::REGION_ASIA_PAL, SIGNAL(triggered()));
-	doMappingExc(ui.actionSystemRegionUSA,  SysVersion::REGION_US_NTSC,  SIGNAL(triggered()));
-	doMappingExc(ui.actionSystemRegionEUR,  SysVersion::REGION_EU_PAL,   SIGNAL(triggered()));
+	doMappingExc(ui.actionSystemRegionAuto, SysVersion::REGION_AUTO);
+	doMappingExc(ui.actionSystemRegionJPN,  SysVersion::REGION_JP_NTSC);
+	doMappingExc(ui.actionSystemRegionAsia, SysVersion::REGION_ASIA_PAL);
+	doMappingExc(ui.actionSystemRegionUSA,  SysVersion::REGION_US_NTSC);
+	doMappingExc(ui.actionSystemRegionEUR,  SysVersion::REGION_EU_PAL);
 	doBaseMenuKey(ui.mnuSystemRegion,
 		SLOT(mnu_mnuSystemRegion_triggered()),
 		GensWindow::tr("Shift+F3"));
@@ -144,26 +143,26 @@ void GensWindowPrivate::initMenuBar(void)
 	// Options, SoundTest.
 	initMapper(SLOT(map_actionSound_triggered(int)));
 	initActGrp();
-	doMappingExc(ui.actionSound11, 11025, SIGNAL(triggered()));
-	doMappingExc(ui.actionSound16, 16000, SIGNAL(triggered()));
-	doMappingExc(ui.actionSound22, 22050, SIGNAL(triggered()));
-	doMappingExc(ui.actionSound32, 32000, SIGNAL(triggered()));
-	doMappingExc(ui.actionSound44, 44100, SIGNAL(triggered()));
-	doMappingExc(ui.actionSound48, 48000, SIGNAL(triggered()));
+	doMappingExc(ui.actionSound11, 11025);
+	doMappingExc(ui.actionSound16, 16000);
+	doMappingExc(ui.actionSound22, 22050);
+	doMappingExc(ui.actionSound32, 32000);
+	doMappingExc(ui.actionSound44, 44100);
+	doMappingExc(ui.actionSound48, 48000);
 
 	// Non-Menu Actions.
 	initMapper(SLOT(map_actionNoMenuSaveSlot_triggered(int)));
 	initActGrp();
-	doMappingExc(ui.actionNoMenuSaveSlot0, 0, SIGNAL(triggered()));
-	doMappingExc(ui.actionNoMenuSaveSlot1, 1, SIGNAL(triggered()));
-	doMappingExc(ui.actionNoMenuSaveSlot2, 2, SIGNAL(triggered()));
-	doMappingExc(ui.actionNoMenuSaveSlot3, 3, SIGNAL(triggered()));
-	doMappingExc(ui.actionNoMenuSaveSlot4, 4, SIGNAL(triggered()));
-	doMappingExc(ui.actionNoMenuSaveSlot5, 5, SIGNAL(triggered()));
-	doMappingExc(ui.actionNoMenuSaveSlot6, 6, SIGNAL(triggered()));
-	doMappingExc(ui.actionNoMenuSaveSlot7, 7, SIGNAL(triggered()));
-	doMappingExc(ui.actionNoMenuSaveSlot8, 8, SIGNAL(triggered()));
-	doMappingExc(ui.actionNoMenuSaveSlot9, 9, SIGNAL(triggered()));
+	doMappingExc(ui.actionNoMenuSaveSlot0, 0);
+	doMappingExc(ui.actionNoMenuSaveSlot1, 1);
+	doMappingExc(ui.actionNoMenuSaveSlot2, 2);
+	doMappingExc(ui.actionNoMenuSaveSlot3, 3);
+	doMappingExc(ui.actionNoMenuSaveSlot4, 4);
+	doMappingExc(ui.actionNoMenuSaveSlot5, 5);
+	doMappingExc(ui.actionNoMenuSaveSlot6, 6);
+	doMappingExc(ui.actionNoMenuSaveSlot7, 7);
+	doMappingExc(ui.actionNoMenuSaveSlot8, 8);
+	doMappingExc(ui.actionNoMenuSaveSlot9, 9);
 }
 
 /**
