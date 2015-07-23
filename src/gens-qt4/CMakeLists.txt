@@ -225,6 +225,7 @@ SET(gens-qt4_ROMDB_MOC_HEADERS
 
 # UI files.
 SET(gens-qt4_WINDOW_UIS
+	windows/GensWindow.ui
 	windows/AboutDialog.ui
 	windows/CtrlConfigWindow.ui
 	windows/ZipSelectDialog.ui

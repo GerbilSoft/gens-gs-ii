@@ -46,11 +46,9 @@ class QCloseEvent;
 // Idle thread.
 #include "IdleThread.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class GensWindowPrivate;
-
 class GensWindow : public QMainWindow
 {
 	Q_OBJECT
