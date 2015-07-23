@@ -27,6 +27,10 @@
 #include "ui_GensWindow.h"
 namespace GensQt4 {
 
+class EmuManager;
+class KeyHandlerQt;
+class VBackend;
+	
 class GensWindowPrivate
 {
 	public:
