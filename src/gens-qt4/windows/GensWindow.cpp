@@ -238,7 +238,7 @@ GensWindow::GensWindow()
 	stateChanged();
 
 	// Enable the context menu.
-	// TODO: If using Sega Mega Mouse, add hotkey to capture
+	// TODO: If emulating the Sega Mega Mouse, add a hotkey to capture
 	// the mouse to allow use of right-click.
 	connect(this, SIGNAL(customContextMenuRequested(QPoint)),
 		this, SLOT(showContextMenu(QPoint)));
