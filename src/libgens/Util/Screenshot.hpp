@@ -24,6 +24,10 @@
 
 #include "../macros/common.h"
 
+namespace LibZomg {
+	class ZomgBase;
+}
+
 namespace LibGens {
 
 class MdFb;
@@ -53,6 +57,16 @@ class Screenshot
 		 * @return 0 on success; negative errno on error.
 		 */
 		static int toFile(const MdFb *fb, const Rom *rom, const utf8_str *filename);
+
+		/**
+		 * Save a screenshot to a ZOMG savestate.
+		 * TODO: Metadata flags parameter.
+		 * @param zomg	[in,out] ZOMG savestate.
+		 * @param fb	[in] MD framebuffer.
+		 * @param rom	[in] ROM object. (Needed for some metadata.)
+		 * @return 0 on success; negative errno on error.
+		 */
+		static int toZomg(LibZomg::ZomgBase *zomg, const MdFb *fb, const Rom *rom);
 };
 
 }

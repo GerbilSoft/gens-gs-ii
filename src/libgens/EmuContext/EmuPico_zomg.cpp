@@ -42,8 +42,8 @@
 #include "libzomg/zomg_psg.h"
 #include "libzomg/zomg_m68k.h"
 
-// ZOMG image data.
-#include "libzomg/img_data.h"
+// Screenshots.
+#include "Util/Screenshot.hpp"
 
 // C includes.
 #include <stdint.h>
@@ -196,41 +196,10 @@ int EmuPico::zomgSave(const utf8_str *filename) const
 	}
 
 	// Create the preview image.
-	// TODO: Separate function to create an img_data from an MdFb.
-	// NOTE: LibZomg doesn't depend on LibGens, so it can't use MdFb directly.
-	// TODO: Store VPix and HPixBegin in the MdFb.
+	// TODO: Use the existing metadata?
+	// TODO: Check the return value?
 	MdFb *fb = m_vdp->MD_Screen->ref();
-	const int startY = ((240 - m_vdp->getVPix()) / 2);
-	const int startX = (m_vdp->getHPixBegin());
-
-	// TODO: Option to save the full framebuffer, not just active display?
-	// NOTE: Zeroing the struct in case new stuff is added later.
-	Zomg_Img_Data_t img_data;
-	memset(&img_data, 0, sizeof(img_data));
-	img_data.w = m_vdp->getHPix();
-	img_data.h = m_vdp->getVPix();
-
-	// Aspect ratio.
-	// Vertical is always 4.
-	// Horizontal is 4 for H40, 5 for H32.
-	// TODO: Handle Interlaced mode 2x rendering?
-	img_data.phys_y = 4;
-	// TODO: Formula to automatically scale for any width?
-	img_data.phys_x = (img_data.w == 256 ? 5 : 4);
-
-	const MdFb::ColorDepth bpp = fb->bpp();
-	if (bpp == MdFb::BPP_32) {
-		img_data.data = (void*)(fb->lineBuf32(startY) + startX);
-		img_data.pitch = (fb->pxPitch() * sizeof(uint32_t));
-		img_data.bpp = 32;
-	} else {
-		img_data.data = (void*)(fb->lineBuf16(startY) + startX);
-		img_data.pitch = (fb->pxPitch() * sizeof(uint16_t));
-		img_data.bpp = (bpp == MdFb::BPP_16 ? 16 : 15);
-	}
-
-	// TODO: ROM metadata.
-	zomg.savePreview(&img_data);
+	Screenshot::toZomg(&zomg, fb, m_rom);
 	fb->unref();
 
 	// TODO: Check error codes from the ZOMG functions.

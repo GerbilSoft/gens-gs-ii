@@ -28,9 +28,11 @@
 // LibZomg
 #include "libzomg/PngWriter.hpp"
 #include "libzomg/Metadata.hpp"
+#include "libzomg/ZomgBase.hpp"
 #include "libzomg/img_data.h"
 using LibZomg::PngWriter;
 using LibZomg::Metadata;
+using LibZomg::ZomgBase;
 
 // C includes. (C++ namespace)
 #include <cerrno>
@@ -166,6 +168,7 @@ void ScreenshotPrivate::toImgData(Zomg_Img_Data_t *img_data,
  * Save a screenshot to a file.
  * File will be in PNG format.
  * TODO: Metadata flags parameter.
+ * TODO: Make filename the first parameter?
  * @param fb		[in] MD framebuffer.
  * @param rom		[in] ROM object. (Needed for some metadata.)
  * @param filename	[in] Filename for the screenshot.
@@ -186,6 +189,28 @@ int Screenshot::toFile(const MdFb *fb, const Rom *rom, const utf8_str *filename)
 	PngWriter pngWriter;
 	return pngWriter.writeToFile(&img_data, filename,
 				&metadata, Metadata::MF_Default);
+}
+
+/**
+ * Save a screenshot to a ZOMG savestate.
+ * TODO: Metadata flags parameter.
+ * @param zomg	[in,out] ZOMG savestate.
+ * @param fb	[in] MD framebuffer.
+ * @param rom	[in] ROM object. (Needed for some metadata.)
+ * @return 0 on success; negative errno on error.
+ */
+int Screenshot::toZomg(LibZomg::ZomgBase *zomg, const MdFb *fb, const Rom *rom)
+{
+	if (!zomg || !fb || !rom)
+		return -EINVAL;
+
+	// TODO: metaFlags.
+	Zomg_Img_Data_t img_data;
+	Metadata metadata;
+	ScreenshotPrivate::toImgData(&img_data, &metadata, fb, rom);
+
+	// Write the image to the ZOMG savestate.
+	return zomg->savePreview(&img_data, &metadata, Metadata::MF_Default);
 }
 
 }
