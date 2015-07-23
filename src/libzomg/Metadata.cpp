@@ -194,7 +194,8 @@ std::string Metadata::toZomgIni(int metaFlags) const
 	d->WriteValue(oss, "FileType", "Zipped Original Memory from Genesis");
 	// TODO: Get the ZomgVersion from somewhere.
 	d->WriteValue(oss, "Version", "0.1-DEV-UNSTABLE");
-	d->WriteValue(oss, "System", d->systemId);
+
+	// System metadata.
 	if (metaFlags & MF_Emulator) {
 		d->WriteValue(oss, "Creator", d->creatorInfo.creator);
 		d->WriteValue(oss, "CreatorVersion", d->creatorInfo.creatorVersion);
@@ -211,6 +212,9 @@ std::string Metadata::toZomgIni(int metaFlags) const
 	if (metaFlags & MF_Author) {
 		d->WriteValue(oss, "Author", d->sysInfo.username);
 	}
+
+	// ROM metadata.
+	d->WriteValue(oss, "System", d->systemId);
 	if (metaFlags & MF_RomInfo) {
 		d->WriteValue(oss, "ROM", d->romFilename);
 		d->WriteValue(oss, "ROM_CRC32", d->romCrc32, 8, true);
@@ -263,14 +267,6 @@ int Metadata::toPngData(png_structp png_ptr, png_infop info_ptr, int metaFlags) 
 
 	/** "Description" field. **/
 
-	// System.
-	// NOTE: This is required for ZOMG.ini, so we'll
-	// always save it in screenshots as well.
-	ostringstream desc;
-	if (!d->systemId.empty()) {
-		desc << "System: " << d->systemId << '\n';
-	}
-
 	// Emulator information.
 	if ((metaFlags & MF_Emulator) && !d->creatorInfo.creator.empty()) {
 		desc << "Emulator: " << d->creatorInfo.creator << '\n';
@@ -291,6 +287,14 @@ int Metadata::toPngData(png_structp png_ptr, png_infop info_ptr, int metaFlags) 
 		if (!d->sysInfo.cpu.empty()) {
 			desc << "CPU: " << d->sysInfo.cpu << '\n';
 		}
+	}
+
+	// System.
+	// NOTE: This is required for ZOMG.ini, so we'll
+	// always save it in screenshots as well.
+	ostringstream desc;
+	if (!d->systemId.empty()) {
+		desc << "System: " << d->systemId << '\n';
 	}
 
 	// ROM information.
