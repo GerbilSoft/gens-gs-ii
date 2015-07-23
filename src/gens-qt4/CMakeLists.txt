@@ -146,6 +146,17 @@ SET(gens-qt4_WINDOW_SRCS
 	windows/McdControlWindow.cpp
 	)
 
+SET(gens-qt4_WINDOW_H
+	windows/GensWindow.hpp
+	windows/GensWindow_p.hpp
+	windows/AboutDialog.hpp
+	windows/CtrlConfigWindow.hpp
+	windows/ZipSelectDialog.hpp
+	windows/GeneralConfigWindow.hpp
+	windows/GeneralConfigWindow_p.hpp
+	windows/McdControlWindow.hpp
+	)
+
 SET(gens-qt4_WIDGET_SRCS
 	widgets/GensLineEdit.cpp
 	widgets/GensZipDirModel.cpp
@@ -361,7 +372,7 @@ ADD_EXECUTABLE(gens-qt4
 	WIN32
 	${gens-qt4_SRCS}
 	${gens-qt4_COMMON_SRCS} ${gens-qt4_COMMON_MOC_HEADERS}
-	${gens-qt4_WINDOW_SRCS} ${gens-qt4_WINDOW_MOC_HEADERS}
+	${gens-qt4_WINDOW_SRCS} ${gens-qt4_WINDOW_H} ${gens-qt4_WINDOW_MOC_HEADERS}
 	${gens-qt4_WIDGET_SRCS} ${gens-qt4_WIDGET_MOC_HEADERS}
 	${gens-qt4_CONFIG_SRCS} ${gens-qt4_CONFIG_MOC_HEADERS}
 	${gens-qt4_ROMDB_SRCS} ${gens-qt4_ROMDB_MOC_HEADERS}

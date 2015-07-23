@@ -50,56 +50,8 @@
 // Video Backend classes.
 #include "VBackend/GensQGLWidget.hpp"
 
-#include "ui_GensWindow.h"
+#include "GensWindow_p.hpp"
 namespace GensQt4 {
-
-class GensWindowPrivate
-{
-	public:
-		GensWindowPrivate(GensWindow *q);
-		~GensWindowPrivate();
-
-	private:
-		GensWindow *const q_ptr;
-		Q_DECLARE_PUBLIC(GensWindow)
-	private:
-		Q_DISABLE_COPY(GensWindowPrivate)
-
-	public:
-		Ui::GensWindow ui;
-
-		// TODO: Remove these later.
-		//GensMenuBar *gensMenuBar;
-		//GensActions *gensACtions;
-
-		EmuManager *emuManager;
-		KeyHandlerQt *keyHandler;
-		VBackend *vBackend;
-
-		// Menu bar.
-		bool isGlobalMenuBar(void) const;
-		bool isShowMenuBar(void) const;
-		void initMenuBar(void);
-
-		int scale;		// Temporary scaling variable.
-		bool hasInitResize;	// Has the initial resize occurred?
-
-		// Resize the window.
-		void gensResize(void);
-
-		// Set the Gens window title.
-		void setGensTitle(void);
-
-		/** Configuration items. **/
-		bool cfg_autoPause;
-		int cfg_introStyle;
-		bool cfg_showMenuBar;
-
-		/** Idle thread. **/
-		IdleThread *idleThread;
-		bool idleThreadAllowed;
-		void checkIdleThread(void);
-};
 
 /** GensWindowPrivate **/
 
