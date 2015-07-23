@@ -133,7 +133,7 @@ void GensWindowPrivate::initMenuBar(void)
 	doMappingExc(ui.actionSound48, 48000, SIGNAL(triggered()));
 
 	// Non-Menu Actions.
-	initMapper(SLOT(map_actionNoMenuSaveSlot));
+	initMapper(SLOT(map_actionNoMenuSaveSlot_triggered(int)));
 	initActGrp();
 	doMappingExc(ui.actionNoMenuSaveSlot0, 0, SIGNAL(triggered()));
 	doMappingExc(ui.actionNoMenuSaveSlot1, 1, SIGNAL(triggered()));
