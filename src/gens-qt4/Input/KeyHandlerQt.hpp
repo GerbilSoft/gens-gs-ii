@@ -73,21 +73,6 @@ class KeyHandlerQt : public QObject
 		void mouseReleaseEvent(QMouseEvent *event);
 
 	private:
-		/**
-		 * DevHandler(): LibGens Device Handler function. (STATIC function)
-		 * @param param Parameter specified when registering the device handler function.
-		 * @param key Gens keycode. (~0 for Update; return value is true on success.)
-		 * @return True if the key is pressed; false if it isn't.
-		 */
-		static bool DevHandler(void *param, GensKey_t key);
-		
-		/**
-		 * DevHandler(): LibGens Device Handler function. (member function)
-		 * @param key Gens keycode. (~0 for Update; return value is true on success.)
-		 * @return True if the key is pressed; false if it isn't.
-		 */
-		bool devHandler(GensKey_t key);
-		
 		// Gens Actions Manager.
 		GensActions *m_gensActions;
 

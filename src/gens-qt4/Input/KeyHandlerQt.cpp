@@ -445,7 +445,7 @@ GensKey_t KeyHandlerQt::NativeModifierToKeyVal(QKeyEvent *event)
 	// NOTE: Shift, Control, and Alt are NOT tested here.
 	// WM_KEYDOWN/WM_KEYUP report VK_SHIFT, VK_CONTORL, and VK_MENU (Alt).
 	// These are useless for testing left/right keys.
-	// Instead, GetAsyncKeyState() is used in KeyHandlerQt::DevHandler().
+	// Instead, GetAsyncKeyState() is used in LibGensKeys::KeyManager::updateIoManager().
 	switch (event->nativeVirtualKey()) {
 		case VK_LWIN:		return KEYV_LSUPER;
 		case VK_RWIN:		return KEYV_RSUPER;
