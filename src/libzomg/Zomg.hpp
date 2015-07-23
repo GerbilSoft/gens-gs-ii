@@ -71,6 +71,7 @@ class Zomg : public ZomgBase
 
 		/**
 		 * Load the preview image.
+		 * TODO: Metadata?
 		 * @param img_data Image data. (Caller must free img_data->data.)
 		 * @return 0 on success; non-zero on error.
 		 */
@@ -131,10 +132,27 @@ class Zomg : public ZomgBase
 
 		/**
 		 * Save the preview image.
-		 * @param img_data Image data.
+		 *
+		 * NOTE: Defined here as well as in ZomgBase because otherwise,
+		 * gcc and MSVC will complain that there's no matching function call.
+		 * FIXME: Figure out why, and/or remove this function.
+		 *
+		 * No metadata other than creation time will be saved.
+		 * @param img_data	[in] Image data.
 		 * @return 0 on success; non-zero on error.
 		 */
-		virtual int savePreview(const _Zomg_Img_Data_t *img_data) override;
+		int savePreview(const _Zomg_Img_Data_t *img_data)
+			{ return savePreview(img_data, nullptr, -1 /*Metadata::MF_Default*/); }
+
+		/**
+		 * Save the preview image.
+		 * @param img_data	[in] Image data.
+		 * @param metadata	[in, opt] Extra metadata.
+		 * @param metaFlags	[in, opt] Metadata flags.
+		 * @return 0 on success; non-zero on error.
+		 */
+		virtual int savePreview(const _Zomg_Img_Data_t *img_data,
+					const Metadata *metadata, int metaFlags);
 
 		// VDP
 		virtual int saveVdpReg(const uint8_t *reg, size_t siz) override;

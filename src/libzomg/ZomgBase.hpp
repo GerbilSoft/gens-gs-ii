@@ -55,6 +55,7 @@ extern "C" struct _Zomg_Img_Data_t;
 
 namespace LibZomg {
 
+class Metadata;
 class ZomgBase
 {
 	public:
@@ -95,6 +96,7 @@ class ZomgBase
 
 		/**
 		 * Load the preview image.
+		 * TODO: Metadata?
 		 * @param img_data Image data. (Caller must free img_data->data.)
 		 * @return Bytes read on success; negative on error.
 		 */
@@ -168,11 +170,23 @@ class ZomgBase
 
 		/**
 		 * Save the preview image.
-		 * @param img_data Image data.
+		 * No metadata other than creation time will be saved.
+		 * @param img_data	[in] Image data.
 		 * @return 0 on success; non-zero on error.
 		 */
-		virtual int savePreview(const _Zomg_Img_Data_t *img_data)
-			{ (void)img_data; return 0; }
+		int savePreview(const _Zomg_Img_Data_t *img_data)
+			{ return savePreview(img_data, nullptr, -1 /*Metadata::MF_Default*/); }
+
+		/**
+		 * Save the preview image.
+		 * @param img_data	[in] Image data.
+		 * @param metadata	[in, opt] Extra metadata.
+		 * @param metaFlags	[in, opt] Metadata flags.
+		 * @return 0 on success; non-zero on error.
+		 */
+		virtual int savePreview(const _Zomg_Img_Data_t *img_data,
+					const Metadata *metadata, int metaFlags)
+			{ (void)img_data; (void)metadata; (void)metaFlags; return 0; }
 
 		// VDP
 		virtual int saveVdpReg(const uint8_t *reg, size_t siz)

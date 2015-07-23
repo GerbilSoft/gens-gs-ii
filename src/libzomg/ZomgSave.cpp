@@ -135,10 +135,13 @@ int Zomg::saveZomgIni(const Metadata *metadata)
 
 /**
  * Save the preview image.
- * @param img_data Image data.
+ * @param img_data	[in] Image data.
+ * @param metadata	[in, opt] Extra metadata.
+ * @param metaFlags	[in, opt] Metadata flags.
  * @return 0 on success; non-zero on error.
  */
-int Zomg::savePreview(const Zomg_Img_Data_t *img_data)
+int Zomg::savePreview(const Zomg_Img_Data_t *img_data,
+		      const Metadata *metadata, int metaFlags)
 {
 	if (m_mode != ZomgBase::ZOMG_SAVE || !d->zip)
 		return -EBADF;
@@ -170,7 +173,7 @@ int Zomg::savePreview(const Zomg_Img_Data_t *img_data)
 
 	// Write the file.
 	PngWriter pngWriter;	// TODO: Make it static?
-	ret = pngWriter.writeToZip(img_data, d->zip);
+	ret = pngWriter.writeToZip(img_data, d->zip, metadata, metaFlags);
 	zipCloseFileInZip(d->zip);	// TODO: Check the return value!
 
 	return ret;
