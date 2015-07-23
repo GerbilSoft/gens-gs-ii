@@ -67,42 +67,31 @@ void GensWindowPrivate::initMenuBar(void)
 	QSignalMapper *mapper;
 	QActionGroup *actgrp;
 
-	// Graphcs, Resolution.
-	mapper = new QSignalMapper(q);
-	mapper->setMapping(ui.actionGraphicsResolution1x, 1);
-	mapper->setMapping(ui.actionGraphicsResolution2x, 2);
-	mapper->setMapping(ui.actionGraphicsResolution3x, 3);
-	mapper->setMapping(ui.actionGraphicsResolution4x, 4);
+	// Macros to make everything easier.
+	#define initMapper(_slot) do { \
+		mapper = new QSignalMapper(q); \
+		QObject::connect(mapper, SIGNAL(mapped(int)), \
+		q, _slot, Qt::UniqueConnection); \
+	} while (0)
+	#define doMapping(_widget, _id, _signal) do { \
+		mapper->setMapping(_widget, _id); \
+		QObject::connect(_widget, _signal, mapper, \
+			SLOT(map()), Qt::UniqueConnection); \
+	} while (0)
 
-	QObject::connect(ui.actionGraphicsResolution1x, SIGNAL(triggered()),
-		mapper, SLOT(map()), Qt::UniqueConnection);
-	QObject::connect(ui.actionGraphicsResolution2x, SIGNAL(triggered()),
-		mapper, SLOT(map()), Qt::UniqueConnection);
-	QObject::connect(ui.actionGraphicsResolution3x, SIGNAL(triggered()),
-		mapper, SLOT(map()), Qt::UniqueConnection);
-	QObject::connect(ui.actionGraphicsResolution4x, SIGNAL(triggered()),
-		mapper, SLOT(map()), Qt::UniqueConnection);
-
-	QObject::connect(mapper, SIGNAL(mapped(int)),
-		q, SLOT(map_actionGraphicsResolution_triggered(int)),
-		Qt::UniqueConnection);
+	// Graphics, Resolution.
+	initMapper(SLOT(map_actionGraphicsResolution_triggered(int)));
+	doMapping(ui.actionGraphicsResolution1x, 1, SIGNAL(triggered()));
+	doMapping(ui.actionGraphicsResolution2x, 2, SIGNAL(triggered()));
+	doMapping(ui.actionGraphicsResolution3x, 3, SIGNAL(triggered()));
+	doMapping(ui.actionGraphicsResolution4x, 4, SIGNAL(triggered()));
+	// TODO: QActionGroup?
 
 	// Graphics, Color Depth.
-	mapper = new QSignalMapper(q);
-	mapper->setMapping(ui.actionGraphicsBpp15, MdFb::BPP_15);
-	mapper->setMapping(ui.actionGraphicsBpp16, MdFb::BPP_16);
-	mapper->setMapping(ui.actionGraphicsBpp32, MdFb::BPP_32);
-
-	QObject::connect(ui.actionGraphicsBpp15, SIGNAL(triggered()),
-		mapper, SLOT(map()), Qt::UniqueConnection);
-	QObject::connect(ui.actionGraphicsBpp16, SIGNAL(triggered()),
-		mapper, SLOT(map()), Qt::UniqueConnection);
-	QObject::connect(ui.actionGraphicsBpp32, SIGNAL(triggered()),
-		mapper, SLOT(map()), Qt::UniqueConnection);
-
-	QObject::connect(mapper, SIGNAL(mapped(int)),
-		q, SLOT(map_actionGraphicsBpp_triggered(int)),
-		Qt::UniqueConnection);
+	initMapper(SLOT(map_actionGraphicsBpp_triggered(int)));
+	doMapping(ui.actionGraphicsBpp15, MdFb::BPP_15, SIGNAL(triggered()));
+	doMapping(ui.actionGraphicsBpp16, MdFb::BPP_16, SIGNAL(triggered()));
+	doMapping(ui.actionGraphicsBpp32, MdFb::BPP_32, SIGNAL(triggered()));
 
 	actgrp = new QActionGroup(q);
 	actgrp->setExclusive(true);
@@ -111,24 +100,11 @@ void GensWindowPrivate::initMenuBar(void)
 	actgrp->addAction(ui.actionGraphicsBpp32);
 
 	// Graphics, Stretch Mode.
-	mapper = new QSignalMapper(q);
-	mapper->setMapping(ui.actionGraphicsStretchNone, STRETCH_NONE);
-	mapper->setMapping(ui.actionGraphicsStretchHorizontal, STRETCH_H);
-	mapper->setMapping(ui.actionGraphicsStretchVertical, STRETCH_V);
-	mapper->setMapping(ui.actionGraphicsStretchFull, STRETCH_FULL);
-
-	QObject::connect(ui.actionGraphicsStretchNone, SIGNAL(triggered()),
-		mapper, SLOT(map()), Qt::UniqueConnection);
-	QObject::connect(ui.actionGraphicsStretchHorizontal, SIGNAL(triggered()),
-		mapper, SLOT(map()), Qt::UniqueConnection);
-	QObject::connect(ui.actionGraphicsStretchVertical, SIGNAL(triggered()),
-		mapper, SLOT(map()), Qt::UniqueConnection);
-	QObject::connect(ui.actionGraphicsStretchFull, SIGNAL(triggered()),
-		mapper, SLOT(map()), Qt::UniqueConnection);
-
-	QObject::connect(mapper, SIGNAL(mapped(int)),
-		q, SLOT(map_actionGraphicsStretch_triggered(int)),
-		Qt::UniqueConnection);
+	initMapper(SLOT(map_actionGraphicsStretch_triggered(int)));
+	doMapping(ui.actionGraphicsStretchNone,       STRETCH_NONE, SIGNAL(triggered()));
+	doMapping(ui.actionGraphicsStretchHorizontal, STRETCH_H,    SIGNAL(triggered()));
+	doMapping(ui.actionGraphicsStretchVertical,   STRETCH_V,    SIGNAL(triggered()));
+	doMapping(ui.actionGraphicsStretchFull,       STRETCH_FULL, SIGNAL(triggered()));
 
 	actgrp = new QActionGroup(q);
 	actgrp->setExclusive(true);
@@ -138,27 +114,12 @@ void GensWindowPrivate::initMenuBar(void)
 	actgrp->addAction(ui.actionGraphicsStretchFull);
 
 	// System, Region.
-	mapper = new QSignalMapper(q);
-	mapper->setMapping(ui.actionSystemRegionAuto, SysVersion::REGION_AUTO);
-	mapper->setMapping(ui.actionSystemRegionJPN, SysVersion::REGION_JP_NTSC);
-	mapper->setMapping(ui.actionSystemRegionAsia, SysVersion::REGION_ASIA_PAL);
-	mapper->setMapping(ui.actionSystemRegionUSA, SysVersion::REGION_US_NTSC);
-	mapper->setMapping(ui.actionSystemRegionEUR, SysVersion::REGION_EU_PAL);
-
-	QObject::connect(ui.actionSystemRegionAuto, SIGNAL(triggered()),
-		mapper, SLOT(map()), Qt::UniqueConnection);
-	QObject::connect(ui.actionSystemRegionJPN, SIGNAL(triggered()),
-		mapper, SLOT(map()), Qt::UniqueConnection);
-	QObject::connect(ui.actionSystemRegionAsia, SIGNAL(triggered()),
-		mapper, SLOT(map()), Qt::UniqueConnection);
-	QObject::connect(ui.actionSystemRegionUSA, SIGNAL(triggered()),
-		mapper, SLOT(map()), Qt::UniqueConnection);
-	QObject::connect(ui.actionSystemRegionEUR, SIGNAL(triggered()),
-		mapper, SLOT(map()), Qt::UniqueConnection);
-
-	QObject::connect(mapper, SIGNAL(mapped(int)),
-		q, SLOT(map_actionSystemRegion_triggered(int)),
-		Qt::UniqueConnection);
+	initMapper(SLOT(map_actionSystemRegion_triggered(int)));
+	doMapping(ui.actionSystemRegionAuto, SysVersion::REGION_AUTO,     SIGNAL(triggered()));
+	doMapping(ui.actionSystemRegionJPN,  SysVersion::REGION_JP_NTSC,  SIGNAL(triggered()));
+	doMapping(ui.actionSystemRegionAsia, SysVersion::REGION_ASIA_PAL, SIGNAL(triggered()));
+	doMapping(ui.actionSystemRegionUSA,  SysVersion::REGION_US_NTSC,  SIGNAL(triggered()));
+	doMapping(ui.actionSystemRegionEUR,  SysVersion::REGION_EU_PAL,   SIGNAL(triggered()));
 
 	actgrp = new QActionGroup(q);
 	actgrp->setExclusive(true);
