@@ -71,11 +71,12 @@ void GensWindowPrivate::initMenuBar(void)
 	#define initMapper(_slot) do { \
 		mapper = new QSignalMapper(q); \
 		QObject::connect(mapper, SIGNAL(mapped(int)), \
-		q, _slot, Qt::UniqueConnection); \
+			q, (_slot), Qt::UniqueConnection); \
 	} while (0)
+	// TODO: Remove _signal? (It's always triggered()...)
 	#define doMapping(_widget, _id, _signal) do { \
-		mapper->setMapping(_widget, _id); \
-		QObject::connect(_widget, _signal, mapper, \
+		mapper->setMapping((_widget), (_id)); \
+		QObject::connect((_widget), (_signal), mapper, \
 			SLOT(map()), Qt::UniqueConnection); \
 	} while (0)
 
