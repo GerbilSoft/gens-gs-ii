@@ -284,6 +284,12 @@ class IoManager
 		 */
 		void setDevType(VirtPort_t virtPort, IoType_t ioType);
 
+		/** Properties. **/
+
+		// Constrain D-Pad input.
+		bool constrainDPad(void) const;
+		void setConstrainDPad(bool constrainDPad);
+
 		/**
 		 * Logical button names.
 		 * These are used for button name trnaslation in the UI.

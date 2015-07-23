@@ -66,6 +66,20 @@ class Device
 		 */
 		IoManager::IoType_t type(void) const;
 
+		/**
+		 * Does this device have a standard D-Pad as buttons 0-3?
+		 *
+		 * This is used by IoManager to determine if the D-Pad
+		 * buttons should be constrained such that the user can't
+		 * press both U+D or L+R at the same time.
+		 *
+		 * The default is true. Devices that don't have a standard
+		 * D-Pad should set m_hasDPad = false in their constructor.
+		 *
+		 * @return True if this device has a standard D-Pad.
+		 */
+		bool hasDPad(void) const;
+
 		// Device-side variables.
 		int counter;			// Internal counter.
 		uint8_t deviceData;		// Data written from the device.
@@ -94,6 +108,9 @@ class Device
 		 * Subclasses must set this field in their constructor.
 		 */
 		IoManager::IoType_t m_type;
+
+		// Does this device have a standard D-Pad as buttons 0-3?
+		bool m_hasDPad;
 
 		/**
 		 * Controller bitfield.

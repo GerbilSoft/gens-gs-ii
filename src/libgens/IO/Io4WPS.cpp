@@ -35,6 +35,7 @@ Io4WPS::Io4WPS()
 	: Device()
 {
 	m_type = IoManager::IOT_4WP_SLAVE;
+	m_hasDPad = false;
 
 	// No controllers are associated initially.
 	memset(pads, 0, sizeof(pads));

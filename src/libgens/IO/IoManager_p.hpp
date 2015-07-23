@@ -136,6 +136,11 @@ class IoManagerPrivate
 		};
 
 		static const IoDevInfo ioDevInfo[IoManager::IOT_MAX];
+
+		// Constrain D-Pad input.
+		// This only affects devices with a D-Pad
+		// as buttons 0-3.
+		bool constrainDPad;
 };
 
 }

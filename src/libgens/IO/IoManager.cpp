@@ -785,6 +785,28 @@ void IoManager::update(int virtPort, uint32_t buttons)
 	assert(virtPort >= VIRTPORT_1 && virtPort < VIRTPORT_MAX);
 	IO::Device *const dev = d->ioDevices[virtPort];
 	if (dev != nullptr) {
+		if (d->constrainDPad && dev->hasDPad()) {
+			// Constrain D-Pad inputs (buttons 0-3).
+			// On an original controller, it's usually impossible
+			// to press both U+D or L+R at the same time.
+			// This constraint ensures that if e.g. U is pressed,
+			// pressing D will have no effect.
+			// FIXME: When pressing L+R at the same time,
+			// L always seems to win on my laptop, and
+			// R always seems to win on a Win7 PC...
+			const uint32_t old_buttons = dev->getButtons();
+			if ((buttons & 0x3) == 0) {
+				// U+D is pressed.
+				// Use the old value.
+				buttons |= (old_buttons & 0x3);
+			}
+			if ((buttons & 0xC) == 0) {
+				// L+R is pressed.
+				// Use the old value.
+				buttons |= (old_buttons & 0xC);
+			}
+		}
+
 		// Update the device.
 		dev->update(buttons);
 	}

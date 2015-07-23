@@ -29,6 +29,7 @@ IoXE1AP::IoXE1AP()
 	: Device()
 {
 	m_type = IoManager::IOT_XE_1AP;
+	m_hasDPad = false;	// Analog joystick; no D-Pad.
 
 	// resetDev() can't be called from the base constructor.
 	resetDev();

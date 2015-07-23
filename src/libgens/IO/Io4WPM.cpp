@@ -32,6 +32,7 @@ Io4WPM::Io4WPM()
 	: Device()
 {
 	m_type = IoManager::IOT_4WP_MASTER;
+	m_hasDPad = false;
 
 	// No slave device is associated initially.
 	slave = nullptr;

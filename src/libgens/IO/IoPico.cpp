@@ -34,6 +34,7 @@ IoPico::IoPico()
 	, m_page_num(0)
 {
 	m_type = IoManager::IOT_PICO;
+	m_hasDPad = false;
 }
 
 /**

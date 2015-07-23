@@ -36,6 +36,7 @@ IoTeamPlayer::IoTeamPlayer()
 	: Device()
 {
 	m_type = IoManager::IOT_TEAMPLAYER;
+	m_hasDPad = false;
 
 	// No controllers are associated initially.
 	memset(pads, 0, sizeof(pads));

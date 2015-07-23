@@ -29,6 +29,7 @@ IoMegaMouse::IoMegaMouse()
 	: Device()
 {
 	m_type = IoManager::IOT_MEGA_MOUSE;
+	m_hasDPad = false;
 
 	// resetDev() can't be called from the base constructor.
 	resetDev();

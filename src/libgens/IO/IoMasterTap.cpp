@@ -42,6 +42,7 @@ IoMasterTap::IoMasterTap()
 	: Device()
 {
 	m_type = IoManager::IOT_MASTERTAP;
+	m_hasDPad = false;
 
 	// No controllers are associated initially.
 	memset(pads, 0, sizeof(pads));
