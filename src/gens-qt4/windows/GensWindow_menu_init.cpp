@@ -113,6 +113,13 @@ void GensWindowPrivate::initMenuBar(void)
 	doMappingExc(ui.actionGraphicsStretchVertical,   STRETCH_V,    SIGNAL(triggered()));
 	doMappingExc(ui.actionGraphicsStretchFull,       STRETCH_FULL, SIGNAL(triggered()));
 
+	QAction *action = ui.mnuGraphicsStretch->menuAction();
+	QObject::connect(action, SIGNAL(triggered()),
+		q, SLOT(mnu_mnuGraphicsStretch_triggered()),
+		Qt::UniqueConnection);
+	// TODO: Set this here?
+	action->setShortcut(QKeySequence(GensWindow::tr("Shift+F2")));
+
 	// System, Region.
 	initMapper(SLOT(map_actionSystemRegion_triggered(int)));
 	initActGrp();
@@ -121,6 +128,13 @@ void GensWindowPrivate::initMenuBar(void)
 	doMappingExc(ui.actionSystemRegionAsia, SysVersion::REGION_ASIA_PAL, SIGNAL(triggered()));
 	doMappingExc(ui.actionSystemRegionUSA,  SysVersion::REGION_US_NTSC,  SIGNAL(triggered()));
 	doMappingExc(ui.actionSystemRegionEUR,  SysVersion::REGION_EU_PAL,   SIGNAL(triggered()));
+
+	action = ui.mnuSystemRegion->menuAction();
+	QObject::connect(action, SIGNAL(triggered()),
+		q, SLOT(mnu_mnuSystemRegion_triggered()),
+		Qt::UniqueConnection);
+	// TODO: Set this here?
+	action->setShortcut(QKeySequence(GensWindow::tr("Shift+F3")));
 
 	// Options, SoundTest.
 	initMapper(SLOT(map_actionSound_triggered(int)));

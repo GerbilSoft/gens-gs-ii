@@ -185,12 +185,12 @@ class GensWindow : public QMainWindow
 		void map_actionGraphicsResolution_triggered(int scale);
 		//void on_mnuGraphicsBpp_triggered(void);
 		void map_actionGraphicsBpp_triggered(int bpp);
-		//void on_mnuGraphicsStretch_triggered(void);
+		void mnu_mnuGraphicsStretch_triggered(void);
 		void map_actionGraphicsStretch_triggered(int stretchMode);
 		void on_actionGraphicsScreenshot_triggered(void);
 
 		// System
-		//void on_mnuSystemRegion_triggered(void);
+		void mnu_mnuSystemRegion_triggered(void);
 		void map_actionSystemRegion_triggered(int region);
 		void on_actionSystemHardReset_triggered(void);
 		void on_actionSystemSoftReset_triggered(void);

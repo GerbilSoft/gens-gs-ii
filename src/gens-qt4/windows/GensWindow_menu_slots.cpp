@@ -111,10 +111,7 @@ void GensWindow::map_actionGraphicsBpp_triggered(int bpp)
 	this->setBpp((LibGens::MdFb::ColorDepth)bpp);
 }
 
-// FIXME: Need to manually find the mnuGraphicsStretch QAction
-// and connect it to this function.
-#if 0
-void GensWindow::on_mnuGraphicsStretch_triggered(void)
+void GensWindow::mnu_mnuGraphicsStretch_triggered(void)
 {
 	// Cycle through stretch modes.
 	Q_D(GensWindow);
@@ -122,7 +119,6 @@ void GensWindow::on_mnuGraphicsStretch_triggered(void)
 	stretch_tmp = (stretch_tmp + 1) % 4;
 	d->vBackend->setStretchMode((StretchMode_t)stretch_tmp);
 }
-#endif
 
 void GensWindow::map_actionGraphicsStretch_triggered(int stretchMode)
 {
@@ -139,19 +135,15 @@ void GensWindow::on_actionGraphicsScreenshot_triggered(void)
 
 /** System **/
 
-// FIXME: Need to manually find the mnuSystemRegion QAction
-// and connect it to this function.
-#if 0
-void GensWindow::on_mnuSystemRegion_triggered(void)
+void GensWindow::mnu_mnuSystemRegion_triggered(void)
 {
 	// Switch to the next region setting.
 	int region = gqt4_cfg->getInt(QLatin1String("System/regionCode")) + 1;
-	if (region > (int)LibGens::SysVersion::REGION_EU_PAL) {
-		region = (int)LibGens::SysVersion::REGION_AUTO;
+	if (region > SysVersion::REGION_EU_PAL) {
+		region = SysVersion::REGION_AUTO;
 	}
 	gqt4_cfg->set(QLatin1String("System/regionCode"), region);
 }
-#endif
 
 void GensWindow::map_actionSystemRegion_triggered(int region)
 {
