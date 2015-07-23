@@ -79,55 +79,6 @@ GensWindowPrivate::~GensWindowPrivate()
 /** GensWindowPrivate **/
 
 /**
- * Initialize the menu bar.
- */
-void GensWindowPrivate::initMenuBar(void)
-{
-	// TODO: Update for the new window UI.
-#if 0
-	// TODO: If the value changed and we're windowed,
-	// resize the window to compensate.
-	QMenuBar *menuBar = nullptr;
-	int height_adjust = 0;
-
-	Q_Q(GensWindow);
-	if (!isShowMenuBar()) {
-		// Hide the menu bar.
-		if (!q->isMaximized() && !q->isMinimized()) {
-			QWidget *menuWidget = q->menuWidget();
-			if (menuWidget != nullptr) {
-				menuBar = q->menuBar();
-				height_adjust = -menuBar->height();
-			}
-		}
-		if (!isGlobalMenuBar())
-			q->setMenuBar(nullptr);
-	} else {
-		// Check if the menu bar was there already.
-		const bool wasMenuBarThere = !!(q->menuWidget());
-
-		// Show the menu bar.
-		menuBar = q->menuBar();
-		ui.gensMenuBar->createMenuBar(menuBar);
-
-		if (!wasMenuBarThere && !q->isMaximized() && !q->isMinimized()) {
-			menuBar->adjustSize();	// ensure the menu bar gets the correct size
-			height_adjust = menuBar->height();
-		}
-	}
-
-	// Hide "Show Menu Bar" if we're using a global menu bar.
-	QAction *actionShowMenuBar = ui.gensMenuBar->actionFromId(IDM_GRAPHICS_MENUBAR);
-	actionShowMenuBar->setVisible(!isGlobalMenuBar());
-
-	if (!isGlobalMenuBar() && height_adjust != 0) {
-		// Adjust the window height to compensate for the menu bar change.
-		q->resize(q->width(), q->height() + height_adjust);
-	}
-#endif
-}
-
-/**
  * Resize the Gens window to show the image at its expected size.
  */
 void GensWindowPrivate::gensResize(void)
@@ -151,29 +102,6 @@ void GensWindowPrivate::gensResize(void)
 
 	// Set the new window size.
 	q->resize(img_width, win_height);
-}
-
-/**
- * Do we have a global menu bar?
- * @return True if yes; false if no.
- */
-inline bool GensWindowPrivate::isGlobalMenuBar(void) const
-{
-	// TODO: Support Unity and Qt global menu bars.
-#ifdef Q_WS_MAC
-	return true;
-#else
-	return false;
-#endif
-}
-
-/**
- * Is the menu bar visible?
- * @return True if yes; false if no.
- */
-inline bool GensWindowPrivate::isShowMenuBar(void) const
-{
-	return (isGlobalMenuBar() || cfg_showMenuBar);
 }
 
 /**
@@ -262,7 +190,7 @@ GensWindow::GensWindow()
 	// Initialize stuff.
 	d->emuManager = new EmuManager();
 	// Initialize the menu bar.
-	//gensMenuBar = new GensMenuBar(GensWindow, emuManager);
+	d->initMenuBar();
 
 	// Initialize the Key Manager and KeyHandlerQt.
 	d->emuManager->setKeyManager(gqt4_cfg->m_keyManager);
@@ -301,8 +229,8 @@ GensWindow::GensWindow()
 	gqt4_cfg->registerChangeNotification(QLatin1String("GensWindow/showMenuBar"),
 				this, SLOT(showMenuBar_changed_slot(QVariant)));
 
-	// Initialize the menu bar.
-	d->initMenuBar();
+	// Update menu bar visibility.
+	d->updateMenuBarVisibility();
 
 	// Initialize the emulation state.
 	d->idleThreadAllowed = true;
@@ -447,7 +375,7 @@ void GensWindow::changeEvent(QEvent *event)
 		Q_D(GensWindow);
 		d->ui.retranslateUi(this);
 		// TODO: Synchronize the menu bar.
-		d->initMenuBar();
+		d->updateMenuBarVisibility();
 	}
 
 	// Pass the event to the base class.
@@ -691,7 +619,7 @@ void GensWindow::showMenuBar_changed_slot(const QVariant &newShowMenuBar)
 {
 	Q_D(GensWindow);
 	d->cfg_showMenuBar = newShowMenuBar.toBool();
-	d->initMenuBar();
+	d->updateMenuBarVisibility();
 }
 
 // TODO: Rename to isIdleThreadAllowed().

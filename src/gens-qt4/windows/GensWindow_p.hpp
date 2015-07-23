@@ -2,8 +2,8 @@
  * gens-qt4: Gens Qt4 UI.                                                     *
  * GensWindow_p.hpp: Gens Window. (PRIVATE CLASS)                             *
  *                                                                            *
- * Copyright (c) 1999-2002 by StÃ©phane Dallongeville.                         *
- * Copyright (c) 2003-2004 by StÃ©phane Akhoun.                                *
+ * Copyright (c) 1999-2002 by Stéphane Dallongeville.                         *
+ * Copyright (c) 2003-2004 by Stéphane Akhoun.                                *
  * Copyright (c) 2008-2015 by David Korth.                                    *
  *                                                                            *
  * This program is free software; you can redistribute it and/or modify       *
@@ -50,9 +50,10 @@ class GensWindowPrivate
 		VBackend *vBackend;
 
 		// Menu bar.
+		void initMenuBar(void);
+		void updateMenuBarVisibility(void);
 		bool isGlobalMenuBar(void) const;
 		bool isShowMenuBar(void) const;
-		void initMenuBar(void);
 
 		int scale;		// Temporary scaling variable.
 		bool hasInitResize;	// Has the initial resize occurred?
@@ -73,6 +74,29 @@ class GensWindowPrivate
 		bool idleThreadAllowed;
 		void checkIdleThread(void);
 };
+
+/**
+ * Do we have a global menu bar?
+ * @return True if yes; false if no.
+ */
+inline bool GensWindowPrivate::isGlobalMenuBar(void) const
+{
+	// TODO: Support Unity and Qt global menu bars.
+#ifdef Q_WS_MAC
+	return true;
+#else
+	return false;
+#endif
+}
+
+/**
+ * Is the menu bar visible?
+ * @return True if yes; false if no.
+ */
+inline bool GensWindowPrivate::isShowMenuBar(void) const
+{
+	return (isGlobalMenuBar() || cfg_showMenuBar);
+}
 
 }
 
