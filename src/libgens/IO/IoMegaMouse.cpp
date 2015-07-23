@@ -49,8 +49,10 @@ void IoMegaMouse::resetDev(void)
 	latch.relY = 0;
 }
 
-// Device type.
-// Should be overridden by subclasses.
+/**
+ * Device type.
+ * Should be overridden by subclasses.
+ */
 IoManager::IoType_t IoMegaMouse::type(void) const
 {
 	return IoManager::IOT_MEGA_MOUSE;

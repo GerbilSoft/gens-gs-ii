@@ -35,8 +35,10 @@ IoColecoVision::IoColecoVision()
 	resetDev();
 }
 
-// Device type.
-// Should be overridden by subclasses.
+/**
+ * Device type.
+ * Should be overridden by subclasses.
+ */
 IoManager::IoType_t IoColecoVision::type(void) const
 {
 	return IoManager::IOT_COLECOVISION;

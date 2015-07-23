@@ -45,8 +45,10 @@ void Io6BTN::resetDev(void)
 	this->scanlines = 0;
 }
 
-// Device type.
-// Should be overridden by subclasses.
+/**
+ * Device type.
+ * Should be overridden by subclasses.
+ */
 IoManager::IoType_t Io6BTN::type(void) const
 {
 	return IoManager::IOT_6BTN;

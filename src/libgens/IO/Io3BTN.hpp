@@ -40,15 +40,17 @@ class Io3BTN : public Device
 		Io3BTN &operator=(const Io3BTN &);
 
 	public:
-		// Device type.
-		// Should be overridden by subclasses.
-		virtual IoManager::IoType_t type(void) const override;
+		/**
+		 * Device type.
+		 * Should be overridden by subclasses.
+		 */
+		virtual IoManager::IoType_t type(void) const final;
 
 		/**
 		 * Update the I/O device.
 		 * Runs the internal device update.
 		 */
-		virtual void update(void) override;
+		virtual void update(void) final;
 };
 
 } }

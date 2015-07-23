@@ -35,8 +35,10 @@ Io4WPM::Io4WPM()
 	slave = nullptr;
 }
 
-// Device type.
-// Should be overridden by subclasses.
+/**
+ * Device type.
+ * Should be overridden by subclasses.
+ */
 IoManager::IoType_t Io4WPM::type(void) const
 {
 	return IoManager::IOT_4WP_MASTER;

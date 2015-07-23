@@ -55,8 +55,10 @@ void Io4WPS::resetDev(void)
 	player = 0x7;
 }
 
-// Device type.
-// Should be overridden by subclasses.
+/**
+ * Device type.
+ * Should be overridden by subclasses.
+ */
 IoManager::IoType_t Io4WPS::type(void) const
 {
 	return IoManager::IOT_4WP_SLAVE;

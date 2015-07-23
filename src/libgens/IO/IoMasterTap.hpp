@@ -54,24 +54,26 @@ class IoMasterTap : public Device
 		 * Should be overridden by subclasses that have
 		 * device-specific data.
 		 */
-		virtual void resetDev(void) override;
+		virtual void resetDev(void) final;
 
-		// Device type.
-		// Should be overridden by subclasses.
-		virtual IoManager::IoType_t type(void) const override;
+		/**
+		 * Device type.
+		 * Should be overridden by subclasses.
+		 */
+		virtual IoManager::IoType_t type(void) const final;
 
 		/**
 		 * Update the I/O device.
 		 * Runs the internal device update.
 		 */
-		virtual void update(void) override;
+		virtual void update(void) final;
 
 		/**
 		 * One scanline worth of time has passed.
 		 * Needed for some devices that reset after a period of time,
 		 * e.g. 6BTN controllers.
 		 */
-		virtual void update_onScanline(void) override;
+		virtual void update_onScanline(void) final;
 
 		/**
 		 * Set a sub-device.
@@ -80,11 +82,13 @@ class IoMasterTap : public Device
 		 * @param ioDevice I/O device.
 		 * @return 0 on success; non-zero on error.
 		 */
-		virtual int setSubDevice(int virtPort, Device *ioDevice) override;
+		virtual int setSubDevice(int virtPort, Device *ioDevice) final;
 
 	private:
-		// Connected controllers.
-		// NOTE: This object does NOT own these IoDevices.
+		/**
+		 * Connected controllers.
+		 * NOTE: This object does NOT own these IoDevices.
+		 */
 		Device *pads[4];
 
 		// Scanline counter.

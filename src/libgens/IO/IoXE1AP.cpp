@@ -44,8 +44,10 @@ void IoXE1AP::resetDev(void)
 	this->latency = 0;
 }
 
-// Device type.
-// Should be overridden by subclasses.
+/**
+ * Device type.
+ * Should be overridden by subclasses.
+ */
 IoManager::IoType_t IoXE1AP::type(void) const
 {
 	return IoManager::IOT_XE_1AP;

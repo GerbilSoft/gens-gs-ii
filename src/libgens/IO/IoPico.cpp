@@ -47,8 +47,10 @@ void IoPico::resetDev(void)
 	m_page_num = 0;		// Reset to title page.
 }
 
-// Device type.
-// Should be overridden by subclasses.
+/**
+ * Device type.
+ * Should be overridden by subclasses.
+ */
 IoManager::IoType_t IoPico::type(void) const
 {
 	return IoManager::IOT_PICO;

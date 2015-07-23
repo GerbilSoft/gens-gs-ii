@@ -54,8 +54,10 @@ void IoTeamPlayer::resetDev(void)
 	rebuildCtrlIndexTable();
 }
 
-// Device type.
-// Should be overridden by subclasses.
+/**
+ * Device type.
+ * Should be overridden by subclasses.
+ */
 IoManager::IoType_t IoTeamPlayer::type(void) const
 {
 	return IoManager::IOT_TEAMPLAYER;

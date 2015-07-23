@@ -44,8 +44,10 @@ void Io2BTN::resetDev(void)
 	this->pause = false;
 }
 
-// Device type.
-// Should be overridden by subclasses.
+/**
+ * Device type.
+ * Should be overridden by subclasses.
+ */
 IoManager::IoType_t Io2BTN::type(void) const
 {
 	return IoManager::IOT_2BTN;

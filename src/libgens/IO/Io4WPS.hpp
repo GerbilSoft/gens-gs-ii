@@ -47,17 +47,19 @@ class Io4WPS : public Device
 		 * Should be overridden by subclasses that have
 		 * device-specific data.
 		 */
-		virtual void resetDev(void) override;
+		virtual void resetDev(void) final;
 
-		// Device type.
-		// Should be overridden by subclasses.
-		virtual IoManager::IoType_t type(void) const override;
+		/**
+		 * Device type.
+		 * Should be overridden by subclasses.
+		 */
+		virtual IoManager::IoType_t type(void) const final;
 
 		/**
 		 * Update the I/O device.
 		 * Runs the internal device update.
 		 */
-		virtual void update(void) override;
+		virtual void update(void) final;
 
 		/**
 		 * Set a sub-device.
@@ -66,7 +68,7 @@ class Io4WPS : public Device
 		 * @param ioDevice I/O device.
 		 * @return 0 on success; non-zero on error.
 		 */
-		virtual int setSubDevice(int virtPort, Device *ioDevice) override;
+		virtual int setSubDevice(int virtPort, Device *ioDevice) final;
 
 		/**
 		 * Set the current player.
@@ -76,14 +78,18 @@ class Io4WPS : public Device
 		void setCurrentPlayer(uint8_t player);
 
 	protected:
-		// Connected controllers.
-		// NOTE: This object does NOT own these Devices.
-		// TODO: Add mutator function to automatically rebuild
-		// the Team Player control table.
+		/**
+		 * Connected controllers.
+		 * NOTE: This object does NOT own these Devices.
+		 * TODO: Add mutator function to automatically rebuild
+		 * the Team Player control table.
+		 */
 		Device *pads[4];
 
-		// Selected controller.
-		// This is written by the Master device.
+		/**
+		 * Selected controller.
+		 * This is written by the Master device.
+		 */
 		uint8_t player;
 };
 

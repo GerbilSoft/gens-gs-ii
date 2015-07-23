@@ -49,8 +49,10 @@ class IoPico : public Device
 		 */
 		virtual void resetDev(void) final;
 
-		// Device type.
-		// Should be overridden by subclasses.
+		/**
+		 * Device type.
+		 * Should be overridden by subclasses.
+		 */
 		virtual IoManager::IoType_t type(void) const final;
 
 		/**
