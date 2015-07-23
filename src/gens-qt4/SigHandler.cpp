@@ -26,7 +26,6 @@
 
 // C includes
 #include <signal.h>
-#include <unistd.h>
 
 // LibGens includes.
 #include "libgens/lg_main.hpp"
@@ -34,7 +33,6 @@
 
 // Qt includes.
 #include <QtCore/QString>
-#include <QtCore/QLatin1String>
 #include <QtGui/QMessageBox>
 
 // Gens QApplication.
@@ -98,17 +96,16 @@ void SigHandler::Init(void)
 	}
 }
 
-
 /**
  * Shut down the signal handler.
  */
 void SigHandler::End(void)
 {
+	// TODO: If using sigaction(), restore oldact?
 	for (int i = 0; gens_signals[i].signum != 0; i++) {
 		signal(gens_signals[i].signum, SIG_DFL);
 	}
 }
-
 
 #ifdef HAVE_SIGACTION
 /**
@@ -161,7 +158,6 @@ const gens_signal_t *SigHandler::GetSigInfo(int signum, int si_code)
 	return nullptr;
 }
 #endif
-
 
 /**
  * Signal handler.
@@ -236,8 +232,9 @@ void SigHandler::SignalHandler(int signum)
 	// Note: If context is nullptr, then info is invalid.
 	// This may happen if SIGILL is sent to the program via kill/pkill/killall.
 	const gens_signal_t *siginfo = nullptr;
-	if (info && context)
+	if (info && context) {
 		siginfo = GetSigInfo(signum, info->si_code);
+	}
 #endif
 
 	// Make sure this is the GUI thread.
