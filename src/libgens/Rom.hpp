@@ -135,6 +135,13 @@ class Rom
 
 		/**
 		 * Get the ROM filename.
+		 * (Basename, with extension.)
+		 * @return ROM filename (UTF-8), or empty string on error.
+		 */
+		std::string filename_base(void) const;
+
+		/**
+		 * Get the ROM filename.
 		 * (Basename, no extension.)
 		 * @return ROM filename (UTF-8), or empty string on error.
 		 */
@@ -145,6 +152,13 @@ class Rom
 		 * @return ROM filename (UTF-8), or empty string on error.
 		 */
 		std::string z_filename(void) const;
+
+		/**
+		 * Get the ROM filename of the selected file in a multi-file archive.
+		 * (Basename, with extension.)
+		 * @return ROM filename (UTF-8), or empty string on error.
+		 */
+		std::string z_filename_base(void) const;
 
 		/**
 		 * Get the ROM filename of the selected file in a multi-file archive.

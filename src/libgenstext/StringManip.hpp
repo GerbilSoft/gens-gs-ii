@@ -38,6 +38,13 @@ namespace LibGensText {
 std::string SpaceElim(const std::string &src);
 
 /**
+ * Get the filename portion of a path, with its extension.
+ * @param filename Original filename.
+ * @return Filename without directories.
+ */
+std::string FilenameBase(const std::string &filename);
+
+/**
  * Get the filename portion of a path, without its extension.
  * @param filename Original filename.
  * @return Filename without directories or its extension.

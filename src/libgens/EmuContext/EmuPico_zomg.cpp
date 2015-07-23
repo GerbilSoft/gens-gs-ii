@@ -159,33 +159,13 @@ int EmuPico::zomgSave(const utf8_str *filename) const
 	metadata.setSystemId("Pico");
 	// TODO: System metadata flags, e.g. save author name.
 
-	// TODO: Move base path triming code to LibGensText later?
-	string rom_filename(m_rom->filename());
-#ifdef _WIN32
-	const char chr_slash = '\\';
-#else
-	const char chr_slash = '/';
-#endif
-	size_t slash_pos = rom_filename.find_last_of(chr_slash);
-	if (slash_pos != string::npos) {
-		if ((slash_pos + 1) <= rom_filename.size() && slash_pos > 0) {
-			// Check for another slash.
-			slash_pos = rom_filename.find_last_of(chr_slash, slash_pos - 1);
-			if (slash_pos != string::npos) {
-				// Trim the filename.
-				rom_filename = rom_filename.substr(slash_pos + 1);
-			}
-		} else {
-			// Trim the filename.
-			rom_filename = rom_filename.substr(slash_pos + 1);
-		}
-	}
-	metadata.setRomFilename(rom_filename);
-
-	// ROM CRC32.
+	// ROM information.
+	metadata.setRomFilename(m_rom->filename_base());
 	metadata.setRomCrc32(m_rom->rom_crc32());
 
+	// Additional metadata.
 	metadata.setDescription("Some description; should probably\nbe left\\blank.");
+	// TODO: Remove these fake extensions before release.
 	metadata.setExtensions("EXT,THAT,DOESNT,EXIST,LOL");
 
 	// Save ZOMG.ini.

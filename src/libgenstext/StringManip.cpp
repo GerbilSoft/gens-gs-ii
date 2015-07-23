@@ -125,6 +125,24 @@ string SpaceElim(const string& src)
 }
 
 /**
+ * Get the filename portion of a path, with its extension.
+ * @param filename Original filename.
+ * @return Filename without directories.
+ */
+string FilenameBase(const string &filename)
+{
+	// Remove the directories from the ROM filename.
+	string tmp = filename;
+
+	// Get the filename portion.
+	size_t dirSep = tmp.rfind(PATH_SEP_CHR);
+	if (dirSep != string::npos)
+		tmp.erase(0, dirSep+1);
+
+	return tmp;
+}
+
+/**
  * Get the filename portion of a path, without its extension.
  * @param filename Original filename.
  * @return Filename without directories or its extension.
