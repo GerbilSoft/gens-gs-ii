@@ -59,6 +59,11 @@ class GensWindowPrivate
 		bool isGlobalMenuBar(void) const;
 		bool isShowMenuBar(void) const;
 
+		// Popup menu.
+		// Used when the menu bar is hidden on
+		// systems without a global menu bar.
+		QMenu *popupMenu;
+
 		int scale;		// Temporary scaling variable.
 		bool hasInitResize;	// Has the initial resize occurred?
 

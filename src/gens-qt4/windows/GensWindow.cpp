@@ -57,6 +57,7 @@ namespace GensQt4 {
 
 GensWindowPrivate::GensWindowPrivate(GensWindow *q)
 	: q_ptr(q)
+	, popupMenu(nullptr)
 	, scale(1)			// Set the scale to 1x by default.
 	, hasInitResize(false)		// Initial resize hasn't occurred yet.
 	, idleThread(nullptr)
@@ -237,6 +238,8 @@ GensWindow::GensWindow()
 	stateChanged();
 
 	// Enable the context menu.
+	// TODO: If using Sega Mega Mouse, add hotkey to capture
+	// the mouse to allow use of right-click.
 	connect(this, SIGNAL(customContextMenuRequested(QPoint)),
 		this, SLOT(showContextMenu(QPoint)));
 	setContextMenuPolicy(Qt::CustomContextMenu);
@@ -682,7 +685,6 @@ void GensWindow::introStyle_changed_slot(const QVariant &newIntroStyle)
  */
 void GensWindow::showContextMenu(const QPoint& pos)
 {
-	/* TODO: update for new menu bar
 	Q_D(GensWindow);
 	if (d->isGlobalMenuBar()) {
 		// Global menu bar. Popup menus aren't necessary.
@@ -691,15 +693,25 @@ void GensWindow::showContextMenu(const QPoint& pos)
 	} else {
 		// No global menu bar.
 
-		// on't do anything if the menu bar is visible.
+		// Don't do anything if the menu bar is visible.
 		if (d->isShowMenuBar())
 			return;
 
-		// Set up the context menu.
+		// Create the popup menu if it doesn't already exist.
+		// NOTE: If the menus are reinitialized, d->popupMenu
+		// will be deleted, which will trigger a reinitialization.
+		if (!d->popupMenu) {
+			d->popupMenu = new QMenu(this);
+			// Add all menus from the main menu bar.
+			foreach (QAction *action, this->menuBar()->actions()) {
+				d->popupMenu->addAction(action);
+			}
+		}
+
+		// Show the popup menu.
 		QPoint globalPos = this->mapToGlobal(pos);
-		d->ui.gensMenuBar->popupMenu()->popup(globalPos);
+		d->popupMenu->popup(globalPos);
 	}
-	*/
 }
 
 }
