@@ -22,11 +22,11 @@
 #include "Config.hpp"
 
 // LibGens
-#include "libgens/Util/MdFb.hpp"
 #include "libgens/Rom.hpp"
+#include "libgens/Util/MdFb.hpp"
 #include "libgens/Util/Screenshot.hpp"
-using LibGens::MdFb;
 using LibGens::Rom;
+using LibGens::MdFb;
 using LibGens::Screenshot;
 
 // LibZomg
