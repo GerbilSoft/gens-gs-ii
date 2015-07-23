@@ -24,8 +24,10 @@
 // LibGens
 #include "libgens/Util/MdFb.hpp"
 #include "libgens/Rom.hpp"
+#include "libgens/Util/Screenshot.hpp"
 using LibGens::MdFb;
 using LibGens::Rom;
+using LibGens::Screenshot;
 
 // LibZomg
 #include "libzomg/PngWriter.hpp"
@@ -50,6 +52,7 @@ using LibZomg::Metadata;
 #include <sys/types.h>
 
 // C includes. (C++ namespace)
+#include <cstdio>
 #include <cstring>
 #include <cerrno>
 
@@ -155,16 +158,6 @@ const std::string getConfigDir(const utf8_str *subdir)
  */
 int doScreenShot(const MdFb *fb, const Rom *rom)
 {
-	/**
-	 * TODO: This code is duplicated in four places:
-	 * - GensSdl::Config
-	 * - GensQt4::EmuManager
-	 * - LibGens::EmuMD
-	 * - LibGens::EmuPico
-	 *
-	 * Consolidate it into a LibGens function?
-	 */
-
 	const string configDir = getConfigDir("Screenshots");
 	if (configDir.empty() || !fb || !rom)
 		return -EINVAL;
@@ -187,56 +180,7 @@ int doScreenShot(const MdFb *fb, const Rom *rom)
 	} while (!access(scrFilename, F_OK));
 
 	// Take the screenshot.
-	// TODO: Separate function to create an img_data from an MdFb.
-	// NOTE: LibZomg doesn't depend on LibGens, so it can't use MdFb directly.
-	fb->ref();
-	const int imgXStart = fb->imgXStart();
-	const int imgYStart = fb->imgYStart();
-
-	// TODO: Option to save the full framebuffer, not just active display?
-	// NOTE: Zeroing the struct in case new stuff is added later.
-	Zomg_Img_Data_t img_data;
-	memset(&img_data, 0, sizeof(img_data));
-	img_data.w = fb->imgWidth();
-	img_data.h = fb->imgHeight();
-
-	// Aspect ratio.
-	// Vertical is always 4.
-	// Horizontal is 4 for H40, 5 for H32.
-	// TODO: Handle Interlaced mode 2x rendering?
-	img_data.phys_y = 4;
-	// TODO: Formula to automatically scale for any width?
-	img_data.phys_x = (img_data.w == 256 ? 5 : 4);
-
-	const MdFb::ColorDepth bpp = fb->bpp();
-	if (bpp == MdFb::BPP_32) {
-		img_data.data = (void*)(fb->lineBuf32(imgYStart) + imgXStart);
-		img_data.pitch = (fb->pxPitch() * sizeof(uint32_t));
-		img_data.bpp = 32;
-	} else {
-		img_data.data = (void*)(fb->lineBuf16(imgYStart) + imgXStart);
-		img_data.pitch = (fb->pxPitch() * sizeof(uint16_t));
-		img_data.bpp = (bpp == MdFb::BPP_16 ? 16 : 15);
-	}
-
-	// Set up metadata.
-	Metadata metadata;
-	// TODO: Get system from Rom.
-	metadata.setSystemId("MD");	// TODO: Pass MDP system ID directly.
-	//metadata.setRegion();		// TODO: Get region code.
-	metadata.setRomFilename(basename);	// TODO: With extension; also, z_file?
-	metadata.setRomCrc32(rom->rom_crc32());
-	//metadata.setRomSize(rom->romSize());	// TODO; also, include SMD header?
-	// TODO: Add more metadata.
-
-	// Write the PNG image.
-	PngWriter pngWriter;
-	int ret = pngWriter.writeToFile(&img_data, scrFilename,
-				&metadata, Metadata::MF_Default);
-
-	// Done using the framebuffer.
-	fb->unref();
-
+	int ret = Screenshot::toFile(fb, rom, scrFilename);
 	if (ret == 0) {
 		printf("Screenshot %d saved.\n", scrNumber);
 	} else {

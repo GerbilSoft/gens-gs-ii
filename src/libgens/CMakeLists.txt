@@ -90,6 +90,7 @@ SET(libgens_UTIL_SRCS
 	Util/gens_siginfo.c
 	Util/cpuflags.c
 	Util/MdFb.cpp
+	Util/Screenshot.cpp
 	)
 
 SET(libgens_UTIL_H
@@ -97,6 +98,7 @@ SET(libgens_UTIL_H
 	Util/gens_siginfo.h
 	Util/cpuflags.h
 	Util/MdFb.hpp
+	Util/Screenshot.hpp
 	)
 
 # OS-specific timing functions.
