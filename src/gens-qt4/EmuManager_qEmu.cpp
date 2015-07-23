@@ -518,7 +518,9 @@ void EmuManager::doScreenShot(void)
 	const int imgYStart = fb->imgYStart();
 
 	// TODO: Option to save the full framebuffer, not just active display?
+	// NOTE: Zeroing the struct in case new stuff is added later.
 	Zomg_Img_Data_t img_data;
+	memset(&img_data, 0, sizeof(img_data));
 	img_data.w = fb->imgWidth();
 	img_data.h = fb->imgHeight();
 

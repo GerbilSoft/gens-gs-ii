@@ -204,7 +204,9 @@ int EmuPico::zomgSave(const utf8_str *filename) const
 	const int startX = (m_vdp->getHPixBegin());
 
 	// TODO: Option to save the full framebuffer, not just active display?
+	// NOTE: Zeroing the struct in case new stuff is added later.
 	Zomg_Img_Data_t img_data;
+	memset(&img_data, 0, sizeof(img_data));
 	img_data.w = m_vdp->getHPix();
 	img_data.h = m_vdp->getVPix();
 
