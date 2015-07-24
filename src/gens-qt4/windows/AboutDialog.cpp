@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -121,7 +121,7 @@ void AboutDialogPrivate::initAboutDialogText(void)
 	QString sCopyrights = QString::fromUtf8(
 			"(c) 1999-2002 by Stéphane Dallongeville.<br/>\n"
 			"(c) 2003-2004 by Stéphane Akhoun.<br />\n<br />\n"
-			"Gens/GS (c) 2008-2014 by David Korth.<br />\n<br />\n");
+			"Gens/GS (c) 2008-2015 by David Korth.<br />\n<br />\n");
 	
 	sCopyrights += AboutDialog::tr("Visit the Gens homepage:") + sLineBreak +
 			QLatin1String(
@@ -226,11 +226,20 @@ void AboutDialogPrivate::initAboutDialogText(void)
 	ui.lblCredits->setText(sCredits);
 	ui.lblCredits->setTextFormat(Qt::RichText);
 
+	// TODO: Change to read-only QTextEdit?
 	if (!scrlAreaInit) {
 		// Create the scroll areas.
 		// Qt Designer's QScrollArea implementation is horribly broken.
 		// Also, this has to be done after the labels are set, because
 		// QScrollArea is kinda dumb.
+
+		// Stylesheets to fix QScrollArea background color on Windows 7.
+		// Reference: http://programming.nullanswer.com/question/25709220
+		const QString scrl_css = QLatin1String(
+			"QScrollArea { background: transparent }");
+		const QString lbl_css = QLatin1String(
+			"QLabel { background: transparent }");
+
 		QScrollArea *scrlIncLibraries = new QScrollArea();
 		scrlIncLibraries->setFrameShape(QFrame::NoFrame);
 		scrlIncLibraries->setFrameShadow(QFrame::Plain);
@@ -238,7 +247,9 @@ void AboutDialogPrivate::initAboutDialogText(void)
 		scrlIncLibraries->setWidget(ui.lblIncLibraries);
 		scrlIncLibraries->setWidgetResizable(true);
 		ui.vboxIncLibraries->addWidget(scrlIncLibraries);
-		scrlIncLibraries->setAutoFillBackground(false);
+		// Make the backgrounds transparent.
+		scrlIncLibraries->setStyleSheet(scrl_css);
+		ui.lblIncLibraries->setStyleSheet(lbl_css);
 
 		QScrollArea *scrlDebugInfo = new QScrollArea();
 		scrlDebugInfo->setFrameShape(QFrame::NoFrame);
@@ -247,7 +258,9 @@ void AboutDialogPrivate::initAboutDialogText(void)
 		scrlDebugInfo->setWidget(ui.lblDebugInfo);
 		scrlDebugInfo->setWidgetResizable(true);
 		ui.vboxDebugInfo->addWidget(scrlDebugInfo);
-		scrlDebugInfo->setAutoFillBackground(false);
+		// Make the backgrounds transparent.
+		scrlDebugInfo->setStyleSheet(scrl_css);
+		ui.lblDebugInfo->setStyleSheet(lbl_css);
 
 		QScrollArea *scrlCredits = new QScrollArea();
 		scrlCredits->setFrameShape(QFrame::NoFrame);
@@ -256,7 +269,9 @@ void AboutDialogPrivate::initAboutDialogText(void)
 		scrlCredits->setWidget(ui.lblCredits);
 		scrlCredits->setWidgetResizable(true);
 		ui.vboxCredits->addWidget(scrlCredits);
-		scrlCredits->setAutoFillBackground(false);
+		// Make the backgrounds transparent.
+		scrlCredits->setStyleSheet(scrl_css);
+		ui.lblCredits->setStyleSheet(lbl_css);
 
 		// Scroll areas initialized.
 		scrlAreaInit = true;
