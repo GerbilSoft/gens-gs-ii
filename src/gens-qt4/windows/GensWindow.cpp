@@ -232,9 +232,6 @@ GensWindow::GensWindow()
 				this, SLOT(showMenuBar_changed_slot(QVariant)));
 	*/
 
-	// Update menu bar visibility.
-	d->updateMenuBarVisibility();
-
 	// Initialize the emulation state.
 	d->idleThreadAllowed = true;
 	stateChanged();

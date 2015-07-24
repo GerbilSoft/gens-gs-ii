@@ -186,6 +186,9 @@ void GensWindowPrivate::initMenuBar(void)
 
 	// Synchronize the menu items.
 	syncAll();
+
+	// Update the menu bar visibility.
+	updateMenuBarVisibility();
 }
 
 /**
