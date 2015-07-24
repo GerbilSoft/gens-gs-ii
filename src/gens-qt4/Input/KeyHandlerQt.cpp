@@ -23,6 +23,10 @@
 
 #include "KeyHandlerQt.hpp"
 
+// Gens Menu shortcuts.
+#include "gqt4_main.hpp"
+#include "windows/GensMenuShortcuts.hpp"
+
 // Key Manager.
 #include "libgenskeys/KeyManager.hpp"
 
@@ -30,6 +34,7 @@
 #include <QtCore/qglobal.h>
 #include <QtGui/QKeyEvent>
 #include <QtGui/QMouseEvent>
+#include <QtGui/QAction>
 
 // C includes. (C++ namespace)
 #include <cstring>
@@ -78,18 +83,18 @@ void KeyHandlerQt::keyPressEvent(QKeyEvent *event)
 	if (gensKey == KEYV_UNKNOWN)
 		return;
 
-	// TODO: Update this to work with the new menu system
-#if 0
+	// TODO: Split GensMenuShortcuts into config / actions.
 	// If this is an event key, don't handle it as a controller key.
 	// We need to apply the modifiers for this to work.
 	// Qt's modifiers conveniently map to GensKeyMod_t.
 	// TODO: Use GensKeyM_t to indicate modifiers?
 	GensKey_t gensKeyMod = (gensKey | ((event->modifiers() >> 16) & 0x1E00));
-	if (m_gensActions && m_gensActions->checkEventKey(gensKeyMod)) {
-		// Key was handled as an event key.
+	QAction *action = gqt4_cfg->gensMenuShortcuts()->keyToAction(gensKeyMod);
+	if (action != nullptr) {
+		// Key is an event key.
+		action->trigger();
 		return;
 	}
-#endif
 
 	// Not an event key. Mark it as pressed.
 	if (m_keyManager) {
