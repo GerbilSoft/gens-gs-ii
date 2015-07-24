@@ -288,15 +288,17 @@ QString AboutDialogPrivate::GetIncLibraries(void)
 
 	// Common strings.
 	const QString sIntCopyOf = AboutDialog::tr("Internal copy of %1.");
-	static const QString sLineBreak = QLatin1String("<br/>\n");
+	const QString sLineBreak = QLatin1String("<br/>\n");
 
 	// Included libraries string.
 	QString sIncLibraries;
+	// Reserve at least 4 KB for the library information.
+	sIncLibraries.reserve(4096);
 
 #if defined(HAVE_ZLIB) && defined(USE_INTERNAL_ZLIB)
 	// ZLIB is included.
 	sIncLibraries += sIntCopyOf.arg(QLatin1String("zlib-" ZLIB_VERSION)) + sLineBreak +
-		QLatin1String("Copyright (c) 1995-2012 Jean-loup Gailly and Mark Adler.") + sLineBreak +
+		QLatin1String("Copyright (c) 1995-2013 Jean-loup Gailly and Mark Adler.") + sLineBreak +
 		QLatin1String("<a href=\"http://www.zlib.net/\">http://www.zlib.net/</a>");
 #endif
 
@@ -310,7 +312,7 @@ QString AboutDialogPrivate::GetIncLibraries(void)
 		QLatin1String("<a href=\"http://www.winimage.com/zLibDll/minizip.html\">"
 					"http://www.winimage.com/zLibDll/minizip.html</a>") + sLineBreak +
 		QLatin1String("Zip64/Unzip Copyright (c) 2007-2008 by Even Rouault.") + sLineBreak +
-		QLatin1String("Zip64/Zip Copyright (c) 2009-2001 by Mathias Svensson.");
+		QLatin1String("Zip64/Zip Copyright (c) 2009-2010 by Mathias Svensson.");
 #endif
 
 #if defined(HAVE_LZMA) && defined(USE_INTERNAL_LZMA)
@@ -332,6 +334,7 @@ QString AboutDialogPrivate::GetIncLibraries(void)
 	const char *glewVersion = (const char*)glewGetString(GLEW_VERSION);
 	QString sGlewVersion = (glewVersion ? QLatin1String(glewVersion) : QString());
 	sIncLibraries += sIntCopyOf.arg(QLatin1String("GLEW ") + sGlewVersion) + sLineBreak +
+		QLatin1String("Copyright (c) 2008-2015 by Nigel Stewart.") + sLineBreak +
 		QLatin1String("Copyright (c) 2002-2008 by Milan Ikits.") + sLineBreak +
 		QLatin1String("Copyright (c) 2002-2008 by Marcelo E. Magallon.") + sLineBreak +
 		QLatin1String("Copyright (c) 2002 by Lev Povalahev.") + sLineBreak +
