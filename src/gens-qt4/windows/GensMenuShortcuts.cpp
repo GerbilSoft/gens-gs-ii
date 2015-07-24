@@ -415,6 +415,8 @@ int GensMenuShortcuts::load(const QSettings *qSettings)
 	// Load the key configuration.
 	for (int i = 0; i < (int)(ARRAY_SIZE(d->DefKeySettings)-1); i++) {
 		const GensMenuShortcutsPrivate::DefKeySetting_t *key = &d->DefKeySettings[i];
+		assert(key->setting != nullptr);
+
 		const GensKey_t gensKey = qSettings->value(
 			QLatin1String(key->setting), key->gensKey).toString().toUInt(nullptr, 0);
 		d->savedKeys[i] = gensKey;
@@ -440,6 +442,8 @@ int GensMenuShortcuts::save(QSettings *qSettings) const
 	// Save the key configuration.
 	for (int i = 0; i < (int)(ARRAY_SIZE(d->DefKeySettings)-1); i++) {
 		const GensMenuShortcutsPrivate::DefKeySetting_t *key = &d->DefKeySettings[i];
+		assert(key->setting != nullptr);
+
 		const GensKey_t gensKey = d->savedKeys[i];
 		QString gensKey_str = QLatin1String("0x") +
 				QString::number(gensKey, 16).toUpper().rightJustified(4, QChar(L'0'));
