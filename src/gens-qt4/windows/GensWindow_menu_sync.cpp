@@ -50,7 +50,17 @@ namespace GensQt4 {
  */
 void GensWindowPrivate::syncAll(void)
 {
-	// TODO
+	syncRecent();
+	syncShowMenuBar();
+
+	// Run some synchronization slots.
+	stretchMode_changed_slot_int(
+		(StretchMode_t)gqt4_cfg->getInt(QLatin1String("Graphics/stretchMode")));
+	regionCode_changed_slot_int(
+		(SysVersion::RegionCode_t)gqt4_cfg->getInt(QLatin1String("System/regionCode")));
+	enableSRam_changed_slot_int(
+		gqt4_cfg->get(QLatin1String("Options/enableSRam")).toBool());
+	updateMenusForStateChanged();
 }
 
 /**
@@ -66,7 +76,8 @@ void GensWindowPrivate::syncRecent(void)
  */
 void GensWindowPrivate::syncShowMenuBar(void)
 {
-	// TODO
+	ui.actionGraphicsShowMenuBar->setChecked(
+		gqt4_cfg->get(QLatin1String("GensWindow/showMenuBar")).toBool());
 }
 
 /**

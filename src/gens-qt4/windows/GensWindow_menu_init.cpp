@@ -183,6 +183,9 @@ void GensWindowPrivate::initMenuBar(void)
 					q, SLOT(enableSRam_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("GensWindow/showMenuBar"),
 					q, SLOT(showMenuBar_changed_slot(QVariant)));
+
+	// Synchronize the menu items.
+	syncAll();
 }
 
 /**
