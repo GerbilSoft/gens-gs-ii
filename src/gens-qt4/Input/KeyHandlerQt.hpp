@@ -24,30 +24,26 @@
 #ifndef __GENS_QT4_INPUT_KEYHANDLERQT_HPP__
 #define __GENS_QT4_INPUT_KEYHANDLERQT_HPP__
 
-// Gens Action Manager.
-#include "../actions/GensActions.hpp"
-
-// Key Manager.
-#include "libgenskeys/KeyManager.hpp"
-
 // Qt includes and classes.
 #include <QtCore/QObject>
 class QKeyEvent;
 class QMouseEvent;
 
-namespace GensQt4
-{
+// LibGensKeys
+#include "libgenskeys/GensKey_t.h"
+namespace LibGensKeys {
+	class KeyManager;
+}
+
+namespace GensQt4 {
 
 class KeyHandlerQt : public QObject
 {
 	Q_OBJECT
 	
 	public:
-		KeyHandlerQt(QObject *parent = 0, GensActions *gensActions = 0, LibGensKeys::KeyManager *keyManager = 0);
+		KeyHandlerQt(QObject *parent = 0, LibGensKeys::KeyManager *keyManager = 0);
 		~KeyHandlerQt();
-
-		GensActions *gensActions(void) const;
-		void setGensActions(GensActions *gensActions);
 
 		LibGensKeys::KeyManager *keyManager(void) const;
 		void setKeyManager(LibGensKeys::KeyManager *keyManager);
@@ -73,24 +69,6 @@ class KeyHandlerQt : public QObject
 		void mouseReleaseEvent(QMouseEvent *event);
 
 	private:
-		/**
-		 * DevHandler(): LibGens Device Handler function. (STATIC function)
-		 * @param param Parameter specified when registering the device handler function.
-		 * @param key Gens keycode. (~0 for Update; return value is true on success.)
-		 * @return True if the key is pressed; false if it isn't.
-		 */
-		static bool DevHandler(void *param, GensKey_t key);
-		
-		/**
-		 * DevHandler(): LibGens Device Handler function. (member function)
-		 * @param key Gens keycode. (~0 for Update; return value is true on success.)
-		 * @return True if the key is pressed; false if it isn't.
-		 */
-		bool devHandler(GensKey_t key);
-		
-		// Gens Actions Manager.
-		GensActions *m_gensActions;
-
 		// Key Manager.
 		LibGensKeys::KeyManager *m_keyManager;
 
@@ -100,10 +78,6 @@ class KeyHandlerQt : public QObject
 		static bool m_lastMousePosValid;
 		static QPoint m_lastMousePos;
 #endif
-	
-	private slots:
-		// GensActions destroyed slot.
-		void gensActionsDestroyed(void);
 };
 
 }

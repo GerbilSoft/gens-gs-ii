@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -23,14 +23,8 @@
 
 #include "RecentRomsMenu.hpp"
 
-// gqt4_cfg
-#include "gqt4_main.hpp"
-
-// Menu item IDs.
-#include "GensMenuBar_menus.hpp"
-
-// Key Handler.
-#include "../Input/KeyHandlerQt.hpp"
+#include "libgens/Rom.hpp"
+using LibGens::Rom;
 
 // Qt includes.
 #include <QtCore/QList>
@@ -38,8 +32,7 @@
 #include <QtCore/QSignalMapper>
 #include <QtGui/QAction>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class RecentRomsMenuPrivate
 {
@@ -54,8 +47,6 @@ class RecentRomsMenuPrivate
 
 	public:
 		void init(void);
-
-		void setRecentRoms(const RecentRoms *newRecentRoms);
 		void update(void);
 
 	private:
@@ -99,42 +90,6 @@ void RecentRomsMenuPrivate::init(void)
 			 q, SLOT(recentRomsUpdated_slot()));
 }
 
-
-/**
- * Set the Recent ROMs class this menu should represent.
- * @param newRecentRoms New Recent ROMs class, or nullptr to unset.
- */
-inline void RecentRomsMenuPrivate::setRecentRoms(const RecentRoms *newRecentRoms)
-{
-	if (this->recentRoms == newRecentRoms)
-		return;
-
-	Q_Q(RecentRomsMenu);
-
-	if (recentRoms) {
-		// Disconnect the signals from the existing Recent ROMs class.
-		QObject::disconnect(recentRoms, SIGNAL(destroyed()),
-				    q, SLOT(recentRomsDestroyed()));
-		QObject::disconnect(recentRoms, SIGNAL(updated()),
-				    q, SLOT(recentRomsupdated()));
-	}
-
-	// Set the new Recent ROMs class.
-	recentRoms = newRecentRoms;
-
-	if (recentRoms) {
-		// Connect the signals from the new Recent ROMs class.
-		QObject::connect(recentRoms, SIGNAL(destroyed()),
-				 q, SLOT(recentRomsDestroyed()));
-		QObject::connect(recentRoms, SIGNAL(updated()),
-				 q, SLOT(recentRomsupdated()));
-	}
-
-	// Update the menu.
-	update();
-}
-
-
 /**
  * Update the Recent ROMs menu.
  */
@@ -143,6 +98,7 @@ void RecentRomsMenuPrivate::update(void)
 	Q_Q(RecentRomsMenu);
 
 	// Delete all existing QActions.
+	// TODO: Reuse existing QActions if possible.
 	qDeleteAll(q->actions());
 	q->actions().clear();
 
@@ -154,67 +110,73 @@ void RecentRomsMenuPrivate::update(void)
 
 	// Create new QActions from the Recent ROMs list.
 	// TODO: Move the ROM format prefixes somewhere else.
-	static const char RomFormatPrefix[][8] =
+	static const char RomFormatPrefix[Rom::MDP_SYSTEM_MAX][8] =
 	{
 		"---", "MD", "MCD", "32X",
-		"MCD32X", "SMS", "GG", "SG",
+		"MCD,32X", "SMS", "GG", "SG",
 		"Pico"
+		// TODO: ColecoVision.
 	};
 
+	//: %1 = menu index; %2 = system abbreviation; %3 = filename.
+	const QString title_template = RecentRoms::tr("&%1 [%2] %3");
+	//: %1 = menu index; %2 = system abbreviation; %3 = filename; %4 = filename inside archive.
+	const QString title_z_template = RecentRoms::tr("&%1 [%2] %3 [%4]");
+
 	int i = 1;
+	// QStrings are placed here to avoid unnecessary initialization.
+	QString title;
+	QString filename;
 	foreach (const RecentRom_t& rom, recentRoms->romList()) {
-		QString title;
-		title.reserve(rom.filename.size() + rom.z_filename.size() + 16);
-
-		// Recent ROM number.
-		title += QChar(L'&') + QString::number(i) + QChar(L' ');
-
 		// System ID.
-		title += QChar(L'[');
-		if (rom.sysId >= LibGens::Rom::MDP_SYSTEM_UNKNOWN &&
-		    rom.sysId < LibGens::Rom::MDP_SYSTEM_MAX)
+		const char *sysAbbrev;
+		if (rom.sysId >= Rom::MDP_SYSTEM_UNKNOWN &&
+		    rom.sysId < Rom::MDP_SYSTEM_MAX)
 		{
-			title += QLatin1String(RomFormatPrefix[rom.sysId]);
+			sysAbbrev = RomFormatPrefix[rom.sysId];
+		} else {
+			sysAbbrev = RomFormatPrefix[Rom::MDP_SYSTEM_UNKNOWN];
 		}
-		else
-		{
-			title += QLatin1String(RomFormatPrefix[LibGens::Rom::MDP_SYSTEM_UNKNOWN]);
-		}
-		title += QChar(L']');
 
 		// Remove directories from the filename.
+		// TODO: Use LibGensText::FilenameBase() once it's merged.
 		QString filename = QDir::fromNativeSeparators(rom.filename);
 		int slash_pos = filename.lastIndexOf(QChar(L'/'));
-		if (slash_pos >= 0)
+		if (slash_pos >= 0) {
 			filename.remove(0, (slash_pos + 1));
+		}
 
 		// Escape ampersands in the ROM filename.
 		filename.replace(QChar(L'&'), QLatin1String("&&"));
 
-		// Append the processed filename.
-		title += QChar(L' ') + filename;
-
 		if (!rom.z_filename.isEmpty()) {
 			// ROM has a compressed filename.
 			// Escape the ampersands and append the compressed filename.
-			filename = rom.z_filename;
-			filename.replace(QChar(L'&'), QLatin1String("&&"));
-			title += QLatin1String(" [") + filename + QChar(L']');
+			QString z_filename = rom.z_filename;
+			z_filename.replace(QChar(L'&'), QLatin1String("&&"));
+			title = title_z_template
+				.arg(i)				// ROM index.
+				.arg(QLatin1String(sysAbbrev))	// System abbreviation.
+				.arg(filename)			// ROM filename, minus directories.
+				.arg(z_filename);		// Compressed filename.
+		} else {
+			// No compressed filename.
+			title = title_template
+				.arg(i)				// ROM index.
+				.arg(QLatin1String(sysAbbrev))	// System abbreviation.
+				.arg(filename);			// ROM filename, minus directories.
 		}
 
 		// Create the QAction.
 		QAction *action = new QAction(title, q);
-
-		// Set the shortcut key.
-		// NOTE: The shortcut key won't show up due to the "\t" after the system ID.
-		const int mnuItemId = ((IDM_FILE_RECENT_1 - 1) + i);
-		GensKey_t gensKey = gqt4_cfg->actionToKey(mnuItemId);
-		action->setShortcut(KeyHandlerQt::KeyValMToQtKey(gensKey));
+		// Set the objectName in order to handle shortcuts.
+		action->setObjectName(QLatin1String("actionRecentROMs_") +
+				      QString::number(i));
 
 		// Connect the signal to the signal mapper.
 		QObject::connect(action, SIGNAL(triggered()),
 				 m_signalMapper, SLOT(map()));
-		m_signalMapper->setMapping(action, mnuItemId);
+		m_signalMapper->setMapping(action, i);
 
 		// Add the action to the RecentRomsMenu.
 		q->addAction(action);
@@ -250,10 +212,6 @@ RecentRomsMenu::RecentRomsMenu(const QString &title, QWidget *parent, const Rece
 RecentRomsMenu::~RecentRomsMenu()
 {
 	delete d_ptr;
-
-	// Make sure all of the QActions are deleted.
-	qDeleteAll(this->actions());
-	this->actions().clear();
 }
 
 /**
@@ -268,13 +226,35 @@ const RecentRoms *RecentRomsMenu::recentRoms(void)
 
 /**
  * Set the Recent ROMs class this menu should represent.
- * WRAPPER FUNCTION for RecentRomsMenuPrivate::isDirty().
- * @param newRecentRoms New Recent ROMs class, or nullptr to unset.
+ * @param recentRoms New Recent ROMs class, or nullptr to unset.
  */
-void RecentRomsMenu::setRecentRoms(const RecentRoms *newRecentRoms)
+void RecentRomsMenu::setRecentRoms(const RecentRoms *recentRoms)
 {
 	Q_D(RecentRomsMenu);
-	d->setRecentRoms(newRecentRoms);
+	if (d->recentRoms == recentRoms)
+		return;
+
+	if (d->recentRoms) {
+		// Disconnect the signals from the existing Recent ROMs class.
+		QObject::disconnect(d->recentRoms, SIGNAL(destroyed()),
+				    this, SLOT(recentRomsDestroyed_slot()));
+		QObject::disconnect(d->recentRoms, SIGNAL(updated()),
+				    this, SLOT(recentRomsUpdated_slot()));
+	}
+
+	// Set the new Recent ROMs class.
+	d->recentRoms = recentRoms;
+
+	if (recentRoms) {
+		// Connect the signals from the new Recent ROMs class.
+		QObject::connect(recentRoms, SIGNAL(destroyed()),
+				 this, SLOT(recentRomsDestroyed_slot()));
+		QObject::connect(recentRoms, SIGNAL(updated()),
+				 this, SLOT(recentRomsUpdated_slot()));
+	}
+
+	// Update the menu.
+	update();
 }
 
 /**

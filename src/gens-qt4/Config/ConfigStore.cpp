@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -52,8 +52,8 @@
 // Default settings.
 #include "ConfigDefaults.hpp"
 
-// Key configuration.
-#include "actions/GensKeyConfig.hpp"
+// Gens Menu shortcuts.
+#include "windows/GensMenuShortcuts.hpp"
 
 // Controller Configuration.
 // (now only has static load/save functions)
@@ -63,8 +63,7 @@
 #include "gqt4_main.hpp"
 #include "GensQApplication.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class ConfigStorePrivate
 {
@@ -137,8 +136,8 @@ class ConfigStorePrivate
 		/** Recent ROMs. **/
 		RecentRoms *const recentRoms;
 
-		/** Key configuration. **/
-		GensKeyConfig keyConfig;
+		/** Menu shortcuts. **/
+		GensMenuShortcuts *menuShortcuts;
 };
 
 /** ConfigStorePrivate **/
@@ -147,6 +146,7 @@ ConfigStorePrivate::ConfigStorePrivate(ConfigStore* q)
 	: q_ptr(q)
 	, pathConfig(new PathConfig(q))
 	, recentRoms(new RecentRoms(q))
+	, menuShortcuts(new GensMenuShortcuts(q))
 {
 	// TODO: This shouldn't be publicly accessible...
 	q->m_keyManager = new LibGensKeys::KeyManager();
@@ -154,7 +154,7 @@ ConfigStorePrivate::ConfigStorePrivate(ConfigStore* q)
 
 ConfigStorePrivate::~ConfigStorePrivate()
 {
-	// Delete all the signal map vectors.
+	// Delete all of the signal map vectors.
 	qDeleteAll(signalMaps);
 	signalMaps.clear();
 
@@ -465,9 +465,9 @@ int ConfigStore::load(const QString &filename)
 	d->recentRoms->load(&qSettings);
 	qSettings.endGroup();
 
-	// Load the key configuration.
+	// Load the menu shortcuts.
 	qSettings.beginGroup(QLatin1String("Shortcut_Keys"));
-	d->keyConfig.load(&qSettings);
+	d->menuShortcuts->load(&qSettings);
 	qSettings.endGroup();
 
 	// Load the controller configuration.
@@ -558,9 +558,9 @@ int ConfigStore::save(const QString &filename) const
 	d->recentRoms->save(&qSettings);
 	qSettings.endGroup();
 
-	// Save the key configuration.
+	// Save the menu shortcuts.
 	qSettings.beginGroup(QLatin1String("Shortcut_Keys"));
-	d->keyConfig.save(&qSettings);
+	d->menuShortcuts->save(&qSettings);
 	qSettings.endGroup();
 
 	// Save the controller configuration.
@@ -773,25 +773,14 @@ RecentRom_t ConfigStore::recentRomsEntry(int id) const
 /** Key configuration. **/
 
 /**
- * Get the action associated with a GensKey_t.
- * @param key GensKey_t.
- * @return Action ID.
+ * Get the GensMenuShortcuts object.
+ * TODO: Split GensMenuShortcuts into a config and an action object.
+ * @return GensMenuShortcuts.
  */
-int ConfigStore::keyToAction(GensKey_t key) const
+GensMenuShortcuts *ConfigStore::gensMenuShortcuts(void)
 {
-	Q_D(const ConfigStore);
-	return d->keyConfig.keyToAction(key);
-}
-
-/**
- * Get the GensKey_t associated with an action.
- * @param actoin Action ID.
- * @return GensKey_t.
- */
-GensKey_t ConfigStore::actionToKey(int action) const
-{
-	Q_D(const ConfigStore);
-	return d->keyConfig.actionToKey(action);
+	Q_D(ConfigStore);
+	return d->menuShortcuts;
 }
 
 }

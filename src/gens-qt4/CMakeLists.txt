@@ -127,19 +127,17 @@ SET(gens-qt4_COMMON_SRCS
 	Audio/ARingBuffer.cpp
 	EmuManager_qEmu.cpp
 	VBackend/GLTex2D.cpp
-	actions/GensKeyConfig.cpp
-	actions/GensMenuBar.cpp
-	actions/GensMenuBar_menus.cpp
-	actions/GensMenuBar_sync.cpp
-	actions/GensActions.cpp
 	EmuManager_str.cpp
-	actions/RecentRomsMenu.cpp
 	cdrom/FindCdromDrives.cpp
 	cdrom/FindCdromBase.cpp
 	)
 
 SET(gens-qt4_WINDOW_SRCS
 	windows/GensWindow.cpp
+	windows/GensWindow_menu_slots.cpp
+	windows/GensWindow_menu_init.cpp
+	windows/GensWindow_menu_sync.cpp
+	windows/GensMenuShortcuts.cpp
 	windows/AboutDialog.cpp
 	windows/CtrlConfigWindow.cpp
 	windows/ZipSelectDialog.cpp
@@ -147,6 +145,17 @@ SET(gens-qt4_WINDOW_SRCS
 	windows/GeneralConfigWindow_p.cpp
 	windows/GeneralConfigWindow_slots.cpp
 	windows/McdControlWindow.cpp
+	)
+
+SET(gens-qt4_WINDOW_H
+	windows/GensWindow.hpp
+	windows/GensWindow_p.hpp
+	windows/AboutDialog.hpp
+	windows/CtrlConfigWindow.hpp
+	windows/ZipSelectDialog.hpp
+	windows/GeneralConfigWindow.hpp
+	windows/GeneralConfigWindow_p.hpp
+	windows/McdControlWindow.hpp
 	)
 
 SET(gens-qt4_WIDGET_SRCS
@@ -159,6 +168,7 @@ SET(gens-qt4_WIDGET_SRCS
 	widgets/GensCtrlKeyWidget.cpp
 	widgets/GensColorButton.cpp
 	widgets/KeyNames.cpp
+	widgets/RecentRomsMenu.cpp
 	)
 
 SET(gens-qt4_CONFIG_SRCS
@@ -185,17 +195,14 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	VBackend/GensQGLWidget.hpp
 	VBackend/GensQGLWidget_p.hpp
 	EmuManager.hpp
-	actions/GensKeyConfig.hpp
-	actions/GensMenuBar.hpp
-	actions/GensActions.hpp
 	Input/KeyHandlerQt.hpp
-	actions/RecentRomsMenu.hpp
 	cdrom/FindCdromDrives.hpp
 	cdrom/FindCdromBase.hpp
 	)
 
 SET(gens-qt4_WINDOW_MOC_HEADERS
 	windows/GensWindow.hpp
+	windows/GensMenuShortcuts.hpp
 	windows/AboutDialog.hpp
 	windows/CtrlConfigWindow.hpp
 	windows/ZipSelectDialog.hpp
@@ -213,6 +220,7 @@ SET(gens-qt4_WIDGET_MOC_HEADERS
 	widgets/GensCtrlKeyWidget.hpp
 	widgets/GensCtrlKeyWidget_p.hpp
 	widgets/GensColorButton.hpp
+	widgets/RecentRomsMenu.hpp
 	)
 
 SET(gens-qt4_CONFIG_MOC_HEADERS
@@ -228,6 +236,7 @@ SET(gens-qt4_ROMDB_MOC_HEADERS
 
 # UI files.
 SET(gens-qt4_WINDOW_UIS
+	windows/GensWindow.ui
 	windows/AboutDialog.ui
 	windows/CtrlConfigWindow.ui
 	windows/ZipSelectDialog.ui
@@ -363,7 +372,7 @@ ADD_EXECUTABLE(gens-qt4
 	WIN32
 	${gens-qt4_SRCS}
 	${gens-qt4_COMMON_SRCS} ${gens-qt4_COMMON_MOC_HEADERS}
-	${gens-qt4_WINDOW_SRCS} ${gens-qt4_WINDOW_MOC_HEADERS}
+	${gens-qt4_WINDOW_SRCS} ${gens-qt4_WINDOW_H} ${gens-qt4_WINDOW_MOC_HEADERS}
 	${gens-qt4_WIDGET_SRCS} ${gens-qt4_WIDGET_MOC_HEADERS}
 	${gens-qt4_CONFIG_SRCS} ${gens-qt4_CONFIG_MOC_HEADERS}
 	${gens-qt4_ROMDB_SRCS} ${gens-qt4_ROMDB_MOC_HEADERS}

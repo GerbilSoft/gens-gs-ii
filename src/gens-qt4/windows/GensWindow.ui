@@ -1,0 +1,648 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>GensWindow</class>
+ <widget class="QMainWindow" name="GensWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>320</width>
+    <height>240</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string notr="true" extracomment="Window title is set by the program. This title is here for convenience purposes.">Gens/GS II</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>320</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="mnuFile">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="actionFileOpenROM"/>
+    <addaction name="actionFileRecentROMs"/>
+    <addaction name="actionFileCloseROM"/>
+    <addaction name="separator"/>
+    <addaction name="actionFileSaveState"/>
+    <addaction name="actionFileLoadState"/>
+    <addaction name="separator"/>
+    <addaction name="actionFileGeneralConfiguration"/>
+    <addaction name="actionFileSegaCDControlPanel"/>
+    <addaction name="separator"/>
+    <addaction name="actionFileQuit"/>
+   </widget>
+   <widget class="QMenu" name="mnuGraphics">
+    <property name="title">
+     <string>&amp;Graphics</string>
+    </property>
+    <widget class="QMenu" name="mnuGraphicsResolution">
+     <property name="title">
+      <string>&amp;Resolution</string>
+     </property>
+     <addaction name="actionGraphicsResolution1x"/>
+     <addaction name="actionGraphicsResolution2x"/>
+     <addaction name="actionGraphicsResolution3x"/>
+     <addaction name="actionGraphicsResolution4x"/>
+    </widget>
+    <widget class="QMenu" name="mnuGraphicsBpp">
+     <property name="title">
+      <string>&amp;Color Depth</string>
+     </property>
+     <addaction name="actionGraphicsBpp15"/>
+     <addaction name="actionGraphicsBpp16"/>
+     <addaction name="actionGraphicsBpp32"/>
+    </widget>
+    <widget class="QMenu" name="mnuGraphicsStretch">
+     <property name="title">
+      <string>S&amp;tretch Mode</string>
+     </property>
+     <addaction name="actionGraphicsStretchNone"/>
+     <addaction name="actionGraphicsStretchHorizontal"/>
+     <addaction name="actionGraphicsStretchVertical"/>
+     <addaction name="actionGraphicsStretchFull"/>
+    </widget>
+    <addaction name="actionGraphicsShowMenuBar"/>
+    <addaction name="separator"/>
+    <addaction name="mnuGraphicsResolution"/>
+    <addaction name="mnuGraphicsBpp"/>
+    <addaction name="mnuGraphicsStretch"/>
+    <addaction name="separator"/>
+    <addaction name="actionGraphicsScreenshot"/>
+   </widget>
+   <widget class="QMenu" name="mnuSystem">
+    <property name="title">
+     <string>&amp;System</string>
+    </property>
+    <widget class="QMenu" name="mnuSystemRegion">
+     <property name="title">
+      <string>&amp;Region</string>
+     </property>
+     <addaction name="actionSystemRegionAuto"/>
+     <addaction name="actionSystemRegionJPN"/>
+     <addaction name="actionSystemRegionAsia"/>
+     <addaction name="actionSystemRegionUSA"/>
+     <addaction name="actionSystemRegionEUR"/>
+    </widget>
+    <addaction name="mnuSystemRegion"/>
+    <addaction name="separator"/>
+    <addaction name="actionSystemHardReset"/>
+    <addaction name="actionSystemSoftReset"/>
+    <addaction name="actionSystemPause"/>
+    <addaction name="separator"/>
+    <addaction name="actionSystemResetM68K"/>
+    <addaction name="actionSystemResetS68K"/>
+    <addaction name="actionSystemResetMSH2"/>
+    <addaction name="actionSystemResetSSH2"/>
+    <addaction name="actionSystemResetZ80"/>
+   </widget>
+   <widget class="QMenu" name="mnuOptions">
+    <property name="title">
+     <string>&amp;Options</string>
+    </property>
+    <widget class="QMenu" name="mnuOptionsSoundTest">
+     <property name="title">
+      <string>SoundTest</string>
+     </property>
+     <addaction name="actionSound11"/>
+     <addaction name="actionSound16"/>
+     <addaction name="actionSound22"/>
+     <addaction name="actionSound32"/>
+     <addaction name="actionSound44"/>
+     <addaction name="actionSound48"/>
+     <addaction name="separator"/>
+     <addaction name="actionSoundMono"/>
+     <addaction name="actionSoundStereo"/>
+    </widget>
+    <addaction name="actionOptionsSRAM"/>
+    <addaction name="separator"/>
+    <addaction name="actionOptionsControllers"/>
+    <addaction name="mnuOptionsSoundTest"/>
+   </widget>
+   <widget class="QMenu" name="mnuHelp">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="actionHelpAbout"/>
+   </widget>
+   <addaction name="mnuFile"/>
+   <addaction name="mnuGraphics"/>
+   <addaction name="mnuSystem"/>
+   <addaction name="mnuOptions"/>
+   <addaction name="mnuHelp"/>
+  </widget>
+  <action name="actionFileOpenROM">
+   <property name="text">
+    <string>&amp;Open ROM...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionFileRecentROMs">
+   <property name="text">
+    <string>&amp;Recent ROMs</string>
+   </property>
+  </action>
+  <action name="actionFileCloseROM">
+   <property name="text">
+    <string>&amp;Close ROM</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
+   </property>
+  </action>
+  <action name="actionFileSaveState">
+   <property name="text">
+    <string>&amp;Save State</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
+  </action>
+  <action name="actionFileLoadState">
+   <property name="text">
+    <string>&amp;Load State</string>
+   </property>
+   <property name="shortcut">
+    <string>F8</string>
+   </property>
+  </action>
+  <action name="actionFileGeneralConfiguration">
+   <property name="text">
+    <string>&amp;General Configuration</string>
+   </property>
+  </action>
+  <action name="actionFileSegaCDControlPanel">
+   <property name="text">
+    <string>Sega C&amp;D Control Panel</string>
+   </property>
+  </action>
+  <action name="actionFileQuit">
+   <property name="text">
+    <string>&amp;Quit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionGraphicsShowMenuBar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show &amp;Menu Bar</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
+   </property>
+  </action>
+  <action name="actionGraphicsScreenshot">
+   <property name="text">
+    <string>Take &amp;Screenshot</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+Backspace</string>
+   </property>
+  </action>
+  <action name="actionGraphicsResolution1x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>320x240 (&amp;1x)</string>
+   </property>
+  </action>
+  <action name="actionGraphicsResolution2x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>640x480 (&amp;2x)</string>
+   </property>
+  </action>
+  <action name="actionGraphicsResolution3x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>960x720 (&amp;3x)</string>
+   </property>
+  </action>
+  <action name="actionGraphicsResolution4x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1280x960 (&amp;4x)</string>
+   </property>
+  </action>
+  <action name="actionGraphicsBpp15">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>15-bit (555)</string>
+   </property>
+  </action>
+  <action name="actionGraphicsBpp16">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>16-bit (565)</string>
+   </property>
+  </action>
+  <action name="actionGraphicsBpp32">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>32-bit (888)</string>
+   </property>
+  </action>
+  <action name="actionGraphicsStretchNone">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>None</string>
+   </property>
+  </action>
+  <action name="actionGraphicsStretchHorizontal">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Horizontal Only</string>
+   </property>
+  </action>
+  <action name="actionGraphicsStretchVertical">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Vertical Only</string>
+   </property>
+  </action>
+  <action name="actionGraphicsStretchFull">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Full Stretch</string>
+   </property>
+  </action>
+  <action name="actionSystemHardReset">
+   <property name="text">
+    <string>&amp;Hard Reset</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+Tab</string>
+   </property>
+  </action>
+  <action name="actionSystemSoftReset">
+   <property name="text">
+    <string>&amp;Soft Reset</string>
+   </property>
+   <property name="shortcut">
+    <string>Tab</string>
+   </property>
+  </action>
+  <action name="actionSystemPause">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Pause</string>
+   </property>
+   <property name="shortcut">
+    <string>Esc</string>
+   </property>
+  </action>
+  <action name="actionSystemResetM68K">
+   <property name="text">
+    <string>Reset &amp;68000</string>
+   </property>
+  </action>
+  <action name="actionSystemResetS68K">
+   <property name="text">
+    <string>Reset Sub 68000</string>
+   </property>
+  </action>
+  <action name="actionSystemResetMSH2">
+   <property name="text">
+    <string>Reset Master SH2</string>
+   </property>
+  </action>
+  <action name="actionSystemResetSSH2">
+   <property name="text">
+    <string>Reset Slave SH2</string>
+   </property>
+  </action>
+  <action name="actionSystemResetZ80">
+   <property name="text">
+    <string>Reset &amp;Z80</string>
+   </property>
+  </action>
+  <action name="actionSystemRegionAuto">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Auto-&amp;Detect</string>
+   </property>
+  </action>
+  <action name="actionSystemRegionJPN">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Japan (NTSC)</string>
+   </property>
+  </action>
+  <action name="actionSystemRegionAsia">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Asia (PAL)</string>
+   </property>
+  </action>
+  <action name="actionSystemRegionUSA">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;USA (NTSC)</string>
+   </property>
+  </action>
+  <action name="actionSystemRegionEUR">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Europe (PAL)</string>
+   </property>
+  </action>
+  <action name="actionOptionsSRAM">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Enable &amp;SRAM/EEPROM</string>
+   </property>
+  </action>
+  <action name="actionOptionsControllers">
+   <property name="text">
+    <string>&amp;Controllers...</string>
+   </property>
+  </action>
+  <action name="actionSound11">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;11,025 Hz</string>
+   </property>
+  </action>
+  <action name="actionSound16">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1&amp;6,000 Hz</string>
+   </property>
+  </action>
+  <action name="actionSound22">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;22,050 Hz</string>
+   </property>
+  </action>
+  <action name="actionSound32">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;32,000 Hz</string>
+   </property>
+  </action>
+  <action name="actionSound44">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;44,100 Hz</string>
+   </property>
+  </action>
+  <action name="actionSound48">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>4&amp;8,000 Hz</string>
+   </property>
+  </action>
+  <action name="actionSoundMono">
+   <property name="text">
+    <string>&amp;Mono</string>
+   </property>
+  </action>
+  <action name="actionSoundStereo">
+   <property name="text">
+    <string>&amp;Stereo</string>
+   </property>
+  </action>
+  <action name="actionHelpAbout">
+   <property name="text">
+    <string>&amp;About Gens/GS II</string>
+   </property>
+  </action>
+  <action name="actionNoMenuFastBlur">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Fast Blur</string>
+   </property>
+   <property name="shortcut">
+    <string>F9</string>
+   </property>
+  </action>
+  <action name="actionNoMenuSaveSlot0">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>0</string>
+   </property>
+   <property name="shortcut">
+    <string>0</string>
+   </property>
+  </action>
+  <action name="actionNoMenuSaveSlot1">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1</string>
+   </property>
+   <property name="toolTip">
+    <string>1</string>
+   </property>
+   <property name="shortcut">
+    <string>1</string>
+   </property>
+  </action>
+  <action name="actionNoMenuSaveSlot2">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>2</string>
+   </property>
+   <property name="toolTip">
+    <string>2</string>
+   </property>
+   <property name="shortcut">
+    <string>2</string>
+   </property>
+  </action>
+  <action name="actionNoMenuSaveSlot3">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>3</string>
+   </property>
+   <property name="toolTip">
+    <string>3</string>
+   </property>
+   <property name="shortcut">
+    <string>3</string>
+   </property>
+  </action>
+  <action name="actionNoMenuSaveSlot4">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>4</string>
+   </property>
+   <property name="toolTip">
+    <string>4</string>
+   </property>
+   <property name="shortcut">
+    <string>4</string>
+   </property>
+  </action>
+  <action name="actionNoMenuSaveSlot5">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>5</string>
+   </property>
+   <property name="toolTip">
+    <string>5</string>
+   </property>
+   <property name="shortcut">
+    <string>5</string>
+   </property>
+  </action>
+  <action name="actionNoMenuSaveSlot6">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>6</string>
+   </property>
+   <property name="toolTip">
+    <string>6</string>
+   </property>
+   <property name="shortcut">
+    <string>6</string>
+   </property>
+  </action>
+  <action name="actionNoMenuSaveSlot7">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>7</string>
+   </property>
+   <property name="toolTip">
+    <string>7</string>
+   </property>
+   <property name="shortcut">
+    <string>7</string>
+   </property>
+  </action>
+  <action name="actionNoMenuSaveSlot8">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>8</string>
+   </property>
+   <property name="shortcut">
+    <string>8</string>
+   </property>
+  </action>
+  <action name="actionNoMenuSaveSlot9">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>9</string>
+   </property>
+   <property name="shortcut">
+    <string>9</string>
+   </property>
+  </action>
+  <action name="actionNoMenuSaveSlotPrev">
+   <property name="text">
+    <string>Previous Save Slot</string>
+   </property>
+   <property name="shortcut">
+    <string>F6</string>
+   </property>
+  </action>
+  <action name="actionNoMenuSaveSlotNext">
+   <property name="text">
+    <string>Next Save Slot</string>
+   </property>
+   <property name="shortcut">
+    <string>F7</string>
+   </property>
+  </action>
+  <action name="actionNoMenuLoadStateFrom">
+   <property name="text">
+    <string>Load State From...</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F8</string>
+   </property>
+  </action>
+  <action name="actionNoMenuSaveStateAs">
+   <property name="text">
+    <string>Save State As...</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F5</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

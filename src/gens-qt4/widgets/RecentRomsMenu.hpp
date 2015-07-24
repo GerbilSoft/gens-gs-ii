@@ -1,10 +1,10 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * GensKeyConfig.hpp: Gens key configuration.                              *
+ * RecentRomsMenu.hpp: Recent ROMs Menu.                                   *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,70 +21,55 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_ACTIONS_GENSKEYCONFIG_HPP__
-#define __GENS_QT4_ACTIONS_GENSKEYCONFIG_HPP__
+#ifndef __GENS_QT4_WIDGETS_RECENTROMSMENU_HPP__
+#define __GENS_QT4_WIDGETS_RECENTROMSMENU_HPP__
 
 // Qt includes.
-#include <QtCore/QObject>
-#include <QtCore/QHash>
+#include <QtGui/QMenu>
 
-// Qt classes.
-class QSettings;
+// Recent ROMs class.
+#include "../Config/RecentRoms.hpp"
 
-// LibGensKeys.
-#include "libgenskeys/GensKey_t.h"
+namespace GensQt4 {
 
-namespace GensQt4
-{
-
-class GensKeyConfigPrivate;
-
-class GensKeyConfig : public QObject
+class RecentRomsMenuPrivate;
+class RecentRomsMenu : public QMenu
 {
 	Q_OBJECT
-	
-	public:
-		GensKeyConfig(QObject *parent = 0);
-		virtual ~GensKeyConfig();
-
-	private:
-		GensKeyConfigPrivate *const d_ptr;
-		Q_DECLARE_PRIVATE(GensKeyConfig);
-	private:
-		Q_DISABLE_COPY(GensKeyConfig);
 
 	public:
+		RecentRomsMenu(QWidget *parent = 0, const RecentRoms *recentRoms = 0);
+		RecentRomsMenu(const QString &title, QWidget *parent = 0, const RecentRoms *recentRoms = 0);
+		virtual ~RecentRomsMenu();
+
+	private:
+		RecentRomsMenuPrivate *const d_ptr;
+		Q_DECLARE_PRIVATE(RecentRomsMenu)
+	private:
+		Q_DISABLE_COPY(RecentRomsMenu)
+
+	public:
+		const RecentRoms *recentRoms(void);
+		void setRecentRoms(const RecentRoms *recentRoms);
+
+	signals:
 		/**
-		 * Look up an action based on a GensKey_t value.
-		 * @param key GensKey_t value. (WITH MODIFIERS)
-		 * @return Action, or 0 if no action was found.
+		 * The Recent ROMs list was updated.
 		 */
-		int keyToAction(GensKey_t key) const;
+		void updated(void);
 
 		/**
-		 * Look up a GensKey_t based on an action value.
-		 * @param action Action value.
-		 * @return GensKey_t (WITH MODIFIERS), or 0 if no key was found.
+		 * A Recent ROM was selected.
+		 * @param idx Index of the recent ROM that was selected.
 		 */
-		int actionToKey(int action) const;
+		void triggered(int idx);
 
-		/**
-		 * Load key configuration from a settings file.
-		 * NOTE: The group must be selected in the QSettings before calling this function!
-		 * @param qSettings Settings file.
-		 * @return 0 on success; non-zero on error.
-		 */
-		int load(const QSettings *qSettings);
-
-		/**
-		 * Save key configuration to a settings file.
-		 * NOTE: The group must be selected in the QSettings before calling this function!
-		 * @param qSettings Settings file.
-		 * @return 0 on success; non-zero on error.
-		 */
-		int save(QSettings *qSettings) const;
+	private slots:
+		// d->recentRoms signals.
+		void recentRomsDestroyed_slot(void);
+		void recentRomsUpdated_slot(void);
 };
 
 }
 
-#endif /* __GENS_QT4_ACTIONS_GENSKEYCONFIG_HPP__ */
+#endif /* __GENS_QT4_WIDGETS_RECENTROMSMENU_HPP__ */

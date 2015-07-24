@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -23,13 +23,21 @@
 
 #include "KeyHandlerQt.hpp"
 
+// Gens Menu shortcuts.
+#include "gqt4_main.hpp"
+#include "windows/GensMenuShortcuts.hpp"
+
+// Key Manager.
+#include "libgenskeys/KeyManager.hpp"
+
 // Qt includes
 #include <QtCore/qglobal.h>
 #include <QtGui/QKeyEvent>
 #include <QtGui/QMouseEvent>
+#include <QtGui/QAction>
 
-// C includes.
-#include <string.h>
+// C includes. (C++ namespace)
+#include <cstring>
 
 // Native virtual keycodes.
 #if defined(Q_WS_X11)
@@ -42,90 +50,23 @@
 #include <windows.h>
 #endif
 
-#include <stdio.h>
-namespace GensQt4
-{
+namespace GensQt4 {
 
 /**
  * Initialize KeyHandlerQt.
- * @param gensActions Gens Actions Manager.
  * @param keyManager Key Manager.
- * NOTE: This class does NOT delete gensActions or keyManager on shutdown!
+ * NOTE: This class does NOT delete keyManager on shutdown!
  */
-KeyHandlerQt::KeyHandlerQt(QObject *parent, GensActions *gensActions, LibGensKeys::KeyManager *keyManager)
+KeyHandlerQt::KeyHandlerQt(QObject *parent, LibGensKeys::KeyManager *keyManager)
 	: QObject(parent)
-	, m_gensActions(gensActions)
 	, m_keyManager(keyManager)
-{
-	if (m_gensActions) {
-		// Connect the Gens Actions object's "destroyed" signal.
-		connect(m_gensActions, SIGNAL(destroyed()),
-			this, SLOT(gensActionsDestroyed()));
-	}
-}
+{ }
 
 /**
  * Shut down KeyHandlerQt.
  */
 KeyHandlerQt::~KeyHandlerQt(void)
 { }
-
-/**
- * Get the GensActions object.
- * @return GensActions object.
- */
-GensActions *KeyHandlerQt::gensActions(void) const
-{
-	return m_gensActions;
-}
-
-/**
- * Set the GensActions object.
- * @param gensActions New GensActions object.
- */
-void KeyHandlerQt::setGensActions(GensActions *gensActions)
-{
-	if (m_gensActions) {
-		// Disconnect the existing key handler's "destroyed" signal.
-		disconnect(m_gensActions, SIGNAL(destroyed()),
-			   this, SLOT(gensActionsDestroyed()));
-	}
-
-	m_gensActions = gensActions;
-
-	if (m_gensActions) {
-		// Connect the new key handler's "destroyed" signal.
-		connect(m_gensActions, SIGNAL(destroyed()),
-			this, SLOT(gensActionsDestroyed()));
-	}
-}
-
-/**
- * Get the KeyManager object.
- * @return KeyManager object.
- */
-LibGensKeys::KeyManager *KeyHandlerQt::keyManager(void) const
-{
-	return m_keyManager;
-}
-
-/**
- * Set the KeyManager object.
- * @return KeyManager object.
- */
-void KeyHandlerQt::setKeyManager(LibGensKeys::KeyManager *keyManager)
-{
-	m_keyManager = keyManager;
-}
-
-/**
- * GensActions object was destroyed.
- */
-void KeyHandlerQt::gensActionsDestroyed(void)
-{
-	m_gensActions = nullptr;
-}
-
 
 /**
  * Key press handler.
@@ -142,13 +83,16 @@ void KeyHandlerQt::keyPressEvent(QKeyEvent *event)
 	if (gensKey == KEYV_UNKNOWN)
 		return;
 
+	// TODO: Split GensMenuShortcuts into config / actions.
 	// If this is an event key, don't handle it as a controller key.
 	// We need to apply the modifiers for this to work.
 	// Qt's modifiers conveniently map to GensKeyMod_t.
 	// TODO: Use GensKeyM_t to indicate modifiers?
 	GensKey_t gensKeyMod = (gensKey | ((event->modifiers() >> 16) & 0x1E00));
-	if (m_gensActions && m_gensActions->checkEventKey(gensKeyMod)) {
-		// Key was handled as an event key.
+	QAction *action = gqt4_cfg->gensMenuShortcuts()->keyToAction(gensKeyMod);
+	if (action != nullptr) {
+		// Key is an event key.
+		action->trigger();
 		return;
 	}
 
@@ -157,7 +101,6 @@ void KeyHandlerQt::keyPressEvent(QKeyEvent *event)
 		m_keyManager->keyDown(gensKey);
 	}
 }
-
 
 /**
  * Key release handler.
@@ -445,7 +388,7 @@ GensKey_t KeyHandlerQt::NativeModifierToKeyVal(QKeyEvent *event)
 	// NOTE: Shift, Control, and Alt are NOT tested here.
 	// WM_KEYDOWN/WM_KEYUP report VK_SHIFT, VK_CONTORL, and VK_MENU (Alt).
 	// These are useless for testing left/right keys.
-	// Instead, GetAsyncKeyState() is used in KeyHandlerQt::DevHandler().
+	// Instead, GetAsyncKeyState() is used in LibGensKeys::KeyManager::updateIoManager().
 	switch (event->nativeVirtualKey()) {
 		case VK_LWIN:		return KEYV_LSUPER;
 		case VK_RWIN:		return KEYV_RSUPER;
