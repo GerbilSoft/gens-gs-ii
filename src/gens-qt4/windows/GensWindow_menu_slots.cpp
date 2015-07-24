@@ -1,6 +1,7 @@
 /******************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                     *
  * GensWindow_menu_slots.cpp: Gens Window: Menu slots.                        *
+ * These are functions run when menu items are selected.                      *
  *                                                                            *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                         *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                                *
@@ -86,7 +87,7 @@ void GensWindow::on_actionFileQuit_triggered(void)
 
 /** Graphics **/
 
-void GensWindow::on_actionGraphicsShowMenuBar_toggled(bool checked)
+void GensWindow::on_actionGraphicsShowMenuBar_triggered(bool checked)
 {
 	// This will automatically update GensWindow.
 	gqt4_cfg->set(QLatin1String("GensWindow/showMenuBar"), checked);
@@ -164,7 +165,7 @@ void GensWindow::on_actionSystemSoftReset_triggered(void)
 	d->emuManager->resetEmulator(false);
 }
 
-void GensWindow::on_actionSystemPause_toggled(bool checked)
+void GensWindow::on_actionSystemPause_triggered(bool checked)
 {
 	Q_D(GensWindow);
 	d->emuManager->pauseRequest(checked);
@@ -202,7 +203,7 @@ void GensWindow::on_actionSystemResetZ80_triggered(void)
 
 /** Options **/
 
-void GensWindow::on_actionOptionsSRAM_toggled(bool checked)
+void GensWindow::on_actionOptionsSRAM_triggered(bool checked)
 {
 	gqt4_cfg->set(QLatin1String("Options/enableSRam"), checked);
 }
@@ -241,7 +242,7 @@ void GensWindow::on_actionHelpAbout_triggered(void)
 /** Non-Menu Actions **/
 // FIXME: Not being triggered in the UI...
 
-void GensWindow::on_actionNoMenuFastBlur_toggled(bool checked)
+void GensWindow::on_actionNoMenuFastBlur_triggered(bool checked)
 {
 	Q_D(GensWindow);
 	d->vBackend->setFastBlur(checked);

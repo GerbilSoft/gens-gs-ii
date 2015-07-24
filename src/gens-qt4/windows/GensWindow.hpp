@@ -134,12 +134,6 @@ class GensWindow : public QMainWindow
 		 */
 		void autoPause_changed_slot(const QVariant &newAutoPause);
 
-		/**
-		 * Show Menu Bar setting has changed.
-		 * @param newShowMenuBar (bool) New Show Menu Bar setting.
-		 */
-		void showMenuBar_changed_slot(const QVariant &newShowMenuBar);
-
 	private slots:
 		/**
 		 * The Idle thread is finished rendering a frame.
@@ -180,7 +174,7 @@ class GensWindow : public QMainWindow
 		void on_actionFileQuit_triggered(void);
 
 		// Graphics
-		void on_actionGraphicsShowMenuBar_toggled(bool checked);
+		void on_actionGraphicsShowMenuBar_triggered(bool checked);
 		//void on_mnuGraphicsResolution_triggered(void);
 		void map_actionGraphicsResolution_triggered(int scale);
 		//void on_mnuGraphicsBpp_triggered(void);
@@ -194,7 +188,7 @@ class GensWindow : public QMainWindow
 		void map_actionSystemRegion_triggered(int region);
 		void on_actionSystemHardReset_triggered(void);
 		void on_actionSystemSoftReset_triggered(void);
-		void on_actionSystemPause_toggled(bool checked);
+		void on_actionSystemPause_triggered(bool checked);
 		// TODO: Signal mapper for CPU reset options?
 		void on_actionSystemResetM68K_triggered(void);
 		void on_actionSystemResetS68K_triggered(void);
@@ -203,7 +197,7 @@ class GensWindow : public QMainWindow
 		void on_actionSystemResetZ80_triggered(void);
 
 		// Options
-		void on_actionOptionsSRAM_toggled(bool checked);
+		void on_actionOptionsSRAM_triggered(bool checked);
 		void on_actionOptionsControllers_triggered(void);
 		// SoundTest; remove this later.
 		void map_actionSound_triggered(int freq);
@@ -214,12 +208,20 @@ class GensWindow : public QMainWindow
 		void on_actionHelpAbout_triggered(void);
 
 		// Non-Menu Actions
-		void on_actionNoMenuFastBlur_toggled(bool checked);
+		void on_actionNoMenuFastBlur_triggered(bool checked);
 		void map_actionNoMenuSaveSlot_triggered(int saveSlot);
 		void on_actionNoMenuSaveSlotPrev_triggered(void);
 		void on_actionNoMenuSaveSlotNext_triggered(void);
 		void on_actionNoMenuLoadStateFrom_triggered(void);
 		void on_actionNoMenuSaveStateAs_triggered(void);
+
+	private slots:
+		/** Menu synchronization slots. **/
+		void recentRoms_updated(void);
+		void stretchMode_changed_slot(const QVariant &stretchMode);	// StretchMode_t
+		void regionCode_changed_slot(const QVariant &regionCode);	// LibGens::SysVersion::RegionCode_t
+		void enableSRam_changed_slot(const QVariant &enableSRam);	// bool
+		void showMenuBar_changed_slot(const QVariant &showMenuBar);	// bool
 };
 
 }

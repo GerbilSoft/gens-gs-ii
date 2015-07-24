@@ -24,6 +24,9 @@
 #ifndef __GENS_QT4_WINDOWS_GENSWINDOW_P_HPP__
 #define __GENS_QT4_WINDOWS_GENSWINDOW_P_HPP__
 
+#include "gqt4_datatypes.h"
+#include "libgens/MD/SysVersion.hpp"
+
 #include "ui_GensWindow.h"
 namespace GensQt4 {
 
@@ -82,6 +85,18 @@ class GensWindowPrivate
 		IdleThread *idleThread;
 		bool idleThreadAllowed;
 		void checkIdleThread(void);
+
+	public:
+		/** Menu synchronization. (GensWindow_menu_sync.cpp) **/
+		void syncAll(void);		// Synchronize all menus.
+		void syncRecent(void);		// Synchronize the "Recent ROMs" menu.
+		void syncShowMenuBar(void);	// Synchronize the "Show Menu Bar" item.
+		void updateMenusForStateChanged(void);
+
+		// Internal functions for synchronization slots.
+		void stretchMode_changed_slot_int(StretchMode_t stretchMode);
+		void regionCode_changed_slot_int(LibGens::SysVersion::RegionCode_t regionCode);
+		void enableSRam_changed_slot_int(bool enableSRam);
 };
 
 /**

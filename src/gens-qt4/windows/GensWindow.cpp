@@ -227,8 +227,10 @@ GensWindow::GensWindow()
 				this, SLOT(autoPause_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("Intro_Effect/introStyle"),
 				this, SLOT(introStyle_changed_slot(QVariant)));
+	/* showMenuBar is handled in the menu sync code now.
 	gqt4_cfg->registerChangeNotification(QLatin1String("GensWindow/showMenuBar"),
 				this, SLOT(showMenuBar_changed_slot(QVariant)));
+	*/
 
 	// Update menu bar visibility.
 	d->updateMenuBarVisibility();
@@ -525,8 +527,9 @@ void GensWindow::stateChanged(void)
 	// Check the idle thread state.
 	d->checkIdleThread();
 
-	// Update the Gens window title.
+	// Update the window state.
 	d->setGensTitle();
+	d->updateMenusForStateChanged();
 }
 
 /**
@@ -612,17 +615,6 @@ void GensWindow::autoPause_changed_slot(const QVariant &newAutoPause)
 
 		d->emuManager->pauseRequest(paused_set, paused_clear);
 	}
-}
-
-/**
- * Show Menu Bar setting has changed.
- * @param newShowMenuBar (bool) New Show Menu Bar setting.
- */
-void GensWindow::showMenuBar_changed_slot(const QVariant &newShowMenuBar)
-{
-	Q_D(GensWindow);
-	d->cfg_showMenuBar = newShowMenuBar.toBool();
-	d->updateMenuBarVisibility();
 }
 
 // TODO: Rename to isIdleThreadAllowed().

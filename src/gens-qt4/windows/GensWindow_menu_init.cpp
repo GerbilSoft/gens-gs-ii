@@ -172,6 +172,17 @@ void GensWindowPrivate::initMenuBar(void)
 	doMappingExc(ui.actionNoMenuSaveSlot7, 7);
 	doMappingExc(ui.actionNoMenuSaveSlot8, 8);
 	doMappingExc(ui.actionNoMenuSaveSlot9, 9);
+
+	/** Menu synchronization slots. **/
+	// TODO: Qt::UniqueConnection?
+	gqt4_cfg->registerChangeNotification(QLatin1String("Graphics/stretchMode"),
+					q, SLOT(stretchMode_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("System/regionCode"),
+					q, SLOT(regionCode_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("Options/enableSRam"),
+					q, SLOT(enableSRam_changed_slot(QVariant)));
+	gqt4_cfg->registerChangeNotification(QLatin1String("GensWindow/showMenuBar"),
+					q, SLOT(showMenuBar_changed_slot(QVariant)));
 }
 
 /**
