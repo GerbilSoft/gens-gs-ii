@@ -98,6 +98,7 @@ void RecentRomsMenuPrivate::update(void)
 	Q_Q(RecentRomsMenu);
 
 	// Delete all existing QActions.
+	// TODO: Reuse existing QActions if possible.
 	qDeleteAll(q->actions());
 	q->actions().clear();
 
