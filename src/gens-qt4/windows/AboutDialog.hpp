@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -26,22 +26,20 @@
 
 #include <QtGui/QDialog>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class AboutDialogPrivate;
-
 class AboutDialog : public QDialog
 {
 	Q_OBJECT
 	
 	public:
 		static void ShowSingle(QWidget *parent = nullptr);
-	
+
 	protected:
 		AboutDialog(QWidget *parent = nullptr);
 		virtual ~AboutDialog();
-		
+
 	private:
 		AboutDialogPrivate *const d_ptr;
 		Q_DECLARE_PRIVATE(AboutDialog)
@@ -56,4 +54,3 @@ class AboutDialog : public QDialog
 }
 
 #endif /* __GENS_QT4_ABOUTWINDOW_HPP__ */
-

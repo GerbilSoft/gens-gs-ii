@@ -95,7 +95,8 @@ class AboutDialogPrivate
 		// Debug information.
 		static QString GetDebugInfo(void);
 #ifdef Q_OS_WIN32
-		static QString GetCodePageInfo(void);
+		static QString GetCodePageInfo(unsigned int codepage);
+		static QString GetSysCodePageInfo(void);
 #endif /* Q_OS_WIN32 */
 };
 
@@ -414,7 +415,7 @@ QString AboutDialogPrivate::GetDebugInfo(void)
 
 #ifdef Q_OS_WIN32
 	// Win32 code page information.
-	sDebugInfo += GetCodePageInfo() + sLineBreak;
+	sDebugInfo += GetSysCodePageInfo() + sLineBreak;
 #endif /* Q_OS_WIN32 */
 
 #ifndef HAVE_OPENGL
@@ -507,10 +508,55 @@ QString AboutDialogPrivate::GetDebugInfo(void)
 #include <windows.h>
 
 /**
+ * Get information about the specified code page. [Win32 only]
+ * @return Code page information.
+ */
+QString AboutDialogPrivate::GetCodePageInfo(unsigned int codepage)
+{
+	// Get the code page information.
+	CPINFOEX cpix;
+	BOOL bRet = GetCPInfoExA(codepage, 0, &cpix);
+	if (!bRet) {
+		//: GetCPInfoExA() call failed.
+		return AboutDialog::tr("Unknown [GetCPInfoExA() failed]");
+	}
+
+	QString cp_desc, cp_name;
+	if (cpix.CodePageName[0] != 0x00) {
+		// Windows XP has the code page number in cpix.CodePageName,
+		// followed by two spaces, and then the code page name in parentheses.
+		char *parenStart = strchr(cpix.CodePageName, '(');
+		if (!parenStart) {
+			// No parentheses. Use the code page name as-is.
+			cp_name = QString::fromLocal8Bit(cpix.CodePageName);
+		} else {
+			// Found starting parenthesis. Check for ending parenthesis.
+			char *parenEnd = strrchr(parenStart, ')');
+			if (parenEnd) {
+				// Found ending parenthesis. Null it out.
+				*parenEnd = 0x00;
+			}
+
+			cp_name = QString::fromLocal8Bit(parenStart + 1);
+		}
+
+		//: Formatting for the Code Page string.
+		cp_desc = AboutDialog::tr("%1 (%2)")
+				.arg(cpix.CodePage)
+				.arg(cp_name);
+	} else {
+		// Code Page name is blank.
+		cp_desc = QString::number(cpix.CodePage);
+	}
+
+	return cp_desc;
+}
+
+/**
  * Get information about the system code pages. [Win32 only]
  * @return System code page information.
  */
-QString AboutDialogPrivate::GetCodePageInfo(void)
+QString AboutDialogPrivate::GetSysCodePageInfo(void)
 {
 	QString sCodePageInfo;
 
@@ -530,46 +576,10 @@ QString AboutDialogPrivate::GetCodePageInfo(void)
 		{CP_OEMCP,	QT_TRANSLATE_NOOP("GensQt4::AboutDialog", "System OEM code page: %1")}
 	};
 
-	// Declare the QStrings here to reduce initialization.
-	QString codepage, codepage_name;
 	// TODO: GetCPInfoExU() support?
 	for (int i = 0; i < 2; i++) {
 		// Get the code page information.
-		CPINFOEX cpix;
-		BOOL bRet = GetCPInfoExA(m_cpInfo[i].cp, 0, &cpix);
-		if (!bRet) {
-			//: GetCPInfoExA() call failed.
-			sCodePageInfo += AboutDialog::tr(m_cpInfo[i].cpStr)
-					.arg(AboutDialog::tr("Unknown [GetCPInfoExA() failed]")) + sLineBreak;
-			continue;
-		}
-
-		if (cpix.CodePageName[0] != 0x00) {
-			// Windows XP has the code page number in cpix.CodePageName,
-			// followed by two spaces, and then the code page name in parentheses.
-			char *parenStart = strchr(cpix.CodePageName, '(');
-			if (!parenStart) {
-				// No parentheses. Use the code page name as-is.
-				codepage_name = QString::fromLocal8Bit(cpix.CodePageName);
-			} else {
-				// Found starting parenthesis. Check for ending parenthesis.
-				char *parenEnd = strrchr(parenStart, ')');
-				if (parenEnd) {
-					// Found ending parenthesis. Null it out.
-					*parenEnd = 0x00;
-				}
-
-				codepage_name = QString::fromLocal8Bit(parenStart + 1);
-			}
-			//: Formatting for the Code Page string.
-			codepage = AboutDialog::tr("%1 (%2)")
-					.arg(cpix.CodePage)
-					.arg(codepage_name);
-		} else {
-			// Code Page name is blank.
-			codepage = QString::number(cpix.CodePage);
-		}
-
+		QString codepage = GetCodePageInfo(m_cpInfo[i].cp);
 		sCodePageInfo += AboutDialog::tr(m_cpInfo[i].cpStr)
 					.arg(codepage) + sLineBreak;
 	}
