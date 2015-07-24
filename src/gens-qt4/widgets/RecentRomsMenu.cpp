@@ -147,7 +147,7 @@ void RecentRomsMenuPrivate::update(void)
 
 	// Create new QActions from the Recent ROMs list.
 	// TODO: Move the ROM format prefixes somewhere else.
-	static const char RomFormatPrefix[][8] =
+	static const char RomFormatPrefix[Rom::MDP_SYSTEM_MAX][8] =
 	{
 		"---", "MD", "MCD", "32X",
 		"MCD,32X", "SMS", "GG", "SG",
@@ -167,12 +167,12 @@ void RecentRomsMenuPrivate::update(void)
 	foreach (const RecentRom_t& rom, recentRoms->romList()) {
 		// System ID.
 		const char *sysAbbrev;
-		if (rom.sysId >= LibGens::Rom::MDP_SYSTEM_UNKNOWN &&
-		    rom.sysId < LibGens::Rom::MDP_SYSTEM_MAX)
+		if (rom.sysId >= Rom::MDP_SYSTEM_UNKNOWN &&
+		    rom.sysId < Rom::MDP_SYSTEM_MAX)
 		{
 			sysAbbrev = RomFormatPrefix[rom.sysId];
 		} else {
-			sysAbbrev = RomFormatPrefix[LibGens::Rom::MDP_SYSTEM_UNKNOWN];
+			sysAbbrev = RomFormatPrefix[Rom::MDP_SYSTEM_UNKNOWN];
 		}
 
 		// Remove directories from the filename.
