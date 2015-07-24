@@ -201,20 +201,6 @@ class ConfigStore : public QObject
 		 */
 		GensMenuShortcuts *gensMenuShortcuts(void);
 
-		/**
-		 * Get the QAction associated with a GensKey_t.
-		 * @param key GensKey_t.
-		 * @return QAction.
-		 */
-		QAction *keyToAction(GensKey_t key) const;
-
-		/**
-		 * Get the GensKey_t associated with an action.
-		 * @param action QAction.
-		 * @return GensKey_t.
-		 */
-		GensKey_t actionToKey(QAction *action) const;
-
 	public:
 		// Key Manager.
 		// TODO: Rework this so it isn't public.

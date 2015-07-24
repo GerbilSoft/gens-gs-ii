@@ -783,26 +783,4 @@ GensMenuShortcuts *ConfigStore::gensMenuShortcuts(void)
 	return d->menuShortcuts;
 }
 
-/**
- * Get the QAction associated with a GensKey_t.
- * @param key GensKey_t.
- * @return QAction.
- */
-QAction *ConfigStore::keyToAction(GensKey_t key) const
-{
-	Q_D(const ConfigStore);
-	return d->menuShortcuts->keyToAction(key);
-}
-
-/**
- * Get the GensKey_t associated with an action.
- * @param action QAction.
- * @return GensKey_t.
- */
-GensKey_t ConfigStore::actionToKey(QAction *action) const
-{
-	Q_D(const ConfigStore);
-	return d->menuShortcuts->actionToKey(action);
-}
-
 }
