@@ -304,10 +304,16 @@
    <property name="text">
     <string>&amp;Hard Reset</string>
    </property>
+   <property name="shortcut">
+    <string>Shift+Tab</string>
+   </property>
   </action>
   <action name="actionSystemSoftReset">
    <property name="text">
     <string>&amp;Soft Reset</string>
+   </property>
+   <property name="shortcut">
+    <string>Tab</string>
    </property>
   </action>
   <action name="actionSystemPause">
