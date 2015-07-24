@@ -26,8 +26,8 @@
 #include "GensWindow.hpp"
 #include "gqt4_main.hpp"
 
-// Menu definitions.
-#include "actions/GensMenuBar_menus.hpp"
+// Menu shortcuts.
+#include "GensMenuShortcuts.hpp"
 
 // Qt includes.
 #include <QtCore/QUrl>
@@ -377,6 +377,9 @@ void GensWindow::changeEvent(QEvent *event)
 		// Retranslate the menu bar.
 		Q_D(GensWindow);
 		d->ui.retranslateUi(this);
+		// Update the menu shortcuts.
+		// TODO: Remove shortcuts from the UI file.
+		gqt4_cfg->gensMenuShortcuts()->updateActions();
 		// Update the window state.
 		d->setGensTitle();
 		d->updateMenusForStateChanged();

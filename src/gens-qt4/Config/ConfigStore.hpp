@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -32,17 +32,18 @@
 
 // Qt includes.
 #include <QtCore/QObject>
+class QAction;
 
 // Configuration classes.
 #include "RecentRoms.hpp"
 #include "PathConfig.hpp"
 #include "libgenskeys/KeyManager.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
+
+class GensMenuShortcuts;
 
 class ConfigStorePrivate;
-
 class ConfigStore : public QObject
 {
 	Q_OBJECT
@@ -191,18 +192,25 @@ class ConfigStore : public QObject
 		/** Key configuration. **/
 
 		/**
-		 * Get the action associated with a GensKey_t.
-		 * @param key GensKey_t.
-		 * @return Action ID.
+		 * Get the GensMenuShortcuts object.
+		 * TODO: Split GensMenuShortcuts into a config and an action object.
+		 * @return GensMenuShortcuts.
 		 */
-		int keyToAction(GensKey_t key) const;
+		GensMenuShortcuts *gensMenuShortcuts(void);
+
+		/**
+		 * Get the QAction associated with a GensKey_t.
+		 * @param key GensKey_t.
+		 * @return QAction.
+		 */
+		QAction *keyToAction(GensKey_t key) const;
 
 		/**
 		 * Get the GensKey_t associated with an action.
-		 * @param actoin Action ID.
+		 * @param action QAction.
 		 * @return GensKey_t.
 		 */
-		GensKey_t actionToKey(int action) const;
+		GensKey_t actionToKey(QAction *action) const;
 
 	public:
 		// Key Manager.

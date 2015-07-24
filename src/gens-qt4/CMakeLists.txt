@@ -124,7 +124,6 @@ SET(gens-qt4_COMMON_SRCS
 	Audio/ARingBuffer.cpp
 	EmuManager_qEmu.cpp
 	VBackend/GLTex2D.cpp
-	actions/GensKeyConfig.cpp
 	EmuManager_str.cpp
 	cdrom/FindCdromDrives.cpp
 	cdrom/FindCdromBase.cpp
@@ -135,6 +134,7 @@ SET(gens-qt4_WINDOW_SRCS
 	windows/GensWindow_menu_slots.cpp
 	windows/GensWindow_menu_init.cpp
 	windows/GensWindow_menu_sync.cpp
+	windows/GensMenuShortcuts.cpp
 	windows/AboutDialog.cpp
 	windows/CtrlConfigWindow.cpp
 	windows/ZipSelectDialog.cpp
@@ -192,7 +192,6 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	VBackend/GensQGLWidget.hpp
 	VBackend/GensQGLWidget_p.hpp
 	EmuManager.hpp
-	actions/GensKeyConfig.hpp
 	Input/KeyHandlerQt.hpp
 	cdrom/FindCdromDrives.hpp
 	cdrom/FindCdromBase.hpp
@@ -200,6 +199,7 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 
 SET(gens-qt4_WINDOW_MOC_HEADERS
 	windows/GensWindow.hpp
+	windows/GensMenuShortcuts.hpp
 	windows/AboutDialog.hpp
 	windows/CtrlConfigWindow.hpp
 	windows/ZipSelectDialog.hpp

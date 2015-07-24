@@ -40,6 +40,9 @@ using LibGens::SysVersion;
 // Recent ROMs menu.
 #include "widgets/RecentRomsMenu.hpp"
 
+// Gens Menu shortcuts.
+#include "GensMenuShortcuts.hpp"
+
 #include "GensWindow_p.hpp"
 namespace GensQt4 {
 
@@ -56,6 +59,7 @@ void GensWindowPrivate::initMenuBar(void)
 	// We don't want any heuristics to be enabled by default.
 	// NOTE: Not limiting this to OS X in case Qt adds
 	// support for other platforms later on.
+	// FIXME: q->actions() is empty. Process menus and non-menu actions manually.
 	foreach (QAction *action, q->actions()) {
 		action->setMenuRole(QAction::NoRole);
 	}
@@ -224,6 +228,21 @@ void GensWindowPrivate::initMenuBar(void)
 	// Help
 	setActionIcon(ui.actionHelpAbout, "help-about");
 #endif /* !defined(Q_OS_MAC) */
+
+	// Set the Gens Menu shortcuts.
+	// TODO: Split into two classes:
+	// - Config class (common, shared with everything)
+	// - Implementation class (unique, one per window)
+	// TODO: Non-menu actions.
+	GensMenuShortcuts *menuShortcuts = gqt4_cfg->gensMenuShortcuts();
+	menuShortcuts->clear();
+	foreach (QAction *action, q->menuBar()->actions()) {
+		QMenu *menu = action->menu();
+		// TODO: Is this check needed?
+		if (menu != nullptr) {
+			menuShortcuts->addMenu(menu);
+		}
+	}
 
 	// Synchronize the menu items.
 	syncAll();
