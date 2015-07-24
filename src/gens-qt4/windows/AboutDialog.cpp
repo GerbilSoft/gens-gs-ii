@@ -356,12 +356,14 @@ QString AboutDialogPrivate::GetIncLibraries(void)
 QString AboutDialogPrivate::GetDebugInfo(void)
 {
 	// Line break string.
-	static const QString sLineBreak = QLatin1String("<br/>\n");
+	const QString sLineBreak = QLatin1String("<br/>\n");
 
 	// Debug information.
 	QString sDebugInfo =
-		AboutDialog::tr("Compiled using Qt %1.").arg(QLatin1String(QT_VERSION_STR)) + sLineBreak +
-		AboutDialog::tr("Using Qt %1.").arg(QLatin1String(qVersion())) + sLineBreak + sLineBreak;
+		AboutDialog::tr("Compiled using Qt %1.")
+			.arg(QLatin1String(QT_VERSION_STR)) + sLineBreak +
+		AboutDialog::tr("Using Qt %1.")
+			.arg(QLatin1String(qVersion())) + sLineBreak + sLineBreak;
 
 	// Reserve at least 4 KB for the debug information.
 	sDebugInfo.reserve(4096);
@@ -369,7 +371,7 @@ QString AboutDialogPrivate::GetDebugInfo(void)
 	// CPU flags.
 	// TODO: Move the array of CPU flag names to LibGens.
 	//: CPU flags are extra features found in a CPU, such as SSE.
-	sDebugInfo += AboutDialog::tr("CPU flags:");
+	sDebugInfo += AboutDialog::tr("CPU flags:") + QChar(L' ');
 #if defined(__i386__) || defined(__amd64__)
 	static const char *const CpuFlagNames[11] = {
 		"MMX", "MMXEXT", "3DNow!", "3DNow! EXT",
@@ -399,8 +401,8 @@ QString AboutDialogPrivate::GetDebugInfo(void)
 
 	//: Timing method: Function used to handle emulation timing.
 	LibGens::Timing timing;
-	sDebugInfo += AboutDialog::tr("Timing method:") +
-		QLatin1String(timing.GetTimingMethodName(timing.getTimingMethod())) +
+	sDebugInfo += AboutDialog::tr("Timing method: %1")
+		.arg(QLatin1String(timing.GetTimingMethodName(timing.getTimingMethod()))) +
 		QLatin1String("()") + sLineBreak + sLineBreak;
 
 	//: Save directory: Directory where configuration and savestate files are saved.
@@ -426,29 +428,31 @@ QString AboutDialogPrivate::GetDebugInfo(void)
 	// Translatable strings.
 
 	//: String identifying the manufacturer of the OpenGL implementation. (e.g. "X.Org R300 Project")
-	const QString qsid_glVendor = AboutDialog::tr("OpenGL vendor string:");
+	const QString qsid_glVendor = AboutDialog::tr("OpenGL vendor string: %1");
 	//: String identifying the specific OpenGL renderer. (e.g. "Gallium 0.4 on ATI RV530")
-	const QString qsid_glRenderer = AboutDialog::tr("OpenGL renderer string:");
+	const QString qsid_glRenderer = AboutDialog::tr("OpenGL renderer string: %1");
 	//: String identifying the OpenGL renderer version. (e.g. "2.1 Mesa 7.11-devel")
-	const QString qsid_glVersion = AboutDialog::tr("OpenGL version string:");
+	const QString qsid_glVersion = AboutDialog::tr("OpenGL version string: %1");
 	//: Placeholder used if an OpenGL version string could not be retrieved.
 	const QString qsid_unknown = AboutDialog::tr("(unknown)");
 
-	sDebugInfo += qsid_glVendor +
-			QString(glVendor ? QLatin1String(glVendor) : qsid_unknown) + sLineBreak +
-			qsid_glRenderer +
-			QString(glRenderer ? QLatin1String(glRenderer) : qsid_unknown) + sLineBreak +
-			qsid_glVersion +
-			QString(glVersion ? QLatin1String(glVersion) : qsid_unknown) + sLineBreak;
+	sDebugInfo += qsid_glVendor.arg(glVendor
+				? QLatin1String(glVendor)
+				: qsid_unknown) + sLineBreak +
+			qsid_glRenderer.arg(glRenderer
+				? QLatin1String(glRenderer)
+				: qsid_unknown) + sLineBreak +
+			qsid_glVersion.arg(glVersion
+				? QLatin1String(glVersion)
+				: qsid_unknown) + sLineBreak;
 
 #ifdef GL_SHADING_LANGUAGE_VERSION
 	if (glVersion && glVersion[0] >= '2' && glVersion[1] == '.') {
 		const char *glslVersion = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
 
 		//: String identifying the OpenGL Shading Language version. (e.g. "1.20")
-		const QString qsid_glslVersion = AboutDialog::tr("GLSL version string:");
-		sDebugInfo += qsid_glslVersion +
-				QString(glslVersion
+		const QString qsid_glslVersion = AboutDialog::tr("GLSL version string: %1");
+		sDebugInfo += qsid_glslVersion.arg(glslVersion
 					? QLatin1String(glslVersion)
 					: qsid_unknown) + sLineBreak;
 	}
@@ -463,11 +467,10 @@ QString AboutDialogPrivate::GetDebugInfo(void)
 	const char *glewVersion = (const char*)glewGetString(GLEW_VERSION);
 
 	//: String identifying the GLEW version.
-	const QString qsid_glewVersion = AboutDialog::tr("GLEW version");
-	sDebugInfo += qsid_glewVersion + QChar(L' ') +
-			QString(glewVersion
+	const QString qsid_glewVersion = AboutDialog::tr("GLEW version: %1");
+	sDebugInfo += qsid_glewVersion.arg(glewVersion
 				? QLatin1String(glewVersion)
-				: AboutDialog::tr("(unknown)")) + sLineBreak;
+				: qsid_unknown) + sLineBreak;
 
 	// Get a list of OpenGL extensions that are in use.
 	const QChar chrBullet(0x2022);	// U+2022: BULLET
