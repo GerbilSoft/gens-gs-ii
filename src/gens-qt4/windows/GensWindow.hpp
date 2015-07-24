@@ -39,8 +39,6 @@ class QCloseEvent;
 #include "gqt4_main.hpp"
 #include "VBackend/VBackend.hpp"
 #include "EmuManager.hpp"
-#include "actions/GensActions.hpp"
-#include "actions/GensMenuBar.hpp"
 #include "Input/KeyHandlerQt.hpp"
 
 // Idle thread.
