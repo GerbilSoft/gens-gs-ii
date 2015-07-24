@@ -23,6 +23,9 @@
 
 #include "RecentRomsMenu.hpp"
 
+#include "libgens/Rom.hpp"
+using LibGens::Rom;
+
 // Qt includes.
 #include <QtCore/QList>
 #include <QtCore/QDir>
@@ -147,56 +150,64 @@ void RecentRomsMenuPrivate::update(void)
 	static const char RomFormatPrefix[][8] =
 	{
 		"---", "MD", "MCD", "32X",
-		"MCD32X", "SMS", "GG", "SG",
+		"MCD,32X", "SMS", "GG", "SG",
 		"Pico"
+		// TODO: ColecoVision.
 	};
 
+	//: %1 = menu index; %2 = system abbreviation; %3 = filename.
+	const QString title_template = RecentRoms::tr("&%1 [%2] %3");
+	//: %1 = menu index; %2 = system abbreviation; %3 = filename, %4 = filename inside archive
+	const QString title_z_template = RecentRoms::tr("&%1 [%2] %3 [%4]");
+
 	int i = 1;
+	// QStrings are placed here to avoid unnecessary initialization.
+	QString title;
+	QString filename;
 	foreach (const RecentRom_t& rom, recentRoms->romList()) {
-		QString title;
-		title.reserve(rom.filename.size() + rom.z_filename.size() + 16);
-
-		// Recent ROM number.
-		title += QChar(L'&') + QString::number(i) + QChar(L' ');
-
 		// System ID.
-		title += QChar(L'[');
+		const char *sysAbbrev;
 		if (rom.sysId >= LibGens::Rom::MDP_SYSTEM_UNKNOWN &&
 		    rom.sysId < LibGens::Rom::MDP_SYSTEM_MAX)
 		{
-			title += QLatin1String(RomFormatPrefix[rom.sysId]);
+			sysAbbrev = RomFormatPrefix[rom.sysId];
+		} else {
+			sysAbbrev = RomFormatPrefix[LibGens::Rom::MDP_SYSTEM_UNKNOWN];
 		}
-		else
-		{
-			title += QLatin1String(RomFormatPrefix[LibGens::Rom::MDP_SYSTEM_UNKNOWN]);
-		}
-		title += QChar(L']');
 
 		// Remove directories from the filename.
+		// TODO: Use LibGensText::FilenameBase() once it's merged.
 		QString filename = QDir::fromNativeSeparators(rom.filename);
 		int slash_pos = filename.lastIndexOf(QChar(L'/'));
-		if (slash_pos >= 0)
+		if (slash_pos >= 0) {
 			filename.remove(0, (slash_pos + 1));
+		}
 
 		// Escape ampersands in the ROM filename.
 		filename.replace(QChar(L'&'), QLatin1String("&&"));
 
-		// Append the processed filename.
-		title += QChar(L' ') + filename;
-
 		if (!rom.z_filename.isEmpty()) {
 			// ROM has a compressed filename.
 			// Escape the ampersands and append the compressed filename.
-			filename = rom.z_filename;
-			filename.replace(QChar(L'&'), QLatin1String("&&"));
-			title += QLatin1String(" [") + filename + QChar(L']');
+			QString z_filename = rom.z_filename;
+			z_filename.replace(QChar(L'&'), QLatin1String("&&"));
+			title = title_z_template
+				.arg(i)				// ROM index.
+				.arg(QLatin1String(sysAbbrev))	// System abbreviation.
+				.arg(filename)			// ROM filename, minus directories.
+				.arg(z_filename);		// Compressed filename.
+		} else {
+			// No compressed filename.
+			title = title_template
+				.arg(i)				// ROM index.
+				.arg(QLatin1String(sysAbbrev))	// System abbreviation.
+				.arg(filename);			// ROM filename, minus directories.
 		}
 
 		// Create the QAction.
 		QAction *action = new QAction(title, q);
 
 		// Set the shortcut key.
-		// NOTE: The shortcut key won't show up due to the "\t" after the system ID.
 		// TODO: Port configurable shortcuts to the new menu system/
 		/*
 		const int mnuItemId = ((IDM_FILE_RECENT_1 - 1) + i);
@@ -244,10 +255,6 @@ RecentRomsMenu::RecentRomsMenu(const QString &title, QWidget *parent, const Rece
 RecentRomsMenu::~RecentRomsMenu()
 {
 	delete d_ptr;
-
-	// Make sure all of the QActions are deleted.
-	qDeleteAll(this->actions());
-	this->actions().clear();
 }
 
 /**
