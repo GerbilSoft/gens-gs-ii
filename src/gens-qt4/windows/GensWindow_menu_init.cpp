@@ -23,6 +23,7 @@
 
 // NOTE: Before committing: check the LATEST UI file!
 #include "GensWindow.hpp"
+#include "gqt4_main.hpp"
 
 // Qt includes.
 #include <QtCore/QSignalMapper>
@@ -33,6 +34,9 @@
 #include "libgens/MD/SysVersion.hpp"
 using LibGens::MdFb;
 using LibGens::SysVersion;
+
+// Recent ROMs menu.
+#include "widgets/RecentRomsMenu.hpp"
 
 #include "GensWindow_p.hpp"
 namespace GensQt4 {
@@ -70,6 +74,16 @@ void GensWindowPrivate::initMenuBar(void)
 		// TODO: Re-add if it changes at runtime.
 		ui.mnuGraphics->removeAction(ui.actionGraphicsShowMenuBar);
 	}
+
+	// Create the "Recent ROMs" menu.
+	recentRomsMenu = new RecentRomsMenu(q, gqt4_cfg->recentRomsObject());
+	ui.actionFileRecentROMs->setMenu(recentRomsMenu);
+	/* TODO: Signals.
+	QObject::connect(recentRomsMenu, SIGNAL(updated()),
+			 q, SLOT(recentRoms_updated()));
+	QObject::connect(recentRomsMenu, SIGNAL(triggered(int)),
+			 q, SLOT(menuItemSelected(int)));
+	*/
 
 	// Create QSignalMappers and QActionGroups for submenus
 	// with lots of similar items.

@@ -58,6 +58,7 @@ namespace GensQt4 {
 GensWindowPrivate::GensWindowPrivate(GensWindow *q)
 	: q_ptr(q)
 	, popupMenu(nullptr)
+	, recentRomsMenu(nullptr)
 	, scale(1)			// Set the scale to 1x by default.
 	, hasInitResize(false)		// Initial resize hasn't occurred yet.
 	, idleThread(nullptr)

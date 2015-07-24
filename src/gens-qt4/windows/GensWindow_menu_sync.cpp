@@ -34,6 +34,9 @@
 using LibGens::MdFb;
 using LibGens::SysVersion;
 
+// Recent ROMs menu.
+#include "widgets/RecentRomsMenu.hpp"
+
 #include "GensWindow_p.hpp"
 namespace GensQt4 {
 
@@ -68,7 +71,13 @@ void GensWindowPrivate::syncAll(void)
  */
 void GensWindowPrivate::syncRecent(void)
 {
-	// TODO
+	// If there aren't any ROMs in the list, disable the action.
+	bool enabled = false;
+	if (recentRomsMenu && !recentRomsMenu->actions().isEmpty()) {
+		// Recent ROMs are available.
+		enabled = true;
+	}
+	ui.actionFileRecentROMs->setEnabled(enabled);
 }
 
 /**

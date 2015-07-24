@@ -33,7 +33,8 @@ namespace GensQt4 {
 class EmuManager;
 class KeyHandlerQt;
 class VBackend;
-	
+class RecentRomsMenu;
+
 class GensWindowPrivate
 {
 	public:
@@ -66,6 +67,9 @@ class GensWindowPrivate
 		// Used when the menu bar is hidden on
 		// systems without a global menu bar.
 		QMenu *popupMenu;
+
+		// Recent ROMs menu.
+		RecentRomsMenu *recentRomsMenu;
 
 		int scale;		// Temporary scaling variable.
 		bool hasInitResize;	// Has the initial resize occurred?
