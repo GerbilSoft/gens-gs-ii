@@ -160,7 +160,7 @@ const GensMenuShortcutsPrivate::DefKeySetting_t GensMenuShortcutsPrivate::DefKey
 	{"graphics/bpp/16",		"actionGraphicsBpp16",			0},
 	{"graphics/bpp/32",		"actionGraphicsBpp32",			0},
 	// Graphics menu.
-	{"graphics/stretch",		"actionGraphicsStretch",		0},
+	{"graphics/stretch",		"actionGraphicsStretch",		KEYM_SHIFT | KEYV_F2},
 	// Graphics, Stretch submenu.
 	{"graphics/stretch/none",	"actionGraphicsStretchNone",		0},
 	{"graphics/stretch/horizontal",	"actionGraphicsStretchHorizontal",	0},

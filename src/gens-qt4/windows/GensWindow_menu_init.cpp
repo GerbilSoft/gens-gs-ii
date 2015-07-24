@@ -117,16 +117,14 @@ void GensWindowPrivate::initMenuBar(void)
 	} while (0)
 
 	// Macros for connecting the base item for submenus.
-	#define doBaseMenu(_menu, _slot) do { \
+	// _menu = menu item object
+	// _name = name for the QAction
+	// _slot = slot to connect triggered() to.
+	#define doBaseMenu(_menu, _name, _slot) do { \
 		QAction *action = (_menu)->menuAction(); \
+		action->setObjectName(QLatin1String(_name)); \
 		QObject::connect(action, SIGNAL(triggered()), \
 			q, (_slot), Qt::UniqueConnection); \
-	} while (0)
-	#define doBaseMenuKey(_menu, _slot, _shortcut) do { \
-		QAction *action = (_menu)->menuAction(); \
-		QObject::connect(action, SIGNAL(triggered()), \
-			q, (_slot), Qt::UniqueConnection); \
-		action->setShortcut(QKeySequence(_shortcut)); \
 	} while (0)
 
 	// Graphics, Resolution.
@@ -151,9 +149,8 @@ void GensWindowPrivate::initMenuBar(void)
 	doMappingExc(ui.actionGraphicsStretchHorizontal, STRETCH_H);
 	doMappingExc(ui.actionGraphicsStretchVertical,   STRETCH_V);
 	doMappingExc(ui.actionGraphicsStretchFull,       STRETCH_FULL);
-	doBaseMenuKey(ui.mnuGraphicsStretch,
-		SLOT(mnu_mnuGraphicsStretch_triggered()),
-		GensWindow::tr("Shift+F2"));
+	doBaseMenu(ui.mnuGraphicsStretch, "actionGraphicsStretch",
+		SLOT(mnu_mnuGraphicsStretch_triggered()));
 
 	// System, Region.
 	initMapper(SLOT(map_actionSystemRegion_triggered(int)));
@@ -163,9 +160,8 @@ void GensWindowPrivate::initMenuBar(void)
 	doMappingExc(ui.actionSystemRegionAsia, SysVersion::REGION_ASIA_PAL);
 	doMappingExc(ui.actionSystemRegionUSA,  SysVersion::REGION_US_NTSC);
 	doMappingExc(ui.actionSystemRegionEUR,  SysVersion::REGION_EU_PAL);
-	doBaseMenuKey(ui.mnuSystemRegion,
-		SLOT(mnu_mnuSystemRegion_triggered()),
-		GensWindow::tr("Shift+F3"));
+	doBaseMenu(ui.mnuSystemRegion, "actionSystemRegion",
+		SLOT(mnu_mnuSystemRegion_triggered()));
 
 	// Options, SoundTest.
 	initMapper(SLOT(map_actionSound_triggered(int)));
