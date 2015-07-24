@@ -37,10 +37,13 @@ class QAction;
 // Configuration classes.
 #include "RecentRoms.hpp"
 #include "PathConfig.hpp"
-#include "libgenskeys/KeyManager.hpp"
+namespace LibGensKeys {
+	class KeyManager;
+}
 
 namespace GensQt4 {
 
+// TODO: Split into config and action classes.
 class GensMenuShortcuts;
 
 class ConfigStorePrivate;
