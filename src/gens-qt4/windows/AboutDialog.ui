@@ -34,7 +34,7 @@
         </size>
        </property>
        <property name="pixmap">
-        <pixmap resource="resources/gens-qt4.qrc">:/gens/gens_small.png</pixmap>
+        <pixmap resource="../resources/gens-qt4.qrc">:/gens/gens_small.png</pixmap>
        </property>
       </widget>
      </item>
@@ -109,6 +109,9 @@
           </property>
           <item>
            <widget class="QLabel" name="lblIncLibraries">
+            <property name="textFormat">
+             <enum>Qt::RichText</enum>
+            </property>
             <property name="alignment">
              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
             </property>
@@ -144,6 +147,9 @@
           </property>
           <item>
            <widget class="QLabel" name="lblDebugInfo">
+            <property name="textFormat">
+             <enum>Qt::RichText</enum>
+            </property>
             <property name="alignment">
              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
             </property>
@@ -182,6 +188,9 @@
           </property>
           <item>
            <widget class="QLabel" name="lblCredits">
+            <property name="textFormat">
+             <enum>Qt::RichText</enum>
+            </property>
             <property name="alignment">
              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
             </property>
@@ -216,6 +225,7 @@
   </layout>
  </widget>
  <resources>
+  <include location="../resources/gens-qt4.qrc"/>
   <include location="resources/gens-qt4.qrc"/>
  </resources>
  <connections>
