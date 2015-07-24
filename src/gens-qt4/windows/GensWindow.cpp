@@ -376,8 +376,9 @@ void GensWindow::changeEvent(QEvent *event)
 		// Retranslate the menu bar.
 		Q_D(GensWindow);
 		d->ui.retranslateUi(this);
-		// TODO: Synchronize the menu bar.
-		d->updateMenuBarVisibility();
+		// Update the window state.
+		d->setGensTitle();
+		d->updateMenusForStateChanged();
 	}
 
 	// Pass the event to the base class.
