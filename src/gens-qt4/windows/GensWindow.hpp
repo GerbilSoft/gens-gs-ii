@@ -173,6 +173,9 @@ class GensWindow : public QMainWindow
 		void on_actionFileSegaCDControlPanel_triggered(void);
 		void on_actionFileQuit_triggered(void);
 
+		// File, Recent ROMs
+		void mnu_actionFileRecentROMs_triggered(int idx);
+
 		// Graphics
 		void on_actionGraphicsShowMenuBar_triggered(bool checked);
 		//void on_mnuGraphicsResolution_triggered(void);

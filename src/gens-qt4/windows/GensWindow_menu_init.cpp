@@ -78,12 +78,10 @@ void GensWindowPrivate::initMenuBar(void)
 	// Create the "Recent ROMs" menu.
 	recentRomsMenu = new RecentRomsMenu(q, gqt4_cfg->recentRomsObject());
 	ui.actionFileRecentROMs->setMenu(recentRomsMenu);
-	/* TODO: Signals.
 	QObject::connect(recentRomsMenu, SIGNAL(updated()),
 			 q, SLOT(recentRoms_updated()));
 	QObject::connect(recentRomsMenu, SIGNAL(triggered(int)),
-			 q, SLOT(menuItemSelected(int)));
-	*/
+			 q, SLOT(mnu_actionFileRecentROMs_triggered(int)));
 
 	// Create QSignalMappers and QActionGroups for submenus
 	// with lots of similar items.

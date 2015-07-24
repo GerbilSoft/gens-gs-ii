@@ -23,6 +23,7 @@
  ******************************************************************************/
 
 #include "GensWindow.hpp"
+#include "gqt4_main.hpp"
 
 // C includes. (C++ namespace)
 #include <cassert>
@@ -83,6 +84,21 @@ void GensWindow::on_actionFileQuit_triggered(void)
 	d->emuManager->closeRom();
 	QuitGens();
 	close();
+}
+
+/** File, Recent ROMs **/
+
+void GensWindow::mnu_actionFileRecentROMs_triggered(int idx)
+{
+	// Load the selected Recent ROM.
+	// TODO: Return a pointer?
+	const RecentRom_t rom = gqt4_cfg->recentRomsEntry(idx);
+	if (!rom.filename.isEmpty()) {
+		// Recent ROM index is valid.
+		// Load the ROM.
+		Q_D(GensWindow);
+		d->emuManager->openRom(rom.filename, rom.z_filename);
+	}
 }
 
 /** Graphics **/
