@@ -57,12 +57,13 @@ namespace GensQt4 {
 
 GensWindowPrivate::GensWindowPrivate(GensWindow *q)
 	: q_ptr(q)
-	, popupMenu(nullptr)
-	, recentRomsMenu(nullptr)
 	, scale(1)			// Set the scale to 1x by default.
 	, hasInitResize(false)		// Initial resize hasn't occurred yet.
 	, idleThread(nullptr)
 	, idleThreadAllowed(false)	// Not allowed yet.
+	, popupMenu(nullptr)
+	, recentRomsMenu(nullptr)
+	, nonMenu(nullptr)
 {
 	/** Configuration items. **/
 	cfg_autoPause = gqt4_cfg->get(QLatin1String("autoPause")).toBool();
@@ -74,8 +75,6 @@ GensWindowPrivate::~GensWindowPrivate()
 {
 	delete emuManager;
 	delete keyHandler;
-	// TODO: Remove this.
-	//delete gensMenuBar;
 }
 
 /** GensWindowPrivate **/

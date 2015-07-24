@@ -240,6 +240,29 @@ void GensWindowPrivate::initMenuBar(void)
 		}
 	}
 
+	// Shortcuts for non-menu actions.
+	if (!nonMenu) {
+		nonMenu = new QMenu(q);
+	} else {
+		nonMenu->clear();
+	}
+	nonMenu->addAction(ui.actionNoMenuFastBlur);
+	nonMenu->addAction(ui.actionNoMenuSaveSlot0);
+	nonMenu->addAction(ui.actionNoMenuSaveSlot1);
+	nonMenu->addAction(ui.actionNoMenuSaveSlot2);
+	nonMenu->addAction(ui.actionNoMenuSaveSlot3);
+	nonMenu->addAction(ui.actionNoMenuSaveSlot4);
+	nonMenu->addAction(ui.actionNoMenuSaveSlot5);
+	nonMenu->addAction(ui.actionNoMenuSaveSlot6);
+	nonMenu->addAction(ui.actionNoMenuSaveSlot7);
+	nonMenu->addAction(ui.actionNoMenuSaveSlot8);
+	nonMenu->addAction(ui.actionNoMenuSaveSlot9);
+	nonMenu->addAction(ui.actionNoMenuSaveSlotPrev);
+	nonMenu->addAction(ui.actionNoMenuSaveSlotNext);
+	nonMenu->addAction(ui.actionNoMenuLoadStateFrom);
+	nonMenu->addAction(ui.actionNoMenuSaveStateAs);
+	menuShortcuts->addMenu(nonMenu);
+
 	// Synchronize the menu items.
 	syncAll();
 

@@ -63,14 +63,6 @@ class GensWindowPrivate
 		bool isGlobalMenuBar(void) const;
 		bool isShowMenuBar(void) const;
 
-		// Popup menu.
-		// Used when the menu bar is hidden on
-		// systems without a global menu bar.
-		QMenu *popupMenu;
-
-		// Recent ROMs menu.
-		RecentRomsMenu *recentRomsMenu;
-
 		int scale;		// Temporary scaling variable.
 		bool hasInitResize;	// Has the initial resize occurred?
 
@@ -89,6 +81,20 @@ class GensWindowPrivate
 		IdleThread *idleThread;
 		bool idleThreadAllowed;
 		void checkIdleThread(void);
+
+	public:
+		// Menus.
+
+		// Popup menu.
+		// Used when the menu bar is hidden on
+		// systems without a global menu bar.
+		QMenu *popupMenu;
+
+		// Recent ROMs menu.
+		RecentRomsMenu *recentRomsMenu;
+
+		// QMenu containing non-menu actions.
+		QMenu *nonMenu;
 
 	public:
 		/** Menu synchronization. (GensWindow_menu_sync.cpp) **/
