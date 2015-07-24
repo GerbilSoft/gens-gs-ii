@@ -266,7 +266,6 @@ void GensWindow::on_actionNoMenuFastBlur_triggered(bool checked)
 
 void GensWindow::map_actionNoMenuSaveSlot_triggered(int saveSlot)
 {
-	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), 9);
 	assert(saveSlot >= 0 && saveSlot <= 9);
 	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), saveSlot);
 }
