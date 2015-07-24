@@ -226,7 +226,7 @@ GensMenuShortcutsPrivate::GensMenuShortcutsPrivate(GensMenuShortcuts *q)
 	// Initialize actionToDefKeySetting.
 	// TODO: Move to initDefaultKeys to save a loop?
 	hashActionToDefKeySetting.clear();
-	for (int i = 0; i < (int)ARRAY_SIZE(DefKeySettings)-1; i++) {
+	for (int i = 0; i < (int)(ARRAY_SIZE(DefKeySettings)-1); i++) {
 		const GensMenuShortcutsPrivate::DefKeySetting_t *key = &DefKeySettings[i];
 		if (key->qAction != nullptr) {
 			hashActionToDefKeySetting.insert(QLatin1String(key->qAction), i);
@@ -242,7 +242,7 @@ GensMenuShortcutsPrivate::GensMenuShortcutsPrivate(GensMenuShortcuts *q)
  */
 void GensMenuShortcutsPrivate::initDefaultKeys(void)
 {
-	for (int i = 0; i < (int)ARRAY_SIZE(DefKeySettings)-1; i++) {
+	for (int i = 0; i < (int)(ARRAY_SIZE(DefKeySettings)-1); i++) {
 		savedKeys[i] = DefKeySettings[i].gensKey;
 	}
 
@@ -404,7 +404,7 @@ int GensMenuShortcuts::load(const QSettings *qSettings)
 	Q_D(GensMenuShortcuts);
 
 	// Load the key configuration.
-	for (int i = 0; i < (int)ARRAY_SIZE(d->DefKeySettings-1)-1; i++) {
+	for (int i = 0; i < (int)(ARRAY_SIZE(d->DefKeySettings)-1); i++) {
 		const GensMenuShortcutsPrivate::DefKeySetting_t *key = &d->DefKeySettings[i];
 		const GensKey_t gensKey = qSettings->value(
 			QLatin1String(key->setting), key->gensKey).toString().toUInt(nullptr, 0);
@@ -429,7 +429,7 @@ int GensMenuShortcuts::save(QSettings *qSettings) const
 	Q_D(const GensMenuShortcuts);
 
 	// Save the key configuration.
-	for (int i = 0; i < (int)ARRAY_SIZE(d->DefKeySettings)-1; i++) {
+	for (int i = 0; i < (int)(ARRAY_SIZE(d->DefKeySettings)-1); i++) {
 		const GensMenuShortcutsPrivate::DefKeySetting_t *key = &d->DefKeySettings[i];
 		const GensKey_t gensKey = d->savedKeys[i];
 		QString gensKey_str = QLatin1String("0x") +
