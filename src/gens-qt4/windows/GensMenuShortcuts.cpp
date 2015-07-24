@@ -23,6 +23,9 @@
 
 #include "GensMenuShortcuts.hpp"
 
+// C includes. (C++ namespace)
+#include <cassert>
+
 // Qt includes.
 #include <QtCore/QSettings>
 #include <QtCore/QSet>
@@ -72,7 +75,7 @@ class GensMenuShortcutsPrivate
 		 * Default key settings.
 		 * Last entry is nullptr.
 		 */
-		static const DefKeySetting_t DefKeySettings[66+1];
+		static const DefKeySetting_t DefKeySettings[65+1];
 
 		/// Converts a QAction's name to a DefKeySettings index.
 		QHash<QString, int> hashActionToDefKeySetting;
@@ -223,6 +226,12 @@ const GensMenuShortcutsPrivate::DefKeySetting_t GensMenuShortcutsPrivate::DefKey
 GensMenuShortcutsPrivate::GensMenuShortcutsPrivate(GensMenuShortcuts *q)
 	: q_ptr(q)
 {
+	// Make sure DefKeySettings is the correct size.
+	// Check for too small.
+	assert(DefKeySettings[ARRAY_SIZE(DefKeySettings)-1].setting == nullptr);
+	// Check for too big.
+	assert(DefKeySettings[ARRAY_SIZE(DefKeySettings)-2].setting != nullptr);
+
 	// Initialize actionToDefKeySetting.
 	// TODO: Move to initDefaultKeys to save a loop?
 	hashActionToDefKeySetting.clear();

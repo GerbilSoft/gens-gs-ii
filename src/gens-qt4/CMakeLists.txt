@@ -94,10 +94,16 @@ CHECK_LIBRARY_EXISTS(c sigaction "" HAVE_SIGACTION)	# libc: sigaction()
 # Find PortAudio.
 # TODO: Write a CMake file for PortAudio.
 CHECK_LIBRARY_EXISTS(portaudio Pa_Initialize "" HAVE_PORTAUDIO)	# libportaudio: Pa_Initialize()
+SET(HAVE_PORTAUDIO 1)
 IF(HAVE_PORTAUDIO)
 	# Found PortAudio.
 	# TODO: Check Win32 and Mac OS X library naming.
-	SET(PORTAUDIO_LIBRARY "portaudio")
+	IF(WIN32)
+		SET(PORTAUDIO_LIBRARY "Z:/programming/gens-gs-ii/build-MSVC/src/gens-qt4/portaudio/portaudio_x86.lib")
+		INCLUDE_DIRECTORIES("Z:/programming/gens-gs-ii/build-MSVC/src/gens-qt4/portaudio")
+	ELSE()
+		SET(PORTAUDIO_LIBRARY "portaudio")
+	ENDIF()
 	MESSAGE(STATUS "Found PortAudio: ${PORTAUDIO_LIBRARY}")
 ENDIF()
 
