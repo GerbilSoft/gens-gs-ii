@@ -353,6 +353,10 @@ void SigHandler::SignalHandler(int signum)
 #endif
 	}
 #endif
+
+	// FIXME: This hangs on Windows sometimes
+	// if GensWindow is visible.
+	// Use a custom exec()?
 	dialog.exec();
 
 	exit(EXIT_FAILURE);
