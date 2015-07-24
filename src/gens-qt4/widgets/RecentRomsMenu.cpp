@@ -157,7 +157,7 @@ void RecentRomsMenuPrivate::update(void)
 
 	//: %1 = menu index; %2 = system abbreviation; %3 = filename.
 	const QString title_template = RecentRoms::tr("&%1 [%2] %3");
-	//: %1 = menu index; %2 = system abbreviation; %3 = filename, %4 = filename inside archive
+	//: %1 = menu index; %2 = system abbreviation; %3 = filename; %4 = filename inside archive.
 	const QString title_z_template = RecentRoms::tr("&%1 [%2] %3 [%4]");
 
 	int i = 1;
