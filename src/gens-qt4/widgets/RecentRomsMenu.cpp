@@ -47,8 +47,6 @@ class RecentRomsMenuPrivate
 
 	public:
 		void init(void);
-
-		void setRecentRoms(const RecentRoms *newRecentRoms);
 		void update(void);
 
 	private:
@@ -91,42 +89,6 @@ void RecentRomsMenuPrivate::init(void)
 	QObject::connect(recentRoms, SIGNAL(updated()),
 			 q, SLOT(recentRomsUpdated_slot()));
 }
-
-
-/**
- * Set the Recent ROMs class this menu should represent.
- * @param newRecentRoms New Recent ROMs class, or nullptr to unset.
- */
-inline void RecentRomsMenuPrivate::setRecentRoms(const RecentRoms *newRecentRoms)
-{
-	if (this->recentRoms == newRecentRoms)
-		return;
-
-	Q_Q(RecentRomsMenu);
-
-	if (recentRoms) {
-		// Disconnect the signals from the existing Recent ROMs class.
-		QObject::disconnect(recentRoms, SIGNAL(destroyed()),
-				    q, SLOT(recentRomsDestroyed()));
-		QObject::disconnect(recentRoms, SIGNAL(updated()),
-				    q, SLOT(recentRomsupdated()));
-	}
-
-	// Set the new Recent ROMs class.
-	recentRoms = newRecentRoms;
-
-	if (recentRoms) {
-		// Connect the signals from the new Recent ROMs class.
-		QObject::connect(recentRoms, SIGNAL(destroyed()),
-				 q, SLOT(recentRomsDestroyed()));
-		QObject::connect(recentRoms, SIGNAL(updated()),
-				 q, SLOT(recentRomsupdated()));
-	}
-
-	// Update the menu.
-	update();
-}
-
 
 /**
  * Update the Recent ROMs menu.
@@ -269,13 +231,35 @@ const RecentRoms *RecentRomsMenu::recentRoms(void)
 
 /**
  * Set the Recent ROMs class this menu should represent.
- * WRAPPER FUNCTION for RecentRomsMenuPrivate::isDirty().
- * @param newRecentRoms New Recent ROMs class, or nullptr to unset.
+ * @param recentRoms New Recent ROMs class, or nullptr to unset.
  */
-void RecentRomsMenu::setRecentRoms(const RecentRoms *newRecentRoms)
+void RecentRomsMenu::setRecentRoms(const RecentRoms *recentRoms)
 {
 	Q_D(RecentRomsMenu);
-	d->setRecentRoms(newRecentRoms);
+	if (d->recentRoms == recentRoms)
+		return;
+
+	if (d->recentRoms) {
+		// Disconnect the signals from the existing Recent ROMs class.
+		QObject::disconnect(d->recentRoms, SIGNAL(destroyed()),
+				    this, SLOT(recentRomsDestroyed_slot()));
+		QObject::disconnect(d->recentRoms, SIGNAL(updated()),
+				    this, SLOT(recentRomsUpdated_slot()));
+	}
+
+	// Set the new Recent ROMs class.
+	d->recentRoms = recentRoms;
+
+	if (recentRoms) {
+		// Connect the signals from the new Recent ROMs class.
+		QObject::connect(recentRoms, SIGNAL(destroyed()),
+				 this, SLOT(recentRomsDestroyed_slot()));
+		QObject::connect(recentRoms, SIGNAL(updated()),
+				 this, SLOT(recentRomsUpdated_slot()));
+	}
+
+	// Update the menu.
+	update();
 }
 
 /**

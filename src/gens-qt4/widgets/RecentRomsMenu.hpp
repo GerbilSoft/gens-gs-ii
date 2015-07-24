@@ -50,7 +50,7 @@ class RecentRomsMenu : public QMenu
 
 	public:
 		const RecentRoms *recentRoms(void);
-		void setRecentRoms(const RecentRoms *newRecentRoms);
+		void setRecentRoms(const RecentRoms *recentRoms);
 
 	signals:
 		/**
