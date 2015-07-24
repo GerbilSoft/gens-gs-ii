@@ -514,61 +514,64 @@ QString AboutDialogPrivate::GetCodePageInfo(void)
 {
 	QString sCodePageInfo;
 
+	// Line break string.
+	const QString sLineBreak = QLatin1String("<br/>\n");
+
 	// Get the ANSI and OEM code pages.
 	struct cpInfo {
 		unsigned int cp;
 		const char *cpStr;
 	};
 
-	cpInfo m_cpInfo[2] = {
+	static const cpInfo m_cpInfo[2] = {
 		//: Win32: ANSI code page. (e.g. 1252 for US/English, 932 for Japanese)
-		{CP_ACP,	QT_TRANSLATE_NOOP("GensQt4::AboutDialog", "System ANSI code page:")},
+		{CP_ACP,	QT_TRANSLATE_NOOP("GensQt4::AboutDialog", "System ANSI code page: %1")},
 		//: Win32: OEM code page. (e.g. 437 for US/English)
-		{CP_OEMCP,	QT_TRANSLATE_NOOP("GensQt4::AboutDialog", "System OEM code page:")}
+		{CP_OEMCP,	QT_TRANSLATE_NOOP("GensQt4::AboutDialog", "System OEM code page: %1")}
 	};
 
+	// Declare the QStrings here to reduce initialization.
+	QString codepage, codepage_name;
 	// TODO: GetCPInfoExU() support?
 	for (int i = 0; i < 2; i++) {
-		sCodePageInfo += AboutDialog::tr(m_cpInfo[i].cpStr);
-
 		// Get the code page information.
 		CPINFOEX cpix;
 		BOOL bRet = GetCPInfoExA(m_cpInfo[i].cp, 0, &cpix);
 		if (!bRet) {
 			//: GetCPInfoExA() call failed.
-			sCodePageInfo += AboutDialog::tr("Unknown [GetCPInfoExA() failed]") + QChar(L'\n');
+			sCodePageInfo += AboutDialog::tr(m_cpInfo[i].cpStr)
+					.arg(AboutDialog::tr("Unknown [GetCPInfoExA() failed]")) + sLineBreak;
 			continue;
 		}
 
-		sCodePageInfo += QString::number(cpix.CodePage);
+		if (cpix.CodePageName[0] != 0x00) {
+			// Windows XP has the code page number in cpix.CodePageName,
+			// followed by two spaces, and then the code page name in parentheses.
+			char *parenStart = strchr(cpix.CodePageName, '(');
+			if (!parenStart) {
+				// No parentheses. Use the code page name as-is.
+				codepage_name = QString::fromLocal8Bit(cpix.CodePageName);
+			} else {
+				// Found starting parenthesis. Check for ending parenthesis.
+				char *parenEnd = strrchr(parenStart, ')');
+				if (parenEnd) {
+					// Found ending parenthesis. Null it out.
+					*parenEnd = 0x00;
+				}
 
-		// if the code page name is blank, don't add extra parentheses.
-		if (cpix.CodePageName[0] == 0x00) {
-			sCodePageInfo += QChar(L'\n');
-			continue;
-		}
-
-		// Add the code page name.
-		sCodePageInfo += QLatin1String(" (");
-
-		// Windows XP has the code page number in cpix.CodePageName,
-		// followed by two spaces, and then the code page name in parentheses.
-		char *parenStart = strchr(cpix.CodePageName, '(');
-		if (!parenStart) {
-			// No parentheses. Use the code page name as-is.
-			sCodePageInfo += QString::fromLocal8Bit(cpix.CodePageName);
-		} else {
-			// Found starting parenthesis. Check for ending parenthesis.
-			char *parenEnd = strrchr(parenStart, ')');
-			if (parenEnd) {
-				// Found ending parenthesis. Null it out.
-				*parenEnd = 0x00;
+				codepage_name = QString::fromLocal8Bit(parenStart + 1);
 			}
-
-			sCodePageInfo += QString::fromLocal8Bit(parenStart + 1);
+			//: Formatting for the Code Page string.
+			codepage = AboutDialog::tr("%1 (%2)")
+					.arg(cpix.CodePage)
+					.arg(codepage_name);
+		} else {
+			// Code Page name is blank.
+			codepage = QString::number(cpix.CodePage);
 		}
 
-		sCodePageInfo += QLatin1String(")\n");
+		sCodePageInfo += AboutDialog::tr(m_cpInfo[i].cpStr)
+					.arg(codepage) + sLineBreak;
 	}
 
 	// Is Gens/GS II using Unicode?
@@ -579,7 +582,7 @@ QString AboutDialogPrivate::GetCodePageInfo(void)
 		//: Win32: ANSI strings are being used. (Win9x)
 		sCodePageInfo += AboutDialog::tr("Using ANSI strings for Win32 API.");
 	}
-	sCodePageInfo += QChar(L'\n');
+	sCodePageInfo += sLineBreak;
 
 	return sCodePageInfo;
 }
