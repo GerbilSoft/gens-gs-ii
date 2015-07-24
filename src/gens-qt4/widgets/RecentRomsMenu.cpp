@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -23,23 +23,13 @@
 
 #include "RecentRomsMenu.hpp"
 
-// gqt4_cfg
-#include "gqt4_main.hpp"
-
-// Menu item IDs.
-#include "GensMenuBar_menus.hpp"
-
-// Key Handler.
-#include "../Input/KeyHandlerQt.hpp"
-
 // Qt includes.
 #include <QtCore/QList>
 #include <QtCore/QDir>
 #include <QtCore/QSignalMapper>
 #include <QtGui/QAction>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class RecentRomsMenuPrivate
 {
@@ -207,14 +197,18 @@ void RecentRomsMenuPrivate::update(void)
 
 		// Set the shortcut key.
 		// NOTE: The shortcut key won't show up due to the "\t" after the system ID.
+		// TODO: Port configurable shortcuts to the new menu system/
+		/*
 		const int mnuItemId = ((IDM_FILE_RECENT_1 - 1) + i);
 		GensKey_t gensKey = gqt4_cfg->actionToKey(mnuItemId);
 		action->setShortcut(KeyHandlerQt::KeyValMToQtKey(gensKey));
+		*/
+		action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_0 + i));
 
 		// Connect the signal to the signal mapper.
 		QObject::connect(action, SIGNAL(triggered()),
 				 m_signalMapper, SLOT(map()));
-		m_signalMapper->setMapping(action, mnuItemId);
+		m_signalMapper->setMapping(action, i);
 
 		// Add the action to the RecentRomsMenu.
 		q->addAction(action);

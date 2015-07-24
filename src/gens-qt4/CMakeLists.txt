@@ -125,11 +125,7 @@ SET(gens-qt4_COMMON_SRCS
 	EmuManager_qEmu.cpp
 	VBackend/GLTex2D.cpp
 	actions/GensKeyConfig.cpp
-	actions/GensMenuBar.cpp
-	actions/GensMenuBar_menus.cpp
-	actions/GensMenuBar_sync.cpp
 	EmuManager_str.cpp
-	actions/RecentRomsMenu.cpp
 	cdrom/FindCdromDrives.cpp
 	cdrom/FindCdromBase.cpp
 	)
@@ -169,6 +165,7 @@ SET(gens-qt4_WIDGET_SRCS
 	widgets/GensCtrlKeyWidget.cpp
 	widgets/GensColorButton.cpp
 	widgets/KeyNames.cpp
+	widgets/RecentRomsMenu.cpp
 	)
 
 SET(gens-qt4_CONFIG_SRCS
@@ -196,9 +193,7 @@ SET(gens-qt4_COMMON_MOC_HEADERS
 	VBackend/GensQGLWidget_p.hpp
 	EmuManager.hpp
 	actions/GensKeyConfig.hpp
-	actions/GensMenuBar.hpp
 	Input/KeyHandlerQt.hpp
-	actions/RecentRomsMenu.hpp
 	cdrom/FindCdromDrives.hpp
 	cdrom/FindCdromBase.hpp
 	)
@@ -222,6 +217,7 @@ SET(gens-qt4_WIDGET_MOC_HEADERS
 	widgets/GensCtrlKeyWidget.hpp
 	widgets/GensCtrlKeyWidget_p.hpp
 	widgets/GensColorButton.hpp
+	widgets/RecentRomsMenu.hpp
 	)
 
 SET(gens-qt4_CONFIG_MOC_HEADERS

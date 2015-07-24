@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_ACTIONS_RECENTROMSMENU_HPP__
-#define __GENS_QT4_ACTIONS_RECENTROMSMENU_HPP__
+#ifndef __GENS_QT4_WIDGETS_RECENTROMSMENU_HPP__
+#define __GENS_QT4_WIDGETS_RECENTROMSMENU_HPP__
 
 // Qt includes.
 #include <QtGui/QMenu>
@@ -30,15 +30,13 @@
 // Recent ROMs class.
 #include "../Config/RecentRoms.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class RecentRomsMenuPrivate;
-
 class RecentRomsMenu : public QMenu
 {
 	Q_OBJECT
-	
+
 	public:
 		RecentRomsMenu(QWidget *parent = 0, const RecentRoms *recentRoms = 0);
 		RecentRomsMenu(const QString &title, QWidget *parent = 0, const RecentRoms *recentRoms = 0);
@@ -62,9 +60,9 @@ class RecentRomsMenu : public QMenu
 
 		/**
 		 * A Recent ROM was selected.
-		 * @param id Menu item ID.
+		 * @param idx Index of the recent ROM that was selected.
 		 */
-		void triggered(int id);
+		void triggered(int idx);
 
 	private slots:
 		// d->recentRoms signals.
@@ -74,4 +72,4 @@ class RecentRomsMenu : public QMenu
 
 }
 
-#endif /* __GENS_QT4_ACTIONS_RECENTROMSMENU_HPP__ */
+#endif /* __GENS_QT4_WIDGETS_RECENTROMSMENU_HPP__ */
