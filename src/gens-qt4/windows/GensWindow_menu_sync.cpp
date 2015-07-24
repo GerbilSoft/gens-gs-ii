@@ -37,6 +37,9 @@ using LibGens::SysVersion;
 // Recent ROMs menu.
 #include "widgets/RecentRomsMenu.hpp"
 
+// Gens Menu shortcuts.
+#include "GensMenuShortcuts.hpp"
+
 #include "GensWindow_p.hpp"
 namespace GensQt4 {
 
@@ -76,6 +79,8 @@ void GensWindowPrivate::syncRecent(void)
 	if (recentRomsMenu && !recentRomsMenu->actions().isEmpty()) {
 		// Recent ROMs are available.
 		enabled = true;
+		// Update shortcuts.
+		gqt4_cfg->gensMenuShortcuts()->addMenu(recentRomsMenu);
 	}
 	ui.actionFileRecentROMs->setEnabled(enabled);
 }

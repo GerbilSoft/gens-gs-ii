@@ -168,15 +168,9 @@ void RecentRomsMenuPrivate::update(void)
 
 		// Create the QAction.
 		QAction *action = new QAction(title, q);
-
-		// Set the shortcut key.
-		// TODO: Port configurable shortcuts to the new menu system/
-		/*
-		const int mnuItemId = ((IDM_FILE_RECENT_1 - 1) + i);
-		GensKey_t gensKey = gqt4_cfg->actionToKey(mnuItemId);
-		action->setShortcut(KeyHandlerQt::KeyValMToQtKey(gensKey));
-		*/
-		action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_0 + i));
+		// Set the objectName in order to handle shortcuts.
+		action->setObjectName(QLatin1String("actionRecentROMs_") +
+				      QString::number(i));
 
 		// Connect the signal to the signal mapper.
 		QObject::connect(action, SIGNAL(triggered()),
