@@ -23,6 +23,8 @@
 
 // NOTE: Before committing: check the LATEST UI file!
 #include "GensWindow.hpp"
+
+#include "GensQApplication.hpp"
 #include "gqt4_main.hpp"
 
 // Qt includes.
@@ -195,6 +197,33 @@ void GensWindowPrivate::initMenuBar(void)
 					q, SLOT(enableSRam_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("GensWindow/showMenuBar"),
 					q, SLOT(showMenuBar_changed_slot(QVariant)));
+
+#if !defined(Q_OS_MAC)
+	/** Menu item icons. **/
+	// NOTE: Menu item icons don't fit in on Mac OS X, hence why
+	// this is in a !defined(Q_OS_MAC) block.
+
+	// NOTE: We're initializing menu item icons here instead of
+	// in Qt Designer because we have a custom icon system that
+	// retrieves system icons in some cases.
+	// Also, xdg theme icons are only properly supported in qt-4.8.
+	#define setActionIcon(_action, _icon_fdo) \
+		_action->setIcon(GensQApplication::IconFromTheme(QLatin1String(_icon_fdo)));
+
+	// TODO: Add more icons.
+	// TODO: Add OS "standard" icons, like in mcrecover.
+	// File
+	setActionIcon(ui.actionFileOpenROM, "document-open");
+	setActionIcon(ui.actionFileRecentROMs, "document-open-recent");
+	setActionIcon(ui.actionFileCloseROM, "document-close");
+	setActionIcon(ui.actionFileGeneralConfiguration, "configure");
+	setActionIcon(ui.actionFileSegaCDControlPanel, "media-optical");
+	setActionIcon(ui.actionFileQuit, "application-exit");
+	// Options
+	setActionIcon(ui.actionOptionsControllers, "input-gaming");
+	// Help
+	setActionIcon(ui.actionHelpAbout, "help-about");
+#endif /* !defined(Q_OS_MAC) */
 
 	// Synchronize the menu items.
 	syncAll();
