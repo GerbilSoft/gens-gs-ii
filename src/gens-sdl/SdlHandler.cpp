@@ -68,7 +68,7 @@ int SdlHandler::init_video(void)
 
 	int ret = SDL_InitSubSystem(SDL_INIT_VIDEO);
 	if (ret < 0) {
-		fprintf(stderr, "%s failed: %u - %s\n",
+		fprintf(stderr, "%s failed: %d - %s\n",
 			__func__, ret, SDL_GetError());
 		return ret;
 	}
