@@ -72,7 +72,6 @@ void MetadataPrivate::InitSystemMetadata(void)
 
 	// Username.
 	// Assuming OS X is compatible with the POSIX version.
-	// TODO: Use getpwuid_r() if it's available.
 	// NOTE: Assuming UTF-8 encoding.
 	struct passwd *pwd;
 #ifdef HAVE_GETPWUID_R
