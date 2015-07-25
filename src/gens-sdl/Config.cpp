@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <gens-sdl/config.gens-sdl.h>
+
 #include "Config.hpp"
 
 // LibGens
@@ -117,9 +119,24 @@ const std::string getConfigDir(const utf8_str *subdir)
 		} else {
 			// HOME variable not found.
 			// Check the user's pwent.
-			// TODO: Check for getpwuid_r().
-			struct passwd *pw = getpwuid(getuid());
-			config_dir = string(pw->pw_dir);
+			struct passwd *pwd;
+#ifdef HAVE_GETPWUID_R
+#define PWD_FN "getpwuid_r"
+			char buf[2048];
+			struct passwd pwd_r;
+			// TODO: Check for ENOMEM?
+			getpwuid_r(getuid(), &pwd_r, buf, sizeof(buf), &pwd);
+#else
+#define PWD_FN "getpwuid"
+			pwd = getpwuid(getuid());
+#endif
+			if (!pwd) {
+				// getpwuid() failed.
+				fprintf(stderr, PWD_FN "() failed; cannot get user's home directory.\n");
+				exit(EXIT_FAILURE);
+			}
+
+			config_dir = string(pwd->pw_dir);
 		}
 		config_dir += "/.config/gens-gs-ii";
 #endif
