@@ -443,14 +443,6 @@ int PngWriter::writeToFile(const Zomg_Img_Data_t *img_data,
 		return -EINVAL;
 	}
 
-	// Output file.
-	// TODO: Convert filename to Unicode or ANSI on Windows.
-	FILE *f = fopen(filename, "wb");
-	if (!f) {
-		// Error opening the output file.
-		return -errno;
-	}
-
 	png_structp png_ptr;
 	png_infop info_ptr;
 
@@ -463,6 +455,15 @@ int PngWriter::writeToFile(const Zomg_Img_Data_t *img_data,
 	if (!info_ptr) {
 		png_destroy_write_struct(&png_ptr, nullptr);
 		return -ENOMEM;
+	}
+
+	// Output file.
+	// TODO: Convert filename to Unicode or ANSI on Windows.
+	FILE *f = fopen(filename, "wb");
+	if (!f) {
+		// Error opening the output file.
+		png_destroy_write_struct(&png_ptr, &info_ptr);
+		return -errno;
 	}
 
 	// Initialize standard file I/O.
