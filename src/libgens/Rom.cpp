@@ -204,8 +204,6 @@ RomPrivate::RomPrivate(Rom *q, const utf8_str *filename,
 	// Cache a few forms of the filename.
 	filename_base = LibGensText::FilenameBase(this->filename);
 	filename_baseNoExt = LibGensText::FilenameBaseNoExt(this->filename);
-	printf("base      == %s\n", filename_base.c_str());
-	printf("baseNoExt == %s\n", filename_baseNoExt.c_str());
 
 	// Open the ROM file.
 	file = fopen(filename, "rb");
