@@ -2,7 +2,7 @@
  * libzomg: Zipped Original Memory from Genesis.                           *
  * config.libzomg.h.in: LibZomg configuration. (source file)               *
  *                                                                         *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -27,5 +27,8 @@
 
 /* Define to 1 if you have the `localtime_r` function. */
 #cmakedefine HAVE_LOCALTIME_R 1
+
+/* Define to 1 if you have the `getpwuid_r` function. */
+#cmakedefine HAVE_GETPWUID_R 1
 
 #endif /* __LIBZOMG_CONFIG_H__ */

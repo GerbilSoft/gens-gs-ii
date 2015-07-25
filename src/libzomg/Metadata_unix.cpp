@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <libzomg/config.libzomg.h>
+
 #include "Metadata_p.hpp"
 
 // System includes.
@@ -72,7 +74,15 @@ void MetadataPrivate::InitSystemMetadata(void)
 	// Assuming OS X is compatible with the POSIX version.
 	// TODO: Use getpwuid_r() if it's available.
 	// NOTE: Assuming UTF-8 encoding.
-	struct passwd *pwd = getpwuid(getuid());
+	struct passwd *pwd;
+#ifdef HAVE_GETPWUID_R
+	char buf[2048];
+	struct passwd pwd_r;
+	// TODO: Check for ENOMEM?
+	getpwuid_r(getuid(), &pwd_r, buf, sizeof(buf), &pwd);
+#else
+	pwd = getpwuid(getuid());
+#endif
 	if (pwd) {
 		// User information retrieved.
 		// Check for a display name.
