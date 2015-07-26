@@ -138,6 +138,7 @@ SET(gens-qt4_WINDOW_SRCS
 	windows/GensWindow_menu_init.cpp
 	windows/GensWindow_menu_sync.cpp
 	windows/GensMenuShortcuts.cpp
+	windows/GensMenuShortcuts_data.cpp
 	windows/AboutDialog.cpp
 	windows/CtrlConfigWindow.cpp
 	windows/ZipSelectDialog.cpp

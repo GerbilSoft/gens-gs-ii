@@ -26,8 +26,9 @@
 #define __GENS_QT4_WINDOWS_GENSMENUSHORTCUTS_P_HPP__
 
 // Qt includes.
-#include <QtCore/QHash>
 #include <QtCore/QString>
+#include <QtCore/QHash>
+#include <QtCore/QSet>
 class QAction;
 
 // LibGensKeys.
