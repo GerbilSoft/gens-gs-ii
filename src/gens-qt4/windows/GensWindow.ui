@@ -626,20 +626,20 @@
     <string>F7</string>
    </property>
   </action>
-  <action name="actionNoMenuLoadStateFrom">
-   <property name="text">
-    <string>Load State From...</string>
-   </property>
-   <property name="shortcut">
-    <string>Shift+F8</string>
-   </property>
-  </action>
   <action name="actionNoMenuSaveStateAs">
    <property name="text">
     <string>Save State As...</string>
    </property>
    <property name="shortcut">
     <string>Shift+F5</string>
+   </property>
+  </action>
+  <action name="actionNoMenuLoadStateFrom">
+   <property name="text">
+    <string>Load State From...</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F8</string>
    </property>
   </action>
  </widget>

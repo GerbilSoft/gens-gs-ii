@@ -121,9 +121,8 @@ const GensMenuShortcutsPrivate::KeyBinding_t GensMenuShortcutsPrivate::KeyBindin
 	{"other/saveSlot9",		"actionNoMenuSaveSlot9"},
 	{"other/saveSlotPrev",		"actionNoMenuSaveSlotPrev"},
 	{"other/saveSlotNext",		"actionNoMenuSaveSlotNext"},
-	// TODO: Swap these two?
-	{"other/saveLoadFrom",		"actionNoMenuLoadStateFrom"},
 	{"other/saveSaveAs",		"actionNoMenuSaveStateAs"},
+	{"other/saveLoadFrom",		"actionNoMenuLoadStateFrom"},
 
 	// End of key bindings.
 	{nullptr, nullptr}
@@ -228,9 +227,8 @@ const GensKey_t GensMenuShortcutsPrivate::DefKeyBindings_gens[KeyBinding_count+1
 	KEYV_9,				// actionNoMenuSaveSlot9
 	KEYV_F6,			// actionNoMenuSaveSlotPrev
 	KEYV_F7,			// actionNoMenuSaveSlotNext
-	// TODO: Swap these two?
-	KEYM_SHIFT | KEYV_F8,		// actionNoMenuLoadStateFrom
 	KEYM_SHIFT | KEYV_F5,		// actionNoMenuSaveStateAs
+	KEYM_SHIFT | KEYV_F8,		// actionNoMenuLoadStateFrom
 
 	// End of key bindings.
 	// TODO: Make this -1, or remove the last entry entirely?
@@ -345,9 +343,8 @@ const GensKey_t GensMenuShortcutsPrivate::DefKeyBindings_kega[KeyBinding_count+1
 	KEYV_9,				// actionNoMenuSaveSlot9
 	KEYV_F6,			// actionNoMenuSaveSlotPrev
 	KEYV_F7,			// actionNoMenuSaveSlotNext
-	// TODO: Swap these two?
-	KEYM_SHIFT | KEYV_F8,		// actionNoMenuLoadStateFrom
 	KEYM_SHIFT | KEYV_F5,		// actionNoMenuSaveStateAs
+	KEYM_SHIFT | KEYV_F8,		// actionNoMenuLoadStateFrom
 
 	// End of key bindings.
 	// TODO: Make this -1, or remove the last entry entirely?
@@ -465,9 +462,8 @@ const GensKey_t GensMenuShortcutsPrivate::DefKeyBindings_regen[KeyBinding_count+
 	KEYM_SHIFT | KEYV_9,		// actionNoMenuSaveSlot9
 	0,				// actionNoMenuSaveSlotPrev
 	0,				// actionNoMenuSaveSlotNext
-	// TODO: Swap these two?
-	KEYM_SHIFT | KEYV_F10,		// actionNoMenuLoadStateFrom
 	KEYM_SHIFT | KEYV_F9,		// actionNoMenuSaveStateAs
+	KEYM_SHIFT | KEYV_F10,		// actionNoMenuLoadStateFrom
 
 	// End of key bindings.
 	// TODO: Make this -1, or remove the last entry entirely?

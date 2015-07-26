@@ -213,8 +213,8 @@ class GensWindow : public QMainWindow
 		void map_actionNoMenuSaveSlot_triggered(int saveSlot);
 		void on_actionNoMenuSaveSlotPrev_triggered(void);
 		void on_actionNoMenuSaveSlotNext_triggered(void);
-		void on_actionNoMenuLoadStateFrom_triggered(void);
 		void on_actionNoMenuSaveStateAs_triggered(void);
+		void on_actionNoMenuLoadStateFrom_triggered(void);
 
 	private slots:
 		/** Menu synchronization slots. **/

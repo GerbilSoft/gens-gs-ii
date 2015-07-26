@@ -284,12 +284,12 @@ void GensWindow::on_actionNoMenuSaveSlotNext_triggered(void)
 	gqt4_cfg->set(QLatin1String("Savestates/saveSlot"), saveSlot);
 }
 
-void GensWindow::on_actionNoMenuLoadStateFrom_triggered(void)
+void GensWindow::on_actionNoMenuSaveStateAs_triggered(void)
 {
 	// TODO (wasn't implemented in GensActions)
 }
 
-void GensWindow::on_actionNoMenuSaveStateAs_triggered(void)
+void GensWindow::on_actionNoMenuLoadStateFrom_triggered(void)
 {
 	// TODO (wasn't implemented in GensActions)
 }
