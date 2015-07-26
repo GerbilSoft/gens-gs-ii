@@ -263,7 +263,7 @@ static void doLoadState(void)
 		} else {
 			// Other error.
 			sdlHandler->osd_printf(1500,
-				"Error loading Save Slot %d:\n%s",
+				"Error loading Save Slot %d:\n* %s",
 				saveSlot_selected, strerror(-ret));
 		}
 	}
@@ -286,7 +286,7 @@ static void doSaveState(void)
 	} else {
 		// Error saving state.
 		sdlHandler->osd_printf(1500,
-				"Error saving Save Slot %d:\n%s",
+				"Error saving Save Slot %d:\n* %s",
 				saveSlot_selected, strerror(-ret));
 	}
 }
