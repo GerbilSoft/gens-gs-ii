@@ -254,11 +254,11 @@ static void doLoadState(void)
 	int ret = context->zomgLoad(filename.c_str());
 	if (ret == 0) {
 		// State loaded.
-		sdlHandler->osd_printf(1500, "Slot %d loaded.", saveSlot_selected);
+		sdlHandler->osd_printf(1500, "Save Slot %d loaded.", saveSlot_selected);
 	} else {
 		// Error loading state.
 		// TODO: Error code?
-		sdlHandler->osd_printf(1500, "Error loading slot %d: %d", saveSlot_selected, ret);
+		sdlHandler->osd_printf(1500, "Error loading Save Slot %d: %d", saveSlot_selected, ret);
 	}
 }
 
@@ -275,11 +275,11 @@ static void doSaveState(void)
 	int ret = context->zomgSave(filename.c_str());
 	if (ret == 0) {
 		// State saved.
-		sdlHandler->osd_printf(1500, "Slot %d saved.", saveSlot_selected);
+		sdlHandler->osd_printf(1500, "Save Slot %d saved.", saveSlot_selected);
 	} else {
 		// Error saving state.
 		// TODO: Error code?
-		sdlHandler->osd_printf(1500, "Error loading slot %d: %d", saveSlot_selected, ret);
+		sdlHandler->osd_printf(1500, "Error saving Save Slot %d: %d", saveSlot_selected, ret);
 	}
 }
 
