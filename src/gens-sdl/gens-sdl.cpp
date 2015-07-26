@@ -83,7 +83,8 @@ using std::vector;
 
 #include <SDL.h>
 
-// TODO: Move to GensSdl?
+namespace GensSdl {
+
 static SdlHandler *sdlHandler = nullptr;
 static Rom *rom = nullptr;
 static EmuContext *context = nullptr;
@@ -111,8 +112,6 @@ struct OsdStartup {
 	int param;
 };
 static vector<OsdStartup> startup_queue;
-
-namespace GensSdl {
 
 /**
  * Onscreen Display handler.
@@ -188,34 +187,39 @@ static bool frameskip = true;
 static bool exposed = false;
 
 // Frameskip timers.
-static uint64_t start_clk;
-static uint64_t old_clk;
-static uint64_t fps_clk;
-static uint64_t new_clk;
-// Microsecond counter for frameskip.
-static uint64_t usec_frameskip;
+class clks_t {
+	public:
+		// Reset frameskip timers.
+		void reset(void) {
+			start_clk = timing.getTime();
+			old_clk = start_clk;
+			fps_clk = start_clk;
+			fps_clk = start_clk;
+			new_clk = start_clk;
+			usec_frameskip = 0;
 
-// Frame counters.
-static unsigned int frames = 0;
-static unsigned int frames_old = 0;
-static unsigned int fps = 0;	// TODO: float or double?
+			// Frame counter.
+			frames = 0;
+			frames_old = 0;
+			fps = 0;
+		}
+
+		uint64_t start_clk;
+		uint64_t old_clk;
+		uint64_t fps_clk;
+		uint64_t new_clk;
+		// Microsecond counter for frameskip.
+		uint64_t usec_frameskip;
+
+		// Frame counters.
+		unsigned int frames = 0;
+		unsigned int frames_old = 0;
+		unsigned int fps = 0;	// TODO: float or double?
+};
+static clks_t clks;
 
 // Save slot.
 static int saveSlot_selected = 0;
-
-// Reset frameskip timers.
-static void reset_frameskip_timers(void) {
-	start_clk = timing.getTime();
-	old_clk = start_clk;
-	fps_clk = start_clk;
-	fps_clk = start_clk;
-	new_clk = start_clk;
-	usec_frameskip = 0;
-
-	// Frame counter.
-	frames_old = frames;
-	fps = 0;
-}
 
 /**
  * Save slot selection.
@@ -327,7 +331,7 @@ static void processSdlEvent(const SDL_Event &event) {
 					// TODO: Apply the pause effect.
 					paused = !paused;
 					// Reset the clocks and counters.
-					GensSdl::reset_frameskip_timers();
+					clks.reset();
 					// Pause audio.
 					sdlHandler->pause_audio(paused);
 					// Autosave SRAM/EEPROM.
@@ -424,36 +428,11 @@ static void processSdlEvent(const SDL_Event &event) {
 	}
 }
 
-}
-
-// Don't use SDL_main.
-#undef main
-int main(int argc, char *argv[])
+/**
+ * Run the emulator.
+ */
+int run(void)
 {
-#ifdef _WIN32
-	W32U_Init();
-#endif /* _WIN32 */
-
-	if (argc < 2) {
-		fprintf(stderr, "usage: %s [rom filename]\n", argv[0]);
-		return EXIT_FAILURE;
-	}
-	rom_filename = argv[1];
-
-	// Make sure we have a valid configuration directory.
-	if (GensSdl::getConfigDir().empty()) {
-		fprintf(stderr, "*** WARNING: Could not find a usable configuration directory.\n"
-				"Save functionality will be disabled.\n\n");
-	}
-
-	// Initialize SDL.
-	int ret = SDL_Init(0);
-	if (ret < 0) {
-		fprintf(stderr, "SDL initialization failed: %d - %s\n",
-			ret, SDL_GetError());
-		return EXIT_FAILURE;
-	}
-
 #ifdef _WIN32
 	// Reference: http://sdl.beuc.net/sdl.wiki/FAQ_Console
 	// TODO: Set console as UTF-8.
@@ -465,7 +444,7 @@ int main(int argc, char *argv[])
 	LibGens::Init();
 
 	// Register the LibGens OSD handler.
-	lg_set_osd_fn(GensSdl::gsdl_osd);
+	lg_set_osd_fn(gsdl_osd);
 
 	// Load the ROM image.
 	rom = new Rom(rom_filename);
@@ -484,7 +463,7 @@ int main(int argc, char *argv[])
 	// Is the ROM format supported?
 	if (!EmuContextFactory::isRomFormatSupported(rom)) {
 		// ROM format is not supported.
-		const char *rom_format = GensSdl::romFormatToString(rom->romFormat());
+		const char *rom_format = romFormatToString(rom->romFormat());
 		fprintf(stderr, "Error loading ROM file %s: ROM is in %s format.\nOnly plain binary and SMD-format ROMs are supported.\n",
 			rom_filename, rom_format);
 		return EXIT_FAILURE;
@@ -493,7 +472,7 @@ int main(int argc, char *argv[])
 	// Check the ROM's system ID.
 	if (!EmuContextFactory::isRomSystemSupported(rom)) {
 		// System is not supported.
-		const char *rom_sysId = GensSdl::sysIdToString(rom->sysId());
+		const char *rom_sysId = sysIdToString(rom->sysId());
 		fprintf(stderr, "Error loading ROM file %s: ROM is for %s.\nOnly Mega Drive and Pico ROMs are supported.\n",
 			rom_filename, rom_sysId);
 		return EXIT_FAILURE;
@@ -506,7 +485,7 @@ int main(int argc, char *argv[])
 	}
 
 	// Set the SRAM/EEPROM path.
-	EmuContext::SetPathSRam(GensSdl::getConfigDir("SRAM").c_str());
+	EmuContext::SetPathSRam(getConfigDir("SRAM").c_str());
 
 	// Create the emulation context.
 	context = EmuContextFactory::createContext(rom);
@@ -540,15 +519,10 @@ int main(int argc, char *argv[])
 	// TODO: Region code?
 	bool isPal = false;
 	const unsigned int usec_per_frame = (1000000 / (isPal ? 50 : 60));
-	GensSdl::reset_frameskip_timers();
-
-	// Frame counters.
-	unsigned int frames = 0;
-	unsigned int frames_old = 0;
-	unsigned int fps = 0;	// TODO: float or double?
+	clks.reset();
 
 	// Enable frameskip.
-	GensSdl::frameskip = true;
+	frameskip = true;
 
 	// TODO: Close the ROM, or let EmuContext do it?
 
@@ -576,10 +550,10 @@ int main(int argc, char *argv[])
 		keyManager->setIoType(IoManager::VIRTPORT_2, IoManager::IOT_NONE);
 	}
 
-	while (GensSdl::running) {
+	while (running) {
 		SDL_Event event;
 		int ret;
-		if (GensSdl::paused) {
+		if (paused) {
 			// Emulation is paused.
 			// Wait for an SDL event.
 			ret = SDL_WaitEvent(&event);
@@ -593,14 +567,14 @@ int main(int argc, char *argv[])
 		if (ret) {
 			// An SDL event has been received.
 			// Process it.
-			GensSdl::processSdlEvent(event);
+			processSdlEvent(event);
 		}
 
-		if (GensSdl::paused) {
+		if (paused) {
 			// Emulation is paused.
 			// Only update video if the VBackend is dirty
 			// or the SDL window has been exposed.
-			if (GensSdl::exposed) {
+			if (exposed) {
 				sdlHandler->update_video();
 			} else {
 				sdlHandler->update_video_paused();
@@ -611,43 +585,44 @@ int main(int argc, char *argv[])
 		}
 
 		// Clear the 'exposed' flag.
-		GensSdl::exposed = false;
+		exposed = false;
 
 		// New start time.
-		GensSdl::new_clk = GensSdl::timing.getTime();
+		clks.new_clk = timing.getTime();
 
 		// Update the FPS counter.
-		unsigned int fps_tmp = ((GensSdl::new_clk - GensSdl::fps_clk) & 0x3FFFFF);
+		unsigned int fps_tmp = ((clks.new_clk - clks.fps_clk) & 0x3FFFFF);
 		if (fps_tmp >= 1000000) {
 			// More than 1 second has passed.
-			GensSdl::fps_clk = GensSdl::new_clk;
-			if (frames_old > frames) {
-				fps = (frames_old - frames);
+			clks.fps_clk = clks.new_clk;
+			// FIXME: Just use abs() here.
+			if (clks.frames_old > clks.frames) {
+				clks.fps = (clks.frames_old - clks.frames);
 			} else {
-				fps = (frames - frames_old);
+				clks.fps = (clks.frames - clks.frames_old);
 			}
-			frames_old = frames;
+			clks.frames_old = clks.frames;
 
 			// Update the window title.
 			// TODO: Average the FPS over multiple seconds
 			// and/or quarter-seconds.
 			char win_title[256];
-			snprintf(win_title, sizeof(win_title), "Gens/GS II [SDL] - %u fps", fps);
+			snprintf(win_title, sizeof(win_title), "Gens/GS II [SDL] - %u fps", clks.fps);
 			sdlHandler->set_window_title(win_title);
 		}
 
 		// Frameskip.
-		if (GensSdl::frameskip) {
+		if (frameskip) {
 			// Determine how many frames to run.
-			GensSdl::usec_frameskip += ((GensSdl::new_clk - GensSdl::old_clk) & 0x3FFFFF); // no more than 4 secs
-			unsigned int frames_todo = (unsigned int)(GensSdl::usec_frameskip / usec_per_frame);
-			GensSdl::usec_frameskip %= usec_per_frame;
-			GensSdl::old_clk = GensSdl::new_clk;
+			clks.usec_frameskip += ((clks.new_clk - clks.old_clk) & 0x3FFFFF); // no more than 4 secs
+			unsigned int frames_todo = (unsigned int)(clks.usec_frameskip / usec_per_frame);
+			clks.usec_frameskip %= usec_per_frame;
+			clks.old_clk = clks.new_clk;
 
 			if (frames_todo == 0) {
 				// No frames to do yet.
 				// Wait until the next frame.
-				uint64_t usec_sleep = (usec_per_frame - GensSdl::usec_frameskip);
+				uint64_t usec_sleep = (usec_per_frame - clks.usec_frameskip);
 				if (usec_sleep > 1000) {
 					// Never sleep for longer than the 50 Hz value
 					// so events are checked often enough.
@@ -659,10 +634,10 @@ int main(int argc, char *argv[])
 #ifdef _WIN32
 					// Win32: Use a yield() loop.
 					// FIXME: Doesn't work properly on VBox/WinXP...
-					uint64_t yield_end = GensSdl::timing.getTime() + usec_sleep;
+					uint64_t yield_end = timing.getTime() + usec_sleep;
 					do {
 						yield();
-					} while (yield_end > GensSdl::timing.getTime());
+					} while (yield_end > timing.getTime());
 #else /* !_WIN32 */
 					// Linux: Use usleep().
 					usleep(usec_sleep);
@@ -682,7 +657,7 @@ int main(int argc, char *argv[])
 				sdlHandler->update_audio();
 				sdlHandler->update_video();
 				// Increment the frame counter.
-				frames++;
+				clks.frames++;
 
 				// Autosave SRAM/EEPROM.
 				// TODO: EmuContext::execFrame() should probably do this itself...
@@ -694,7 +669,7 @@ int main(int argc, char *argv[])
 			sdlHandler->update_audio();
 			sdlHandler->update_video();
 			// Increment the frame counter.
-			frames++;
+			clks.frames++;
 
 			// Autosave SRAM/EEPROM.
 			// TODO: EmuContext::execFrame() should probably do this itself...
@@ -730,4 +705,37 @@ int main(int argc, char *argv[])
 	delete rom;
 	fb->unref();
 	return EXIT_SUCCESS;
+}
+
+}
+
+// Don't use SDL_main.
+#undef main
+int main(int argc, char *argv[])
+{
+#ifdef _WIN32
+	W32U_Init();
+#endif /* _WIN32 */
+
+	if (argc < 2) {
+		fprintf(stderr, "usage: %s [rom filename]\n", argv[0]);
+		return EXIT_FAILURE;
+	}
+	GensSdl::rom_filename = argv[1];
+
+	// Make sure we have a valid configuration directory.
+	if (GensSdl::getConfigDir().empty()) {
+		fprintf(stderr, "*** WARNING: Could not find a usable configuration directory.\n"
+				"Save functionality will be disabled.\n\n");
+	}
+
+	// Initialize SDL.
+	int ret = SDL_Init(0);
+	if (ret < 0) {
+		fprintf(stderr, "SDL initialization failed: %d - %s\n",
+			ret, SDL_GetError());
+		return EXIT_FAILURE;
+	}
+
+	return GensSdl::run();
 }
