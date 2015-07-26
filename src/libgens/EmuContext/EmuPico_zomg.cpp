@@ -76,8 +76,7 @@ namespace LibGens {
 /**
  * Load the current state from a ZOMG file.
  * @param filename	[in] ZOMG file.
- * @return 0 on success; non-zero on error.
- * TODO: Error code constants.
+ * @return 0 on success; negative errno on error.
  */
 int EmuPico::zomgLoad(const utf8_str *filename)
 {
@@ -140,8 +139,7 @@ int EmuPico::zomgLoad(const utf8_str *filename)
 /**
  * Save the current state to a ZOMG file.
  * @param filename	[in] ZOMG file.
- * @return 0 on success; non-zero on error.
- * TODO: Error code constants.
+ * @return 0 on success; negative errno on error.
  */
 int EmuPico::zomgSave(const utf8_str *filename) const
 {
@@ -151,7 +149,7 @@ int EmuPico::zomgSave(const utf8_str *filename) const
 
 	// Rom object has some useful ROM information.
 	if (!m_rom)
-		return -2;
+		return -EINVAL;
 
 	// Create ZOMG.ini.
 	// TODO: More information...
