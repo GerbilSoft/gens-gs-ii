@@ -80,8 +80,8 @@ class OsdGLPrivate {
 		LibGens::Timing timer;
 
 		// TODO: Get this from the OSD font.
-		const int chrW = 8;	// must be pow2
-		const int chrH = 16;	// must be pow2
+		static const int chrW = 8;	// must be pow2
+		static const int chrH = 16;	// must be pow2
 
 		// OSD queue.
 		// NOTE: Manually allocating objects.
