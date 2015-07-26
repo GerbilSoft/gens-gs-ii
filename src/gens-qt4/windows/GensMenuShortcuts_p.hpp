@@ -84,6 +84,11 @@ class GensMenuShortcutsPrivate
 		 */
 		static const GensKey_t DefKeyBindings_kega[KeyBinding_count+1];
 
+		/**
+		 * Default key bindings for Regen v0.972.
+		 */
+		static const GensKey_t DefKeyBindings_regen[KeyBinding_count+1];
+
 		/// Converts a QAction's name to a KeyBindings index.
 		QHash<QString, int> hashActionToKeyBinding;
 

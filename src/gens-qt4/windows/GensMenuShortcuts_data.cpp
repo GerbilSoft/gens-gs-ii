@@ -301,7 +301,7 @@ const GensKey_t GensMenuShortcutsPrivate::DefKeyBindings_kega[KeyBinding_count+1
 	KEYM_SHIFT | KEYV_F12,		// actionGraphicsScreenshot
 
 	// System menu.
-	KEYM_SHIFT | KEYV_F3,		// actionSystemRegion
+	0,				// actionSystemRegion
 	// System, Region submenu.
 	0,				// actionSystemRegionAuto
 	0,				// actionSystemRegionJPN
@@ -348,6 +348,126 @@ const GensKey_t GensMenuShortcutsPrivate::DefKeyBindings_kega[KeyBinding_count+1
 	// TODO: Swap these two?
 	KEYM_SHIFT | KEYV_F8,		// actionNoMenuLoadStateFrom
 	KEYM_SHIFT | KEYV_F5,		// actionNoMenuSaveStateAs
+
+	// End of key bindings.
+	// TODO: Make this -1, or remove the last entry entirely?
+	0
+};
+
+/**
+ * Default key bindings for Regen v0.972.
+ */
+const GensKey_t GensMenuShortcutsPrivate::DefKeyBindings_regen[KeyBinding_count+1] = {
+	// File menu.
+	// NOTE: Regen has separate menu items for different
+	// systems. Gens/GS II does not, so use the standard
+	// "Open" key shortcut.
+	KEYM_CTRL | KEYV_o,		// actionFileOpenROM
+	0,				// actionFileRecentROMs
+	// File, Recent ROMs menu.
+	// NOTE: Regen doesn't have any hotkeys for these.
+	0,				// actionRecentROMs_1
+	0,				// actionRecentROMs_2
+	0,				// actionRecentROMs_3
+	0,				// actionRecentROMs_4
+	0,				// actionRecentROMs_5
+	0,				// actionRecentROMs_6
+	0,				// actionRecentROMs_7
+	0,				// actionRecentROMs_8
+	0,				// actionRecentROMs_9
+	// File menu.
+	// Instead of "Close ROM", Regen has "Power Off".
+	// Unlike Kega Fusion, the ROM won't be reloaded if "Hard Reset"
+	// is selected, so this is basically the same as "Close ROM".
+	KEYM_SHIFT | KEYV_p,		// actionFileCloseROM
+	KEYV_F9,			// actionFileSaveState
+	KEYV_F10,			// actionFileLoadState
+#ifdef Q_WS_MAC
+	KEYM_CTRL | KEYV_COMMA,		// actionFileGeneralConfiguration
+#else
+	KEYM_CTRL | KEYV_p,		// actionFileGeneralConfiguration
+#endif
+	0,				// actionFileSegaCDControlPanel
+	KEYM_CTRL | KEYV_q,		// actionFileQuit
+
+	// Graphics menu.
+	KEYM_CTRL | KEYV_m,		// actionGraphicsShowMenuBar
+	//KEYM_ALT | KEYV_RETURN,	// TODO: Fullscreen.
+	0,				// actionGraphicsResolution
+	// Graphics, Resolution submenu.
+	KEYM_ALT | KEYV_1,		// actionGraphicsResolution1x
+	KEYM_ALT | KEYV_2,		// actionGraphicsResolution2x
+	KEYM_ALT | KEYV_3,		// actionGraphicsResolution3x
+	// NOTE: This is used for "monitor properties",
+	// which isn't emulated.
+	KEYM_ALT | KEYV_4,		// actionGraphicsResolution4x
+	// Graphics menu.
+	0,				// actionGraphicsBpp
+	// Graphics, Color Depth submenu.
+	0,				// actionGraphicsBpp15
+	0,				// actionGraphicsBpp16
+	0,				// actionGraphicsBpp32
+	// Graphics menu.
+	// NOTE: This is used to switch between STRETCH_NONE and STRETCH_H.
+	// Gens/GS II doesn't have an equivalent, so just cycle between all of them.
+	// TODO: Remove STRETCH_V?
+	KEYM_CTRL | KEYV_4,		// actionGraphicsStretch
+	// Graphics, Stretch submenu.
+	0,				// actionGraphicsStretchNone
+	0,				// actionGraphicsStretchHorizontal
+	0,				// actionGraphicsStretchVertical
+	0,				// actionGraphicsStretchFull
+	// Graphics menu.
+	// NOTE: This is the same as "unfiltered" screenshots.
+	// Gens/GS II does not support filtered screenshots by design.
+	KEYV_F5,			// actionGraphicsScreenshot
+
+	// System menu.
+	0,				// actionSystemRegion
+	// System, Region submenu.
+	0,				// actionSystemRegionAuto
+	0,				// actionSystemRegionJPN
+	0,				// actionSystemRegionAsia
+	0,				// actionSystemRegionUSA
+	0,				// actionSystemRegionEUR
+	// System menu.
+	KEYM_SHIFT | KEYV_r,		// actionSystemHardReset
+	KEYM_CTRL | KEYV_r,		// actionSystemSoftReset
+	KEYV_PAUSE,			// actionSystemPause
+	0,				// actionSystemResetM68K
+	0,				// actionSystemResetS68K
+	0,				// actionSystemResetMSH2
+	0,				// actionSystemResetSSH2
+	0,				// actionSystemResetZ80
+
+	// Options menu.
+	KEYM_SHIFT | KEYV_s,		// actionOptionsSRAM
+	KEYM_ALT | KEYV_r,		// actionOptionsControllers
+
+	// NOTE: Test menus aren't going to be added here.
+
+	// Help menu.
+	0,				// actionHelpAbout
+
+	// Non-menu keys.
+	KEYV_F9,			// actionNoMenuFastBlur
+
+	// Savestates.
+	KEYM_SHIFT | KEYV_0,		// actionNoMenuSaveSlot0
+	KEYM_SHIFT | KEYV_1,		// actionNoMenuSaveSlot1
+	KEYM_SHIFT | KEYV_2,		// actionNoMenuSaveSlot2
+	KEYM_SHIFT | KEYV_3,		// actionNoMenuSaveSlot3
+	KEYM_SHIFT | KEYV_4,		// actionNoMenuSaveSlot4
+	KEYM_SHIFT | KEYV_5,		// actionNoMenuSaveSlot5
+	KEYM_SHIFT | KEYV_6,		// actionNoMenuSaveSlot6
+	KEYM_SHIFT | KEYV_7,		// actionNoMenuSaveSlot7
+	KEYM_SHIFT | KEYV_8,		// actionNoMenuSaveSlot8
+	KEYM_SHIFT | KEYV_9,		// actionNoMenuSaveSlot9
+	0,				// actionNoMenuSaveSlotPrev
+	0,				// actionNoMenuSaveSlotNext
+	// TODO: Swap these two?
+	KEYM_SHIFT | KEYV_F10,		// actionNoMenuLoadStateFrom
+	KEYM_SHIFT | KEYV_F9,		// actionNoMenuSaveStateAs
 
 	// End of key bindings.
 	// TODO: Make this -1, or remove the last entry entirely?
