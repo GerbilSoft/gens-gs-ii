@@ -24,8 +24,6 @@
 
 // C includes.
 #include <stdint.h>
-// C includes. (C++ namespace)
-#include <climits>
 
 // OpenGL
 #ifdef _WIN32
@@ -40,11 +38,15 @@
 
 namespace GensSdl {
 
+class GLBackendPrivate;
 class GLBackend : public VBackend {
 	public:
 		GLBackend();
 		virtual ~GLBackend();
 
+	private:
+		friend class GLBackendPrivate;
+		GLBackendPrivate *const d;
 	private:
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add GensSdl-specific version of Q_DISABLE_COPY().
@@ -72,37 +74,6 @@ class GLBackend : public VBackend {
 		 */
 		virtual void resize(int width, int height) override;
 
-	private:
-		// Last MdFb bpp.
-		LibGens::MdFb::ColorDepth m_lastBpp;
-
-		// OpenGL texture.
-		GLuint m_tex;			// Texture name.
-		int m_colorComponents;		// Number of color components. (3 == RGB; 4 == BGRA)
-		GLenum m_texFormat;		// Texture format. (GL_RGB, GL_BGRA)
-		GLenum m_texType;		// Texture type. (GL_UNSIGNED_BYTE, etc.)
-		// TODO: Size type?
-		int m_texW, m_texH;		// Texture size. (1x == 512x256 for pow2 textures.)
-		int m_texVisW, m_texVisH;	// Texture visible size. (1x == 320x240)
-
-		// Texture rectangle.
-		GLdouble m_texRectF[4][2];
-
-		// Previous stretch mode parameters.
-		int m_prevMD_W, m_prevMD_H;
-		StretchMode_t m_prevStretchMode;
-
-		// Find the next highest power of two. (signed integers)
-		// http://en.wikipedia.org/wiki/Power_of_two#Algorithm_to_find_the_next-highest_power_of_two
-		template <class T>
-		static inline T next_pow2s(T k)
-		{
-			k--;
-			for (int i = 1; i < (int)(sizeof(T)*CHAR_BIT); i <<= 1)
-				k = k | k >> i;
-			return k + 1;
-		}
-
 	protected:
 		// Window size.
 		// TODO: Accessors?
@@ -120,16 +91,6 @@ class GLBackend : public VBackend {
 		 * This must be called by the subclass destructor.
 		 */
 		void endGL(void);
-
-		/**
-		 * Reallocate the OpenGL texture.
-		 */
-		void reallocTexture(void);
-
-		/**
-		 * Recalculate the texture rectangle.
-		 */
-		void recalcTexRectF(void);
 };
 
 }
