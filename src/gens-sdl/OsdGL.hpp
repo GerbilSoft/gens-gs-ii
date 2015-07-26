@@ -22,6 +22,9 @@
 #ifndef __GENS_SDL_OSDGL_HPP__
 #define __GENS_SDL_OSDGL_HPP__
 
+// utf8_str
+#include "libgens/macros/common.h"
+
 namespace GensSdl {
 
 class OsdGLPrivate;
@@ -57,6 +60,15 @@ class OsdGL {
 		 * This must be called from a valid GL context.
 		 */
 		void draw(void);
+
+	public:
+		/**
+		 * Add a message to the OSD queue.
+		 * @param duration Duration for the message to appear, in milliseconds.
+		 * @param msg Message. (UTF-8)
+		 * TODO: printf() function.
+		 */
+		void print(unsigned int duration, const utf8_str *msg);
 };
 
 }

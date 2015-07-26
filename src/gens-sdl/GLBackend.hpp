@@ -74,6 +74,16 @@ class GLBackend : public VBackend {
 		 */
 		virtual void resize(int width, int height) override;
 
+	public:
+		/**
+		 * Print a message to the Onscreen Display.
+		 * @param duration Duration for the message to appear, in milliseconds.
+		 * @param msg Message. (printf-formatted; UTF-8)
+		 * @param ap Format arguments.
+		 */
+		virtual void osd_vprintf(const int duration, const utf8_str *msg, va_list ap) final
+			ATTR_FORMAT_PRINTF(3, 0);
+
 	protected:
 		// Window size.
 		// TODO: Accessors?

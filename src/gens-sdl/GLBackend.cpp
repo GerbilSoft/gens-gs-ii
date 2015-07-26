@@ -26,6 +26,7 @@ using LibGens::MdFb;
 // C includes. (C++ namespace)
 #include <cstdlib>
 #include <climits>
+#include <cstdio>
 
 // Onscreen Display.
 #include "OsdGL.hpp"
@@ -523,6 +524,22 @@ void GLBackend::endGL(void)
 		glDeleteTextures(1, &d->tex);
 		d->tex = 0;
 	}
+}
+
+/** Onscreen Display functions. **/
+
+/**
+ * Print a message to the Onscreen Display.
+ * @param duration Duration for the message to appear, in milliseconds.
+ * @param msg Message. (printf-formatted; UTF-8)
+ * @param ap Format arguments.
+ */
+void GLBackend::osd_vprintf(const int duration, const utf8_str *msg, va_list ap)
+{
+	// TODO: printf() it here or in OsdGL?
+	char buf[2048];
+	vsnprintf(buf, sizeof(buf), msg, ap);
+	d->osd->print(duration, buf);
 }
 
 }

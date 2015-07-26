@@ -22,6 +22,9 @@
 #include "VBackend.hpp"
 #include "libgens/Util/MdFb.hpp"
 
+// C includes. (C++ namespace)
+#include <cstdio>
+
 namespace GensSdl {
 
 VBackend::VBackend()
@@ -43,6 +46,35 @@ void VBackend::setStretchMode(StretchMode_t stretchMode)
 {
 	m_stretchMode = stretchMode;
 	setDirty();
+}
+
+/**
+ * Print a message to the Onscreen Display.
+ * @param duration Duration for the message to appear, in milliseconds.
+ * @param msg Message. (printf-formatted; UTF-8)
+ * @param ap Format arguments.
+ */
+void VBackend::osd_vprintf(const int duration, const utf8_str *msg, va_list ap)
+{
+	// Default version prints to the console.
+	// TODO: Convert to local codepage on Windows?
+	((void)duration);
+	vprintf(msg, ap);
+	putchar('\n');
+}
+
+/**
+ * Print a message to the Onscreen Display.
+ * @param duration Duration for the message to appear, in milliseconds.
+ * @param msg Message. (printf-formatted; UTF-8)
+ * @params ... Format arguments.
+ */
+void VBackend::osd_printf(const int duration, const utf8_str *msg, ...)
+{
+	va_list ap;
+	va_start(ap, msg);
+	osd_vprintf(duration, msg, ap);
+	va_end(ap);
 }
 
 }

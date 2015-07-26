@@ -22,7 +22,11 @@
 #ifndef __GENS_SDL_SDLHANDLER_HPP__
 #define __GENS_SDL_SDLHANDLER_HPP__
 
+// C includes.
 #include <stdint.h>
+
+// C includes. (C++ namespace)
+#include <cstdarg>
 
 // SDL
 #include <SDL.h>
@@ -31,6 +35,18 @@
 namespace LibGens {
 	class MdFb;
 }
+
+// utf8_str
+#include "libgens/macros/common.h"
+
+// TODO: Minimum gcc version, other compilers?
+// TODO: Move to libgens/macros/common.h?
+#ifdef __GNUC__
+#define ATTR_FORMAT_PRINTF(fmt, varargs) \
+	__attribute__ ((format (printf, (fmt), (varargs))))
+#else
+#define ATTR_FORMAT_PRINTF(fmt, varargs)
+#endif
 
 namespace GensSdl {
 
@@ -135,6 +151,26 @@ class SdlHandler {
 		 * @return Gens keycode, or 0 if unsupported.
 		 */
 		static GensKey_t scancodeToGensKey(SDL_Scancode scancode);
+
+		/** Onscreen Display functions. **/
+
+		/**
+		 * Print a message to the Onscreen Display.
+		 * @param duration Duration for the message to appear, in milliseconds.
+		 * @param msg Message. (printf-formatted; UTF-8)
+		 * @param ap Format arguments.
+		 */
+		void osd_vprintf(const int duration, const utf8_str *msg, va_list ap)
+			ATTR_FORMAT_PRINTF(3, 0);
+
+		/**
+		 * Print a message to the Onscreen Display.
+		 * @param duration Duration for the message to appear, in milliseconds.
+		 * @param msg Message. (printf-formatted; UTF-8)
+		 * @params ... Format arguments.
+		 */
+		void osd_printf(const int duration, const utf8_str *msg, ...)
+			ATTR_FORMAT_PRINTF(3, 4);
 
 	private:
 		/**

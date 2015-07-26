@@ -29,6 +29,15 @@
 #include <cstdlib>
 #include <cstring>
 
+// C++ includes.
+#include <string>
+#include <vector>
+using std::string;
+using std::vector;
+
+// LibGens.
+#include "libgens/Util/Timing.hpp"
+
 // OpenGL
 #ifdef _WIN32
 #include <windows.h>
@@ -65,14 +74,40 @@ class OsdGLPrivate {
 		 * @param y Y coordinate.
 		 * @param msg Line of text. (NOTE: ASCII only right now...)
 		 */
-		void printLine(int x, int y, const char *msg);
+		void printLine(int x, int y, const string &msg);
+
+		// Timer.
+		LibGens::Timing timer;
+
+		// TODO: Get this from the OSD font.
+		const int chrW = 8;	// must be pow2
+		const int chrH = 16;	// must be pow2
+
+		// OSD queue.
+		// NOTE: Manually allocating objects.
+		struct OsdMessage {
+			string msg;		// Message. (Converted to internal 8-bit charset.)
+			unsigned int duration;	// Duration, in milliseconds.
+			bool hasDisplayed;	// Timer starts counting down once the message has been displayed.
+			uint64_t endTime;	// End time, using internal Timing object. (microseconds)
+		};
+		vector<OsdMessage*> osdList;
+
+		// Is the OSD list dirty?
+		// If so, the display list needs to be regenerated.
+		// TODO: Use a display list.
+		bool dirty;
 };
 
 /** OsdGLPrivate **/
 
 OsdGLPrivate::OsdGLPrivate()
 	: texOsd(0)
-{ }
+	, dirty(false)
+{
+	// Reserve space for at least 8 OSD messages.
+	osdList.reserve(8);
+}
 
 /**
  * (Re-)Allocate the OSD texture.
@@ -118,8 +153,6 @@ void OsdGLPrivate::reallocOsdTexture()
 	// TODO: Optimize this?
 	uint8_t *glImage = (uint8_t*)malloc(256 * 16 * 8);
 	// Converting 1bpp characters to 8bpp.
-	const int chrW = 8;	// must be pow2
-	const int chrH = 16;	// must be pow2
 	// pitch = 8 pixels per character; 16 per line.
 	const int pitch = chrW * 16;
 	for (int chr = 0; chr < 256; chr++) {
@@ -151,7 +184,7 @@ void OsdGLPrivate::reallocOsdTexture()
  * @param y Y coordinate.
  * @param msg Line of text. (NOTE: ASCII only right now...)
  */
-void OsdGLPrivate::printLine(int x, int y, const char *msg)
+void OsdGLPrivate::printLine(int x, int y, const std::string &msg)
 {
 	// TODO: Font information.
 	const int chrW = 8;
@@ -160,12 +193,15 @@ void OsdGLPrivate::printLine(int x, int y, const char *msg)
 	// TODO: Wordwrapping.
 
 	// TODO: Precalculate vertices?
-	const int len = (int)strlen(msg);
+	const int len = (int)msg.size();
+	// TODO: Allocate once, and reallocate if a larger one is needed?
 	GLint *vtx = new GLint[len * 8];
 	GLfloat *txc = new GLfloat[len * 8];
 
-	for (int i = 0; i < len; i++, x += chrW, msg++) {
-		uint8_t chr = *msg;
+	// TODO: Optimize this!
+	const char *pChr = msg.c_str();
+	for (int i = 0; i < (int)msg.size(); i++, x += chrW, pChr++) {
+		uint8_t chr = *pChr;
 		if (chr == 0)
 			break;
 
@@ -231,6 +267,12 @@ void OsdGL::end(void)
  */
 void OsdGL::draw(void)
 {
+	if (d->osdList.empty()) {
+		// No OSD messages.
+		// TODO: Check for FPS and "enabled" values.
+		return;
+	}
+
 	// Set pixel matrices.
 	// Assuming 320x240 for 1x text rendering.
 	// TODO: Use a larger matrix when rendering to a larger screen?
@@ -261,11 +303,60 @@ void OsdGL::draw(void)
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-	// TODO: Process the OSD.
-	glColor4f(0.0, 0.0, 0.0, 1.0);
-	d->printLine(1, 1, "testing 1 2 3");
-	glColor4f(1.0, 1.0, 1.0, 1.0);
-	d->printLine(0, 0, "testing 1 2 3");
+	// TODO: Adjust for visible texture size.
+	int y = (240 - d->chrH);
+	// TODO: Message Enable, Message Color.
+	const uint64_t curTime = d->timer.getTime();
+
+	// TODO: Switch from vector to list?
+	// TODO: Move to OsdGLPrivate?
+	for (int i = (int)d->osdList.size() - 1; i >= 0; i--) {
+		OsdGLPrivate::OsdMessage *osdMsg = d->osdList[i];
+		if (!osdMsg)
+			continue;
+
+		if (curTime >= osdMsg->endTime) {
+			// Time has elapsed.
+			// Check if the message has been displayed.
+			if (osdMsg->hasDisplayed) {
+				// Message has been displayed.
+				// Remove the message from the list.
+				delete d->osdList[i];
+				d->osdList[i] = nullptr;
+				continue;
+			} else {
+				// Message has *not* been displayed.
+				// Reset its end time.
+				osdMsg->endTime = curTime + (osdMsg->duration * 1000);
+			}
+		}
+
+		// Message is now being displayed.
+		osdMsg->hasDisplayed = true;
+
+		// Next line.
+		y -= d->chrH;
+
+		// TODO: Make the drop shadow optional.
+		glColor4f(0.0, 0.0, 0.0, 1.0);
+		d->printLine(d->chrW+1, y+1, osdMsg->msg);
+		glColor4f(1.0, 1.0, 1.0, 1.0);	// TODO: Message color.
+		d->printLine(d->chrW, y, osdMsg->msg);
+	}
+
+	// Check if all messages have been processed.
+	// TODO: Use an std::list and remove entries as they're processed?
+	bool isAllProcessed = true;
+	for (int i = 0; i < (int)d->osdList.size(); i++) {
+		if (d->osdList[i] != nullptr) {
+			isAllProcessed = false;
+			break;
+		}
+	}
+	if (isAllProcessed) {
+		// All messages have been processed.
+		d->osdList.clear();
+	}
 
 	// Done with vertex and texture coordinate arrays.
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -282,6 +373,34 @@ void OsdGL::draw(void)
 
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
+}
+
+/**
+ * Add a message to the OSD queue.
+ * @param duration Duration for the message to appear, in milliseconds.
+ * @param msg Message. (UTF-8)
+ * TODO: printf() function.
+ */
+void OsdGL::print(unsigned int duration, const utf8_str *msg)
+{
+	// If the OSD is currently idle, reset the timer.
+	// TODO: FPS.
+	if (d->osdList.empty()) {
+		// OSD is empty.
+		d->timer.resetBase();
+	}
+
+	OsdGLPrivate::OsdMessage *osdMsg = new OsdGLPrivate::OsdMessage();
+
+	// TODO: Convert msg from UTF-8.
+	osdMsg->msg = string(msg);
+	osdMsg->duration = duration;
+	osdMsg->hasDisplayed = false;
+	osdMsg->endTime = d->timer.getTime() + (duration * 1000);
+	d->osdList.push_back(osdMsg);
+
+	// OSD is dirty.
+	d->dirty = true;
 }
 
 }

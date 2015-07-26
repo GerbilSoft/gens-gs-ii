@@ -77,7 +77,9 @@ using LibGensKeys::KeyManager;
 
 // C++ includes.
 #include <string>
+#include <vector>
 using std::string;
+using std::vector;
 
 #include <SDL.h>
 
@@ -102,6 +104,14 @@ static const GensKey_t keyMap_pico[] = {
 	, 0, 0, 0, 0
 };
 
+// Startup OSD message queue.
+struct OsdStartup {
+	int duration;
+	const char *msg;
+	int param;
+};
+vector<OsdStartup> startup_queue;
+
 namespace GensSdl {
 
 /**
@@ -114,37 +124,53 @@ static void gsdl_osd(OsdType osd_type, int param)
 	// NOTE: We're not using any sort of translation system
 	// in the SDL frontend, so we'll just use the plural form.
 	// Most SRAM/EEPROM chips are larger than 1 byte, after all...
+	const char *msg;
 	switch (osd_type) {
 		case OSD_SRAM_LOAD:
-			printf("SRAM loaded. (%d bytes)\n", param);
+			msg = "SRAM loaded. (%d bytes)";
 			break;
 		case OSD_SRAM_SAVE:
-			printf("SRAM saved. (%d bytes)\n", param);
+			msg = "SRAM saved. (%d bytes)";
 			break;
 		case OSD_SRAM_AUTOSAVE:
-			printf("SRAM autosaved. (%d bytes)\n", param);
+			msg = "SRAM autosaved. (%d bytes)";
 			break;
 		case OSD_EEPROM_LOAD:
-			printf("EEPROM loaded. (%d bytes)\n", param);
+			msg = "EEPROM loaded. (%d bytes)";
 			break;
 		case OSD_EEPROM_SAVE:
-			printf("EEPROM saved. (%d bytes)\n", param);
+			msg = "EEPROM saved. (%d bytes)";
 			break;
 		case OSD_EEPROM_AUTOSAVE:
-			printf("EEPROM autosaved. (%d bytes)\n", param);
+			msg = "EEPROM autosaved. (%d bytes)";
 			break;
 		case OSD_PICO_PAGESET:
-			printf("Pico: Page set to page %d.\n", param);
+			msg = "Pico: Page set to page %d.";
 			break;
 		case OSD_PICO_PAGEUP:
-			printf("Pico: PgUp to page %d.\n", param);
+			msg = "Pico: PgUp to page %d.";
 			break;
 		case OSD_PICO_PAGEDOWN:
-			printf("Pico: PgDn to page %d.\n", param);
+			msg = "Pico: PgDn to page %d.";
 			break;
 		default:
 			// Unknown OSD type.
+			msg = nullptr;
 			break;
+	}
+
+	if (msg != nullptr) {
+		if (sdlHandler) {
+			sdlHandler->osd_printf(1500, msg, param);
+		} else {
+			// SDL handler hasn't been created yet.
+			// Store the message for later.
+			OsdStartup startup;
+			startup.duration = 1500;
+			startup.msg = msg;
+			startup.param = param;
+			startup_queue.push_back(startup);
+		}
 	}
 }
 
@@ -203,9 +229,11 @@ static void processSdlEvent(const SDL_Event &event) {
 					if (event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
 						// Hard Reset.
 						context->hardReset();
+						sdlHandler->osd_printf(1500, "Hard Reset.");
 					} else {
 						// Soft Reset.
 						context->softReset();
+						sdlHandler->osd_printf(1500, "Soft Reset.");
 					}
 					break;
 
@@ -390,6 +418,17 @@ int main(int argc, char *argv[])
 	if (sdlHandler->init_audio() < 0)
 		return EXIT_FAILURE;
 
+	// Set the window title.
+	sdlHandler->set_window_title("Gens/GS II [SDL]");
+
+	// Check for startup messages.
+	if (!startup_queue.empty()) {
+		for (int i = 0; i < (int)startup_queue.size(); i++) {
+			const OsdStartup &startup = startup_queue.at(i);
+			sdlHandler->osd_printf(startup.duration, startup.msg, startup.param);
+		}
+	}
+
 	// Start the frame timer.
 	// TODO: Region code?
 	bool isPal = false;
@@ -412,9 +451,6 @@ int main(int argc, char *argv[])
 
 	// Set the SDL video source.
 	sdlHandler->set_video_source(fb);
-
-	// Set the window title.
-	sdlHandler->set_window_title("Gens/GS II [SDL]");
 
 	// Start audio.
 	sdlHandler->pause_audio(false);

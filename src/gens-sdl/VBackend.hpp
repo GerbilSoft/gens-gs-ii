@@ -22,7 +22,23 @@
 #ifndef __GENS_SDL_VBACKEND_HPP__
 #define __GENS_SDL_VBACKEND_HPP__
 
+// C includes.
 #include <stdint.h>
+
+// C includes. (C++ namespace)
+#include <cstdarg>
+
+// utf8_str
+#include "libgens/macros/common.h"
+
+// TODO: Minimum gcc version, other compilers?
+// TODO: Move to libgens/macros/common.h?
+#ifdef __GNUC__
+#define ATTR_FORMAT_PRINTF(fmt, varargs) \
+	__attribute__ ((format (printf, (fmt), (varargs))))
+#else
+#define ATTR_FORMAT_PRINTF(fmt, varargs)
+#endif
 
 namespace LibGens {
 	class MdFb;
@@ -98,6 +114,25 @@ class VBackend {
 		};
 		StretchMode_t stretchMode(void) const;
 		void setStretchMode(StretchMode_t stretchMode);
+
+	public:
+		/**
+		 * Print a message to the Onscreen Display.
+		 * @param duration Duration for the message to appear, in milliseconds.
+		 * @param msg Message. (printf-formatted; UTF-8)
+		 * @param ap Format arguments.
+		 */
+		virtual void osd_vprintf(const int duration, const utf8_str *msg, va_list ap)
+			ATTR_FORMAT_PRINTF(3, 0);
+
+		/**
+		 * Print a message to the Onscreen Display.
+		 * @param duration Duration for the message to appear, in milliseconds.
+		 * @param msg Message. (printf-formatted; UTF-8)
+		 * @params ... Format arguments.
+		 */
+		void osd_printf(const int duration, const utf8_str *msg, ...)
+			ATTR_FORMAT_PRINTF(3, 4);
 
 	private:
 		// Dirty flag.
