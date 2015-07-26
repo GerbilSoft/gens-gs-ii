@@ -262,6 +262,9 @@ void OsdGL::draw(void)
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	// TODO: Process the OSD.
+	glColor4f(0.0, 0.0, 0.0, 1.0);
+	d->printLine(1, 1, "testing 1 2 3");
+	glColor4f(1.0, 1.0, 1.0, 1.0);
 	d->printLine(0, 0, "testing 1 2 3");
 
 	// Done with vertex and texture coordinate arrays.
@@ -269,7 +272,7 @@ void OsdGL::draw(void)
 	glDisableClientState(GL_VERTEX_ARRAY);
 
 	// Reset the GL state.
-	//glColor4f(1.0, 1.0, 1.0, 1.0);
+	glColor4f(1.0, 1.0, 1.0, 1.0);
 	glDisable(GL_BLEND);			// Disable GL blending.
 	glDisable(GL_TEXTURE_2D);		// Disable 2D textures.
 
