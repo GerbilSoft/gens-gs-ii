@@ -38,6 +38,12 @@
 using std::string;
 using std::u16string;
 
+#ifdef _WIN32
+// W32U_mini
+// Needed for proper Unicode filename support on Windows.
+#include "Win32/W32U_mini.h"
+#endif
+
 // Character set conversion.
 #include "libgenstext/Encoding.hpp"
 #include "libgenstext/StringManip.hpp"
