@@ -33,10 +33,13 @@
 #include <string>
 #include <vector>
 using std::string;
+using std::u16string;
 using std::vector;
 
 // LibGens.
 #include "libgens/Util/Timing.hpp"
+// LibGensText.
+#include "libgenstext/Encoding.hpp"
 
 // OpenGL
 #ifdef _WIN32
@@ -92,6 +95,14 @@ class OsdGLPrivate {
 			uint64_t endTime;	// End time, using internal Timing object. (microseconds)
 		};
 		vector<OsdMessage*> osdList;
+
+		/**
+		 * Convert a UTF-8 string to the internal character set.
+		 * @param str UTF-8 string.
+		 * @param len Length of str.
+		 * @return String using the internal character set.
+		 */
+		static string utf8ToInternal(const utf8_str *str, size_t len);
 
 		// OpenGL Display List.
 		GLuint displayList;
@@ -256,6 +267,82 @@ void OsdGLPrivate::printLine(int x, int y, const std::string &msg)
 
 	delete[] txc;
 	delete[] vtx;
+}
+
+/**
+ * Convert a UTF-8 string to the internal character set.
+ * @param str UTF-8 string.
+ * @param len Length of str.
+ * @return String using the internal character set.
+ */
+string OsdGLPrivate::utf8ToInternal(const utf8_str *str, size_t len)
+{
+	string cp8;	// for return value optimization
+
+	// Convert to UTF-16 first.
+	u16string u16 = LibGensText::Utf8_to_Utf16(str, len);
+
+	// Convert to the local 8-bit character set.
+	cp8.resize(u16.size());
+	for (int i = 0; i < (int)u16.size(); i++) {
+		char16_t chr16 = u16[i];
+		if (chr16 <= 0xFF) {
+			// U+0000 - U+00FF.
+			cp8[i] = (char)chr16;
+		} else {
+			// Some Unicode characters over U+00FF are supported.
+			// TODO: Replacement character for unsupported characters.
+
+			// Check if this is a supported cp437 character.
+			// TODO: Optimize this!
+			char chr8;
+			switch (chr16) {
+				case 0x263A:	chr8 = 0x01; break;
+				case 0x263B:	chr8 = 0x02; break;
+				case 0x2665:	chr8 = 0x03; break;
+				case 0x2666:	chr8 = 0x04; break;
+				case 0x2663:	chr8 = 0x05; break;
+				case 0x2660:	chr8 = 0x06; break;
+				case 0x2022:	chr8 = 0x07; break;
+				case 0x2508:	chr8 = 0x08; break;
+				case 0x25CB:	chr8 = 0x09; break;
+				case 0x25D9:	chr8 = 0x0A; break;
+				case 0x2642:	chr8 = 0x0B; break;
+				case 0x2640:	chr8 = 0x0C; break;
+				case 0x266A:	chr8 = 0x0D; break;
+				case 0x266B:	chr8 = 0x0E; break;
+				case 0x263C:	chr8 = 0x0F; break;
+				case 0x25BA:	chr8 = 0x10; break;
+				case 0x25C4:	chr8 = 0x11; break;
+				case 0x2195:	chr8 = 0x12; break;
+				case 0x203C:	chr8 = 0x13; break;
+				//case 0x00B6:	chr8 = 0x14; break;	// This is part of cp1252...
+				//case 0x00A7:	chr8 = 0x15; break;	// This is part of cp1252...
+				case 0x25AC:	chr8 = 0x16; break;
+				case 0x21A8:	chr8 = 0x17; break;
+				case 0x2191:	chr8 = 0x18; break;
+				case 0x2193:	chr8 = 0x19; break;
+				case 0x2192:	chr8 = 0x1A; break;
+				case 0x2190:	chr8 = 0x1B; break;
+				case 0x221F:	chr8 = 0x1C; break;
+				case 0x2194:	chr8 = 0x1D; break;
+				case 0x2582:	chr8 = 0x1E; break;
+				case 0x25BC:	chr8 = 0x1F; break;
+
+				// VCR symbols.
+				case 0x25CF:	chr8 = 0x80; break;	// Record. (BLACK CIRCLE)
+				case 0xF8FE:	chr8 = 0x81; break;	// Pause. (Private Use Area)
+				case 0x25A0:	chr8 = 0x82; break;	// Stop. (BLACK SQUARE)
+
+				default:	chr8 = 0; break;
+			}
+
+			cp8[i] = chr8;
+		}
+	}
+
+	// Return the new string.
+	return cp8;
 }
 
 /**
@@ -484,10 +571,10 @@ void OsdGL::print(unsigned int duration, const utf8_str *msg)
 		// TODO: Convert msg from UTF-8.
 		if (delim == nullptr) {
 			// No newlines. Take the whole string.
-			osdMsg->msg = string(start);
+			osdMsg->msg = d->utf8ToInternal(start, strlen(start));
 		} else {
 			// Newline found.
-			osdMsg->msg = string(start, (delim - start));
+			osdMsg->msg = d->utf8ToInternal(start, (delim - start));
 		}
 		start = (delim ? delim + 1 : nullptr);
 
