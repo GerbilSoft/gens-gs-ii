@@ -311,7 +311,7 @@ inline void OsdGLPrivate::setGLColor(uint32_t color)
 	const uint8_t r = (color >> 16) & 0xFF;
 	const uint8_t g = (color >>  8) & 0xFF;
 	const uint8_t b = (color >>  0) & 0xFF;
-	glColor4ub(a, r, g, b);
+	glColor4ub(r, g, b, a);
 }
 
 /** OsdGL **/
