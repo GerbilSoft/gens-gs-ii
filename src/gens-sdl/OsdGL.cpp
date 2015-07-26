@@ -470,14 +470,42 @@ void OsdGL::print(unsigned int duration, const utf8_str *msg)
 		d->timer.resetBase();
 	}
 
-	OsdGLPrivate::OsdMessage *osdMsg = new OsdGLPrivate::OsdMessage();
+	// Get the timer now, so we have the same time for
+	// each line if this message has multiple lines.
+	const uint64_t endTime = d->timer.getTime() + (duration * 1000);
 
-	// TODO: Convert msg from UTF-8.
-	osdMsg->msg = string(msg);
-	osdMsg->duration = duration;
-	osdMsg->hasDisplayed = false;
-	osdMsg->endTime = d->timer.getTime() + (duration * 1000);
-	d->osdList.push_back(osdMsg);
+	// Check for newlines.
+	const utf8_str *start = msg;
+	while (start != nullptr) {
+		const utf8_str *delim = strchr(start, '\n');
+		
+		OsdGLPrivate::OsdMessage *osdMsg = new OsdGLPrivate::OsdMessage();
+
+		// TODO: Convert msg from UTF-8.
+		if (delim == nullptr) {
+			// No newlines. Take the whole string.
+			osdMsg->msg = string(start);
+		} else {
+			// Newline found.
+			osdMsg->msg = string(start, (delim - start));
+		}
+		start = (delim ? delim + 1 : nullptr);
+
+		// Check if the end of the string is '\r'
+		if (!osdMsg->msg.empty() &&
+		    osdMsg->msg.at(osdMsg->msg.size() - 1) == '\r')
+		{
+			// Found a trailing '\r'.
+			// Remove it.
+			osdMsg->msg.resize(osdMsg->msg.size() - 1);
+		}
+
+		// Fill in the remaining OsdMessage fields.
+		osdMsg->duration = duration;
+		osdMsg->hasDisplayed = false;
+		osdMsg->endTime = endTime;
+		d->osdList.push_back(osdMsg);
+	}
 
 	// OSD is dirty.
 	d->dirty = true;
