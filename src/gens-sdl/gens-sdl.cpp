@@ -212,9 +212,9 @@ class clks_t {
 		uint64_t usec_frameskip;
 
 		// Frame counters.
-		unsigned int frames = 0;
-		unsigned int frames_old = 0;
-		unsigned int fps = 0;	// TODO: float or double?
+		unsigned int frames;
+		unsigned int frames_old;
+		unsigned int fps;	// TODO: float or double?
 };
 static clks_t clks;
 
