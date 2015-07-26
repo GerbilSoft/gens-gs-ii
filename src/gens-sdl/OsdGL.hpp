@@ -22,6 +22,9 @@
 #ifndef __GENS_SDL_OSDGL_HPP__
 #define __GENS_SDL_OSDGL_HPP__
 
+// C includes.
+#include <stdint.h>
+
 // utf8_str
 #include "libgens/macros/common.h"
 
@@ -69,6 +72,24 @@ class OsdGL {
 		 * TODO: printf() function.
 		 */
 		void print(unsigned int duration, const utf8_str *msg);
+
+	public:
+		/** Properties. **/
+
+		bool isFpsEnabled(void) const;
+		void setFpsEnabled(bool fpsEnabled);
+
+		bool isMsgEnabled(void) const;
+		void setMsgEnabled(bool msgEnabled);
+
+		// Colors are in the same format as VdpPalette.
+		// 32-bit ARGB
+
+		uint32_t fpsColor(void) const;
+		void setFpsColor(uint32_t fpsColor);
+
+		uint32_t msgColor(void) const;
+		void setMsgColor(uint32_t msgColor);
 };
 
 }

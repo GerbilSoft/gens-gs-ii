@@ -106,6 +106,15 @@ class OsdGLPrivate {
 		 * Expired messages will be removed from the list.
 		 */
 		void checkForExpiredMessages(void);
+
+		/** Properties. **/
+		bool fpsEnabled;
+		bool msgEnabled;
+
+		uint32_t fpsColor;
+		uint32_t msgColor;
+
+		static void setGLColor(uint32_t color);
 };
 
 /** OsdGLPrivate **/
@@ -114,6 +123,10 @@ OsdGLPrivate::OsdGLPrivate()
 	: texOsd(0)
 	, displayList(0)
 	, dirty(true)
+	, fpsEnabled(false)
+	, msgEnabled(true)
+	, fpsColor(0xFFFFFFFF)
+	, msgColor(0xFFFFFFFF)
 {
 	// Reserve space for at least 8 OSD messages.
 	osdList.reserve(8);
@@ -287,6 +300,20 @@ void OsdGLPrivate::checkForExpiredMessages(void)
 	}
 }
 
+/**
+ * Set the OpenGL color
+ * @param color 32-bit ARGB color.
+ */
+inline void OsdGLPrivate::setGLColor(uint32_t color)
+{
+	// FIXME: 0xFFFFFF seems to map to (254,254,254)...
+	const uint8_t a = (color >> 24) & 0xFF;
+	const uint8_t r = (color >> 16) & 0xFF;
+	const uint8_t g = (color >>  8) & 0xFF;
+	const uint8_t b = (color >>  0) & 0xFF;
+	glColor4ub(a, r, g, b);
+}
+
 /** OsdGL **/
 
 OsdGL::OsdGL()
@@ -403,7 +430,7 @@ void OsdGL::draw(void)
 		// TODO: Make the drop shadow optional.
 		glColor4f(0.0, 0.0, 0.0, 1.0);
 		d->printLine(d->chrW+1, y+1, osdMsg->msg);
-		glColor4f(1.0, 1.0, 1.0, 1.0);	// TODO: Message color.
+		d->setGLColor(d->msgColor);
 		d->printLine(d->chrW, y, osdMsg->msg);
 	}
 
@@ -454,6 +481,75 @@ void OsdGL::print(unsigned int duration, const utf8_str *msg)
 
 	// OSD is dirty.
 	d->dirty = true;
+}
+
+/** Properties. **/
+
+bool OsdGL::isFpsEnabled(void) const
+{
+	return d->fpsEnabled;
+}
+
+void OsdGL::setFpsEnabled(bool fpsEnabled)
+{
+	if (d->fpsEnabled == fpsEnabled)
+		return;
+
+	d->fpsEnabled = fpsEnabled;
+	// TODO: Force dirty...
+}
+
+bool OsdGL::isMsgEnabled(void) const
+{
+	return d->msgEnabled;
+}
+
+void OsdGL::setMsgEnabled(bool msgEnabled)
+{
+	if (d->msgEnabled == msgEnabled)
+		return;
+
+	d->msgEnabled = msgEnabled;
+	if (!d->osdList.empty()) {
+		// OSD messages are present.
+		// Mark the OSD as dirty, since the messages
+		// need to either be drawn if msgEnabled == true,
+		// or hidden if msgEnabled == false.
+		d->dirty = true;
+	}
+}
+
+uint32_t OsdGL::fpsColor(void) const
+{
+	return d->fpsColor;
+}
+
+void OsdGL::setFpsColor(uint32_t fpsColor)
+{
+	if (d->fpsColor == fpsColor)
+		return;
+
+	d->fpsColor = fpsColor;
+	// TODO: Force dirty...
+}
+
+uint32_t OsdGL::msgColor(void) const
+{
+	return d->msgColor;
+}
+
+void OsdGL::setMsgColor(uint32_t msgColor)
+{
+	if (d->msgColor == msgColor)
+		return;
+
+	d->msgColor = msgColor;
+	if (d->msgEnabled && !d->osdList.empty()) {
+		// OSD messages are present.
+		// Mark the OSD as dirty, since the messages
+		// need to be redrawn using the new color.
+		d->dirty = true;
+	}
 }
 
 }
