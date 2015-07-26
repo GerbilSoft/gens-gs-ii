@@ -1,10 +1,10 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * GensMenuShortcuts.hpp: Gens key configuration.                              *
+ * GensMenuShortcuts.hpp: Shortcut handler for GensWindow QActions.        *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -38,83 +38,8 @@
 
 // TODO: Create a typedef GensKeyM_t to indicate "with modifiers"?
 
-#define ARRAY_SIZE(x) (sizeof(x)/sizeof((x)[0]))
-
+#include "GensMenuShortcuts_p.hpp"
 namespace GensQt4 {
-
-class GensMenuShortcutsPrivate
-{
-	public:
-		GensMenuShortcutsPrivate(GensMenuShortcuts *q);
-
-	private:
-		GensMenuShortcuts *const q_ptr;
-		Q_DECLARE_PUBLIC(GensMenuShortcuts)
-	private:
-		Q_DISABLE_COPY(GensMenuShortcutsPrivate);
-
-	public:
-		/**
-		 * Key configuration.
-		 *
-		 * NOTE: Key configuration expects modifiers in high 7 bits of GensKey_t.
-		 * See libgens/GensInput/GensKey_t.h for more information.
-		 */
-
-		/** Active QAction maps. **/
-
-		struct DefKeySetting_t {
-			const char *setting;	// QSettings name.
-			const char *qAction;	// QAction object name.
-
-			// TODO: Remove from here; use separate array.
-			GensKey_t gensKey;	// Default GensKey_t.
-		};
-
-		/**
-		 * Default key settings.
-		 * Last entry is nullptr.
-		 */
-		static const DefKeySetting_t DefKeySettings[65+1];
-
-		/// Converts a QAction's name to a DefKeySettings index.
-		QHash<QString, int> hashActionToDefKeySetting;
-
-		/// Set of all QActions.
-		QSet<QAction*> actions;
-		/// Converts a QAction to a GensKey_t.
-		QHash<QAction*, GensKey_t> hashActionToKey;
-		/// Converts a GensKey_t to a QAction.
-		QHash<GensKey_t, QAction*> hashKeyToAction;
-
-		/** Saved configuration. **/
-		/// Key configuration. (Indexes match DefKeySettings[].)
-		GensKey_t savedKeys[ARRAY_SIZE(DefKeySettings)-1];
-
-		/**
-		 * Initialize savedKeys with the default key configuration.
-		 */
-		void initDefaultKeys(void);
-
-	protected:
-		/**
-		 * Update a QAction.
-		 * @param action QAction to update.
-		 */
-		void updateAction(QAction *action);
-
-	public:
-		/**
-		 * Update the QAction maps.
-		 */
-		void updateActionMaps(void);
-
-		/**
-		 * Add an action.
-		 * @param action Action to add.
-		 */
-		void addAction(QAction *action);
-};
 
 /** GensMenuShortcutsPrivate **/
 

@@ -148,14 +148,9 @@ SET(gens-qt4_WINDOW_SRCS
 	)
 
 SET(gens-qt4_WINDOW_H
-	windows/GensWindow.hpp
 	windows/GensWindow_p.hpp
-	windows/AboutDialog.hpp
-	windows/CtrlConfigWindow.hpp
-	windows/ZipSelectDialog.hpp
-	windows/GeneralConfigWindow.hpp
+	windows/GensMenuShortcuts_p.hpp
 	windows/GeneralConfigWindow_p.hpp
-	windows/McdControlWindow.hpp
 	)
 
 SET(gens-qt4_WIDGET_SRCS
