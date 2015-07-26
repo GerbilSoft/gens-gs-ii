@@ -110,7 +110,7 @@ struct OsdStartup {
 	const char *msg;
 	int param;
 };
-vector<OsdStartup> startup_queue;
+static vector<OsdStartup> startup_queue;
 
 namespace GensSdl {
 
@@ -192,9 +192,12 @@ static uint64_t new_clk;
 static uint64_t usec_frameskip;
 
 // Frame counters.
-unsigned int frames = 0;
-unsigned int frames_old = 0;
-unsigned int fps = 0;	// TODO: float or double?
+static unsigned int frames = 0;
+static unsigned int frames_old = 0;
+static unsigned int fps = 0;	// TODO: float or double?
+
+// Save slot.
+static int saveSlot_selected = 0;
 
 // Reset frameskip timers.
 static void reset_frameskip_timers(void) {
@@ -208,6 +211,76 @@ static void reset_frameskip_timers(void) {
 	// Frame counter.
 	frames_old = frames;
 	fps = 0;
+}
+
+/**
+ * Save slot selection.
+ * @param saveSlot Save slot. (0-9)
+ */
+static void doSaveSlot(int saveSlot)
+{
+	assert(saveSlot >= 0 && saveSlot <= 9);
+	if (saveSlot < 0 || saveSlot > 9)
+		return;
+	saveSlot_selected = saveSlot;
+
+	// Check if the specified savestate exists.
+	// TODO: R_OK or just F_OK?
+	const char *slot_state;
+	string filename = getSavestateFilename(rom, saveSlot);
+	if (!access(filename.c_str(), F_OK)) {
+		// Savestate exists.
+		slot_state = "OCCUPIED";
+		// TODO: Load the preview image.
+	} else {
+		// Savestate does not exist.
+		slot_state = "EMPTY";
+	}
+
+	// Show an OSD message.
+	sdlHandler->osd_printf(1500, "Save Slot %d [%s]", saveSlot, slot_state);
+}
+
+/**
+ * Load the state in the selected slot.
+ */
+static void doLoadState(void)
+{
+	assert(saveSlot_selected >= 0 && saveSlot_selected <= 9);
+	if (saveSlot_selected < 0 || saveSlot_selected > 9)
+		return;
+
+	string filename = getSavestateFilename(rom, saveSlot_selected);
+	int ret = context->zomgLoad(filename.c_str());
+	if (ret == 0) {
+		// State loaded.
+		sdlHandler->osd_printf(1500, "Slot %d loaded.", saveSlot_selected);
+	} else {
+		// Error loading state.
+		// TODO: Error code?
+		sdlHandler->osd_printf(1500, "Error loading slot %d: %d", saveSlot_selected, ret);
+	}
+}
+
+/**
+ * Save the state in the selected slot.
+ */
+static void doSaveState(void)
+{
+	assert(saveSlot_selected >= 0 && saveSlot_selected <= 9);
+	if (saveSlot_selected < 0 || saveSlot_selected > 9)
+		return;
+
+	string filename = getSavestateFilename(rom, saveSlot_selected);
+	int ret = context->zomgSave(filename.c_str());
+	if (ret == 0) {
+		// State saved.
+		sdlHandler->osd_printf(1500, "Slot %d saved.", saveSlot_selected);
+	} else {
+		// Error saving state.
+		// TODO: Error code?
+		sdlHandler->osd_printf(1500, "Error loading slot %d: %d", saveSlot_selected, ret);
+	}
 }
 
 /**
@@ -287,6 +360,25 @@ static void processSdlEvent(const SDL_Event &event) {
 						// Send the key to the KeyManager.
 						keyManager->keyDown(SdlHandler::scancodeToGensKey(event.key.keysym.scancode));
 					}
+					break;
+
+				case SDLK_0: case SDLK_1:
+				case SDLK_2: case SDLK_3:
+				case SDLK_4: case SDLK_5:
+				case SDLK_6: case SDLK_7:
+				case SDLK_8: case SDLK_9:
+					// Save slot selection.
+					doSaveSlot(event.key.keysym.sym - SDLK_0);
+					break;
+
+				case SDLK_F8:
+					// Load state.
+					doLoadState();
+					break;
+
+				case SDLK_F5:
+					// Save state.
+					doSaveState();
 					break;
 
 				default:

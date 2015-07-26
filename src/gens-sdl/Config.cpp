@@ -53,7 +53,9 @@ using LibGens::Screenshot;
 
 // C++ includes.
 #include <string>
+#include <sstream>
 using std::string;
+using std::ostringstream;
 
 namespace GensSdl {
 
@@ -94,7 +96,7 @@ static int mkdir_recursive(const char *dir) {
  * @param subdir [in, opt] If not null, append a subdirectory.
  * @return Configuration directory, or nullptr on error.
  */
-const std::string getConfigDir(const utf8_str *subdir)
+std::string getConfigDir(const utf8_str *subdir)
 {
 	static string config_dir;
 	if (config_dir.empty()) {
@@ -158,6 +160,33 @@ const std::string getConfigDir(const utf8_str *subdir)
 	}
 
 	return ret;
+}
+
+/**
+ * Get a savestate filename.
+ * @param rom ROM for the savestate.
+ * @param saveSlot Save slot number. (0-9)
+ * @return Savestate filename.
+ */
+std::string getSavestateFilename(const LibGens::Rom *rom, int saveSlot)
+{
+	assert(saveSlot >= 0 && saveSlot <= 9);
+	if (!rom || saveSlot < 0 || saveSlot > 9)
+		return string();
+
+	const string configDir = getConfigDir("Savestates");
+	if (configDir.empty())
+		return string();
+
+	ostringstream oss;
+	oss << configDir;
+	oss << DIR_SEP_CHR;
+	oss << rom->filename_baseNoExt();
+	oss << '.';
+	oss << saveSlot;
+	oss << ".zomg";
+
+	return oss.str();
 }
 
 /**

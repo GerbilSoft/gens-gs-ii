@@ -46,7 +46,15 @@ namespace GensSdl {
  * @param subdir [in, opt] If not null, append a subdirectory.
  * @return Configuration directory, or empty string on error.
  */
-const std::string getConfigDir(const utf8_str *subdir = nullptr);
+std::string getConfigDir(const utf8_str *subdir = nullptr);
+
+/**
+ * Get a savestate filename.
+ * @param rom ROM for the savestate.
+ * @param saveSlot Save slot number. (0-9)
+ * @return Savestate filename.
+ */
+std::string getSavestateFilename(const LibGens::Rom *rom, int saveSlot);
 
 /**
  * Take a screenshot.
