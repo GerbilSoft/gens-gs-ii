@@ -93,17 +93,27 @@ class OsdGLPrivate {
 		};
 		vector<OsdMessage*> osdList;
 
+		// OpenGL Display List.
+		GLuint displayList;
+
 		// Is the OSD list dirty?
 		// If so, the display list needs to be regenerated.
 		// TODO: Use a display list.
 		bool dirty;
+
+		/**
+		 * Check for expired messages.
+		 * Expired messages will be removed from the list.
+		 */
+		void checkForExpiredMessages(void);
 };
 
 /** OsdGLPrivate **/
 
 OsdGLPrivate::OsdGLPrivate()
 	: texOsd(0)
-	, dirty(false)
+	, displayList(0)
+	, dirty(true)
 {
 	// Reserve space for at least 8 OSD messages.
 	osdList.reserve(8);
@@ -115,7 +125,12 @@ OsdGLPrivate::OsdGLPrivate()
 void OsdGLPrivate::reallocOsdTexture()
 {
 	if (texOsd == 0) {
+		// Create a texture.
 		glGenTextures(1, &texOsd);
+	}
+	if (displayList == 0) {
+		// Create a DisplayList.
+		displayList = glGenLists(1);
 	}
 
 	glEnable(GL_TEXTURE_2D);
@@ -176,6 +191,9 @@ void OsdGLPrivate::reallocOsdTexture()
 			0,		// No border.
 			GL_ALPHA, GL_UNSIGNED_BYTE, glImage);
 	free(glImage);
+
+	// OSD is dirty.
+	dirty = true;
 }
 
 /**
@@ -227,6 +245,48 @@ void OsdGLPrivate::printLine(int x, int y, const std::string &msg)
 	delete[] vtx;
 }
 
+/**
+ * Check for expired messages.
+ * Expired messages will be removed from the list.
+ */
+void OsdGLPrivate::checkForExpiredMessages(void)
+{
+	const uint64_t curTime = timer.getTime();
+	bool isAllProcessed = true;
+
+	for (int i = (int)osdList.size() - 1; i >= 0; i--) {
+		OsdGLPrivate::OsdMessage *osdMsg = osdList[i];
+		if (!osdMsg)
+			continue;
+
+		if (curTime >= osdMsg->endTime) {
+			// Time has elapsed.
+			// Check if the message has been displayed.
+			if (osdMsg->hasDisplayed) {
+				// Message has been displayed.
+				// Remove the message from the list.
+				delete osdList[i];
+				osdList[i] = nullptr;
+				dirty = true;
+			} else {
+				// Message has *not* been displayed.
+				// Reset its end time.
+				osdMsg->endTime = curTime + (osdMsg->duration * 1000);
+				isAllProcessed = false;
+			}
+		} else {
+			// Message has not been processed yet.
+			isAllProcessed = false;
+		}
+	}
+
+	if (isAllProcessed) {
+		// TODO: Use an std::list and remove entries as they're processed?
+		// All messages have been processed.
+		osdList.clear();
+	}
+}
+
 /** OsdGL **/
 
 OsdGL::OsdGL()
@@ -259,6 +319,10 @@ void OsdGL::end(void)
 		glDeleteTextures(1, &d->texOsd);
 		d->texOsd = 0;
 	}
+	if (d->displayList > 0) {
+		glDeleteLists(d->displayList, 1);
+		d->displayList = 0;
+	}
 }
 
 /**
@@ -272,6 +336,20 @@ void OsdGL::draw(void)
 		// TODO: Check for FPS and "enabled" values.
 		return;
 	}
+
+	// Check for expired messages.
+	d->checkForExpiredMessages();
+
+	if (!d->dirty) {
+		// OSD is not dirty.
+		// Call the Display List.
+		glCallList(d->displayList);
+		return;
+	}
+
+	// OSD is dirty.
+	// Create a new GL display list.
+	glNewList(d->displayList, GL_COMPILE_AND_EXECUTE);
 
 	// Set pixel matrices.
 	// Assuming 320x240 for 1x text rendering.
@@ -306,7 +384,6 @@ void OsdGL::draw(void)
 	// TODO: Adjust for visible texture size.
 	int y = (240 - d->chrH);
 	// TODO: Message Enable, Message Color.
-	const uint64_t curTime = d->timer.getTime();
 
 	// TODO: Switch from vector to list?
 	// TODO: Move to OsdGLPrivate?
@@ -315,21 +392,7 @@ void OsdGL::draw(void)
 		if (!osdMsg)
 			continue;
 
-		if (curTime >= osdMsg->endTime) {
-			// Time has elapsed.
-			// Check if the message has been displayed.
-			if (osdMsg->hasDisplayed) {
-				// Message has been displayed.
-				// Remove the message from the list.
-				delete d->osdList[i];
-				d->osdList[i] = nullptr;
-				continue;
-			} else {
-				// Message has *not* been displayed.
-				// Reset its end time.
-				osdMsg->endTime = curTime + (osdMsg->duration * 1000);
-			}
-		}
+		// NOTE: Message expiration is checked at the beginning of the function.
 
 		// Message is now being displayed.
 		osdMsg->hasDisplayed = true;
@@ -342,20 +405,6 @@ void OsdGL::draw(void)
 		d->printLine(d->chrW+1, y+1, osdMsg->msg);
 		glColor4f(1.0, 1.0, 1.0, 1.0);	// TODO: Message color.
 		d->printLine(d->chrW, y, osdMsg->msg);
-	}
-
-	// Check if all messages have been processed.
-	// TODO: Use an std::list and remove entries as they're processed?
-	bool isAllProcessed = true;
-	for (int i = 0; i < (int)d->osdList.size(); i++) {
-		if (d->osdList[i] != nullptr) {
-			isAllProcessed = false;
-			break;
-		}
-	}
-	if (isAllProcessed) {
-		// All messages have been processed.
-		d->osdList.clear();
 	}
 
 	// Done with vertex and texture coordinate arrays.
@@ -373,6 +422,10 @@ void OsdGL::draw(void)
 
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
+
+	// Finished creating the GL display list.
+	glEndList();
+	d->dirty = false;
 }
 
 /**
