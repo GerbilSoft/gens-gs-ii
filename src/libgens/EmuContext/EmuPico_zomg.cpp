@@ -83,8 +83,14 @@ int EmuPico::zomgLoad(const utf8_str *filename)
 	// Make sure the file exists.
 	if (access(filename, F_OK))
 		return -ENOENT;
+	if (access(filename, R_OK))
+		return -EACCES;
 
 	// Make sure this is a ZOMG file.
+	// TODO: More comprehensive error if the file simply
+	// can't be opened instead of being the wrong format?
+	// TODO: Better error description for wrong format?
+	// (Maybe use MDP error codes instead of POSIX later...)
 	if (!LibZomg::Zomg::DetectFormat(filename))
 		return -EINVAL;
 
@@ -143,6 +149,7 @@ int EmuPico::zomgLoad(const utf8_str *filename)
  */
 int EmuPico::zomgSave(const utf8_str *filename) const
 {
+	// TODO: More comprehensive error reporting.
 	LibZomg::Zomg zomg(filename, LibZomg::Zomg::ZOMG_SAVE);
 	if (!zomg.isOpen())
 		return -ENOENT;
