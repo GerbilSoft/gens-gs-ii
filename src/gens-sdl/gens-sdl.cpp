@@ -257,8 +257,15 @@ static void doLoadState(void)
 		sdlHandler->osd_printf(1500, "Save Slot %d loaded.", saveSlot_selected);
 	} else {
 		// Error loading state.
-		// TODO: Error code?
-		sdlHandler->osd_printf(1500, "Error loading Save Slot %d: %d", saveSlot_selected, ret);
+		if (ret == -ENOENT) {
+			// File not found.
+			sdlHandler->osd_printf(1500, "Save Slot %d is empty.", saveSlot_selected);
+		} else {
+			// Other error.
+			sdlHandler->osd_printf(1500,
+				"Error loading Save Slot %d:\n%s",
+				saveSlot_selected, strerror(-ret));
+		}
 	}
 }
 
@@ -278,8 +285,9 @@ static void doSaveState(void)
 		sdlHandler->osd_printf(1500, "Save Slot %d saved.", saveSlot_selected);
 	} else {
 		// Error saving state.
-		// TODO: Error code?
-		sdlHandler->osd_printf(1500, "Error saving Save Slot %d: %d", saveSlot_selected, ret);
+		sdlHandler->osd_printf(1500,
+				"Error saving Save Slot %d:\n%s",
+				saveSlot_selected, strerror(-ret));
 	}
 }
 
