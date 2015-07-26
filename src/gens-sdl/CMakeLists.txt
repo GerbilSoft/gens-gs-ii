@@ -45,6 +45,8 @@ SET(gens-sdl_SRCS
 	SdlGLBackend.cpp
 	GLBackend.cpp
 	str_lookup.cpp
+	OsdGL.cpp
+	OsdFont_VGA.cpp
 	)
 
 # Headers.
@@ -58,6 +60,8 @@ SET(gens-sdl_H
 	SdlGLBackend.hpp
 	GLBackend.hpp
 	str_lookup.hpp
+	OsdGL.hpp
+	OsdFont_VGA.hpp
 	)
 
 # Main target.

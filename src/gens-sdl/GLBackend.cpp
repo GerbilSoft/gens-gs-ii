@@ -27,6 +27,9 @@ using LibGens::MdFb;
 #include <cstdlib>
 #include <climits>
 
+// Onscreen Display.
+#include "OsdGL.hpp"
+
 // Byteswapping macros.
 #include "libgens/Util/byteswap.h"
 
@@ -54,6 +57,7 @@ namespace GensSdl {
 class GLBackendPrivate {
 	public:
 		GLBackendPrivate(GLBackend *q);
+		~GLBackendPrivate();
 
 	private:
 		friend class GLBackend;
@@ -94,6 +98,9 @@ class GLBackendPrivate {
 			return k + 1;
 		}
 
+		// Onscreen Display.
+		OsdGL *osd;
+
 	public:
 		/**
 		 * Reallocate the OpenGL texture.
@@ -119,7 +126,13 @@ GLBackendPrivate::GLBackendPrivate(GLBackend *q)
 	, texVisW(0), texVisH(0)
 	, prevMD_W(0), prevMD_H(0)
 	, prevStretchMode(VBackend::STRETCH_MAX)
+	, osd(new OsdGL())
 { }
+
+GLBackendPrivate::~GLBackendPrivate()
+{
+	delete osd;
+}
 
 /**
  * Reallocate the OpenGL texture.
@@ -403,6 +416,9 @@ void GLBackend::update(bool fb_dirty)
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisable(GL_TEXTURE_2D);
 
+	// Draw the OSD.
+	d->osd->draw();
+
 	// Subclass must swap the framebuffers.
 
 	// VBackend is no longer dirty.
@@ -487,6 +503,9 @@ void GLBackend::initGL(void)
 
 	// Allocate textures.
 	d->reallocTexture();
+
+	// Initialize the OSD.
+	d->osd->init();
 }
 
 /**
@@ -496,6 +515,9 @@ void GLBackend::initGL(void)
 void GLBackend::endGL(void)
 {
 	// TODO: makeCurrent()?
+
+	// Shut down the OSD.
+	d->osd->end();
 
 	if (d->tex > 0) {
 		glDeleteTextures(1, &d->tex);
