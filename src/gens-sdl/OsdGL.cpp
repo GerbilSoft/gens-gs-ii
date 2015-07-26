@@ -330,9 +330,11 @@ string OsdGLPrivate::utf8ToInternal(const utf8_str *str, size_t len)
 				case 0x25BC:	chr8 = 0x1F; break;
 
 				// VCR symbols.
-				case 0x25CF:	chr8 = 0x80; break;	// Record. (BLACK CIRCLE)
-				case 0xF8FE:	chr8 = 0x81; break;	// Pause. (Private Use Area)
-				case 0x25A0:	chr8 = 0x82; break;	// Stop. (BLACK SQUARE)
+				// NOTE: MSVC 2010 complains about
+				// truncation of constant values.
+				case 0x25CF:	chr8 = (char)0x80; break;	// Record. (BLACK CIRCLE)
+				case 0xF8FE:	chr8 = (char)0x81; break;	// Pause. (Private Use Area)
+				case 0x25A0:	chr8 = (char)0x82; break;	// Stop. (BLACK SQUARE)
 
 				default:	chr8 = 0; break;
 			}
