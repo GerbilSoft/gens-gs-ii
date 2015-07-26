@@ -183,6 +183,10 @@ static bool paused = false;
 // Enable frameskip.
 static bool frameskip = true;
 
+// Window has been exposed.
+// Video should be updated if emulation is paused.
+static bool exposed = false;
+
 // Frameskip timers.
 static uint64_t start_clk;
 static uint64_t old_clk;
@@ -407,7 +411,10 @@ static void processSdlEvent(const SDL_Event &event) {
 					// Resize the video renderer.
 					sdlHandler->resize_video(event.window.data1, event.window.data2);
 					break;
-				default:
+				case SDL_WINDOWEVENT_EXPOSED:
+					// Window has been exposed.
+					// Tell the main loop to update video.
+					exposed = true;
 					break;
 			}
 			break;
@@ -591,11 +598,20 @@ int main(int argc, char *argv[])
 
 		if (GensSdl::paused) {
 			// Emulation is paused.
-			// Only update video if the VBackend is dirty.
-			sdlHandler->update_video_paused();
+			// Only update video if the VBackend is dirty
+			// or the SDL window has been exposed.
+			if (GensSdl::exposed) {
+				sdlHandler->update_video();
+			} else {
+				sdlHandler->update_video_paused();
+			}
+
 			// Don't run any frames.
 			continue;
 		}
+
+		// Clear the 'exposed' flag.
+		GensSdl::exposed = false;
 
 		// New start time.
 		GensSdl::new_clk = GensSdl::timing.getTime();
