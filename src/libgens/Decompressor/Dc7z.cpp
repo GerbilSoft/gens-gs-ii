@@ -107,8 +107,7 @@ Dc7z::Dc7z(FILE *f, const utf8_str *filename)
 
 #ifdef _WIN32
 	// Convert the filename from UTF-8 to UTF-16.
-	// TODO: Eliminate the unnecessary string conversion.
-	u16string filenameW = LibGensText::Utf8_to_Utf16(string(filename));
+	u16string filenameW = LibGensText::Utf8_to_Utf16(filename, strlen(filename));
 	if (filenameW.empty()) {
 		// Error converting the filename to UTF-16.
 		m_file = nullptr;
