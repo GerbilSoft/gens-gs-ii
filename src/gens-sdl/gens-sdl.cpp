@@ -387,14 +387,28 @@ static void processSdlEvent(const SDL_Event &event) {
 					doSaveSlot(event.key.keysym.sym - SDLK_0);
 					break;
 
-				case SDLK_F8:
-					// Load state.
-					doLoadState();
-					break;
-
 				case SDLK_F5:
 					// Save state.
 					doSaveState();
+					break;
+
+				case SDLK_F6: {
+					// Previous save slot.
+					int saveSlot  = ((saveSlot_selected + 9) % 10);
+					doSaveSlot(saveSlot);
+					break;
+				}
+
+				case SDLK_F7: {
+					// Next save slot.
+					int saveSlot  = ((saveSlot_selected + 1) % 10);
+					doSaveSlot(saveSlot);
+					break;
+				}
+
+				case SDLK_F8:
+					// Load state.
+					doLoadState();
 					break;
 
 				default:
