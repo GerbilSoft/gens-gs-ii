@@ -79,6 +79,11 @@ class GensMenuShortcutsPrivate
 		 */
 		static const GensKey_t DefKeyBindings_gens[KeyBinding_count+1];
 
+		/**
+		 * Default key bindings for Kega Fusion 3.63x.
+		 */
+		static const GensKey_t DefKeyBindings_kega[KeyBinding_count+1];
+
 		/// Converts a QAction's name to a KeyBindings index.
 		QHash<QString, int> hashActionToKeyBinding;
 

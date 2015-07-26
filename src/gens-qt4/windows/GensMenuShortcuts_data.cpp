@@ -53,6 +53,8 @@ const GensMenuShortcutsPrivate::KeyBinding_t GensMenuShortcutsPrivate::KeyBindin
 
 	// Graphics menu.
 	{"graphics/showMenuBar",	"actionGraphicsShowMenuBar"},
+	// TODO: Fullscreen.
+	//{"graphics/fullScreen",	"actionGraphicsFullScreen"},
 	{"graphics/resolution",		"actionGraphicsResolution"},
 	// Graphics, Resolution submenu.
 	{"graphics/resolution/1x",	"actionGraphicsResolution1x"},
@@ -160,6 +162,7 @@ const GensKey_t GensMenuShortcutsPrivate::DefKeyBindings_gens[KeyBinding_count+1
 
 	// Graphics menu.
 	KEYM_CTRL | KEYV_m,		// actionGraphicsShowMenuBar
+	//KEYM_ALT | KEYV_RETURN,	// TODO: Fullscreen.
 	0,				// actionGraphicsResolution
 	// Graphics, Resolution submenu.
 	0,				// actionGraphicsResolution1x
@@ -198,7 +201,7 @@ const GensKey_t GensMenuShortcutsPrivate::DefKeyBindings_gens[KeyBinding_count+1
 	0,				// actionSystemResetS68K
 	0,				// actionSystemResetMSH2
 	0,				// actionSystemResetSSH2
-	0,				//actionSystemResetZ80
+	0,				// actionSystemResetZ80
 
 	// Options menu.
 	0,				// actionOptionsSRAM
@@ -213,6 +216,123 @@ const GensKey_t GensMenuShortcutsPrivate::DefKeyBindings_gens[KeyBinding_count+1
 	KEYV_F9,			// actionNoMenuFastBlur
 
 	// Savestates.
+	KEYV_0,				// actionNoMenuSaveSlot0
+	KEYV_1,				// actionNoMenuSaveSlot1
+	KEYV_2,				// actionNoMenuSaveSlot2
+	KEYV_3,				// actionNoMenuSaveSlot3
+	KEYV_4,				// actionNoMenuSaveSlot4
+	KEYV_5,				// actionNoMenuSaveSlot5
+	KEYV_6,				// actionNoMenuSaveSlot6
+	KEYV_7,				// actionNoMenuSaveSlot7
+	KEYV_8,				// actionNoMenuSaveSlot8
+	KEYV_9,				// actionNoMenuSaveSlot9
+	KEYV_F6,			// actionNoMenuSaveSlotPrev
+	KEYV_F7,			// actionNoMenuSaveSlotNext
+	// TODO: Swap these two?
+	KEYM_SHIFT | KEYV_F8,		// actionNoMenuLoadStateFrom
+	KEYM_SHIFT | KEYV_F5,		// actionNoMenuSaveStateAs
+
+	// End of key bindings.
+	// TODO: Make this -1, or remove the last entry entirely?
+	0
+};
+
+/**
+ * Default key bindings for Kega Fusion 3.63x.
+ */
+const GensKey_t GensMenuShortcutsPrivate::DefKeyBindings_kega[KeyBinding_count+1] = {
+	// File menu.
+	// NOTE: Kega Fusion has separate menu items for
+	// different systems. Gens/GS II does not, so use
+	// the standard "Open" key shortcut.
+	KEYM_CTRL | KEYV_o,		// actionFileOpenROM
+	0,				// actionFileRecentROMs
+	// File, Recent ROMs menu.
+	// Kega Fusion only has a hotkey for the "last" ROM.
+	KEYM_SHIFT | KEYM_CTRL | KEYV_l,	// actionRecentROMs_1
+	0,		// actionRecentROMs_2
+	0,		// actionRecentROMs_3
+	0,		// actionRecentROMs_4
+	0,		// actionRecentROMs_5
+	0,		// actionRecentROMs_6
+	0,		// actionRecentROMs_7
+	0,		// actionRecentROMs_8
+	0,		// actionRecentROMs_9
+	// File menu.
+	// Instead of "Close ROM", Kega Fusion has "Power Off".
+	// The last ROM will be reloaded if "Hard Reset" is selected.
+	// Gens/GS II doesn't support this, so use the "Power Off"
+	// hotkey for "Close ROM".
+	KEYM_SHIFT | KEYV_TAB,		// actionFileCloseROM
+	KEYV_F5,			// actionFileSaveState
+	KEYV_F8,			// actionFileLoadState
+#ifdef Q_WS_MAC
+	KEYM_CTRL | KEYV_COMMA,		// actionFileGeneralConfiguration
+#else
+	0,				// actionFileGeneralConfiguration
+#endif
+	0,				// actionFileSegaCDControlPanel
+	KEYM_CTRL | KEYV_q,		// actionFileQuit
+
+	// Graphics menu.
+	KEYM_CTRL | KEYV_m,		// actionGraphicsShowMenuBar
+	// NOTE: Both Esc and Alt+Enter work here. Add secondary shortcuts?
+	//KEYM_ALT | KEYV_RETURN,	// TODO: Fullscreen.
+	0,				// actionGraphicsResolution
+	// Graphics, Resolution submenu.
+	0,				// actionGraphicsResolution1x
+	0,				// actionGraphicsResolution2x
+	0,				// actionGraphicsResolution3x
+	0,				// actionGraphicsResolution4x
+	// Graphics menu.
+	0,				// actionGraphicsBpp
+	// Graphics, Color Depth submenu.
+	0,				// actionGraphicsBpp15
+	0,				// actionGraphicsBpp16
+	0,				// actionGraphicsBpp32
+	// Graphics menu.
+	KEYM_SHIFT | KEYV_F2,		// actionGraphicsStretch
+	// Graphics, Stretch submenu.
+	0,				// actionGraphicsStretchNone
+	0,				// actionGraphicsStretchHorizontal
+	0,				// actionGraphicsStretchVertical
+	0,				// actionGraphicsStretchFull
+	// Graphics menu.
+	KEYM_SHIFT | KEYV_F12,		// actionGraphicsScreenshot
+
+	// System menu.
+	KEYM_SHIFT | KEYV_F3,		// actionSystemRegion
+	// System, Region submenu.
+	0,				// actionSystemRegionAuto
+	0,				// actionSystemRegionJPN
+	0,				// actionSystemRegionAsia
+	0,				// actionSystemRegionUSA
+	0,				// actionSystemRegionEUR
+	// System menu.
+	KEYM_SHIFT | KEYV_TAB,		// actionSystemHardReset
+	KEYV_TAB,			// actionSystemSoftReset
+	KEYV_PAUSE,			// actionSystemPause
+	0,				// actionSystemResetM68K
+	0,				// actionSystemResetS68K
+	0,				// actionSystemResetMSH2
+	0,				// actionSystemResetSSH2
+	0,				// actionSystemResetZ80
+
+	// Options menu.
+	0,				// actionOptionsSRAM
+	0,				// actionOptionsControllers
+
+	// NOTE: Test menus aren't going to be added here.
+
+	// Help menu.
+	0,				// actionHelpAbout
+
+	// Non-menu keys.
+	KEYV_F9,			// actionNoMenuFastBlur
+
+	// Savestates.
+	// NOTE: Kega doesn't map keys 0-9, but we'll
+	// keep the mapping for convenience reasons.
 	KEYV_0,				// actionNoMenuSaveSlot0
 	KEYV_1,				// actionNoMenuSaveSlot1
 	KEYV_2,				// actionNoMenuSaveSlot2
