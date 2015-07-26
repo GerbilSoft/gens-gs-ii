@@ -61,22 +61,26 @@ class GensMenuShortcutsPrivate
 
 		/** Active QAction maps. **/
 
-		struct DefKeySetting_t {
+		static const int KeyBinding_count = 65;
+		struct KeyBinding_t {
 			const char *setting;	// QSettings name.
 			const char *qAction;	// QAction object name.
-
-			// TODO: Remove from here; use separate array.
-			GensKey_t gensKey;	// Default GensKey_t.
 		};
 
 		/**
-		 * Default key settings.
+		 * Key bindings.
+		 * This maps QSettings entries to QActions.
 		 * Last entry is nullptr.
 		 */
-		static const DefKeySetting_t DefKeySettings[65+1];
+		static const KeyBinding_t KeyBindings[KeyBinding_count+1];
 
-		/// Converts a QAction's name to a DefKeySettings index.
-		QHash<QString, int> hashActionToDefKeySetting;
+		/**
+		 * Default key bindings for Gens/GS II.
+		 */
+		static const GensKey_t DefKeyBindings_gens[KeyBinding_count+1];
+
+		/// Converts a QAction's name to a KeyBindings index.
+		QHash<QString, int> hashActionToKeyBinding;
 
 		/// Set of all QActions.
 		QSet<QAction*> actions;
@@ -86,8 +90,8 @@ class GensMenuShortcutsPrivate
 		QHash<GensKey_t, QAction*> hashKeyToAction;
 
 		/** Saved configuration. **/
-		/// Key configuration. (Indexes match DefKeySettings[].)
-		GensKey_t savedKeys[ARRAY_SIZE(DefKeySettings)-1];
+		/// Key configuration. (Indexes match KeyBindings[].)
+		GensKey_t savedKeys[KeyBinding_count];
 
 		/**
 		 * Initialize savedKeys with the default key configuration.

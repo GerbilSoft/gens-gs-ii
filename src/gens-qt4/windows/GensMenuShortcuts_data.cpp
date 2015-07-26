@@ -25,109 +25,213 @@
 
 namespace GensQt4 {
 
-// Default key settings.
-const GensMenuShortcutsPrivate::DefKeySetting_t GensMenuShortcutsPrivate::DefKeySettings[] =
+// Map of QSettings entries to QActions.
+const GensMenuShortcutsPrivate::KeyBinding_t GensMenuShortcutsPrivate::KeyBindings[KeyBinding_count+1] =
 {
 	// File menu.
-	{"file/open",			"actionFileOpenROM",			KEYM_CTRL | KEYV_o},
-	{"file/recent",			"actionFileRecentROMs",			0},
+	{"file/open",			"actionFileOpenROM"},
+	{"file/recent",			"actionFileRecentROMs"},
 	// File, Recent ROMs menu.
 	// NOTE: Recent ROMs menu is dynamic.
 	// The menu items will have these object names.
-	{"file/recent/1",		"actionRecentROMs_1",			KEYM_CTRL | KEYV_1},
-	{"file/recent/2",		"actionRecentROMs_2",			KEYM_CTRL | KEYV_2},
-	{"file/recent/3",		"actionRecentROMs_3",			KEYM_CTRL | KEYV_3},
-	{"file/recent/4",		"actionRecentROMs_4",			KEYM_CTRL | KEYV_4},
-	{"file/recent/5",		"actionRecentROMs_5",			KEYM_CTRL | KEYV_5},
-	{"file/recent/6",		"actionRecentROMs_6",			KEYM_CTRL | KEYV_6},
-	{"file/recent/7",		"actionRecentROMs_7",			KEYM_CTRL | KEYV_7},
-	{"file/recent/8",		"actionRecentROMs_8",			KEYM_CTRL | KEYV_8},
-	{"file/recent/9",		"actionRecentROMs_9",			KEYM_CTRL | KEYV_9},
+	{"file/recent/1",		"actionRecentROMs_1"},
+	{"file/recent/2",		"actionRecentROMs_2"},
+	{"file/recent/3",		"actionRecentROMs_3"},
+	{"file/recent/4",		"actionRecentROMs_4"},
+	{"file/recent/5",		"actionRecentROMs_5"},
+	{"file/recent/6",		"actionRecentROMs_6"},
+	{"file/recent/7",		"actionRecentROMs_7"},
+	{"file/recent/8",		"actionRecentROMs_8"},
+	{"file/recent/9",		"actionRecentROMs_9"},
 	// File menu.
-	{"file/close",			"actionFileCloseROM",			KEYM_CTRL | KEYV_w},
-	{"file/saveState",		"actionFileSaveState",			KEYV_F5},
-	{"file/loadState",		"actionFileLoadState",			KEYV_F8},
-#ifdef Q_WS_MAC
-	{"file/genConfig",		"actionFileGeneralConfiguration",	KEYM_CTRL | KEYV_COMMA},
-#else
-	{"file/genConfig",		"actionFileGeneralConfiguration",	0},
-#endif
-	{"file/mcdControl",		"actionFileSegaCDControlPanel",		0},
-	{"file/quit",			"actionFileQuit",			KEYM_CTRL | KEYV_q},
+	{"file/close",			"actionFileCloseROM"},
+	{"file/saveState",		"actionFileSaveState"},
+	{"file/loadState",		"actionFileLoadState"},
+	{"file/genConfig",		"actionFileGeneralConfiguration"},
+	{"file/mcdControl",		"actionFileSegaCDControlPanel"},
+	{"file/quit",			"actionFileQuit"},
 
 	// Graphics menu.
-	{"graphics/showMenuBar",	"actionGraphicsShowMenuBar",		KEYM_CTRL | KEYV_m},
-	{"graphics/resolution",		"actionGraphicsResolution",		0},
+	{"graphics/showMenuBar",	"actionGraphicsShowMenuBar"},
+	{"graphics/resolution",		"actionGraphicsResolution"},
 	// Graphics, Resolution submenu.
-	{"graphics/resolution/1x",	"actionGraphicsResolution1x",		0},
-	{"graphics/resolution/2x",	"actionGraphicsResolution2x",		0},
-	{"graphics/resolution/3x",	"actionGraphicsResolution3x",		0},
-	{"graphics/resolution/4x",	"actionGraphicsResolution4x",		0},
+	{"graphics/resolution/1x",	"actionGraphicsResolution1x"},
+	{"graphics/resolution/2x",	"actionGraphicsResolution2x"},
+	{"graphics/resolution/3x",	"actionGraphicsResolution3x"},
+	{"graphics/resolution/4x",	"actionGraphicsResolution4x"},
 	// Graphics menu.
-	{"graphics/bpp",		"actionGraphicsBpp",			0},
+	{"graphics/bpp",		"actionGraphicsBpp"},
 	// Graphics, Color Depth submenu.
-	{"graphics/bpp/15",		"actionGraphicsBpp15",			0},
-	{"graphics/bpp/16",		"actionGraphicsBpp16",			0},
-	{"graphics/bpp/32",		"actionGraphicsBpp32",			0},
+	{"graphics/bpp/15",		"actionGraphicsBpp15"},
+	{"graphics/bpp/16",		"actionGraphicsBpp16"},
+	{"graphics/bpp/32",		"actionGraphicsBpp32"},
 	// Graphics menu.
-	{"graphics/stretch",		"actionGraphicsStretch",		KEYM_SHIFT | KEYV_F2},
+	{"graphics/stretch",		"actionGraphicsStretch"},
 	// Graphics, Stretch submenu.
-	{"graphics/stretch/none",	"actionGraphicsStretchNone",		0},
-	{"graphics/stretch/horizontal",	"actionGraphicsStretchHorizontal",	0},
-	{"graphics/stretch/vertical",	"actionGraphicsStretchVertical",	0},
-	{"graphics/stretch/full",	"actionGraphicsStretchFull",		0},
+	{"graphics/stretch/none",	"actionGraphicsStretchNone"},
+	{"graphics/stretch/horizontal",	"actionGraphicsStretchHorizontal"},
+	{"graphics/stretch/vertical",	"actionGraphicsStretchVertical"},
+	{"graphics/stretch/full",	"actionGraphicsStretchFull"},
 	// Graphics menu.
-	{"graphics/screenShot",		"actionGraphicsScreenshot",		KEYM_SHIFT | KEYV_BACKSPACE},
+	{"graphics/screenShot",		"actionGraphicsScreenshot"},
 
 	// System menu.
-	{"system/region",		"actionSystemRegion",			KEYM_SHIFT | KEYV_F3},
+	{"system/region",		"actionSystemRegion"},
 	// System, Region submenu.
-	{"system/region/autoDetect",	"actionSystemRegionAuto",		0},
-	{"system/region/japan",		"actionSystemRegionJPN",		0},
-	{"system/region/asia",		"actionSystemRegionAsia",		0},
-	{"system/region/usa",		"actionSystemRegionUSA",		0},
-	{"system/region/europe",	"actionSystemRegionEUR",		0},
+	{"system/region/autoDetect",	"actionSystemRegionAuto"},
+	{"system/region/japan",		"actionSystemRegionJPN"},
+	{"system/region/asia",		"actionSystemRegionAsia"},
+	{"system/region/usa",		"actionSystemRegionUSA"},
+	{"system/region/europe",	"actionSystemRegionEUR"},
 	// System menu.
-	{"system/hardReset",		"actionSystemHardReset",		KEYM_SHIFT | KEYV_TAB},
-	{"system/softReset",		"actionSystemSoftReset",		KEYV_TAB},
-	{"system/pause",		"actionSystemPause",			KEYV_ESCAPE},
-	{"system/resetM68K",		"actionSystemResetM68K",		0},
-	{"system/resetS68K",		"actionSystemResetS68K",		0},
-	{"system/resetMSH2",		"actionSystemResetMSH2",		0},
-	{"system/resetSSH2",		"actionSystemResetSSH2",		0},
-	{"system/resetZ80",		"actionSystemResetZ80",			0},
+	{"system/hardReset",		"actionSystemHardReset"},
+	{"system/softReset",		"actionSystemSoftReset"},
+	{"system/pause",		"actionSystemPause"},
+	{"system/resetM68K",		"actionSystemResetM68K"},
+	{"system/resetS68K",		"actionSystemResetS68K"},
+	{"system/resetMSH2",		"actionSystemResetMSH2"},
+	{"system/resetSSH2",		"actionSystemResetSSH2"},
+	{"system/resetZ80",		"actionSystemResetZ80"},
 
 	// Options menu.
-	{"options/enableSRam",		"actionOptionsSRAM",			0},
-	{"options/controllers",		"actionOptionsControllers",		0},
+	{"options/enableSRam",		"actionOptionsSRAM"},
+	{"options/controllers",		"actionOptionsControllers"},
 
 	// NOTE: Test menus aren't going to be added here.
 
 	// Help menu.
-	{"help/about",			"actionHelpAbout",			0},
+	{"help/about",			"actionHelpAbout"},
 
 	// Non-menu keys.
-	{"other/fastBlur",		"actionNoMenuFastBlur",			KEYV_F9},
+	{"other/fastBlur",		"actionNoMenuFastBlur"},
 
+	// Savestates.
 	// TODO: Change to saveSlot/0?
-	{"other/saveSlot0",		"actionNoMenuSaveSlot0",		KEYV_0},
-	{"other/saveSlot1",		"actionNoMenuSaveSlot1",		KEYV_1},
-	{"other/saveSlot2",		"actionNoMenuSaveSlot2",		KEYV_2},
-	{"other/saveSlot3",		"actionNoMenuSaveSlot3",		KEYV_3},
-	{"other/saveSlot4",		"actionNoMenuSaveSlot4",		KEYV_4},
-	{"other/saveSlot5",		"actionNoMenuSaveSlot5",		KEYV_5},
-	{"other/saveSlot6",		"actionNoMenuSaveSlot6",		KEYV_6},
-	{"other/saveSlot7",		"actionNoMenuSaveSlot7",		KEYV_7},
-	{"other/saveSlot8",		"actionNoMenuSaveSlot8",		KEYV_8},
-	{"other/saveSlot9",		"actionNoMenuSaveSlot9",		KEYV_9},
-	{"other/saveSlotPrev",		"actionNoMenuSaveSlotPrev",		KEYV_F6},
-	{"other/saveSlotNext",		"actionNoMenuSaveSlotNext",		KEYV_F7},
+	{"other/saveSlot0",		"actionNoMenuSaveSlot0"},
+	{"other/saveSlot1",		"actionNoMenuSaveSlot1"},
+	{"other/saveSlot2",		"actionNoMenuSaveSlot2"},
+	{"other/saveSlot3",		"actionNoMenuSaveSlot3"},
+	{"other/saveSlot4",		"actionNoMenuSaveSlot4"},
+	{"other/saveSlot5",		"actionNoMenuSaveSlot5"},
+	{"other/saveSlot6",		"actionNoMenuSaveSlot6"},
+	{"other/saveSlot7",		"actionNoMenuSaveSlot7"},
+	{"other/saveSlot8",		"actionNoMenuSaveSlot8"},
+	{"other/saveSlot9",		"actionNoMenuSaveSlot9"},
+	{"other/saveSlotPrev",		"actionNoMenuSaveSlotPrev"},
+	{"other/saveSlotNext",		"actionNoMenuSaveSlotNext"},
 	// TODO: Swap these two?
-	{"other/saveSlotPrev",		"actionNoMenuLoadStateFrom",		KEYM_SHIFT | KEYV_F8},
-	{"other/saveSlotNext",		"actionNoMenuSaveStateAs",		KEYM_SHIFT | KEYV_F5},
+	{"other/saveSlotPrev",		"actionNoMenuLoadStateFrom"},
+	{"other/saveSlotNext",		"actionNoMenuSaveStateAs"},
 
-	// End of default keys.
-	{nullptr, nullptr, 0}
+	// End of key bindings.
+	{nullptr, nullptr}
+};
+
+/**
+ * Default key bindings for Gens/GS II.
+ */
+const GensKey_t GensMenuShortcutsPrivate::DefKeyBindings_gens[KeyBinding_count+1] = {
+	// File menu.
+	KEYM_CTRL | KEYV_o,		// actionFileOpenROM
+	0,				// actionFileRecentROMs
+	// File, Recent ROMs menu.
+	// NOTE: Recent ROMs menu is dynamic.
+	// The menu items will have these object names.
+	KEYM_CTRL | KEYV_1,		// actionRecentROMs_1
+	KEYM_CTRL | KEYV_2,		// actionRecentROMs_2
+	KEYM_CTRL | KEYV_3,		// actionRecentROMs_3
+	KEYM_CTRL | KEYV_4,		// actionRecentROMs_4
+	KEYM_CTRL | KEYV_5,		// actionRecentROMs_5
+	KEYM_CTRL | KEYV_6,		// actionRecentROMs_6
+	KEYM_CTRL | KEYV_7,		// actionRecentROMs_7
+	KEYM_CTRL | KEYV_8,		// actionRecentROMs_8
+	KEYM_CTRL | KEYV_9,		// actionRecentROMs_9
+	// File menu.
+	KEYM_CTRL | KEYV_w,		// actionFileCloseROM
+	KEYV_F5,			// actionFileSaveState
+	KEYV_F8,			// actionFileLoadState
+#ifdef Q_WS_MAC
+	KEYM_CTRL | KEYV_COMMA,		// actionFileGeneralConfiguration
+#else
+	0,				// actionFileGeneralConfiguration
+#endif
+	0,				// actionFileSegaCDControlPanel
+	KEYM_CTRL | KEYV_q,		// actionFileQuit
+
+	// Graphics menu.
+	KEYM_CTRL | KEYV_m,		// actionGraphicsShowMenuBar
+	0,				// actionGraphicsResolution
+	// Graphics, Resolution submenu.
+	0,				// actionGraphicsResolution1x
+	0,				// actionGraphicsResolution2x
+	0,				// actionGraphicsResolution3x
+	0,				// actionGraphicsResolution4x
+	// Graphics menu.
+	0,				// actionGraphicsBpp
+	// Graphics, Color Depth submenu.
+	0,				// actionGraphicsBpp15
+	0,				// actionGraphicsBpp16
+	0,				// actionGraphicsBpp32
+	// Graphics menu.
+	KEYM_SHIFT | KEYV_F2,		// actionGraphicsStretch
+	// Graphics, Stretch submenu.
+	0,				// actionGraphicsStretchNone
+	0,				// actionGraphicsStretchHorizontal
+	0,				// actionGraphicsStretchVertical
+	0,				// actionGraphicsStretchFull
+	// Graphics menu.
+	KEYM_SHIFT | KEYV_BACKSPACE,	// actionGraphicsScreenshot
+
+	// System menu.
+	KEYM_SHIFT | KEYV_F3,		// actionSystemRegion
+	// System, Region submenu.
+	0,				// actionSystemRegionAuto
+	0,				// actionSystemRegionJPN
+	0,				// actionSystemRegionAsia
+	0,				// actionSystemRegionUSA
+	0,				// actionSystemRegionEUR
+	// System menu.
+	KEYM_SHIFT | KEYV_TAB,		// actionSystemHardReset
+	KEYV_TAB,			// actionSystemSoftReset
+	KEYV_ESCAPE,			// actionSystemPause
+	0,				// actionSystemResetM68K
+	0,				// actionSystemResetS68K
+	0,				// actionSystemResetMSH2
+	0,				// actionSystemResetSSH2
+	0,				//actionSystemResetZ80
+
+	// Options menu.
+	0,				// actionOptionsSRAM
+	0,				// actionOptionsControllers
+
+	// NOTE: Test menus aren't going to be added here.
+
+	// Help menu.
+	0,				// actionHelpAbout
+
+	// Non-menu keys.
+	KEYV_F9,			// actionNoMenuFastBlur
+
+	// Savestates.
+	KEYV_0,				// actionNoMenuSaveSlot0
+	KEYV_1,				// actionNoMenuSaveSlot1
+	KEYV_2,				// actionNoMenuSaveSlot2
+	KEYV_3,				// actionNoMenuSaveSlot3
+	KEYV_4,				// actionNoMenuSaveSlot4
+	KEYV_5,				// actionNoMenuSaveSlot5
+	KEYV_6,				// actionNoMenuSaveSlot6
+	KEYV_7,				// actionNoMenuSaveSlot7
+	KEYV_8,				// actionNoMenuSaveSlot8
+	KEYV_9,				// actionNoMenuSaveSlot9
+	KEYV_F6,			// actionNoMenuSaveSlotPrev
+	KEYV_F7,			// actionNoMenuSaveSlotNext
+	// TODO: Swap these two?
+	KEYM_SHIFT | KEYV_F8,		// actionNoMenuLoadStateFrom
+	KEYM_SHIFT | KEYV_F5,		// actionNoMenuSaveStateAs
+
+	// End of key bindings.
+	// TODO: Make this -1, or remove the last entry entirely?
+	0
 };
 
 }

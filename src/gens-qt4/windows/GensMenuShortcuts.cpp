@@ -46,19 +46,19 @@ namespace GensQt4 {
 GensMenuShortcutsPrivate::GensMenuShortcutsPrivate(GensMenuShortcuts *q)
 	: q_ptr(q)
 {
-	// Make sure DefKeySettings is the correct size.
+	// Make sure KeyBindings is the correct size.
 	// Check for too small.
-	assert(DefKeySettings[ARRAY_SIZE(DefKeySettings)-1].setting == nullptr);
+	assert(KeyBindings[ARRAY_SIZE(KeyBindings)-1].setting == nullptr);
 	// Check for too big.
-	assert(DefKeySettings[ARRAY_SIZE(DefKeySettings)-2].setting != nullptr);
+	assert(KeyBindings[ARRAY_SIZE(KeyBindings)-2].setting != nullptr);
 
 	// Initialize actionToDefKeySetting.
 	// TODO: Move to initDefaultKeys to save a loop?
-	hashActionToDefKeySetting.clear();
-	for (int i = 0; i < (int)(ARRAY_SIZE(DefKeySettings)-1); i++) {
-		const GensMenuShortcutsPrivate::DefKeySetting_t *key = &DefKeySettings[i];
+	hashActionToKeyBinding.clear();
+	for (int i = 0; i < (int)(ARRAY_SIZE(KeyBindings)-1); i++) {
+		const GensMenuShortcutsPrivate::KeyBinding_t *key = &KeyBindings[i];
 		if (key->qAction != nullptr) {
-			hashActionToDefKeySetting.insert(QLatin1String(key->qAction), i);
+			hashActionToKeyBinding.insert(QLatin1String(key->qAction), i);
 		}
 	}
 
@@ -71,8 +71,9 @@ GensMenuShortcutsPrivate::GensMenuShortcutsPrivate(GensMenuShortcuts *q)
  */
 void GensMenuShortcutsPrivate::initDefaultKeys(void)
 {
-	for (int i = 0; i < (int)(ARRAY_SIZE(DefKeySettings)-1); i++) {
-		savedKeys[i] = DefKeySettings[i].gensKey;
+	// Using the Gens/GS II key bindings by default.
+	for (int i = 0; i < (int)(ARRAY_SIZE(KeyBindings)-1); i++) {
+		savedKeys[i] = DefKeyBindings_gens[i];
 	}
 
 	updateActionMaps();
@@ -84,8 +85,8 @@ void GensMenuShortcutsPrivate::initDefaultKeys(void)
  */
 void GensMenuShortcutsPrivate::updateAction(QAction *action)
 {
-	// Find this action in DefKeySettings..
-	int idx = hashActionToDefKeySetting.value(action->objectName(), -1);
+	// Find this action in KeyBindings..
+	int idx = hashActionToKeyBinding.value(action->objectName(), -1);
 	if (idx >= 0 && idx < (int)ARRAY_SIZE(savedKeys)-1) {
 		// Action found.
 		GensKey_t gensKey = savedKeys[idx];
@@ -99,7 +100,7 @@ void GensMenuShortcutsPrivate::updateAction(QAction *action)
 	} else {
 		// Action not found.
 		// TODO: LOG_MSG?
-		fprintf(stderr, "%s: Action '%s' not present in DefKeySettings.\n",
+		fprintf(stderr, "%s: Action '%s' not present in KeyBindings.\n",
 			__func__, action->objectName().toUtf8().constData());
 	}
 }
@@ -233,12 +234,13 @@ int GensMenuShortcuts::load(const QSettings *qSettings)
 	Q_D(GensMenuShortcuts);
 
 	// Load the key configuration.
-	for (int i = 0; i < (int)(ARRAY_SIZE(d->DefKeySettings)-1); i++) {
-		const GensMenuShortcutsPrivate::DefKeySetting_t *key = &d->DefKeySettings[i];
+	for (int i = 0; i < (int)(ARRAY_SIZE(d->KeyBindings)-1); i++) {
+		const GensMenuShortcutsPrivate::KeyBinding_t *key = &d->KeyBindings[i];
 		assert(key->setting != nullptr);
 
 		const GensKey_t gensKey = qSettings->value(
-			QLatin1String(key->setting), key->gensKey).toString().toUInt(nullptr, 0);
+			QLatin1String(key->setting),
+			GensMenuShortcutsPrivate::DefKeyBindings_gens[i]).toString().toUInt(nullptr, 0);
 		d->savedKeys[i] = gensKey;
 	}
 
@@ -260,8 +262,8 @@ int GensMenuShortcuts::save(QSettings *qSettings) const
 	Q_D(const GensMenuShortcuts);
 
 	// Save the key configuration.
-	for (int i = 0; i < (int)(ARRAY_SIZE(d->DefKeySettings)-1); i++) {
-		const GensMenuShortcutsPrivate::DefKeySetting_t *key = &d->DefKeySettings[i];
+	for (int i = 0; i < (int)(ARRAY_SIZE(d->KeyBindings)-1); i++) {
+		const GensMenuShortcutsPrivate::KeyBinding_t *key = &d->KeyBindings[i];
 		assert(key->setting != nullptr);
 
 		const GensKey_t gensKey = d->savedKeys[i];
