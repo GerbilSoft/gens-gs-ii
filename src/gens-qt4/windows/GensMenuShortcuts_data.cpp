@@ -122,8 +122,8 @@ const GensMenuShortcutsPrivate::KeyBinding_t GensMenuShortcutsPrivate::KeyBindin
 	{"other/saveSlotPrev",		"actionNoMenuSaveSlotPrev"},
 	{"other/saveSlotNext",		"actionNoMenuSaveSlotNext"},
 	// TODO: Swap these two?
-	{"other/saveSlotPrev",		"actionNoMenuLoadStateFrom"},
-	{"other/saveSlotNext",		"actionNoMenuSaveStateAs"},
+	{"other/saveLoadFrom",		"actionNoMenuLoadStateFrom"},
+	{"other/saveSaveAs",		"actionNoMenuSaveStateAs"},
 
 	// End of key bindings.
 	{nullptr, nullptr}
