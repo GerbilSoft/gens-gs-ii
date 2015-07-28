@@ -303,8 +303,8 @@ static void doSaveState(void)
  * Process an SDL event.
  * @param event SDL event.
  */
-static void processSdlEvent(const SDL_Event &event) {
-	switch (event.type) {
+static void processSdlEvent(const SDL_Event *event) {
+	switch (event->type) {
 		case SDL_QUIT:
 			running = 0;
 			break;
@@ -312,10 +312,10 @@ static void processSdlEvent(const SDL_Event &event) {
 		case SDL_KEYDOWN:
 			// SDL keycodes nearly match GensKey.
 			// TODO: Split out into a separate function?
-			switch (event.key.keysym.sym) {
+			switch (event->key.keysym.sym) {
 				case SDLK_TAB:
 					// Check for Shift.
-					if (event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
+					if (event->key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
 						// Hard Reset.
 						context->hardReset();
 						sdlHandler->osd_printf(1500, "Hard Reset.");
@@ -346,14 +346,14 @@ static void processSdlEvent(const SDL_Event &event) {
 					break;
 
 				case SDLK_BACKSPACE:
-					if (event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
+					if (event->key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
 						// Take a screenshot.
 						GensSdl::doScreenShot(context->m_vdp->MD_Screen, rom);
 					}
 					break;
 
 				case SDLK_F2:
-					if (event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
+					if (event->key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
 						// Change stretch mode parameters.
 						// TODO: OSD message, but only if the backend supports it?
 						int stretchMode = (int)sdlHandler->vBackend()->stretchMode();
@@ -366,15 +366,15 @@ static void processSdlEvent(const SDL_Event &event) {
 
 				case SDLK_RETURN:
 					// Check for Alt+Enter.
-					if ((event.key.keysym.mod & KMOD_ALT) &&
-					    !(event.key.keysym.mod & ~KMOD_ALT))
+					if ((event->key.keysym.mod & KMOD_ALT) &&
+					    !(event->key.keysym.mod & ~KMOD_ALT))
 					{
 						// Alt+Enter. Toggle fullscreen.
 						sdlHandler->toggle_fullscreen();
 					} else {
 						// Not Alt+Enter.
 						// Send the key to the KeyManager.
-						keyManager->keyDown(SdlHandler::scancodeToGensKey(event.key.keysym.scancode));
+						keyManager->keyDown(SdlHandler::scancodeToGensKey(event->key.keysym.scancode));
 					}
 					break;
 
@@ -384,7 +384,7 @@ static void processSdlEvent(const SDL_Event &event) {
 				case SDLK_6: case SDLK_7:
 				case SDLK_8: case SDLK_9:
 					// Save slot selection.
-					doSaveSlot(event.key.keysym.sym - SDLK_0);
+					doSaveSlot(event->key.keysym.sym - SDLK_0);
 					break;
 
 				case SDLK_F5:
@@ -413,21 +413,21 @@ static void processSdlEvent(const SDL_Event &event) {
 
 				default:
 					// Send the key to the KeyManager.
-					keyManager->keyDown(SdlHandler::scancodeToGensKey(event.key.keysym.scancode));
+					keyManager->keyDown(SdlHandler::scancodeToGensKey(event->key.keysym.scancode));
 					break;
 			}
 			break;
 
 		case SDL_KEYUP:
 			// SDL keycodes nearly match GensKey.
-			keyManager->keyUp(SdlHandler::scancodeToGensKey(event.key.keysym.scancode));
+			keyManager->keyUp(SdlHandler::scancodeToGensKey(event->key.keysym.scancode));
 			break;
 
 		case SDL_WINDOWEVENT:
-			switch (event.window.event) {
+			switch (event->window.event) {
 				case SDL_WINDOWEVENT_RESIZED:
 					// Resize the video renderer.
-					sdlHandler->resize_video(event.window.data1, event.window.data2);
+					sdlHandler->resize_video(event->window.data1, event->window.data2);
 					break;
 				case SDL_WINDOWEVENT_EXPOSED:
 					// Window has been exposed.
@@ -581,7 +581,7 @@ int run(void)
 		if (ret) {
 			// An SDL event has been received.
 			// Process it.
-			processSdlEvent(event);
+			processSdlEvent(&event);
 		}
 
 		if (paused) {
