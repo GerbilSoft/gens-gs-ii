@@ -135,6 +135,22 @@ int Zomg::saveZomgIni(const Metadata *metadata)
 
 /**
  * Save the preview image.
+ *
+ * NOTE: Defined here as well as in ZomgBase because otherwise,
+ * gcc and MSVC will complain that there's no matching function call.
+ * FIXME: Figure out why, and/or remove this function.
+ *
+ * No metadata other than creation time will be saved.
+ * @param img_data	[in] Image data.
+ * @return 0 on success; non-zero on error.
+ */
+int Zomg::savePreview(const _Zomg_Img_Data_t *img_data)
+{
+	return savePreview(img_data, nullptr, Metadata::MF_Default);
+}
+
+/**
+ * Save the preview image.
  * @param img_data	[in] Image data.
  * @param metadata	[in, opt] Extra metadata.
  * @param metaFlags	[in, opt] Metadata flags.

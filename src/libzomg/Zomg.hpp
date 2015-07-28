@@ -141,8 +141,7 @@ class Zomg : public ZomgBase
 		 * @param img_data	[in] Image data.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int savePreview(const _Zomg_Img_Data_t *img_data)
-			{ return savePreview(img_data, nullptr, -1 /*Metadata::MF_Default*/); }
+		int savePreview(const _Zomg_Img_Data_t *img_data);
 
 		/**
 		 * Save the preview image.
@@ -152,7 +151,7 @@ class Zomg : public ZomgBase
 		 * @return 0 on success; non-zero on error.
 		 */
 		virtual int savePreview(const _Zomg_Img_Data_t *img_data,
-					const Metadata *metadata, int metaFlags);
+					const Metadata *metadata, int metaFlags) final;
 
 		// VDP
 		virtual int saveVdpReg(const uint8_t *reg, size_t siz) final;
