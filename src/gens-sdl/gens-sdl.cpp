@@ -570,19 +570,26 @@ int run(void)
 		if (paused) {
 			// Emulation is paused.
 			// Wait for an SDL event.
+			// TODO: Check OSD timers?
 			ret = SDL_WaitEvent(&event);
-		} else {
-			// Emulation is running.
-			// Poll for an SDL event,
-			// since we don't want to block frames.
-			ret = SDL_PollEvent(&event);
+			if (ret) {
+				processSdlEvent(&event);
+			}
 		}
+		if (!running)
+			break;
 
-		if (ret) {
-			// An SDL event has been received.
-			// Process it.
-			processSdlEvent(&event);
-		}
+		// Poll for SDL events, and wait for the queue
+		// to empty. This ensures that we don't end up
+		// only processing one event per frame.
+		do {
+			ret = SDL_PollEvent(&event);
+			if (ret) {
+				processSdlEvent(&event);
+			}
+		} while (running && ret != 0);
+		if (!running)
+			break;
 
 		if (paused) {
 			// Emulation is paused.
