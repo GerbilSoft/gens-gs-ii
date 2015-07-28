@@ -56,6 +56,7 @@ extern "C" struct _Zomg_Img_Data_t;
 namespace LibZomg {
 
 class Metadata;
+
 class ZomgBase
 {
 	public:
@@ -65,12 +66,8 @@ class ZomgBase
 			ZOMG_SAVE
 		};
 
-		ZomgBase(const utf8_str *filename, ZomgFileMode mode)
-		{
-			(void)filename; (void)mode;	// Unused parameters.
-			m_mode = ZOMG_CLOSED;	// No file open initially.
-		}
-		virtual ~ZomgBase() { }		// NOTE: Can't call close() here because close() is virtual.
+		ZomgBase(const utf8_str *filename, ZomgFileMode mode);
+		virtual ~ZomgBase();
 
 	private:
 		// Q_DISABLE_COPY() equivalent.
@@ -84,86 +81,73 @@ class ZomgBase
 		virtual void close(void) = 0;
 
 		/**
-		 * DetectFormat(): Detect if a savestate is supported by this class.
+		 * Get the last error code.
+		 * @return 0 if no error; negative errno on error.
+		 */
+		inline int lastError(void) const
+			{ return m_lastError; }
+
+		/**
+		 * Detect if a savestate is supported by this class.
 		 * @param filename Savestate filename.
 		 * @return True if the savestate is supported; false if not.
 		 */
-		static bool DetectFormat(const utf8_str *filename)
-			{ (void)filename; return false; }
+		static bool DetectFormat(const utf8_str *filename);
 
 		// TODO: Determine siz and is16bit from the system type?
 		// (once FORMAT.ini is implemented)
+
+		// ZOMG functions will return an error code
+		// as well as set m_lastError if an error occurs.
+		// On success, they will return bytes read and
+		// set m_lastError to 0.
+
+		/** Load functions. **/
 
 		/**
 		 * Load the preview image.
 		 * TODO: Metadata?
 		 * @param img_data Image data. (Caller must free img_data->data.)
-		 * @return Bytes read on success; negative on error.
+		 * @return Bytes read on success; negative errno on error.
 		 */
-		virtual int loadPreview(_Zomg_Img_Data_t *img_data)
-			{ (void)img_data; return 0; }
+		virtual int loadPreview(_Zomg_Img_Data_t *img_data);
 
 		// VDP
-		virtual int loadVdpReg(uint8_t *reg, size_t siz)
-			{ (void)reg; (void)siz; return 0; }
-		virtual int loadVdpCtrl_8(_Zomg_VDP_ctrl_8_t *ctrl)
-			{ (void)ctrl; return 0; }
-		virtual int loadVdpCtrl_16(_Zomg_VDP_ctrl_16_t *ctrl)
-			{ (void)ctrl; return 0; }
-		virtual int loadVRam(void *vram, size_t siz, ZomgByteorder_t byteorder)
-			{ (void)vram; (void)siz; (void)byteorder; return 0; }
-		virtual int loadCRam(_Zomg_CRam_t *cram, ZomgByteorder_t byteorder)
-			{ (void)cram; (void)byteorder; return 0; }
+		virtual int loadVdpReg(uint8_t *reg, size_t siz);
+		virtual int loadVdpCtrl_8(_Zomg_VDP_ctrl_8_t *ctrl);
+		virtual int loadVdpCtrl_16(_Zomg_VDP_ctrl_16_t *ctrl);
+		virtual int loadVRam(void *vram, size_t siz, ZomgByteorder_t byteorder);
+		virtual int loadCRam(_Zomg_CRam_t *cram, ZomgByteorder_t byteorder);
 		/// MD-specific
-		virtual int loadMD_VSRam(uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder)
-			{ (void)vsram; (void)siz; (void)byteorder; return 0; }
-		virtual int loadMD_VDP_SAT(uint16_t *vdp_sat, size_t siz, ZomgByteorder_t byteorder)
-			{ (void)vdp_sat; (void)siz; (void)byteorder; return 0; }
+		virtual int loadMD_VSRam(uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder);
+		virtual int loadMD_VDP_SAT(uint16_t *vdp_sat, size_t siz, ZomgByteorder_t byteorder);
 
 		// Audio
-		virtual int loadPsgReg(_Zomg_PsgSave_t *state)
-			{ (void)state; return 0; }
-		virtual int loadMD_YM2612_reg(_Zomg_Ym2612Save_t *state) /// MD-specific
-			{ (void)state; return 0; }
+		virtual int loadPsgReg(_Zomg_PsgSave_t *state);
+		/// MD-specific
+		virtual int loadMD_YM2612_reg(_Zomg_Ym2612Save_t *state);
 
 		// Z80
-		virtual int loadZ80Mem(uint8_t *mem, size_t siz)
-			{ (void)mem; (void)siz; return 0; }
-		virtual int loadZ80Reg(_Zomg_Z80RegSave_t *state)
-			{ (void)state; return 0; }
+		virtual int loadZ80Mem(uint8_t *mem, size_t siz);
+		virtual int loadZ80Reg(_Zomg_Z80RegSave_t *state);
 
 		// M68K (MD-specific)
-		virtual int loadM68KMem(uint16_t *mem, size_t siz, ZomgByteorder_t byteorder)
-			{ (void)mem; (void)siz; (void)byteorder; return 0; }
-		virtual int loadM68KReg(_Zomg_M68KRegSave_t *state)
-			{ (void)state; return 0; }
+		virtual int loadM68KMem(uint16_t *mem, size_t siz, ZomgByteorder_t byteorder);
+		virtual int loadM68KReg(_Zomg_M68KRegSave_t *state);
 
 		// MD-specific registers
-		virtual int loadMD_IO(_Zomg_MD_IoSave_t *state)
-			{ (void)state; return 0; }
-		virtual int loadMD_Z80Ctrl(_Zomg_MD_Z80CtrlSave_t *state)
-			{ (void)state; return 0; }
-		virtual int loadMD_TimeReg(_Zomg_MD_TimeReg_t *state)
-			{ (void)state; return 0; }
-		virtual int loadMD_TMSS_reg(_Zomg_MD_TMSS_reg_t *tmss)
-			{ (void)tmss; return 0; }
+		virtual int loadMD_IO(_Zomg_MD_IoSave_t *state);
+		virtual int loadMD_Z80Ctrl(_Zomg_MD_Z80CtrlSave_t *state);
+		virtual int loadMD_TimeReg(_Zomg_MD_TimeReg_t *state);
+		virtual int loadMD_TMSS_reg(_Zomg_MD_TMSS_reg_t *tmss);
 
 		// Miscellaneous
-		virtual int loadSRam(uint8_t *sram, size_t siz)
-			{ (void)sram; (void)siz; return 0; }
-		virtual int loadEEPRomCtrl(_Zomg_EPR_ctrl_t *ctrl)
-			{ (void)ctrl; return 0; }
-		virtual int loadEEPRomCache(uint8_t *cache, size_t siz)
-			{ (void)cache; (void)siz; return 0; }
-		virtual int loadEEPRom(uint8_t *eeprom, size_t siz)
-			{ (void)eeprom; (void)siz; return 0; }
+		virtual int loadSRam(uint8_t *sram, size_t siz);
+		virtual int loadEEPRomCtrl(_Zomg_EPR_ctrl_t *ctrl);
+		virtual int loadEEPRomCache(uint8_t *cache, size_t siz);
+		virtual int loadEEPRom(uint8_t *eeprom, size_t siz);
 
-		/**
-		 * Save savestate functions.
-		 * @param siz Number of bytes to write.
-		 * @return 0 on success; non-zero on error.
-		 * TODO: Standardize error codes.
-		 */
+		/** Save functions. **/
 
 		// TODO: Determine siz and is16bit from the system type?
 		// (once FORMAT.ini is implemented)
@@ -174,8 +158,7 @@ class ZomgBase
 		 * @param img_data	[in] Image data.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int savePreview(const _Zomg_Img_Data_t *img_data)
-			{ return savePreview(img_data, nullptr, -1 /*Metadata::MF_Default*/); }
+		int savePreview(const _Zomg_Img_Data_t *img_data);
 
 		/**
 		 * Save the preview image.
@@ -185,69 +168,48 @@ class ZomgBase
 		 * @return 0 on success; non-zero on error.
 		 */
 		virtual int savePreview(const _Zomg_Img_Data_t *img_data,
-					const Metadata *metadata, int metaFlags)
-			{ (void)img_data; (void)metadata; (void)metaFlags; return 0; }
+					const Metadata *metadata, int metaFlags);
 
 		// VDP
-		virtual int saveVdpReg(const uint8_t *reg, size_t siz)
-			{ (void)reg; (void)siz; return 0; }
-		virtual int saveVdpCtrl_8(const _Zomg_VDP_ctrl_8_t *ctrl)
-			{ (void)ctrl; return 0; }
-		virtual int saveVdpCtrl_16(const _Zomg_VDP_ctrl_16_t *ctrl)
-			{ (void)ctrl; return 0; }
-		virtual int saveVRam(const void *vram, size_t siz, ZomgByteorder_t byteorder)
-			{ (void)vram; (void)siz; (void)byteorder; return 0; }
-		virtual int saveCRam(const _Zomg_CRam_t *cram, ZomgByteorder_t byteorder)
-			{ (void)cram; (void)byteorder; return 0; }
+		virtual int saveVdpReg(const uint8_t *reg, size_t siz);
+		virtual int saveVdpCtrl_8(const _Zomg_VDP_ctrl_8_t *ctrl);
+		virtual int saveVdpCtrl_16(const _Zomg_VDP_ctrl_16_t *ctrl);
+		virtual int saveVRam(const void *vram, size_t siz, ZomgByteorder_t byteorder);
+		virtual int saveCRam(const _Zomg_CRam_t *cram, ZomgByteorder_t byteorder);
 		/// MD-specific
-		virtual int saveMD_VSRam(const uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder)
-			{ (void)vsram; (void)siz; (void)byteorder; return 0; }
-		virtual int saveMD_VDP_SAT(const void *vdp_sat, size_t siz, ZomgByteorder_t byteorder)
-			{ (void)vdp_sat; (void)siz; (void)byteorder; return 0; }
+		virtual int saveMD_VSRam(const uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder);
+		virtual int saveMD_VDP_SAT(const void *vdp_sat, size_t siz, ZomgByteorder_t byteorder);
 
 		// Audio
-		virtual int savePsgReg(const _Zomg_PsgSave_t *state)
-			{ (void)state; return 0; }
+		virtual int savePsgReg(const _Zomg_PsgSave_t *state);
 		/// MD-specific
-		virtual int saveMD_YM2612_reg(const _Zomg_Ym2612Save_t *state)
-			{ (void)state; return 0; }
+		virtual int saveMD_YM2612_reg(const _Zomg_Ym2612Save_t *state);
 
 		// Z80
-		virtual int saveZ80Mem(const uint8_t *mem, size_t siz)
-			{ (void)mem; (void)siz; return 0; }
-		virtual int saveZ80Reg(const _Zomg_Z80RegSave_t *state)
-			{ (void)state; return 0; }
+		virtual int saveZ80Mem(const uint8_t *mem, size_t siz);
+		virtual int saveZ80Reg(const _Zomg_Z80RegSave_t *state);
 
 		// M68K (MD-specific)
-		virtual int saveM68KMem(const uint16_t *mem, size_t siz, ZomgByteorder_t byteorder)
-			{ (void)mem; (void)siz; (void)byteorder; return 0; }
-		virtual int saveM68KReg(const _Zomg_M68KRegSave_t *state)
-			{ (void)state; return 0; }
+		virtual int saveM68KMem(const uint16_t *mem, size_t siz, ZomgByteorder_t byteorder);
+		virtual int saveM68KReg(const _Zomg_M68KRegSave_t *state);
 
 		// MD-specific registers
-		virtual int saveMD_IO(const _Zomg_MD_IoSave_t *state)
-			{ (void)state; return 0; }
-		virtual int saveMD_Z80Ctrl(const _Zomg_MD_Z80CtrlSave_t *state)
-			{ (void)state; return 0; }
-		virtual int saveMD_TimeReg(const _Zomg_MD_TimeReg_t *state)
-			{ (void)state; return 0; }
-		virtual int saveMD_TMSS_reg(const _Zomg_MD_TMSS_reg_t *tmss)
-			{ (void)tmss; return 0; }
+		virtual int saveMD_IO(const _Zomg_MD_IoSave_t *state);
+		virtual int saveMD_Z80Ctrl(const _Zomg_MD_Z80CtrlSave_t *state);
+		virtual int saveMD_TimeReg(const _Zomg_MD_TimeReg_t *state);
+		virtual int saveMD_TMSS_reg(const _Zomg_MD_TMSS_reg_t *tmss);
 
 		// Miscellaneous
-		virtual int saveSRam(const uint8_t *sram, size_t siz)
-			{ (void)sram; (void)siz; return 0; }
-		virtual int saveEEPRomCtrl(const _Zomg_EPR_ctrl_t *ctrl)
-			{ (void)ctrl; return 0; }
-		virtual int saveEEPRomCache(const uint8_t *cache, size_t siz)
-			{ (void)cache; (void)siz; return 0; }
-		virtual int saveEEPRom(const uint8_t *eeprom, size_t siz)
-			{ (void)eeprom; (void)siz; return 0; }
+		virtual int saveSRam(const uint8_t *sram, size_t siz);
+		virtual int saveEEPRomCtrl(const _Zomg_EPR_ctrl_t *ctrl);
+		virtual int saveEEPRomCache(const uint8_t *cache, size_t siz);
+		virtual int saveEEPRom(const uint8_t *eeprom, size_t siz);
 
 	protected:
 		// TODO: Move to a private class?
 		std::string m_filename;
 		ZomgFileMode m_mode;
+		int m_lastError;
 };
 
 }

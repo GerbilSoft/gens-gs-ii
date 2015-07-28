@@ -41,6 +41,7 @@ CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/zomg_byteorder.h.in" "${CMAKE_CURREN
 
 # Sources.
 SET(libzomg_SRCS
+	ZomgBase.cpp
 	Zomg.cpp
 	ZomgLoad.cpp
 	ZomgSave.cpp
