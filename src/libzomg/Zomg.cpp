@@ -74,8 +74,14 @@ int ZomgPrivate::initZomgLoad(const utf8_str *filename)
 #else
 	this->unz = unzOpen(filename);
 #endif
-	if (!this->unz)
-		return -1;
+
+	if (!this->unz) {
+		// TODO: Figure out why open failed.
+		// On Windows, GetLastError() may work.
+		// On Linux, errno may work.
+		// Alternatively, try opening the file ourselves.
+		return -EIO;
+	}
 
 	return 0;
 }
@@ -94,8 +100,14 @@ int ZomgPrivate::initZomgSave(const utf8_str *filename)
 #else
 	this->zip = zipOpen(filename, APPEND_STATUS_CREATE);
 #endif
-	if (!this->zip)
-		return -1;
+
+	if (!this->zip) {
+		// TODO: Figure out why open failed.
+		// On Windows, GetLastError() may work.
+		// On Linux, errno may work.
+		// Alternatively, try opening the file ourselves.
+		return -EIO;
+	}
 
 	// Clear the default Zip timestamp first.
 	memset(&this->zipfi, 0, sizeof(this->zipfi));
@@ -134,27 +146,32 @@ Zomg::Zomg(const utf8_str *filename, ZomgFileMode mode)
 	: ZomgBase(filename, mode)
 	, d(new ZomgPrivate(this))
 {
-	if (!filename)
+	if (!filename || !filename[0]) {
+		// No filename specified.
+		m_lastError = -EINVAL;
 		return;
+	}
 
 	// Open the ZOMG file.
 	// TODO: Open for reading to load existing FORMAT.ini even if
 	// the current mode is ZOMG_SAVE.
 
 	// TODO: Split this up into multiple functions?
+	int ret;
 	switch (mode) {
 		case ZOMG_LOAD:
-			if (d->initZomgLoad(filename) != 0)
-				return;
+			ret = d->initZomgLoad(filename);
 			break;
-
 		case ZOMG_SAVE:
-			if (d->initZomgSave(filename) != 0)
-				return;
+			ret = d->initZomgSave(filename);
 			break;
-
 		default:
-			return;
+			ret = -EINVAL;
+			break;
+	}
+	if (ret != 0) {
+		m_lastError = ret;
+		return;
 	}
 
 	// ZOMG file is open.
@@ -189,6 +206,7 @@ void Zomg::close(void)
 	}
 
 	m_mode = ZOMG_CLOSED;
+	m_lastError = 0;
 }
 
 
