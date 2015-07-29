@@ -49,7 +49,7 @@ using std::string;
 
 // Win32 Unicode Translation Layer.
 #ifdef _WIN32
-#include "Win32/W32U_mini.h"
+#include "libW32U/W32U_mini.h"
 #endif
 
 namespace LibGens {

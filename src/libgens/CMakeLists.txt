@@ -264,9 +264,6 @@ IF(WIN32)
 		Decompressor/DcRar.hpp
 		Decompressor/UnRAR_dll.hpp
 		)
-	SET(libgens_COMPAT_SRCS
-		Win32/W32U_mini.c
-		)
 ELSE()
 	SET(libgens_DECOMPRESSOR_SRCS
 		${libgens_DECOMPRESSOR_SRCS}
@@ -290,7 +287,6 @@ ADD_LIBRARY(gens STATIC
 	${libgens_VDP_SRCS} ${libgens_VDP_H}
 	${libgens_IO_SRCS} ${libgens_IO_H}
 	${libgens_DECOMPRESSOR_SRCS} ${libgens_DECOMPRESSOR_H}
-	${libgens_COMPAT_SRCS}
 	)
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(gens)
@@ -312,6 +308,8 @@ IF(HAVE_LZMA)
 	TARGET_LINK_LIBRARIES(gens ${7z_LIBRARY} ${LZMA_LIBRARY})
 ENDIF(HAVE_LZMA)
 IF(WIN32)
+	# Link in libW32U for character set conversion.
+	TARGET_LINK_LIBRARIES(gens W32U)
 	# version.dll is required for DcRar_Win32.cpp, which calls these functions:
 	# - GetFileVersionInfoSize()
 	# - GetFileVersionInfo()

@@ -78,6 +78,11 @@ TARGET_LINK_LIBRARIES(gens-sdl
 	${OPENGL_gl_LIBRARY}
 	)
 
+IF(WIN32)
+	# Link in libW32U for character set conversion.
+	TARGET_LINK_LIBRARIES(gens-sdl W32U)
+ENDIF(WIN32)
+
 # Split debug information.
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(gens-sdl)

@@ -28,9 +28,6 @@
 #error W32U_mini.h should only be included on Win32!
 #endif
 
-// utf8_str
-#include "../macros/common.h"
-
 // C includes.
 #include <wchar.h>
 #include <stdio.h>
@@ -67,7 +64,7 @@ extern int W32U_IsUnicode;
  * @param codepage mbs codepage.
  * @return UTF-16 string, or nullptr on error.
  */
-wchar_t *W32U_mbs_to_UTF16(const utf8_str *mbs, unsigned int codepage);
+wchar_t *W32U_mbs_to_UTF16(const char *mbs, unsigned int codepage);
 
 /**
  * Convert a null-terminated UTF-16 string to multibyte.
@@ -86,7 +83,7 @@ char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage);
  * @param mode File mode.
  * @return File pointer, or nullptr on error.
  */
-FILE *W32U_fopen(const utf8_str *filename, const utf8_str *mode);
+FILE *W32U_fopen(const char *filename, const char *mode);
 
 // Redefine access() as W32U_access().
 #define access(path, mode) W32U_access(path, mode)
@@ -111,7 +108,7 @@ FILE *W32U_fopen(const utf8_str *filename, const utf8_str *mode);
  * @param mode Mode.
  * @return 0 if the file has the given mode; -1 if not or if the file does not exist.
  */
-int W32U_access(const utf8_str *path, int mode);
+int W32U_access(const char *path, int mode);
 
 // Redefine mkdir() as W32U_mkdir().
 #define mkdir(path, mode) W32U_mkdir(path)
@@ -121,7 +118,7 @@ int W32U_access(const utf8_str *path, int mode);
  * @param path Pathname.
  * @return 0 on success; -1 on error.
  */
-int W32U_mkdir(const utf8_str *path);
+int W32U_mkdir(const char *path);
 
 #ifdef __cplusplus
 }

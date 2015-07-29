@@ -25,7 +25,7 @@
 #include "UnRAR_dll.hpp"
 
 // Win32 Unicode Translation Layer.
-#include "../Win32/W32U_mini.h"
+#include "libW32U/W32U_mini.h"
 
 // C includes.
 #include <stdlib.h>

@@ -69,7 +69,7 @@ int W32U_End(void)
  * @param codepage mbs codepage.
  * @return UTF-16 string, or NULL on error.
  */
-wchar_t *W32U_mbs_to_UTF16(const utf8_str *mbs, unsigned int codepage)
+wchar_t *W32U_mbs_to_UTF16(const char *mbs, unsigned int codepage)
 {
 	int cchWcs;
 	wchar_t *wcs;
@@ -114,7 +114,7 @@ char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage)
  * @param mode File mode.
  * @return File pointer, or NULL on error.
  */
-FILE *W32U_fopen(const utf8_str *filename, const utf8_str *mode)
+FILE *W32U_fopen(const char *filename, const char *mode)
 {
 	wchar_t *filenameW, *modeW;
 	FILE *fRet;
@@ -175,7 +175,7 @@ fail:
  * @param mode Mode.
  * @return 0 if the file has the given mode; -1 if not or if the file does not exist.
  */
-int W32U_access(const utf8_str *path, int mode)
+int W32U_access(const char *path, int mode)
 {
 	wchar_t *pathW;
 	int ret = -1;
@@ -225,7 +225,7 @@ fail:
  * @param path Pathname.
  * @return 0 on success; -1 on error.
  */
-int W32U_mkdir(const utf8_str *path)
+int W32U_mkdir(const char *path)
 {
 	wchar_t *pathW;
 	int ret = -1;

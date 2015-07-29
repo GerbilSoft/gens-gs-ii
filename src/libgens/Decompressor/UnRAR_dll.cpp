@@ -28,7 +28,7 @@
 #include <stdlib.h>
 
 // Win32 Unicode Translation Layer.
-#include "../Win32/W32U_mini.h"
+#include "libW32U/W32U_mini.h"
 
 #define InitFuncPtr_unrar(hDll, fn) p##fn = (typeof(p##fn))GetProcAddress((hDll), #fn)
 

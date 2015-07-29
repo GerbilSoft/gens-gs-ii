@@ -54,7 +54,7 @@ using std::u16string;
 // Character set conversion.
 #include "libgenstext/Encoding.hpp"
 #if defined(_WIN32)
-#include "Win32/W32U_mini.h"
+#include "libW32U/W32U_mini.h"
 #endif
 
 namespace LibGens

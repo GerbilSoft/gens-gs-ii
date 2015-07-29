@@ -35,7 +35,7 @@ using LibGens::Screenshot;
 // Windows
 #include <windows.h>
 #include <shlobj.h>
-#include "libgens/Win32/W32U_mini.h"
+#include "libW32U/W32U_mini.h"
 #else
 // Linux / Unix / Mac OS X.
 #include <unistd.h>
