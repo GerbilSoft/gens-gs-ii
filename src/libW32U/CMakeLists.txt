@@ -11,11 +11,13 @@ INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/../")
 # Sources.
 SET(libW32U_SRCS
 	W32U_mini.c
+	W32U_libc.c
 	)
 
 # Headers.
 SET(libW32U_H
 	W32U_mini.h
+	W32U_libc.h
 	)
 
 ######################
