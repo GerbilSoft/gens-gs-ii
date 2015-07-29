@@ -833,10 +833,68 @@ int run(void)
 
 }
 
+#ifdef _WIN32
+
+// __wgetmainargs()
+extern "C" {
+typedef struct {
+	int newmode;
+} _startupinfo;
+_CRTIMP int __cdecl __wgetmainargs(int * _Argc, wchar_t ***_Argv, wchar_t ***_Env, int _DoWildCard, _startupinfo *_StartInfo);
+}
+
+/**
+ * Convert the Windows Unicode command line to UTF-8.
+ * @param argc_ret	[out] Pointer to argc.
+ * @param argv_ret	[out] Pointer to argv.
+ * @return 0 on success; non-zero on error.
+ */
+static int do_wmain(int *argc_ret, char **argv_ret[])
+{
+	// TODO: Replace mainCRTStartup()?
+	int argc;
+	wchar_t **argvW;
+	wchar_t **envW;
+
+	_startupinfo StartInfo;
+	StartInfo.newmode = 0;
+
+	// NOTE: __wgetmainargs() is MSVC 2010+.
+	// MinGW-w64 supports it as well.
+	int ret = __wgetmainargs(&argc, &argvW, &envW, 0, &StartInfo);
+	if (ret != 0) {
+		// ERROR!
+		return ret;
+	}
+
+	// Convert the arguments from UTF-16 to UTF-8.
+	// NOTE: We're malloc()'ing strings here, but never freeing them.
+	// Maybe we should free them once command line parsing is done...
+	char **argvU = (char**)malloc(argc * sizeof(char*));
+	for (int i = 0; i < argc; i++) {
+		argvU[i] = W32U_UTF16_to_mbs(argvW[i], CP_UTF8);
+	}
+	// TODO: env?
+
+	*argv_ret = argvU;
+	return 0;
+}
+#endif /* _WIN32 */
+
 // Don't use SDL_main.
 #undef main
 int main(int argc, char *argv[])
 {
+#ifdef _WIN32
+	// Check for Unicode arguments.
+	if (W32U_IsUnicode()) {
+		if (do_wmain(&argc, &argv) != 0) {
+			// ERROR!
+			return EXIT_FAILURE;
+		}
+	}
+#endif /* _WIN32 */
+
 	if (argc < 2) {
 		fprintf(stderr, "usage: %s [rom filename]\n", argv[0]);
 		return EXIT_FAILURE;
