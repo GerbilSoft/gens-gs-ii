@@ -55,6 +55,8 @@ static __inline int W32U_IsUnicode(void)
 	return W32U_internal_isUnicode;
 }
 
+/** fopen() **/
+
 // Make sure fopen() isn't redefined.
 #ifdef fopen
 #undef fopen
@@ -116,6 +118,8 @@ fail:
 	return fRet;
 }
 
+/** access() **/
+
 // Make sure access() isn't redefined.
 #ifdef access
 #undef access
@@ -167,6 +171,8 @@ fail:
 	return ret;
 }
 
+/** mkdir() **/
+
 // Make sure mkdir() isn't redefined.
 #ifdef mkdir
 #undef mkdir
@@ -209,5 +215,46 @@ int W32U_mkdir(const char *path)
 
 fail:
 	free(pathW);
+	return ret;
+}
+
+/**
+ * Get file status.
+ * @param pathname Pathname.
+ * @param buf Stat buffer.
+ * @return 0 on success; -1 on error.
+ */
+int W32U_stat64(const char *pathname, struct _stat64 *buf)
+{
+	wchar_t *pathnameW;
+	int ret = -1;
+
+	pathnameW = W32U_mbs_to_UTF16(pathname, CP_UTF8);
+	if (!pathnameW) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (W32U_IsUnicode()) {
+		// Unicode version.
+		ret = _wstat64(pathnameW, buf);
+	} else {
+		// ANSI version.
+		char *pathnameA;
+
+		// Convert the filename from UTF-16 to ANSI.
+		pathnameA = W32U_UTF16_to_mbs(pathnameW, CP_ACP);
+		if (!pathnameA) {
+			errno = EINVAL;
+			goto fail;
+		}
+
+		// Get the file status.
+		ret = _stat64(pathnameA, buf);
+		free(pathnameA);
+	}
+
+fail:
+	free(pathnameW);
 	return ret;
 }

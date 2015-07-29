@@ -33,6 +33,8 @@
 // C includes.
 #include <wchar.h>
 #include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 // Win32 includes.
 #include <windows.h>
@@ -41,6 +43,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/** fopen() **/
 
 // Redefine fopen() as W32U_fopen().
 #define fopen(filename, mode) W32U_fopen(filename, mode)
@@ -52,6 +56,8 @@ extern "C" {
  * @return File pointer, or nullptr on error.
  */
 FILE *W32U_fopen(const char *filename, const char *mode);
+
+/** access() **/
 
 // Redefine access() as W32U_access().
 #define access(path, mode) W32U_access(path, mode)
@@ -78,6 +84,8 @@ FILE *W32U_fopen(const char *filename, const char *mode);
  */
 int W32U_access(const char *path, int mode);
 
+/** mkdir() **/
+
 // Redefine mkdir() as W32U_mkdir().
 #define mkdir(path, mode) W32U_mkdir(path)
 
@@ -87,6 +95,27 @@ int W32U_access(const char *path, int mode);
  * @return 0 on success; -1 on error.
  */
 int W32U_mkdir(const char *path);
+
+/** stat() **/
+
+// Not only is 'stat' both a struct and a function on Unix,
+// there's also four variants with underscores on Windows
+// for various 32-bit vs. 64-bit fields. There's also
+// non-underscore versions for compatibility.
+
+// FIXME: How do we handle struct stat?
+// For now, the caller will have to ensure it uses struct _stat64.
+
+// Redefine stat() as W32U_stat64().
+#define stat(pathname, buf) W32U_stat64(pathname, buf)
+
+/**
+ * Get file status.
+ * @param pathname Pathname.
+ * @param buf Stat buffer.
+ * @return 0 on success; -1 on error.
+ */
+int W32U_stat64(const char *pathname, struct _stat64 *buf);
 
 #ifdef __cplusplus
 }

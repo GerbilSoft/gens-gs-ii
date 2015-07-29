@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -55,8 +55,7 @@
 #include <sstream>
 using std::string;
 
-namespace LibGens
-{
+namespace LibGens {
 
 /** Static class variable initialization. **/
 
@@ -515,8 +514,7 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
 		return -1;
 
 	// Make sure that this is a regular file.
-	// FIXME: W32U version of stat()?
-	struct stat st_buf;
+	struct _stat64 st_buf;
 	if (stat(extprg, &st_buf) != 0)
 		return -4;
 	if (!S_ISREG(st_buf.st_mode))
