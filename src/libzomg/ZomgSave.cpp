@@ -58,6 +58,31 @@ using std::string;
 #include "PngWriter.hpp"
 #include "img_data.h"
 
+// OS-dependent Zip fields.
+// References:
+// - https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT
+// - http://unix.stackexchange.com/questions/14705/the-zip-formats-external-file-attribute
+// - http://nadeausoftware.com/articles/2012/01/c_c_tip_how_use_compiler_predefined_macros_detect_operating_system
+#if defined(__APPLE__)
+# if defined(__MACH__)
+#  define ZIP_CREATOR_SYSTEM 19			/* OS X (Darwin) */
+/* TODO: ZIP_EXTERNAL_FA for Mac OS X. */
+#  error Needs ZIP_EXTERNAL_FA for Mac OS X.
+# else
+#  define ZIP_CREATOR_SYSTEM 7			/* Macintosh */
+#  define ZIP_EXTERNAL_FA 0			/* No reliable data for this... */
+# endif
+#elif defined(__unix) || defined(__unix__) || \
+      defined(__linux) || defined(__linux__)
+# define ZIP_CREATOR_SYSTEM 3			/* UNIX */
+# define ZIP_EXTERNAL_FA (0100644 << 16)	/* UNIX file permissions + MS-DOS */
+#else
+# define ZIP_CREATOR_SYSTEM 0			/* MS-DOS, OS/2, Windows, other FAT-based systems */
+# define ZIP_EXTERNAL_FA 0
+#endif
+
+#define ZIP_VERSION_MADE_BY (ZIP_CREATOR_SYSTEM << 8)
+
 #include "Zomg_p.hpp"
 namespace LibZomg {
 
@@ -78,9 +103,11 @@ int ZomgPrivate::saveToZomg(const utf8_str *filename, const void *buf, int len)
 	memcpy(&zipfi.tmz_date, &this->zipfi.tmz_date, sizeof(zipfi.tmz_date));
 	zipfi.dosDate = 0;
 	zipfi.internal_fa = 0x0000; // TODO: Set to 0x0001 for text files.
-	zipfi.external_fa = 0x0000; // MS-DOS directory attribute byte.
 
-	int ret = zipOpenNewFileInZip(
+	// External attributes. (OS-dependent)
+	zipfi.external_fa = ZIP_EXTERNAL_FA;
+
+	int ret = zipOpenNewFileInZip4(
 		this->zip,		// zipFile
 		filename,		// Filename in the Zip archive
 		&zipfi,			// File information (timestamp, attributes)
@@ -90,8 +117,18 @@ int ZomgPrivate::saveToZomg(const utf8_str *filename, const void *buf, int len)
 		0,			// size_extrafield_global,
 		nullptr,		// comment
 		Z_DEFLATED,		// method
-		Z_DEFAULT_COMPRESSION	// level
-		);
+		Z_DEFAULT_COMPRESSION,  // level
+		// The following values, except for versionMadeBy,
+		// are all defaults from zipOpenNewFileInZip().
+		0,			// raw
+		-MAX_WBITS,		// windowBits
+		DEF_MEM_LEVEL,		// memLevel
+		Z_DEFAULT_STRATEGY,	// strategy
+		nullptr,		// password
+		0,			// crcForCrypting
+		ZIP_VERSION_MADE_BY,	// versionMadeBy
+		0			// flagBase
+	);
 
 	if (ret != UNZ_OK) {
 		// Error opening the new file in the Zip archive.
