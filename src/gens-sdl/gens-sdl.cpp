@@ -55,6 +55,7 @@ using LibGensKeys::KeyManager;
 
 // LibZomg
 #include "libzomg/Zomg.hpp"
+using LibZomg::ZomgBase;
 using LibZomg::Zomg;
 
 // OS-specific includes.
@@ -227,6 +228,86 @@ static clks_t clks;
 // Save slot.
 static int saveSlot_selected = 0;
 
+#ifndef HAVE_LOCALTIME_R
+/**
+ * localtime_r() custom implementation.
+ * TODO: Split into a separate file?
+ * @param timep
+ * @param result
+ * @return
+ */
+static inline struct tm *localtime_r(const time_t *time_p, struct tm *result) {
+	struct tm *ret = localtime(time_p);
+	if (ret && result) {
+		memcpy(result, ret, sizeof(struct tm));
+	}
+	return ret;
+}
+#endif /* HAVE_LOCALTIME_R */
+
+/**
+ * Get the modification time string for the specified save file.
+ * @param zomg Save file.
+ * @return String contianing the mtime, or an error message if invalid.
+ */
+static string getSaveSlot_mtime(const ZomgBase *zomg)
+{
+	// TODO: This function can probably be optimized more...
+
+	// Slot state.
+	char slot_state[48];
+
+	// Check the mtime.
+	// TODO: mtime=0 is invalid.
+	bool doFullTimestamp = false;
+	time_t cur_time = time(nullptr);
+	time_t zomg_mtime = zomg->mtime();
+
+	// zomg_mtime is needed for printing.
+	// TODO: Custom localtime_r() if system version isn't available?
+	struct tm tm_zomg_mtime;
+	if (!localtime_r(&zomg_mtime, &tm_zomg_mtime)) {
+		// Error converting zomg_mtime.
+		return "occupied";
+	}
+
+	if (zomg_mtime > cur_time) {
+		// Savestate was modified in teh future!!1!
+		// Either that, or localtime_r() failed.
+		doFullTimestamp = true;
+		goto convert;
+	}
+
+	// Check if the times are "close enough" to omit the date.
+	struct tm tm_cur_time;
+	if (!localtime_r(&cur_time, &tm_cur_time)) {
+		// Error converting cur_time.
+		doFullTimestamp = true;
+		goto convert;
+	}
+
+	// Check if the times are within the same day.
+	if (tm_cur_time.tm_yday != tm_zomg_mtime.tm_yday) {
+		// Not the same day.
+		// Are the times within 12 hours?
+		if (cur_time - zomg_mtime >= (3600*12)) {
+			// More than 12 hours.
+			// Show the full date.
+			doFullTimestamp = true;
+		}
+	}
+
+convert:
+	if (doFullTimestamp) {
+		// Show the full timestamp.
+		strftime(slot_state, sizeof(slot_state), "%x %X", &tm_zomg_mtime);
+	} else {
+		// Show only the time.
+		strftime(slot_state, sizeof(slot_state), "%X", &tm_zomg_mtime);
+	}
+	return string(slot_state);
+}
+
 /**
  * Save slot selection.
  * @param saveSlot Save slot. (0-9)
@@ -240,7 +321,7 @@ static void doSaveSlot(int saveSlot)
 
 	// Check if the specified savestate exists.
 	// TODO: R_OK or just F_OK?
-	char slot_state[48];
+	string slot_state;
 	string filename = getSavestateFilename(rom, saveSlot);
 	if (!access(filename.c_str(), F_OK)) {
 		// Savestate exists.
@@ -248,87 +329,20 @@ static void doSaveSlot(int saveSlot)
 		LibZomg::Zomg zomg(filename.c_str(), Zomg::ZOMG_LOAD);
 		if (!zomg.isOpen()) {
 			// Error opening the savestate.
-			strcpy(slot_state, "error");
+			slot_state = "error";
 		} else {
-			// Savestate opened.
-			// Check the mtime.
-			// TODO: Create a separate function to determine if
-			// the timestamps are "far enough apart"?
-			// TODO: mtime=0 is invalid.
-			bool doFullTimestamp = false;
-			bool isTimeValid = true;
-			time_t cur_time = time(nullptr);
-			time_t zomg_mtime = zomg.mtime();
-
-			// zomg_mtime is needed for printing.
-			// TODO: Custom localtime_r() if system version isn't available?
-			struct tm tm_zomg_mtime;
-#ifdef HAVE_LOCALTIME_R
-			if (!localtime_r(&zomg_mtime, &tm_zomg_mtime)) {
-				isTimeValid = false;
-			}
-#else /* !HAVE_LOCALTIME_R */
-			struct tm *tm_tmp;
-			tm_tmp = localtime(&zomg_mtime);
-			if (!tm_tmp) {
-				isTimeValid = false;
-			} else {
-				memcpy(&tm_zomg_mtime, tm_tmp, sizeof(tm_zomg_mtime));
-			}
-#endif /* HAVE_LOCALTIME_R */
-
-			if (!isTimeValid || (zomg_mtime > cur_time)) {
-				// Savestate was modified in teh future!!1!
-				// Either that, or localtime_r() failed.
-				doFullTimestamp = true;
-			} else {
-				// Check if the times are "close enough" to omit the date.
-				struct tm tm_cur_time;
-#ifdef HAVE_LOCALTIME_R
-				if (!localtime_r(&cur_time, &tm_cur_time)) {
-					doFullTimestamp = true;
-				}
-#else /* !HAVE_LOCALTIME_R */
-				struct tm *tm_tmp;
-				tm_tmp = localtime_r(&cur_time);
-				if (!tm_tmp) {
-					doFullTimestamp = true;
-				} else {
-					memcpy(&tm_cur_time, tm_tmp, sizeof(tm_cur_time);
-				}
-#endif /* HAVE_LOCALTIME_R */
-
-				if (!doFullTimestamp) {
-					// Check if the times are within the same day.
-					if (tm_cur_time.tm_yday != tm_zomg_mtime.tm_yday) {
-						// Not the same day.
-						// Are the times within 12 hours?
-						if (cur_time - zomg_mtime >= (3600*12)) {
-							// More than 12 hours.
-							// Show the full date.
-							doFullTimestamp = true;
-						}
-					}
-				}
-			}
-
-			if (doFullTimestamp) {
-				// Show the full timestamp.
-				strftime(slot_state, sizeof(slot_state), "%x %X", &tm_zomg_mtime);
-			} else {
-				// Show only the time.
-				strftime(slot_state, sizeof(slot_state), "%X", &tm_zomg_mtime);
-			}
+			// Get the slot mtime.
+			slot_state = getSaveSlot_mtime(&zomg);
 
 			// TODO: Load the preview image.
 		}
 	} else {
 		// Savestate does not exist.
-		strcpy(slot_state, "empty");
+		slot_state = "empty";
 	}
 
 	// Show an OSD message.
-	sdlHandler->osd_printf(1500, "Slot %d [%s]", saveSlot, slot_state);
+	sdlHandler->osd_printf(1500, "Slot %d [%s]", saveSlot, slot_state.c_str());
 }
 
 /**
