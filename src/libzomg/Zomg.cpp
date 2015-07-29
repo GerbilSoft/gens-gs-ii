@@ -32,6 +32,8 @@
 #ifdef _WIN32
 // MiniZip Win32 I/O handler.
 #include "../extlib/minizip/iowin32u.h"
+// Win32 Unicode Translation Layer.
+#include "libW32U/W32U_mini.h"
 #endif
 
 // C includes.
@@ -90,8 +92,11 @@ int ZomgPrivate::initZomgLoad(const utf8_str *filename)
 	// Check the file's mtime.
 	// TODO: Check for "CreationTime" in ZOMG.ini, and use it
 	// if it's available.
-	// TODO: W32U version of stat().
+#ifdef _WIN32
+	struct _stat64 buf;
+#else
 	struct stat buf;
+#endif
 	int ret = stat(filename, &buf);
 	if (ret == 0) {
 		// stat() succeeded.
