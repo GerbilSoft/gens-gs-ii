@@ -106,9 +106,7 @@ int ZomgPrivate::saveToZomg(const utf8_str *filename, const void *buf, int len,
 	zipfi.dosDate = 0;
 	assert(fileType >= ZOMG_FILE_BINARY && fileType <= ZOMG_FILE_TEXT);
 	zipfi.internal_fa = fileType;
-
-	// External attributes. (OS-dependent)
-	zipfi.external_fa = ZIP_EXTERNAL_FA;
+	zipfi.external_fa = ZIP_EXTERNAL_FA;	// External attributes. (OS-dependent)
 
 	int ret = zipOpenNewFileInZip4(
 		this->zip,		// zipFile
@@ -131,7 +129,7 @@ int ZomgPrivate::saveToZomg(const utf8_str *filename, const void *buf, int len,
 		0,			// crcForCrypting
 		ZIP_VERSION_MADE_BY,	// versionMadeBy
 		0			// flagBase
-	);
+		);
 
 	if (ret != UNZ_OK) {
 		// Error opening the new file in the Zip archive.
@@ -212,10 +210,10 @@ int Zomg::savePreview(const Zomg_Img_Data_t *img_data,
 	zip_fileinfo zipfi;
 	memcpy(&zipfi.tmz_date, &d->zipfi.tmz_date, sizeof(zipfi.tmz_date));
 	zipfi.dosDate = 0;
-	zipfi.internal_fa = 0x0000; // Binary file.
-	zipfi.external_fa = 0x0000; // MS-DOS directory attribute byte.
+	zipfi.internal_fa = ZomgPrivate::ZOMG_FILE_BINARY;
+	zipfi.external_fa = ZIP_EXTERNAL_FA;	// External attributes. (OS-dependent)
 
-	int ret = zipOpenNewFileInZip(
+	int ret = zipOpenNewFileInZip4(
 		d->zip,			// zipFile
 		"preview.png",		// Filename in the Zip archive
 		&zipfi,			// File information (timestamp, attributes)
@@ -225,7 +223,17 @@ int Zomg::savePreview(const Zomg_Img_Data_t *img_data,
 		0,			// size_extrafield_global,
 		nullptr,		// comment
 		Z_DEFLATED,		// method
-		Z_DEFAULT_COMPRESSION	// level
+		Z_DEFAULT_COMPRESSION,	// level
+		// The following values, except for versionMadeBy,
+		// are all defaults from zipOpenNewFileInZip().
+		0,			// raw
+		-MAX_WBITS,		// windowBits
+		DEF_MEM_LEVEL,		// memLevel
+		Z_DEFAULT_STRATEGY,	// strategy
+		nullptr,		// password
+		0,			// crcForCrypting
+		ZIP_VERSION_MADE_BY,	// versionMadeBy
+		0			// flagBase
 		);
 
 	if (ret != UNZ_OK) {
