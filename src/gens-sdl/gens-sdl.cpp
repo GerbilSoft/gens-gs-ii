@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <gens-sdl/config.gens-sdl.h>
+
 #include "SdlHandler.hpp"
 #include "Config.hpp"
 #include "VBackend.hpp"
@@ -50,6 +52,10 @@ using LibGens::EmuContextFactory;
 #include "libgenskeys/GensKey_t.h"
 using LibGens::IoManager;
 using LibGensKeys::KeyManager;
+
+// LibZomg
+#include "libzomg/Zomg.hpp"
+using LibZomg::Zomg;
 
 // OS-specific includes.
 #ifdef _WIN32
@@ -234,19 +240,95 @@ static void doSaveSlot(int saveSlot)
 
 	// Check if the specified savestate exists.
 	// TODO: R_OK or just F_OK?
-	const char *slot_state;
+	char slot_state[48];
 	string filename = getSavestateFilename(rom, saveSlot);
 	if (!access(filename.c_str(), F_OK)) {
 		// Savestate exists.
-		slot_state = "OCCUPIED";
-		// TODO: Load the preview image.
+		// Load some file information.
+		LibZomg::Zomg zomg(filename.c_str(), Zomg::ZOMG_LOAD);
+		if (!zomg.isOpen()) {
+			// Error opening the savestate.
+			strcpy(slot_state, "error");
+		} else {
+			// Savestate opened.
+			// Check the mtime.
+			// TODO: Create a separate function to determine if
+			// the timestamps are "far enough apart"?
+			// TODO: mtime=0 is invalid.
+			bool doFullTimestamp = false;
+			bool isTimeValid = true;
+			time_t cur_time = time(nullptr);
+			time_t zomg_mtime = zomg.mtime();
+
+			// zomg_mtime is needed for printing.
+			// TODO: Custom localtime_r() if system version isn't available?
+			struct tm tm_zomg_mtime;
+#ifdef HAVE_LOCALTIME_R
+			if (!localtime_r(&zomg_mtime, &tm_zomg_mtime)) {
+				isTimeValid = false;
+			}
+#else /* !HAVE_LOCALTIME_R */
+			struct tm *tm_tmp;
+			tm_tmp = localtime(&zomg_mtime);
+			if (!tm_tmp) {
+				isTimeValid = false;
+			} else {
+				memcpy(&tm_zomg_mtime, tm_tmp, sizeof(tm_zomg_mtime));
+			}
+#endif /* HAVE_LOCALTIME_R */
+
+			if (!isTimeValid || (zomg_mtime > cur_time)) {
+				// Savestate was modified in teh future!!1!
+				// Either that, or localtime_r() failed.
+				doFullTimestamp = true;
+			} else {
+				// Check if the times are "close enough" to omit the date.
+				struct tm tm_cur_time;
+#ifdef HAVE_LOCALTIME_R
+				if (!localtime_r(&cur_time, &tm_cur_time)) {
+					doFullTimestamp = true;
+				}
+#else /* !HAVE_LOCALTIME_R */
+				struct tm *tm_tmp;
+				tm_tmp = localtime_r(&cur_time);
+				if (!tm_tmp) {
+					doFullTimestamp = true;
+				} else {
+					memcpy(&tm_cur_time, tm_tmp, sizeof(tm_cur_time);
+				}
+#endif /* HAVE_LOCALTIME_R */
+
+				if (!doFullTimestamp) {
+					// Check if the times are within the same day.
+					if (tm_cur_time.tm_yday != tm_zomg_mtime.tm_yday) {
+						// Not the same day.
+						// Are the times within 12 hours?
+						if (cur_time - zomg_mtime >= (3600*12)) {
+							// More than 12 hours.
+							// Show the full date.
+							doFullTimestamp = true;
+						}
+					}
+				}
+			}
+
+			if (doFullTimestamp) {
+				// Show the full timestamp.
+				strftime(slot_state, sizeof(slot_state), "%x %X", &tm_zomg_mtime);
+			} else {
+				// Show only the time.
+				strftime(slot_state, sizeof(slot_state), "%X", &tm_zomg_mtime);
+			}
+
+			// TODO: Load the preview image.
+		}
 	} else {
 		// Savestate does not exist.
-		slot_state = "EMPTY";
+		strcpy(slot_state, "empty");
 	}
 
 	// Show an OSD message.
-	sdlHandler->osd_printf(1500, "Save Slot %d [%s]", saveSlot, slot_state);
+	sdlHandler->osd_printf(1500, "Slot %d [%s]", saveSlot, slot_state);
 }
 
 /**
@@ -262,16 +344,16 @@ static void doLoadState(void)
 	int ret = context->zomgLoad(filename.c_str());
 	if (ret == 0) {
 		// State loaded.
-		sdlHandler->osd_printf(1500, "Save Slot %d loaded.", saveSlot_selected);
+		sdlHandler->osd_printf(1500, "Save %d loaded.", saveSlot_selected);
 	} else {
 		// Error loading state.
 		if (ret == -ENOENT) {
 			// File not found.
-			sdlHandler->osd_printf(1500, "Save Slot %d is empty.", saveSlot_selected);
+			sdlHandler->osd_printf(1500, "Save %d is empty.", saveSlot_selected);
 		} else {
 			// Other error.
 			sdlHandler->osd_printf(1500,
-				"Error loading Save Slot %d:\n* %s",
+				"Error loading Slot %d:\n* %s",
 				saveSlot_selected, strerror(-ret));
 		}
 	}
@@ -290,11 +372,11 @@ static void doSaveState(void)
 	int ret = context->zomgSave(filename.c_str());
 	if (ret == 0) {
 		// State saved.
-		sdlHandler->osd_printf(1500, "Save Slot %d saved.", saveSlot_selected);
+		sdlHandler->osd_printf(1500, "Slot %d saved.", saveSlot_selected);
 	} else {
 		// Error saving state.
 		sdlHandler->osd_printf(1500,
-				"Error saving Save Slot %d:\n* %s",
+				"Error saving Slot %d:\n* %s",
 				saveSlot_selected, strerror(-ret));
 	}
 }
