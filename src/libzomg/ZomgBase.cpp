@@ -27,9 +27,14 @@ namespace LibZomg {
 ZomgBase::ZomgBase(const utf8_str *filename, ZomgFileMode mode)
 	: m_mode(ZOMG_CLOSED)	// No file open initially.
 	, m_lastError(0)
+	, m_mtime(0)
 {
 	((void)filename);
-	((void)mode);
+
+	if (m_mode == ZOMG_SAVE) {
+		// Initialize m_mtime.
+		m_mtime = time(nullptr);
+	}
 }
 
 ZomgBase::~ZomgBase()
@@ -49,6 +54,19 @@ bool ZomgBase::DetectFormat(const utf8_str *filename)
 	((void)filename);
 	return false;
 }
+
+/** Metadata functions. **/
+
+/**
+ * Get the savestate's modification time.
+ * @return File modification time. (If 0, mtime is invalid.)
+ */
+int ZomgBase::mtime(void) const
+{
+	return m_mtime;
+}
+
+/** Load functions. **/
 
 /**
  * Load the preview image.

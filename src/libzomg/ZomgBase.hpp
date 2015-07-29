@@ -25,6 +25,9 @@
 // C includes.
 #include <stdint.h>
 
+// C includes. (C++ namespace)
+#include <ctime>
+
 // C++ includes.
 #include <string>
 
@@ -101,6 +104,14 @@ class ZomgBase
 		// as well as set m_lastError if an error occurs.
 		// On success, they will return bytes read and
 		// set m_lastError to 0.
+
+		/** General metadata functions. **/
+
+		/**
+		 * Get the savestate's modification time.
+		 * @return File modification time. (If 0, mtime is invalid.)
+		 */
+		int mtime(void) const;
 
 		/** Load functions. **/
 
@@ -210,6 +221,25 @@ class ZomgBase
 		std::string m_filename;
 		ZomgFileMode m_mode;
 		int m_lastError;
+
+		/**
+		 * Modified Time.
+		 * ZOMG_SAVE: Initialized to the current time.
+		 * ZOMG_LOAD: Initialized to 0.
+		 *
+		 * Subclasses should load the file's mtime in
+		 * their constructors.
+		 *
+		 * NOTE: Save files may have an internal CreationTime.
+		 * That should be used in favor of the file system's
+		 * mtime if available.
+		 *
+		 * NOTE: If this value is 0, it should be assumed to
+		 * be "invalid". (Genesis emulators in 1970?)
+		 *
+		 * TODO: 64-bit time_t on 32-bit Linux?
+		 */
+		time_t m_mtime;
 };
 
 }

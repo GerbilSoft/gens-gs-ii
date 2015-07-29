@@ -34,6 +34,10 @@
 #include "../extlib/minizip/iowin32u.h"
 #endif
 
+// C includes.
+#include <sys/types.h>
+#include <sys/stat.h>
+
 // C includes. (C++ namespace)
 #include <cstdio>
 #include <cstring>
@@ -83,6 +87,17 @@ int ZomgPrivate::initZomgLoad(const utf8_str *filename)
 		return -EIO;
 	}
 
+	// Check the file's mtime.
+	// TODO: Check for "CreationTime" in ZOMG.ini, and use it
+	// if it's available.
+	// TODO: W32U version of stat().
+	struct stat buf;
+	int ret = stat(filename, &buf);
+	if (ret == 0) {
+		// stat() succeeded.
+		q->m_mtime = buf.st_mtime;
+	}
+
 	return 0;
 }
 
@@ -112,14 +127,13 @@ int ZomgPrivate::initZomgSave(const utf8_str *filename)
 	// Clear the default Zip timestamp first.
 	memset(&this->zipfi, 0, sizeof(this->zipfi));
 
-	// Get the current time for the Zip archive.
-	time_t cur_time = time(nullptr);
+	// Convert m_mtime to localtime.
 	struct tm *tm_local;
 #ifdef HAVE_LOCALTIME_R
 	struct tm tm_local_r;
-	tm_local = localtime_r(&cur_time, &tm_local_r);
+	tm_local = localtime_r(&q->m_mtime, &tm_local_r);
 #else /* !HAVE_LOCALTIME_R */
-	tm_local = localtime(&cur_time);
+	tm_local = localtime(&q->m_mtime);
 #endif /* HAVE_LOCALTIME_R */
 	if (tm_local) {
 		// Local time received.
