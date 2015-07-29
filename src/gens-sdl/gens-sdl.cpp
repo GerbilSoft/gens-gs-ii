@@ -837,10 +837,6 @@ int run(void)
 #undef main
 int main(int argc, char *argv[])
 {
-#ifdef _WIN32
-	W32U_Init();
-#endif /* _WIN32 */
-
 	if (argc < 2) {
 		fprintf(stderr, "usage: %s [rom filename]\n", argv[0]);
 		return EXIT_FAILURE;

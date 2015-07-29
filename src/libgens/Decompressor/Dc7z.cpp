@@ -115,7 +115,7 @@ Dc7z::Dc7z(FILE *f, const utf8_str *filename)
 		return; // TODO: Figure out an MDP error code for this.
 	}
 
-	if (W32U_IsUnicode) {
+	if (W32U_IsUnicode()) {
 		res = InFile_OpenW(&m_archiveStream.file, (const wchar_t*)filenameW.c_str());
 	} else {
 		// System doesn't support Unicode.

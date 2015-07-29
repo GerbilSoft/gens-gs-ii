@@ -163,7 +163,7 @@ int DcRar::getFileInfo(mdp_z_entry_t **z_entry_out)
 	if (!filenameW)
 		return -9; // TODO: Figure out an MDP error code for this.
 
-	if (!W32U_IsUnicode) {
+	if (!W32U_IsUnicode()) {
 		// System isn't using Unicode.
 		// Convert the filename from UTF-16 to ANSI.
 		filenameA = W32U_UTF16_to_mbs(filenameW, CP_ACP);
@@ -180,7 +180,7 @@ int DcRar::getFileInfo(mdp_z_entry_t **z_entry_out)
 	rar_open.CmtBuf = nullptr;
 	rar_open.CmtBufSize = 0;
 
-	if (W32U_IsUnicode) {
+	if (W32U_IsUnicode()) {
 		// Unicode mode.
 		rar_open.ArcName = nullptr;
 		rar_open.ArcNameW = filenameW;
@@ -313,7 +313,7 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
 	if (!filenameW)
 		return -9; // TODO: Figure out an MDP error code for this.
 
-	if (!W32U_IsUnicode) {
+	if (!W32U_IsUnicode()) {
 		// System doesn't support Unicode.
 		// Convert the filename from UTF-16 to ANSI.
 		filenameA = W32U_UTF16_to_mbs(filenameW, CP_ACP);
@@ -330,7 +330,7 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
 	rar_open.CmtBuf = nullptr;
 	rar_open.CmtBufSize = 0;
 
-	if (W32U_IsUnicode) {
+	if (W32U_IsUnicode()) {
 		// Unicode mode.
 		rar_open.ArcName = nullptr;
 		rar_open.ArcNameW = filenameW;

@@ -41,22 +41,10 @@ extern "C" {
 #endif
 
 /**
- * Initialize the Win32 Unicode Translation Layer.
- * @return 0 on success; non-zero on error.
+ * Check if the system is Unicode.
+ * @return 1 if the system is Unicode; 0 if the system is ANSI.
  */
-int W32U_Init(void);
-
-/**
- * Shut down the Win32 Unicode Translation Layer.
- * @return 0 on success; non-zero on error.
- */
-int W32U_End(void);
-
-/**
- * Indicates if the system is Unicode.
- * NOTE: Do NOT edit this variable outside of W32U!
- */
-extern int W32U_IsUnicode;
+int W32U_IsUnicode(void);
 
 /**
  * Convert a null-terminated multibyte string to UTF-16.

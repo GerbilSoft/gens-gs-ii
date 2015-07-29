@@ -56,7 +56,7 @@ bool UnRAR_dll::load(const utf8_str *filename)
 	if (!filename)
 		return false;
 
-	if (W32U_IsUnicode) {
+	if (W32U_IsUnicode()) {
 		// Use the Unicode filename.
 		hUnrarDll = LoadLibraryW(filenameW);
 	} else {

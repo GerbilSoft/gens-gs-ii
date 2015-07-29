@@ -38,29 +38,20 @@
 #include <direct.h>
 
 /**
- * Indicates if the system is Unicode.
- * NOTE: Do NOT edit this variable outside of W32U!
+ * Check if the system is Unicode.
+ * @return 1 if the system is Unicode; 0 if the system is ANSI.
  */
-int W32U_IsUnicode = 0;
-
-/**
- * Initialize the Win32 Unicode Translation Layer.
- * @return 0 on success; non-zero on error.
- */
-int W32U_Init(void)
+__inline int W32U_IsUnicode(void)
 {
-	W32U_IsUnicode = (GetModuleHandleW(nullptr) != nullptr);
-	return 0;
-}
-
-/**
- * Shut down the Win32 Unicode Translation Layer.
- * @return 0 on success; non-zero on error.
- */
-int W32U_End(void)
-{
-	W32U_IsUnicode = 0;
-	return 0;
+	// NOTE: MSVC 2010 doesn't support initializing
+	// static variables with a function.
+	// TODO: Initialize it better on MinGW-w64?
+	// TODO: How slow is GetModuleHandleW()?
+	static int isUnicode = -1;
+	if (isUnicode < 0) {
+		isUnicode = (GetModuleHandleW(nullptr) != nullptr);
+	}
+	return isUnicode;
 }
 
 /**
@@ -132,7 +123,7 @@ FILE *W32U_fopen(const char *filename, const char *mode)
 	}
 
 	fRet = nullptr;
-	if (W32U_IsUnicode) {
+	if (W32U_IsUnicode()) {
 		// Unicode version.
 		fRet = _wfopen(filenameW, modeW);
 	} else {
@@ -191,7 +182,7 @@ int W32U_access(const char *path, int mode)
 		return -1;
 	}
 
-	if (W32U_IsUnicode) {
+	if (W32U_IsUnicode()) {
 		// Unicode version.
 		ret = _waccess(pathW, mode);
 	} else {
@@ -236,7 +227,7 @@ int W32U_mkdir(const char *path)
 		return -1;
 	}
 
-	if (W32U_IsUnicode) {
+	if (W32U_IsUnicode()) {
 		// Unicode version.
 		ret = _wmkdir(pathW);
 	} else {
