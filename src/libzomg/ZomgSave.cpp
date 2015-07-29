@@ -88,12 +88,14 @@ namespace LibZomg {
 
 /**
  * Save a file to the ZOMG file.
- * @param filename Filename to save in the ZOMG file.
- * @param buf Buffer containing the file contents.
- * @param len Length of the buffer.
+ * @param filename     [in] Filename to save in the ZOMG file.
+ * @param buf          [in] Buffer containing the file contents.
+ * @param len          [in] Length of the buffer.
+ * @param fileType     [in] File type, e.g. binary or text.
  * @return 0 on success; non-zero on error.
  */
-int ZomgPrivate::saveToZomg(const utf8_str *filename, const void *buf, int len)
+int ZomgPrivate::saveToZomg(const utf8_str *filename, const void *buf, int len,
+			    ZomgZipFileType_t fileType)
 {
 	if (q->m_mode != ZomgBase::ZOMG_SAVE || !this->zip)
 		return -EBADF;
@@ -102,7 +104,8 @@ int ZomgPrivate::saveToZomg(const utf8_str *filename, const void *buf, int len)
 	zip_fileinfo zipfi;
 	memcpy(&zipfi.tmz_date, &this->zipfi.tmz_date, sizeof(zipfi.tmz_date));
 	zipfi.dosDate = 0;
-	zipfi.internal_fa = 0x0000; // TODO: Set to 0x0001 for text files.
+	assert(fileType >= ZOMG_FILE_BINARY && fileType <= ZOMG_FILE_TEXT);
+	zipfi.internal_fa = fileType;
 
 	// External attributes. (OS-dependent)
 	zipfi.external_fa = ZIP_EXTERNAL_FA;
@@ -161,13 +164,19 @@ int ZomgPrivate::saveToZomg(const utf8_str *filename, const void *buf, int len)
  */
 int Zomg::saveZomgIni(const Metadata *metadata)
 {
+	// TODO: Synchronize Zip timestamp with metadata?
+	// TODO: Save system ID? (once it's an enum...)
+	// TODO: Return an error in other functions if metadata wasn't saved.
+
 	string zomgIniStr = metadata->toZomgIni();
 	if (zomgIniStr.empty())
 		return -1;
 
 	// Write ZOMG.ini to the ZOMG file.
 	// TODO: Set a flag indicating ZOMG.ini has been saved.
-	return d->saveToZomg("ZOMG.ini", zomgIniStr.data(), zomgIniStr.size());
+	return d->saveToZomg("ZOMG.ini",
+		zomgIniStr.data(), zomgIniStr.size(),
+		ZomgPrivate::ZOMG_FILE_TEXT);
 }
 
 /**

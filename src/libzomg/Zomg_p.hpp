@@ -60,8 +60,18 @@ class ZomgPrivate
 		int initZomgLoad(const utf8_str *filename);
 		int initZomgSave(const utf8_str *filename);
 
+		/**
+		 * File type.
+		 * This maps directly to Zip internal file attributes.
+		 */
+		enum ZomgZipFileType_t {
+			ZOMG_FILE_BINARY = 0,
+			ZOMG_FILE_TEXT = 1,
+		};
+
 		int loadFromZomg(const utf8_str *filename, void *buf, int len);
-		int saveToZomg(const utf8_str *filename, const void *buf, int len);
+		int saveToZomg(const utf8_str *filename, const void *buf, int len,
+			       ZomgZipFileType_t fileType = ZOMG_FILE_BINARY);
 };
 
 }
