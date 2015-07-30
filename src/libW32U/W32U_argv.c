@@ -55,7 +55,8 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 	wchar_t **argvW;
 	wchar_t **envpW;
 	// Temporary variables.
-	int ret, i;
+	int ret = -1;
+	int i;
 	// Block sizes.
 	int cbArgvUPtr, cbArgvUStr;
 	int cbArgvUStrLeft;
@@ -85,7 +86,7 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 	if (ret != 0) {
 		// ERROR!
 		// TODO: What values?
-		return ret;
+		goto out;
 	}
 
 	// NOTE: Empty strings should still take up 1 character,
@@ -99,7 +100,8 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 		if (ret <= 0) {
 			// WideCharToMultiByte() failed!
 			// Stop processing.
-			return GetLastError();
+			ret = GetLastError();
+			goto out;
 		}
 		cbArgvUStr += ret;
 	}
@@ -116,18 +118,16 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 		assert(cbArgvUStrLeft > 0);
 		if (cbArgvUStrLeft <= 0) {
 			// Out of space in argvU...
-			free(argvU);
-			argvU = NULL;
-			return ERROR_INSUFFICIENT_BUFFER;
+			ret = ERROR_INSUFFICIENT_BUFFER;
+			goto out;
 		}
 
 		ret = WideCharToMultiByte(CP_UTF8, 0, argvW[i], -1, strU, cbArgvUStrLeft, NULL, NULL);
 		if (ret <= 0) {
 			// WideCharToMultiByte() failed.
 			// Stop processing.
-			free(argvU);
-			argvU = NULL;
-			return GetLastError();
+			ret = GetLastError();
+			goto out;
 		}
 
 		argvU[i] = strU;
@@ -138,6 +138,17 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 	// Set the last entry in argvU to NULL.
 	argcU = argcW;
 	argvU[argcU] = NULL;
+	ret = 0;
+
+out:
+	if (ret != 0) {
+		// An error occurred.
+		free(argvU);
+		free(envpU);
+		argcU = 0;
+		argvU = NULL;
+		envpU = NULL;
+	}
 
 	// TODO: Process envp.
 	*p_argc = argcU;
