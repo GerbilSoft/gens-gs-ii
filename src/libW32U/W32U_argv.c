@@ -57,10 +57,10 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 	// Temporary variables.
 	int ret, i;
 	// Block sizes.
-	int argv_ptr_sz, argv_str_sz;
-	int argv_sz_remain;
+	int cbArgvUPtr, cbArgvUStr;
+	int cbArgvUStrLeft;
 	// UTF-8 block pointer.
-	char *str;
+	char *strU;
 
 	// Check if argv has already been converted.
 	if (argcU > 0 || argvU || envpU) {
@@ -92,8 +92,8 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 	// since they're NULL-terminated.
 
 	// Determine the total length of the argv block.
-	argv_ptr_sz = (int)((argcW + 1) * sizeof(char*));
-	argv_str_sz = 0;
+	cbArgvUPtr = (int)((argcW + 1) * sizeof(char*));
+	cbArgvUStr = 0;
 	for (i = 0; i < argcW; i++) {
 		ret = WideCharToMultiByte(CP_UTF8, 0, argvW[i], -1, NULL, 0, NULL, NULL);
 		if (ret <= 0) {
@@ -101,27 +101,27 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 			// Stop processing.
 			return GetLastError();
 		}
-		argv_str_sz += ret;
+		cbArgvUStr += ret;
 	}
 
 	// Allocate the argv block.
 	// The first portion of the block is argv[];
 	// the second portion contains the actual string data.
-	argvU = (char**)malloc(argv_ptr_sz + argv_str_sz);
-	str = (char*)argvU + argv_ptr_sz;
-	argv_sz_remain = argv_str_sz;
+	argvU = (char**)malloc(cbArgvUPtr + cbArgvUStr);
+	strU = (char*)argvU + cbArgvUPtr;
+	cbArgvUStrLeft = cbArgvUStr;
 
 	// Convert the arguments from UTF-16 to UTF-8.
 	for (i = 0; i < argcW; i++) {
-		assert(argv_sz_remain > 0);
-		if (argv_sz_remain <= 0) {
+		assert(cbArgvUStrLeft > 0);
+		if (cbArgvUStrLeft <= 0) {
 			// Out of space in argvU...
 			free(argvU);
 			argvU = NULL;
 			return ERROR_INSUFFICIENT_BUFFER;
 		}
 
-		ret = WideCharToMultiByte(CP_UTF8, 0, argvW[i], -1, str, argv_sz_remain, NULL, NULL);
+		ret = WideCharToMultiByte(CP_UTF8, 0, argvW[i], -1, strU, cbArgvUStrLeft, NULL, NULL);
 		if (ret <= 0) {
 			// WideCharToMultiByte() failed.
 			// Stop processing.
@@ -130,9 +130,9 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 			return GetLastError();
 		}
 
-		argvU[i] = str;
-		str += ret;
-		argv_sz_remain -= ret;
+		argvU[i] = strU;
+		      strU += ret;
+		      cbArgvUStrLeft -= ret;
 	}
 
 	// Set the last entry in argvU to NULL.
