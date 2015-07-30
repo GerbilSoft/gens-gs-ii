@@ -29,16 +29,123 @@
 // Windows includes.
 #include <windows.h>
 
-// __wgetmainargs()
+// __wgetmainargs(), __getmainargs()
 typedef struct {
 	int newmode;
 } _startupinfo;
 _CRTIMP int __cdecl __wgetmainargs(int * _Argc, wchar_t ***_Argv, wchar_t ***_Env, int _DoWildCard, _startupinfo *_StartInfo);
+_CRTIMP int __cdecl __getmainargs(int * _Argc, char ***_Argv, char ***_Env, int _DoWildCard, _startupinfo *_StartInfo);
 
 // Converted parameters are stored here.
 static int argcU = 0;
 static char **argvU = NULL;
 static char **envpU = NULL;
+
+/**
+ * Convert ANSI argv/envp to UTF-16.
+ * Caller must free the allocated argvW and envpW.
+ * @param p_argcW	[out] Pointer to new argc.
+ * @param p_argvW	[out] Pointer to new argv.
+ * @param p_envpW	[out, opt] Pointer to new envp.
+ * @return 0 on success; non-zero on error.
+ */
+static int getArgvAtoW(int *p_argcW, wchar_t **p_argvW[], wchar_t **p_envpW[])
+{
+	_startupinfo StartInfo;
+	// __getmainargs() returns.
+	int argcA;
+	char **argvA;
+	char **envpA;
+	// Temporary variables.
+	int ret, i;
+	// Block sizes.
+	int cbArgvWPtr, cchArgvWStr;
+	int cchArgvWStrLeft;
+	// UTF-16 data.
+	int argcW;
+	wchar_t **argvW = NULL;
+	// UTF-16 block pointer.
+	wchar_t *strW;
+
+	// TODO: Get existing newmode from MSVCRT.
+	StartInfo.newmode = 0;
+
+	// NOTE: __getmainargs() is in MSVC 2010+.
+	// MinGW-w64 should support it as well.
+	// (It's present in 2.0.8 and possibly earlier.)
+	ret = __getmainargs(&argcA, &argvA, &envpA, 0, &StartInfo);
+	if (ret != 0) {
+		// ERROR!
+		// TODO: What values?
+		return ret;
+	}
+
+	// NOTE: Empty strings should still take up 1 character,
+	// since they're NULL-terminated.
+
+	// Determine the total length of the argv block.
+	cbArgvWPtr = (int)((argcA + 1) * sizeof(wchar_t*));
+	cchArgvWStr = 0;
+	for (i = 0; i < argcA; i++) {
+		ret = MultiByteToWideChar(CP_ACP, 0, argvA[i], -1, NULL, 0);
+		if (ret <= 0) {
+			// MultiByteToWideChar() failed!
+			// Stop processing.
+			ret = GetLastError();
+			goto out;
+		}
+		cchArgvWStr += ret;
+	}
+
+	// Allocate the argv block.
+	// The first portion of the block is argv[];
+	// the second portion contains the actual string data.
+	argvW = (wchar_t**)malloc(cbArgvWPtr + (cchArgvWStr * sizeof(wchar_t)));
+	strW = (wchar_t*)((char*)argvW + cbArgvWPtr);
+	cchArgvWStrLeft = cchArgvWStr;
+
+	// Convert the arguments from UTF-16 to UTF-8.
+	for (i = 0; i < argcA; i++) {
+		assert(cchArgvWStrLeft > 0);
+		if (cchArgvWStrLeft <= 0) {
+			// Out of space in argvW...
+			ret = ERROR_INSUFFICIENT_BUFFER;
+			goto out;
+		}
+
+		ret = MultiByteToWideChar(CP_ACP, 0, argvA[i], -1, strW, cchArgvWStrLeft);
+		if (ret <= 0) {
+			// MultiByteToWideChar() failed.
+			// Stop processing.
+			ret = GetLastError();
+			goto out;
+		}
+
+		argvW[i] = strW;
+		strW += ret;
+		cchArgvWStrLeft -= ret;
+	}
+
+	// Set the last entry in argvW to NULL.
+	argcW = argcA;
+	argvW[argcA] = NULL;
+	ret = 0;
+
+out:
+	if (ret != 0) {
+		// An error occurred.
+		free(argvW);
+		return ret;
+	}
+
+	// TODO: Process envp.
+	*p_argcW = argcW;
+	*p_argvW = argvW;
+	if (p_envpW) {
+		*p_envpW = NULL;
+	}
+	return 0;
+}
 
 /**
  * Convert the Windows command line to UTF-8.
@@ -49,7 +156,6 @@ static char **envpU = NULL;
  */
 int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 {
-	_startupinfo StartInfo;
 	// __wgetmainargs() returns.
 	int argcW;
 	wchar_t **argvW;
@@ -62,6 +168,8 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 	int cbArgvUStrLeft;
 	// UTF-8 block pointer.
 	char *strU;
+	// Is the system Unicode?
+	int isUnicode;
 
 	// Check if argv has already been converted.
 	if (argcU > 0 || argvU || envpU) {
@@ -74,19 +182,32 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 		return 0;
 	}
 
-	// TODO: Get existing newmode from MSVCRT.
-	StartInfo.newmode = 0;
+	// TODO: W32U_IsUnicode()?
+	isUnicode = (GetModuleHandleW(NULL) != NULL);
+	if (!isUnicode) {
+		// ANSI. Use __getmainargs().
+		// TODO: Free these variables later.
+		ret = getArgvAtoW(&argcW, &argvW, &envpW);
+		if (ret != 0) {
+			// ERROR!
+			// TODO: What values?
+			goto out;
+		}
+	} else {
+		// Unicode. Use __wgetmainargs().
+		// TODO: Get existing newmode from MSVCRT.
+		_startupinfo StartInfo;
+		StartInfo.newmode = 0;
 
-	// TODO: Use __getmainargs() if the system is ANSI.
-
-	// NOTE: __wgetmainargs() is in MSVC 2010+.
-	// MinGW-w64 should support it as well.
-	// (It's present in 2.0.8 and possibly earlier.)
-	ret = __wgetmainargs(&argcW, &argvW, &envpW, 0, &StartInfo);
-	if (ret != 0) {
-		// ERROR!
-		// TODO: What values?
-		goto out;
+		// NOTE: __wgetmainargs() is in MSVC 2010+.
+		// MinGW-w64 should support it as well.
+		// (It's present in 2.0.8 and possibly earlier.)
+		ret = __wgetmainargs(&argcW, &argvW, &envpW, 0, &StartInfo);
+		if (ret != 0) {
+			// ERROR!
+			// TODO: What values?
+			goto out;
+		}
 	}
 
 	// NOTE: Empty strings should still take up 1 character,
@@ -109,7 +230,7 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 	// Allocate the argv block.
 	// The first portion of the block is argv[];
 	// the second portion contains the actual string data.
-	argvU = (char**)malloc(cbArgvUPtr + cbArgvUStr);
+	argvU = (char**)malloc(cbArgvUPtr + (cbArgvUStr * sizeof(char)));
 	strU = (char*)argvU + cbArgvUPtr;
 	cbArgvUStrLeft = cbArgvUStr;
 
