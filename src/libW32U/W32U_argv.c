@@ -252,8 +252,8 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 		}
 
 		argvU[i] = strU;
-		      strU += ret;
-		      cbArgvUStrLeft -= ret;
+		strU += ret;
+		cbArgvUStrLeft -= ret;
 	}
 
 	// Set the last entry in argvU to NULL.
