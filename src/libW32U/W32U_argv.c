@@ -51,7 +51,7 @@ static char **saved_envpU = NULL;
  * @param p_argvW	[out] Newly-allocated UTF-16 arguments.
  * @return 0 on success; non-zero on error.
  * On success, p_argvW will contain a malloc()'d block.
- * Caller must free it when it's done.
+ * Caller must free it when it's done using it.
  */
 static int convertArgsAtoW(int argcA, const char *argvA[], int *p_argcW, wchar_t **p_argvW[])
 {
@@ -197,7 +197,7 @@ out:
  * @param p_argvU	[out] Newly-allocated UTF-8 arguments.
  * @return 0 on success; non-zero on error.
  * On success, p_argvU will contain a malloc()'d block.
- * Caller must free it when it's done.
+ * Caller must free it when it's done using it.
  */
 static int convertArgsWtoU(int argcW, const wchar_t *argvW[], int *p_argcU, char **p_argvU[])
 {
@@ -273,6 +273,88 @@ out:
 	return 0;
 }
 
+/**
+ * Convert UTF-16 environment to UTF-8.
+ * @param envpW		[in] UTF-16 environment.
+ * @param p_envpU	[out] Newly-allocated UTF-8 environment.
+ * @return 0 on success; non-zero on error.
+ * On success, p_argvW will contain a malloc()'d block.
+ * Caller must free it when it's done using it.
+ */
+static int convertEnvpWtoU(const wchar_t *envpW[], char **p_envpU[])
+{
+	// Temporary variables.
+	int ret = -1;
+	// Block sizes.
+	int cbEnvpUPtr, cbEnvpUStr;
+	int cbEnvpUStrLeft;
+	// Temporary envpW pointer.
+	const wchar_t **ptrW;
+	// UTF-8 data.
+	char **envpU;
+	char **envpU_tmp;
+	// UTF-8 block pointer.
+	char *strU;
+
+	// Determine the total length of the argv block.
+	cbEnvpUStr = 0;
+	for (ptrW = envpW; *ptrW != NULL; ptrW++) {
+		ret = WideCharToMultiByte(CP_UTF8, 0, *ptrW, -1, NULL, 0, NULL, NULL);
+		if (ret <= 0) {
+			// WideCharToMultiByte() failed!
+			// Stop processing.
+			ret = GetLastError();
+			goto out;
+		}
+		cbEnvpUStr += ret;
+	}
+	cbEnvpUPtr = (int)((ptrW - envpW + 1) * sizeof(char*));
+
+	// Allocate the envp block.
+	// The first portion of the block is envp[];
+	// the second portion contains the actual string data.
+	envpU = (char**)malloc(cbEnvpUPtr + (cbEnvpUStr * sizeof(char)));
+	strU = (char*)envpU + cbEnvpUPtr;
+	cbEnvpUStrLeft = cbEnvpUStr;
+
+	// Convert the arguments from UTF-16 to UTF-8.
+	for (ptrW = envpW, envpU_tmp = envpU;
+	     *ptrW != NULL; ptrW++, envpU_tmp++) {
+		assert(cbEnvpUStrLeft > 0);
+		if (cbEnvpUStrLeft <= 0) {
+			// Out of space in envpU...
+			ret = ERROR_INSUFFICIENT_BUFFER;
+			goto out;
+		}
+
+		ret = WideCharToMultiByte(CP_UTF8, 0, *ptrW, -1, strU, cbEnvpUStrLeft, NULL, NULL);
+		if (ret <= 0) {
+			// WideCharToMultiByte() failed.
+			// Stop processing.
+			ret = GetLastError();
+			goto out;
+		}
+
+		*envpU_tmp = strU;
+		strU += ret;
+		cbEnvpUStrLeft -= ret;
+	}
+
+	// Set the last entry in envpU to NULL.
+	*envpU_tmp = NULL;
+	ret = 0;
+
+out:
+	if (ret != 0) {
+		// An error occurred.
+		free(envpU);
+		return ret;
+	}
+
+	*p_envpU = envpU;
+	return 0;
+}
+
 /** External functions **/
 
 /**
@@ -293,6 +375,7 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 	// UTF-8 data.
 	int argcU;
 	char **argvU = NULL;
+	char **envpU = NULL;
 	// Is the system Unicode?
 	int isUnicode;
 
@@ -345,6 +428,16 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 		goto out;
 	}
 
+	// Convert envpW from UTF-16 to UTF-8.
+	// FIXME: Remove if() after implementing ANSI envp.
+	if (envpW) {
+	ret = convertEnvpWtoU(envpW, &envpU);
+	if (ret != 0) {
+		// An error occurred.
+		goto out;
+	}
+	}
+
 out:
 	if (!isUnicode) {
 		// ANSI system.
@@ -356,17 +449,20 @@ out:
 	if (ret != 0) {
 		// An error occurred.
 		free(argvU);
-		//free(envpU);
+		free(envpU);
 		return ret;
 	}
 
 	// Save arguments and environment.
 	saved_argcU = argcU;
 	saved_argvU = argvU;
-	//saved_envpU = envpU;
+	saved_envpU = envpU;
 
-	// TODO: Process envp.
 	*p_argc = argcU;
 	*p_argv = argvU;
+	if (p_envp) {
+		// TODO: Uncomment after ANSI envp is implemented.
+		//*p_envp = envpU;
+	}
 	return 0;
 }
