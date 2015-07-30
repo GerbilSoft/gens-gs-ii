@@ -158,8 +158,8 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 {
 	// __wgetmainargs() returns.
 	int argcW;
-	wchar_t **argvW;
-	wchar_t **envpW;
+	wchar_t **argvW = NULL;
+	wchar_t **envpW = NULL;
 	// Temporary variables.
 	int ret = -1;
 	int i;
@@ -262,6 +262,13 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 	ret = 0;
 
 out:
+	if (!isUnicode) {
+		// ANSI system.
+		// Free the temporary UTF-16 buffers.
+		free(argvW);
+		free(envpW);
+	}
+
 	if (ret != 0) {
 		// An error occurred.
 		free(argvU);
