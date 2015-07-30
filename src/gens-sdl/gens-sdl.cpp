@@ -63,6 +63,7 @@ using LibZomg::Zomg;
 // Windows
 #include <windows.h>
 #include "libW32U/W32U_mini.h"
+#include "libW32U/W32U_argv.h"
 #else
 // Linux, Unix, Mac OS X
 #include <unistd.h>
@@ -834,104 +835,15 @@ int run(void)
 
 }
 
-#ifdef _WIN32
-
-// __wgetmainargs()
-extern "C" {
-typedef struct {
-	int newmode;
-} _startupinfo;
-_CRTIMP int __cdecl __wgetmainargs(int * _Argc, wchar_t ***_Argv, wchar_t ***_Env, int _DoWildCard, _startupinfo *_StartInfo);
-}
-
-/**
- * Convert the Windows Unicode command line to UTF-8.
- * @param argc_ret	[out] Pointer to argc.
- * @param argv_ret	[out] Pointer to argv.
- * @return 0 on success; non-zero on error.
- */
-static int do_wmain(int *argc_ret, char **argv_ret[])
-{
-	// TODO: Replace mainCRTStartup()?
-	int argc;
-	wchar_t **argvW;
-	wchar_t **envW;
-
-	_startupinfo StartInfo;
-	StartInfo.newmode = 0;
-
-	// NOTE: __wgetmainargs() is MSVC 2010+.
-	// MinGW-w64 supports it as well.
-	int ret = __wgetmainargs(&argc, &argvW, &envW, 0, &StartInfo);
-	if (ret != 0) {
-		// ERROR!
-		// TODO: What values?
-		return ret;
-	}
-
-	// NOTE: Empty strings should still take up 1 character,
-	// since they're NULL-terminated.
-
-	// Determine the total length of the argv block.
-	const int argv_ptr_sz = (int)((argc + 1) * sizeof(char*));
-	int argv_str_sz = 0;
-	for (int i = 0; i < argc; i++) {
-		ret = WideCharToMultiByte(CP_UTF8, 0, argvW[i], -1, nullptr, 0, nullptr, nullptr);
-		if (ret <= 0) {
-			// WideCharToMultiByte() failed!
-			// Stop processing.
-			return GetLastError();
-		}
-		argv_str_sz += ret;
-	}
-
-	// Allocate the argv block.
-	// The first portion of the block is argv[];
-	// the second portion contains the actual string data.
-	char **argvU = (char**)malloc(argv_ptr_sz + argv_str_sz);
-	char *str = (char*)argvU + argv_ptr_sz;
-	int argv_sz_remain = argv_str_sz;
-
-	// Convert the arguments from UTF-16 to UTF-8.
-	for (int i = 0; i < argc; i++) {
-		assert(argv_sz_remain > 0);
-		if (argv_sz_remain <= 0) {
-			// Out of space in argvU...
-			free(argvU);
-			return ERROR_INSUFFICIENT_BUFFER;
-		}
-
-		ret = WideCharToMultiByte(CP_UTF8, 0, argvW[i], -1, str, argv_sz_remain, nullptr, nullptr);
-		if (ret <= 0) {
-			// WideCharToMultiByte() failed.
-			// Stop processing.
-			free(argvU);
-			return GetLastError();
-		}
-
-		argvU[i] = str;
-		str += ret;
-		argv_sz_remain -= ret;
-	}
-
-	// Set the last entry in argvU to nullptr.
-	argvU[argc] = nullptr;
-
-	// TODO: env?
-
-	*argv_ret = argvU;
-	return 0;
-}
-#endif /* _WIN32 */
-
 // Don't use SDL_main.
 #undef main
 int main(int argc, char *argv[])
 {
 #ifdef _WIN32
-	// Check for Unicode arguments.
+	// Convert command line parameters to UTF-8.
+	// TODO: Also for ANSI.
 	if (W32U_IsUnicode()) {
-		if (do_wmain(&argc, &argv) != 0) {
+		if (W32U_GetArgvU(&argc, &argv, nullptr) != 0) {
 			// ERROR!
 			return EXIT_FAILURE;
 		}
