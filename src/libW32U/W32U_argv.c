@@ -41,47 +41,31 @@ static int saved_argcU = 0;
 static char **saved_argvU = NULL;
 static char **saved_envpU = NULL;
 
+/** ANSI to UTF-16 **/
+
 /**
- * Convert ANSI argv/envp to UTF-16.
- * Caller must free the allocated argvW and envpW.
- * @param p_argcW	[out] Pointer to new argc.
- * @param p_argvW	[out] Pointer to new argv.
- * @param p_envpW	[out, opt] Pointer to new envp.
+ * Convert UTF-8 arguments to UTF-16.
+ * @param argcA		[in] Number of UTF-8 arguments.
+ * @param argvA		[in] UTF-8 arguments.
+ * @param p_argcW	[out] Number of UTF-16 arguments.
+ * @param p_argvW	[out] Newly-allocated UTF-16 arguments.
  * @return 0 on success; non-zero on error.
+ * On success, p_argvW will contain a malloc()'d block.
+ * Caller must free it when it's done.
  */
-static int getArgvAtoW(int *p_argcW, wchar_t **p_argvW[], wchar_t **p_envpW[])
+static int convertArgsAtoW(int argcA, const char *argvA[], int *p_argcW, wchar_t **p_argvW[])
 {
-	_startupinfo StartInfo;
-	// __getmainargs() returns.
-	int argcA;
-	char **argvA;
-	char **envpA;
 	// Temporary variables.
-	int ret, i;
+	int ret = -1;
+	int i;
 	// Block sizes.
 	int cbArgvWPtr, cchArgvWStr;
 	int cchArgvWStrLeft;
 	// UTF-16 data.
 	int argcW;
-	wchar_t **argvW = NULL;
+	wchar_t **argvW;
 	// UTF-16 block pointer.
 	wchar_t *strW;
-
-	// TODO: Get existing newmode from MSVCRT.
-	StartInfo.newmode = 0;
-
-	// NOTE: __getmainargs() is in MSVC 2010+.
-	// MinGW-w64 should support it as well.
-	// (It's present in 2.0.8 and possibly earlier.)
-	ret = __getmainargs(&argcA, &argvA, &envpA, 0, &StartInfo);
-	if (ret != 0) {
-		// ERROR!
-		// TODO: What values?
-		return ret;
-	}
-
-	// NOTE: Empty strings should still take up 1 character,
-	// since they're NULL-terminated.
 
 	// Determine the total length of the argv block.
 	cbArgvWPtr = (int)((argcA + 1) * sizeof(wchar_t*));
@@ -126,10 +110,66 @@ static int getArgvAtoW(int *p_argcW, wchar_t **p_argvW[], wchar_t **p_envpW[])
 		cchArgvWStrLeft -= ret;
 	}
 
-	// Set the last entry in argvW to NULL.
+	// Set the last entry in argvA to NULL.
 	argcW = argcA;
-	argvW[argcA] = NULL;
+	argvW[argcW] = NULL;
 	ret = 0;
+
+out:
+	if (ret != 0) {
+		// An error occurred.
+		free(argvW);
+		return ret;
+	}
+
+	*p_argcW = argcW;
+	*p_argvW = argvW;
+	return 0;
+}
+
+/**
+ * Convert ANSI argv/envp to UTF-16.
+ * Caller must free the allocated argvW and envpW.
+ * @param p_argcW	[out] Pointer to new argc.
+ * @param p_argvW	[out] Pointer to new argv.
+ * @param p_envpW	[out, opt] Pointer to new envp.
+ * @return 0 on success; non-zero on error.
+ */
+static int getArgvAtoW(int *p_argcW, wchar_t **p_argvW[], wchar_t **p_envpW[])
+{
+	_startupinfo StartInfo;
+	// __getmainargs() returns.
+	int argcA;
+	char **argvA;
+	char **envpA;
+	// Temporary variables.
+	int ret;
+	// UTF-16 data.
+	int argcW;
+	wchar_t **argvW = NULL;
+
+	// TODO: Get existing newmode from MSVCRT.
+	StartInfo.newmode = 0;
+
+	// NOTE: __getmainargs() is in MSVC 2010+.
+	// MinGW-w64 should support it as well.
+	// (It's present in 2.0.8 and possibly earlier.)
+	ret = __getmainargs(&argcA, &argvA, &envpA, 0, &StartInfo);
+	if (ret != 0) {
+		// ERROR!
+		// TODO: What values?
+		return ret;
+	}
+
+	// NOTE: Empty strings should still take up 1 character,
+	// since they're NULL-terminated.
+
+	// Convert argvA from ANSI to UTF-16.
+	ret = convertArgsAtoW(argcA, argvA, &argcW, &argvW);
+	if (ret != 0) {
+		// An error occurred.
+		goto out;
+	}
 
 out:
 	if (ret != 0) {
@@ -146,6 +186,8 @@ out:
 	}
 	return 0;
 }
+
+/** UTF-16 to UTF-8 **/
 
 /**
  * Convert UTF-16 arguments to UTF-8.
@@ -231,6 +273,8 @@ out:
 	return 0;
 }
 
+/** External functions **/
+
 /**
  * Convert the Windows command line to UTF-8.
  * @param p_argc	[out] Pointer to new argc.
@@ -264,7 +308,7 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 	}
 
 	// TODO: W32U_IsUnicode()?
-	isUnicode = (GetModuleHandleW(NULL) != NULL);
+	isUnicode = 0;//(GetModuleHandleW(NULL) != NULL);
 	if (!isUnicode) {
 		// ANSI. Use __getmainargs().
 		// TODO: Free these variables later.
