@@ -278,7 +278,7 @@ out:
  * @param envpW		[in] UTF-16 environment.
  * @param p_envpU	[out] Newly-allocated UTF-8 environment.
  * @return 0 on success; non-zero on error.
- * On success, p_argvW will contain a malloc()'d block.
+ * On success, p_envpU will contain a malloc()'d block.
  * Caller must free it when it's done using it.
  */
 static int convertEnvpWtoU(const wchar_t *envpW[], char **p_envpU[])
