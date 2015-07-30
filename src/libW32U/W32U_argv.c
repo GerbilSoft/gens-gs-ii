@@ -308,7 +308,7 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 	}
 
 	// TODO: W32U_IsUnicode()?
-	isUnicode = 0;//(GetModuleHandleW(NULL) != NULL);
+	isUnicode = (GetModuleHandleW(NULL) != NULL);
 	if (!isUnicode) {
 		// ANSI. Use __getmainargs().
 		// TODO: Free these variables later.
