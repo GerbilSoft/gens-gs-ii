@@ -37,9 +37,9 @@ _CRTIMP int __cdecl __wgetmainargs(int * _Argc, wchar_t ***_Argv, wchar_t ***_En
 _CRTIMP int __cdecl __getmainargs(int * _Argc, char ***_Argv, char ***_Env, int _DoWildCard, _startupinfo *_StartInfo);
 
 // Converted parameters are stored here.
-static int argcU = 0;
-static char **argvU = NULL;
-static char **envpU = NULL;
+static int saved_argcU = 0;
+static char **saved_argvU = NULL;
+static char **saved_envpU = NULL;
 
 /**
  * Convert ANSI argv/envp to UTF-16.
@@ -148,70 +148,28 @@ out:
 }
 
 /**
- * Convert the Windows command line to UTF-8.
- * @param p_argc	[out] Pointer to new argc.
- * @param p_argv	[out] Pointer to new argv.
- * @param p_envp	[out, opt] Pointer to new envp.
+ * Convert UTF-16 arguments to UTF-8.
+ * @param argcW		[in] Number of UTF-16 arguments.
+ * @param argvW		[in] UTF-16 arguments.
+ * @param p_argcU	[out] Number of UTF-8 arguments.
+ * @param p_argvU	[out] Newly-allocated UTF-8 arguments.
  * @return 0 on success; non-zero on error.
+ * On success, p_argvU will contain a malloc()'d block.
+ * Caller must free it when it's done.
  */
-int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
+static int convertArgsWtoU(int argcW, const wchar_t *argvW[], int *p_argcU, char **p_argvU[])
 {
-	// __wgetmainargs() returns.
-	int argcW;
-	wchar_t **argvW = NULL;
-	wchar_t **envpW = NULL;
 	// Temporary variables.
 	int ret = -1;
 	int i;
 	// Block sizes.
 	int cbArgvUPtr, cbArgvUStr;
 	int cbArgvUStrLeft;
+	// UTF-8 data.
+	int argcU;
+	char **argvU;
 	// UTF-8 block pointer.
 	char *strU;
-	// Is the system Unicode?
-	int isUnicode;
-
-	// Check if argv has already been converted.
-	if (argcU > 0 || argvU || envpU) {
-		// argv has already been converted.
-		*p_argc = argcU;
-		*p_argv = argvU;
-		if (p_envp) {
-			*p_envp = envpU;
-		}
-		return 0;
-	}
-
-	// TODO: W32U_IsUnicode()?
-	isUnicode = (GetModuleHandleW(NULL) != NULL);
-	if (!isUnicode) {
-		// ANSI. Use __getmainargs().
-		// TODO: Free these variables later.
-		ret = getArgvAtoW(&argcW, &argvW, &envpW);
-		if (ret != 0) {
-			// ERROR!
-			// TODO: What values?
-			goto out;
-		}
-	} else {
-		// Unicode. Use __wgetmainargs().
-		// TODO: Get existing newmode from MSVCRT.
-		_startupinfo StartInfo;
-		StartInfo.newmode = 0;
-
-		// NOTE: __wgetmainargs() is in MSVC 2010+.
-		// MinGW-w64 should support it as well.
-		// (It's present in 2.0.8 and possibly earlier.)
-		ret = __wgetmainargs(&argcW, &argvW, &envpW, 0, &StartInfo);
-		if (ret != 0) {
-			// ERROR!
-			// TODO: What values?
-			goto out;
-		}
-	}
-
-	// NOTE: Empty strings should still take up 1 character,
-	// since they're NULL-terminated.
 
 	// Determine the total length of the argv block.
 	cbArgvUPtr = (int)((argcW + 1) * sizeof(char*));
@@ -262,6 +220,88 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 	ret = 0;
 
 out:
+	if (ret != 0) {
+		// An error occurred.
+		free(argvU);
+		return ret;
+	}
+
+	*p_argcU = argcU;
+	*p_argvU = argvU;
+	return 0;
+}
+
+/**
+ * Convert the Windows command line to UTF-8.
+ * @param p_argc	[out] Pointer to new argc.
+ * @param p_argv	[out] Pointer to new argv.
+ * @param p_envp	[out, opt] Pointer to new envp.
+ * @return 0 on success; non-zero on error.
+ */
+int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
+{
+	// __wgetmainargs() returns.
+	int argcW;
+	wchar_t **argvW = NULL;
+	wchar_t **envpW = NULL;
+	// Temporary variables.
+	int ret = -1;
+	// UTF-8 data.
+	int argcU;
+	char **argvU = NULL;
+	// Is the system Unicode?
+	int isUnicode;
+
+	// Check if argv has already been converted.
+	if (saved_argcU > 0 || saved_argvU || saved_envpU) {
+		// argv has already been converted.
+		*p_argc = saved_argcU;
+		*p_argv = saved_argvU;
+		if (p_envp) {
+			*p_envp = saved_envpU;
+		}
+		return 0;
+	}
+
+	// TODO: W32U_IsUnicode()?
+	isUnicode = (GetModuleHandleW(NULL) != NULL);
+	if (!isUnicode) {
+		// ANSI. Use __getmainargs().
+		// TODO: Free these variables later.
+		ret = getArgvAtoW(&argcW, &argvW, &envpW);
+		if (ret != 0) {
+			// ERROR!
+			// TODO: What values?
+			goto out;
+		}
+	} else {
+		// Unicode. Use __wgetmainargs().
+		// TODO: Get existing newmode from MSVCRT.
+		_startupinfo StartInfo;
+		StartInfo.newmode = 0;
+
+		// NOTE: __wgetmainargs() is in MSVC 2010+.
+		// MinGW-w64 should support it as well.
+		// (It's present in 2.0.8 and possibly earlier.)
+		ret = __wgetmainargs(&argcW, &argvW, &envpW, 0, &StartInfo);
+		if (ret != 0) {
+			// ERROR!
+			// TODO: What values?
+			goto out;
+		}
+	}
+
+	// NOTE: Empty strings should still take up 1 character,
+	// since they're NULL-terminated.
+
+	// Convert argvW from UTF-16 to UTF-8.
+	ret = convertArgsWtoU(argcW, argvW, &argcU, &argvU);
+	if (ret != 0) {
+		// An error occurred.
+		goto out;
+	}
+
+out:
 	if (!isUnicode) {
 		// ANSI system.
 		// Free the temporary UTF-16 buffers.
@@ -272,12 +312,14 @@ out:
 	if (ret != 0) {
 		// An error occurred.
 		free(argvU);
-		free(envpU);
-		argcU = 0;
-		argvU = NULL;
-		envpU = NULL;
+		//free(envpU);
 		return ret;
 	}
+
+	// Save arguments and environment.
+	saved_argcU = argcU;
+	saved_argvU = argvU;
+	//saved_envpU = envpU;
 
 	// TODO: Process envp.
 	*p_argc = argcU;
