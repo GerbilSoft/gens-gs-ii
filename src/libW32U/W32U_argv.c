@@ -148,6 +148,7 @@ out:
 		argcU = 0;
 		argvU = NULL;
 		envpU = NULL;
+		return ret;
 	}
 
 	// TODO: Process envp.
