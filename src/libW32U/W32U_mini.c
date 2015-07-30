@@ -1,6 +1,6 @@
 /***************************************************************************
  * libW32U: Win32 Unicode Translation Layer. (Mini Version)                *
- * W32U_mini.h: Main source file.                                          *
+ * W32U_mini.c: Main source file.                                          *
  *                                                                         *
  * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *

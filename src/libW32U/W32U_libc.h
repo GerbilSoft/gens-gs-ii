@@ -23,7 +23,7 @@
 #define __LIBW32U_W32U_LIBC_H__
 
 #ifndef _WIN32
-#error W32U_mini.h should only be included on Win32!
+#error W32U_libc.h should only be included on Win32!
 #endif
 
 #ifndef __IN_W32U__
