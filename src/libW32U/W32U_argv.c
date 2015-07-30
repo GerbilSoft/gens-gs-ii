@@ -88,7 +88,7 @@ static int convertArgsAtoW(int argcA, const char *argvA[], int *p_argcW, wchar_t
 	strW = (wchar_t*)((char*)argvW + cbArgvWPtr);
 	cchArgvWStrLeft = cchArgvWStr;
 
-	// Convert the arguments from UTF-16 to UTF-8.
+	// Convert the arguments from ANSI to UTF-16.
 	for (i = 0; i < argcA; i++) {
 		assert(cchArgvWStrLeft > 0);
 		if (cchArgvWStrLeft <= 0) {
@@ -128,6 +128,90 @@ out:
 }
 
 /**
+ * Convert ANSI environment to UTF-16.
+ * @param envpA		[in] ANSI environment.
+ * @param p_envpW	[out] Newly-allocated UTF-16 environment.
+ * @return 0 on success; non-zero on error.
+ * On success, p_envpW will contain a malloc()'d block.
+ * Caller must free it when it's done using it.
+ */
+static int convertEnvpAtoW(const char *envpA[], wchar_t **p_envpW[])
+{
+	// Temporary variables.
+	int ret = -1;
+	// Block sizes.
+	int cbEnvpWPtr, cchEnvpWStr;
+	int cchEnvpWStrLeft;
+	// Temporary envpA pointer.
+	const char **ptrA;
+	// UTF-16 data.
+	wchar_t **envpW;
+	wchar_t **envpW_tmp;
+	// UTF-16 block pointer.
+	wchar_t *strW;
+
+	// Determine the total length of the argv block.
+	cchEnvpWStr = 0;
+	for (ptrA = envpA; *ptrA != NULL; ptrA++) {
+		ret = MultiByteToWideChar(CP_ACP, 0, *ptrA, -1, NULL, 0);
+		if (ret <= 0) {
+			// WideCharToMultiByte() failed!
+			// Stop processing.
+			ret = GetLastError();
+			goto out;
+		}
+		cchEnvpWStr += ret;
+	}
+	cbEnvpWPtr = (int)((ptrA - envpA + 1) * sizeof(wchar_t*));
+
+	// Allocate the envp block.
+	// The first portion of the block is envp[];
+	// the second portion contains the actual string data.
+	envpW = (wchar_t**)malloc(cbEnvpWPtr + (cchEnvpWStr * sizeof(wchar_t)));
+	memset(envpW, 0, cbEnvpWPtr + (cchEnvpWStr * sizeof(wchar_t)));
+	strW = (wchar_t*)((char*)envpW + cbEnvpWPtr);
+	cchEnvpWStrLeft = cchEnvpWStr;
+
+	// Convert the environment from ANSI to UTF-16.
+	for (ptrA = envpA, envpW_tmp = envpW;
+	     *ptrA != NULL; ptrA++, envpW_tmp++)
+	{
+		assert(cchEnvpWStrLeft > 0);
+		if (cchEnvpWStrLeft <= 0) {
+			// Out of space in envpU...
+			ret = ERROR_INSUFFICIENT_BUFFER;
+			goto out;
+		}
+
+		ret = MultiByteToWideChar(CP_ACP, 0, *ptrA, -1, strW, cchEnvpWStrLeft);
+		if (ret <= 0) {
+			// WideCharToMultiByte() failed.
+			// Stop processing.
+			ret = GetLastError();
+			goto out;
+		}
+
+		*envpW_tmp = strW;
+		strW += ret;
+		cchEnvpWStrLeft -= ret;
+	}
+
+	// Set the last entry in envpW to NULL.
+	*envpW_tmp = NULL;
+	ret = 0;
+
+out:
+	if (ret != 0) {
+		// An error occurred.
+		free(envpW);
+		return ret;
+	}
+
+	*p_envpW = envpW;
+	return 0;
+}
+
+/**
  * Convert ANSI argv/envp to UTF-16.
  * Caller must free the allocated argvW and envpW.
  * @param p_argcW	[out] Pointer to new argc.
@@ -147,6 +231,7 @@ static int getArgvAtoW(int *p_argcW, wchar_t **p_argvW[], wchar_t **p_envpW[])
 	// UTF-16 data.
 	int argcW;
 	wchar_t **argvW = NULL;
+	wchar_t **envpW = NULL;
 
 	// TODO: Get existing newmode from MSVCRT.
 	StartInfo.newmode = 0;
@@ -171,10 +256,18 @@ static int getArgvAtoW(int *p_argcW, wchar_t **p_argvW[], wchar_t **p_envpW[])
 		goto out;
 	}
 
+	// Convert envpA from ANSI to UTF-16.
+	ret = convertEnvpAtoW(envpA, &envpW);
+	if (ret != 0) {
+		// An error occurred.
+		goto out;
+	}
+
 out:
 	if (ret != 0) {
 		// An error occurred.
 		free(argvW);
+		free(envpW);
 		return ret;
 	}
 
@@ -182,7 +275,7 @@ out:
 	*p_argcW = argcW;
 	*p_argvW = argvW;
 	if (p_envpW) {
-		*p_envpW = NULL;
+		*p_envpW = envpW;
 	}
 	return 0;
 }
@@ -319,7 +412,8 @@ static int convertEnvpWtoU(const wchar_t *envpW[], char **p_envpU[])
 
 	// Convert the arguments from UTF-16 to UTF-8.
 	for (ptrW = envpW, envpU_tmp = envpU;
-	     *ptrW != NULL; ptrW++, envpU_tmp++) {
+	     *ptrW != NULL; ptrW++, envpU_tmp++)
+	{
 		assert(cbEnvpUStrLeft > 0);
 		if (cbEnvpUStrLeft <= 0) {
 			// Out of space in envpU...
@@ -429,13 +523,10 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 	}
 
 	// Convert envpW from UTF-16 to UTF-8.
-	// FIXME: Remove if() after implementing ANSI envp.
-	if (envpW) {
 	ret = convertEnvpWtoU(envpW, &envpU);
 	if (ret != 0) {
 		// An error occurred.
 		goto out;
-	}
 	}
 
 out:
@@ -461,8 +552,7 @@ out:
 	*p_argc = argcU;
 	*p_argv = argvU;
 	if (p_envp) {
-		// TODO: Uncomment after ANSI envp is implemented.
-		//*p_envp = envpU;
+		*p_envp = envpU;
 	}
 	return 0;
 }
