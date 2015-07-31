@@ -88,12 +88,12 @@ int GLTex::alloc(Format format, int w, int h)
 #ifdef GL_HEADER_HAS_PACKED_PIXELS
 		// TODO: Verify that packed pixels is actually supported using GLEW.
 		case FMT_XRGB1555:
-			this->components = 4;
+			this->intformat = GL_RGBA;
 			this->format = GL_BGRA;
 			this->type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
 			break;
 		case FMT_RGB565:
-			this->components = 3;
+			this->intformat = GL_RGB;
 			this->format = GL_RGB;
 			this->type = GL_UNSIGNED_SHORT_5_6_5;
 			break;
@@ -110,7 +110,7 @@ int GLTex::alloc(Format format, int w, int h)
 			// TODO: Verify that GL_BGRA is supported.
 			// Pretty much everything supports it,
 			// but you can never be sure...
-			this->components = 4;
+			this->intformat = GL_RGBA;
 			this->format = GL_BGRA;
 			this->type = SDLGL_UNSIGNED_BYTE;
 			break;
@@ -151,7 +151,7 @@ int GLTex::alloc(Format format, int w, int h)
 
 	// Allocate the texture.
 	glTexImage2D(GL_TEXTURE_2D, 0,
-			this->components,	// Internal format.
+			this->intformat,	// Internal format.
 			texW, texH,		// width/height
 			0,			// No border.
 			this->format, SDLGL_UNSIGNED_BYTE, texBuf);

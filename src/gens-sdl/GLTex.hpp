@@ -77,7 +77,7 @@ class GLTex
 		void subImage2D(int w, int h, int pitch, const void *data);
 
 	protected:
-		GLenum components;	// Number of color components.
+		GLenum intformat;	// Internal format. (GL_RGB, GL_RGBA)
 		GLenum format;		// Texture format. (GL_RGB, GL_BGRA)
 		GLenum type;		// Texture type. (GL_UNSIGNED_BYTE, etc.)
 
