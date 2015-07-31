@@ -19,11 +19,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#define __IN_W32U__
 #include "W32U_mini.h"
 
 // C includes.
 #include <wchar.h>
 #include <stdlib.h>
+
+// Windows includes.
+#include <windows.h>
 
 // Indicates if the system is Unicode.
 // -1 = uninitialized; 0 == ANSI; 1 == Unicode.
