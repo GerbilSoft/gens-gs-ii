@@ -101,8 +101,9 @@ class SdlHandler {
 		 * If the VBackend is dirty, video is updated;
 		 * otherwise, nothing happens.
 		 * NOTE: This function does NOT update the frame counter.
+		 * @param force Force an update. Required if a window expose event occurred.
 		 */
-		void update_video_paused(void);
+		void update_video_paused(bool force = false);
 
 		/**
 		 * Resize the video renderer.

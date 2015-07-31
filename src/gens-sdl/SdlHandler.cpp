@@ -135,11 +135,14 @@ void SdlHandler::update_video(void)
  * If the VBackend is dirty, video is updated;
  * otherwise, nothing happens.
  * NOTE: This function does NOT update the frame counter.
+ * @param force Force an update. Required if a window expose event occurred.
  */
-void SdlHandler::update_video_paused(void)
+void SdlHandler::update_video_paused(bool force)
 {
-	if (m_vBackend && m_vBackend->isDirty()) {
-		m_vBackend->update(false);
+	if (m_vBackend) {
+		if (force || m_vBackend->isDirty()) {
+			m_vBackend->update(false);
+		}
 	}
 }
 

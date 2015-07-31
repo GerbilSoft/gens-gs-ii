@@ -712,11 +712,7 @@ int run(void)
 			// Emulation is paused.
 			// Only update video if the VBackend is dirty
 			// or the SDL window has been exposed.
-			if (exposed) {
-				sdlHandler->update_video();
-			} else {
-				sdlHandler->update_video_paused();
-			}
+			sdlHandler->update_video_paused(exposed);
 
 			// Don't run any frames.
 			continue;
