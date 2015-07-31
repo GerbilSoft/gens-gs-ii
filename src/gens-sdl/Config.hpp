@@ -60,7 +60,7 @@ std::string getSavestateFilename(const LibGens::Rom *rom, int saveSlot);
  * Take a screenshot.
  * @param fb	[in] MdFb.
  * @param rom	[in] ROM object.
- * @return 0 on success; non-zero on error.
+ * @return Screenshot number on success; negative errno on error.
  */
 int doScreenShot(const LibGens::MdFb *fb, const LibGens::Rom *rom);
 

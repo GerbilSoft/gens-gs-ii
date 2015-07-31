@@ -451,7 +451,12 @@ static void processSdlEvent(const SDL_Event *event) {
 				case SDLK_BACKSPACE:
 					if (event->key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
 						// Take a screenshot.
-						GensSdl::doScreenShot(context->m_vdp->MD_Screen, rom);
+						int ret = GensSdl::doScreenShot(context->m_vdp->MD_Screen, rom);
+						if (ret >= 0) {
+							sdlHandler->osd_printf(1500, "Screenshot %d saved.", ret);
+						} else {
+							sdlHandler->osd_printf(1500, "Error saving screenshot:\n\n* %s", strerror(-ret));
+						}
 					}
 					break;
 

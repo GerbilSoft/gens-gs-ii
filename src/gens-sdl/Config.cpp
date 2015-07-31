@@ -193,7 +193,7 @@ std::string getSavestateFilename(const LibGens::Rom *rom, int saveSlot)
  * Take a screenshot.
  * @param fb	[in] MdFb.
  * @param rom	[in] ROM object.
- * @return 0 on success; non-zero on error.
+ * @return Screenshot number on success; negative errno on error.
  */
 int doScreenShot(const MdFb *fb, const Rom *rom)
 {
@@ -220,14 +220,7 @@ int doScreenShot(const MdFb *fb, const Rom *rom)
 
 	// Take the screenshot.
 	int ret = Screenshot::toFile(fb, rom, scrFilename);
-	if (ret == 0) {
-		printf("Screenshot %d saved.\n", scrNumber);
-	} else {
-		// TODO: Print the actual error.
-		printf("Error saving screenshot: %s\n", strerror(-ret));
-	}
-
-	return ret;
+	return (ret == 0 ? scrNumber : ret);
 }
 
 }
