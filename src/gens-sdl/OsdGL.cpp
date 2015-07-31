@@ -358,21 +358,17 @@ void OsdGLPrivate::checkForExpiredMessages(void)
 		if (!osdMsg)
 			continue;
 
-		if (curTime >= osdMsg->endTime) {
+		if (!osdMsg->hasDisplayed) {
+			// Message hasn't been displayed yet.
+			// Reset its end time.
+			osdMsg->endTime = curTime + (osdMsg->duration * 1000);
+			isAllProcessed = false;
+		} else if (curTime >= osdMsg->endTime) {
 			// Time has elapsed.
-			// Check if the message has been displayed.
-			if (osdMsg->hasDisplayed) {
-				// Message has been displayed.
-				// Remove the message from the list.
-				delete osdList[i];
-				osdList[i] = nullptr;
-				dirty = true;
-			} else {
-				// Message has *not* been displayed.
-				// Reset its end time.
-				osdMsg->endTime = curTime + (osdMsg->duration * 1000);
-				isAllProcessed = false;
-			}
+			// Remove the message from the list.
+			delete osdList[i];
+			osdList[i] = nullptr;
+			dirty = true;
 		} else {
 			// Message has not been processed yet.
 			isAllProcessed = false;
