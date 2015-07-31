@@ -48,6 +48,9 @@ extern int W32U_internal_isUnicode;
 int W32U_internal_isUnicode = -1;
 #endif
 
+// From W32U_mini.h.
+void W32U_CheckUTF8(void);
+
 /**
  * Check if the system is Unicode.
  * @return 1 if the system is Unicode; 0 if the system is ANSI.
@@ -64,6 +67,9 @@ static __inline int W32U_IsUnicode(void)
 	// TODO: How slow is GetModuleHandleW()?
 	if (W32U_internal_isUnicode < 0) {
 		W32U_internal_isUnicode = (GetModuleHandleW(nullptr) != nullptr);
+		// Check for UTF-8 support.
+		// If not found, the program will exit.
+		W32U_CheckUTF8();
 	}
 	return W32U_internal_isUnicode;
 }

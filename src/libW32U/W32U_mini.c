@@ -34,6 +34,71 @@
 #include "is_unicode.h"
 
 /**
+ * Check if the system supports UTF-8.
+ * If it doesn't, the program will show an
+ * error message and then exit.
+ */
+void W32U_CheckUTF8(void)
+{
+	// U+2602: UMBRELLA
+	// NOTE: Buffers are padded with 0x5A to match the
+	// expected values for memcmp().
+	// TODO: Use "random" data?
+	static const int cbUtf8 = 4;
+	static const char utf8_src[] =
+		{0xE2, 0x98, 0x82, 0x00, 0x5A, 0x5A, 0x5A, 0x5A,
+		 0x5A, 0x5A, 0x5A, 0x5A, 0x5A, 0x5A, 0x5A, 0x5A};
+	static const int cchUtf16 = 2;
+	static const wchar_t utf16_src[] =
+		{0x2602, 0x0000, 0x5A5A, 0x5A5A,
+		 0x5A5A, 0x5A5A, 0x5A5A, 0x5A5A};
+
+	// Temporary buffers.
+	int ret;
+	union {
+		char utf8[16];
+		wchar_t utf16[8];
+	} buf;
+
+	// Attempt to convert U+2602 from UTF-8 to UTF-16.
+	memset(buf.utf8, 0x5A, sizeof(buf.utf8));
+	ret = MultiByteToWideChar(CP_UTF8, 0, utf8_src, -1, buf.utf16, sizeof(buf.utf16));
+	if (ret != cchUtf16) {
+		// Wrong number of characters converted.
+		goto fail;
+	}
+	if (memcmp(buf.utf16, utf16_src, sizeof(utf16_src)) != 0) {
+		// Conversion is wrong.
+		goto fail;
+	}
+
+	// Attempt to convert U+2602 from UTF-16 to UTF-8.
+	memset(buf.utf8, 0x5A, sizeof(buf.utf8));
+	ret = WideCharToMultiByte(CP_UTF8, 0, utf16_src, -1, buf.utf8, sizeof(buf.utf8), NULL, NULL);
+	if (ret != cbUtf8) {
+		// Wrong number of characters converted.
+		goto fail;
+	}
+	if (memcmp(buf.utf8, utf8_src, sizeof(utf8_src)) != 0) {
+		// Conversion is wrong.
+		goto fail;
+	}
+
+	// UTF-8 conversions succeeded.
+	return;
+
+fail:
+	// UTF-8 conversions failed.
+	MessageBoxA(NULL,
+		"This system does not support the UTF-8 encoding for Unicode text.\n\n"
+		"Because Gens/GS II uses UTF-8 internally for all text,\n"
+		"it requires a system that supports UTF-8.\n\n"
+		"Please upgrade to an OS released in the 21st century.",
+		"UTF-8 Error", MB_ICONSTOP);
+	exit(EXIT_FAILURE);
+}
+
+/**
  * Convert a null-terminated multibyte string to UTF-16.
  * @param mbs Multibyte string. (null-terminated)
  * @param codepage mbs codepage.

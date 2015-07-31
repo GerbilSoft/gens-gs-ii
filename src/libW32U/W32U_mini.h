@@ -40,6 +40,13 @@ extern "C" {
 int W32U_IsUnicode(void);
 
 /**
+ * Check if the system supports UTF-8.
+ * If it doesn't, the program will show an
+ * error message and then exit.
+ */
+void W32U_CheckUTF8(void);
+
+/**
  * Convert a null-terminated multibyte string to UTF-16.
  * @param mbs Multibyte string. (null-terminated)
  * @param codepage mbs codepage.
