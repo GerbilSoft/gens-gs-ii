@@ -43,9 +43,11 @@
 #define GL_BGRA GL_BGRA_EXT
 #endif
 
+// NOTE: These constants are provided by OpenGL 1.2,
+// *not* GL_EXT_packed_pixels.
 #if defined(GL_UNSIGNED_SHORT_1_5_5_5_REV) && \
     defined(GL_UNSIGNED_SHORT_5_6_5)
-#define GL_HEADER_HAS_PACKED_PIXELS
+#define GL_HEADER_HAS_GL_1_2_PACKED_PIXELS
 #endif
 
 namespace GensSdl {
@@ -85,9 +87,12 @@ int GLTex::alloc(Format format, int w, int h)
 			// Unknown format.
 			dealloc();
 			return -EINVAL;
-#ifdef GL_HEADER_HAS_PACKED_PIXELS
-		// TODO: Verify that packed pixels is actually supported using GLEW.
+#ifdef GL_HEADER_HAS_GL_1_2_PACKED_PIXELS
+		// TODO: Verify that OpenGL 1.2 is supported.
+		// TODO: GL_RGB5 seems to work as an internal format.
+		// https://www.opengl.org/registry/doc/glspec121_bookmarked.pdf
 		case FMT_XRGB1555:
+			// TODO: Store as GL_RGB5 internally?
 			this->intformat = GL_RGBA;
 			this->format = GL_BGRA;
 			this->type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
@@ -97,15 +102,16 @@ int GLTex::alloc(Format format, int w, int h)
 			this->format = GL_RGB;
 			this->type = GL_UNSIGNED_SHORT_5_6_5;
 			break;
-#else /* !GL_HEADER_HAS_PACKED_PIXELS */
+#else /* !GL_HEADER_HAS_GL_1_2_PACKED_PIXELS */
 		case FMT_XRGB1555:
 		case FMT_RGB565:
-			// GL_EXT_packed_pixels / GL_APPLE_packed_pixels
-			// is required for 15-bit and 16-bit color.
+			// OpenGL 1.2 is required for 15-bit and 16-bit color.
+			// NOTE: GL_EXT_packed_pixels could work for 15-bit.
+			// NOTE: GL_APPLE_packed_pixels could work for 15-bit and 16-bit.
 			// TODO: Error code?
 			dealloc();
 			return -EINVAL;
-#endif
+#endif /* GL_HEADER_HAS_GL_1_2_PACKED_PIXELS */
 		case FMT_XRGB8888:
 			// TODO: Verify that GL_BGRA is supported.
 			// Pretty much everything supports it,
