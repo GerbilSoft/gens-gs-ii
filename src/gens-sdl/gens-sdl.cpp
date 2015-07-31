@@ -455,7 +455,7 @@ static void processSdlEvent(const SDL_Event *event) {
 						if (ret >= 0) {
 							sdlHandler->osd_printf(1500, "Screenshot %d saved.", ret);
 						} else {
-							sdlHandler->osd_printf(1500, "Error saving screenshot:\n\n* %s", strerror(-ret));
+							sdlHandler->osd_printf(1500, "Error saving screenshot:\n* %s", strerror(-ret));
 						}
 					}
 					break;
