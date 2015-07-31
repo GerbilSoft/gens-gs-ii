@@ -75,6 +75,21 @@ class GLBackend : public VBackend {
 		virtual void resize(int width, int height) override;
 
 	public:
+		/** Onscreen Display functions. **/
+
+		/**
+		 * Are any OSD messages currently onscreen?
+		 * @return True if OSD messages are onscreen; false if not.
+		 */
+		virtual bool has_osd_messages(void) const final;
+
+		/**
+		 * Process OSD messages.
+		 * This usually only needs to be called if the emulator is paused.
+		 * @return True if OSD messages were processed; false if not.
+		 */
+		virtual bool process_osd_messages(void) final;
+
 		/**
 		 * Print a message to the Onscreen Display.
 		 * @param duration Duration for the message to appear, in milliseconds.

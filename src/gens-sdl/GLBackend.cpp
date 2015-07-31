@@ -420,6 +420,29 @@ void GLBackend::endGL(void)
 /** Onscreen Display functions. **/
 
 /**
+ * Are any OSD messages currently onscreen?
+ * @return True if OSD messages are onscreen; false if not.
+ */
+bool GLBackend::has_osd_messages(void) const
+{
+	return d->osd->hasMessages();
+}
+
+/**
+ * Process OSD messages.
+ * This usually only needs to be called if the emulator is paused.
+ * @return True if OSD messages were processed; false if not.
+ */
+bool GLBackend::process_osd_messages(void)
+{
+	bool ret = d->osd->processMessages();
+	if (ret) {
+		setDirty();
+	}
+	return ret;
+}
+
+/**
  * Print a message to the Onscreen Display.
  * @param duration Duration for the message to appear, in milliseconds.
  * @param msg Message. (printf-formatted; UTF-8)
@@ -431,6 +454,9 @@ void GLBackend::osd_vprintf(const int duration, const utf8_str *msg, va_list ap)
 	char buf[2048];
 	vsnprintf(buf, sizeof(buf), msg, ap);
 	d->osd->print(duration, buf);
+
+	// VBackend is dirty.
+	setDirty();
 }
 
 }

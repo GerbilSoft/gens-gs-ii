@@ -64,6 +64,21 @@ class OsdGL {
 		 */
 		void draw(void);
 
+		/**
+		 * Are messages present in the message queue?
+		 * This should be queried to determine if the
+		 * video backend needs to be updated.
+		 * @return True if messages are present; false if not.
+		 */
+		bool hasMessages(void) const;
+
+		/**
+		 * Process messages.
+		 * This usually only needs to be called if the emulator is paused.
+		 * @return True if messages were processed; false if not.
+		 */
+		bool processMessages(void);
+
 	public:
 		// NOTE: printf() functions won't be added here.
 		// They can be implemented by VBackend.

@@ -681,12 +681,17 @@ int run(void)
 		int ret;
 		if (paused) {
 			// Emulation is paused.
-			// Wait for an SDL event.
-			// TODO: Check OSD timers?
-			ret = SDL_WaitEvent(&event);
-			if (ret) {
-				processSdlEvent(&event);
+			if (!vBackend->has_osd_messages()) {
+				// No OSD messages.
+				// Wait for an SDL event.
+				ret = SDL_WaitEvent(&event);
+				if (ret) {
+					processSdlEvent(&event);
+				}
 			}
+
+			// Process OSD messages.
+			vBackend->process_osd_messages();
 		}
 		if (!running)
 			break;

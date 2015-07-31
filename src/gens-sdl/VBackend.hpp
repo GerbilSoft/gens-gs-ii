@@ -95,7 +95,6 @@ class VBackend {
 		 * Is the VBackend dirty?
 		 * This is true if any of the properties have changed
 		 * and the image hasn't been updated.
-		 * TODO: Also OSD?
 		 * @return True if dirty; false if not.
 		 */
 		bool isDirty(void) const;
@@ -116,6 +115,21 @@ class VBackend {
 		void setStretchMode(StretchMode_t stretchMode);
 
 	public:
+		/** Onscreen Display functions. **/
+
+		/**
+		 * Are any OSD messages currently onscreen?
+		 * @return True if OSD messages are onscreen; false if not.
+		 */
+		virtual bool has_osd_messages(void) const;
+
+		/**
+		 * Process OSD messages.
+		 * This usually only needs to be called if the emulator is paused.
+		 * @return True if OSD messages were processed; false if not.
+		 */
+		virtual bool process_osd_messages(void);
+
 		/**
 		 * Print a message to the Onscreen Display.
 		 * @param duration Duration for the message to appear, in milliseconds.

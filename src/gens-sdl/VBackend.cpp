@@ -48,6 +48,29 @@ void VBackend::setStretchMode(StretchMode_t stretchMode)
 	setDirty();
 }
 
+/** Onscreen Display functions. **/
+
+/**
+ * Are any OSD messages currently onscreen?
+ * @return True if OSD messages are onscreen; false if not.
+ */
+bool VBackend::has_osd_messages(void) const
+{
+	// Nothing to do here...
+	return false;
+}
+
+/**
+ * Process OSD messages.
+ * This usually only needs to be called if the emulator is paused.
+ * @return True if OSD messages were processed; false if not.
+ */
+bool VBackend::process_osd_messages(void)
+{
+	// Nothing to do here...
+	return false;
+}
+
 /**
  * Print a message to the Onscreen Display.
  * @param duration Duration for the message to appear, in milliseconds.
