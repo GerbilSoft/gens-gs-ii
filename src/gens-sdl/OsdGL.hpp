@@ -65,13 +65,24 @@ class OsdGL {
 		void draw(void);
 
 	public:
+		// NOTE: printf() functions won't be added here.
+		// They can be implemented by VBackend.
+
 		/**
 		 * Add a message to the OSD queue.
 		 * @param duration Duration for the message to appear, in milliseconds.
 		 * @param msg Message. (UTF-8)
-		 * TODO: printf() function.
 		 */
 		void print(unsigned int duration, const utf8_str *msg);
+
+		// TODO: Implement this.
+		// strchr() isn't available for UTF-16...
+		/**
+		 * Add a message to the OSD queue.
+		 * @param duration Duration for the message to appear, in milliseconds.
+		 * @param msg Message. (UTF-16)
+		 */
+		void print(unsigned int duration, const char16_t *msg);
 
 	public:
 		/** Properties. **/

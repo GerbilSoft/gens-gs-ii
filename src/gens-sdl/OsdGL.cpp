@@ -101,6 +101,14 @@ class OsdGLPrivate {
 		 */
 		static string utf8ToInternal(const utf8_str *str, size_t len);
 
+		/**
+		 * Convert a UTF-16 string to the internal character set.
+		 * @param str UTF-16 string.
+		 * @param len Length of str.
+		 * @return String using the internal character set.
+		 */
+		static string utf16ToInternal(const char16_t *str, size_t len);
+
 		// OpenGL Display List.
 		GLuint displayList;
 
@@ -253,15 +261,28 @@ void OsdGLPrivate::printLine(int x, int y, const std::string &msg)
  */
 string OsdGLPrivate::utf8ToInternal(const utf8_str *str, size_t len)
 {
-	string cp8;	// for return value optimization
+	// TODO: Move to after utf16ToInternal()?
 
 	// Convert to UTF-16 first.
 	u16string u16 = LibGensText::Utf8_to_Utf16(str, len);
+	// Convert to the local 8-bit character set.
+	return utf16ToInternal(u16.data(), u16.size());
+}
+
+/**
+ * Convert a UTF-16 string to the internal character set.
+ * @param str UTF-16 string.
+ * @param len Length of str.
+ * @return String using the internal character set.
+ */
+string OsdGLPrivate::utf16ToInternal(const char16_t *str, size_t len)
+{
+	string cp8;	// for return value optimization
 
 	// Convert to the local 8-bit character set.
-	cp8.resize(u16.size());
-	for (int i = 0; i < (int)u16.size(); i++) {
-		char16_t chr16 = u16[i];
+	cp8.resize(len);
+	for (int i = 0; i < (int)len; i++, str++) {
+		char16_t chr16 = *str;
 		if (chr16 <= 0xFF) {
 			// U+0000 - U+00FF.
 			cp8[i] = (char)chr16;
