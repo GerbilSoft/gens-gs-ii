@@ -41,11 +41,8 @@ using std::vector;
 // LibGensText.
 #include "libgenstext/Encoding.hpp"
 
-// OpenGL
-#ifdef _WIN32
-#include <windows.h>
-#endif
-#include <GL/gl.h>
+// GL Texture wrapper.
+#include "GLTex.hpp"
 
 // OSD font.
 #include "OsdFont_VGA.hpp"
@@ -63,7 +60,7 @@ class OsdGLPrivate {
 		OsdGLPrivate &operator=(const OsdGLPrivate &);
 
 	public:
-		GLuint texOsd;			// OSD texture.
+		GLTex texOsd;			// OSD texture.
 		GLfloat osdVertex[256][8];	// Texture vertex array.
 
 		/**
@@ -131,8 +128,7 @@ class OsdGLPrivate {
 /** OsdGLPrivate **/
 
 OsdGLPrivate::OsdGLPrivate()
-	: texOsd(0)
-	, displayList(0)
+	: displayList(0)
 	, dirty(true)
 	, fpsEnabled(false)
 	, msgEnabled(true)
@@ -148,28 +144,10 @@ OsdGLPrivate::OsdGLPrivate()
  */
 void OsdGLPrivate::reallocOsdTexture()
 {
-	if (texOsd == 0) {
-		// Create a texture.
-		glGenTextures(1, &texOsd);
-	}
 	if (displayList == 0) {
 		// Create a DisplayList.
 		displayList = glGenLists(1);
 	}
-
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, texOsd);
-
-	// Set texture parameters.
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
-	// Texture filtering.
-	// TODO: Should we use linear filtering for the OSD text?
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	glDisable(GL_TEXTURE_2D);
 
 	// Calculate the GL vertex array.
 	GLfloat *vtx = &osdVertex[0][0];
@@ -208,12 +186,10 @@ void OsdGLPrivate::reallocOsdTexture()
 		}
 	}
 
-	// Upload the image data.
-	glTexImage2D(GL_TEXTURE_2D, 0,
-			GL_ALPHA,	// One component.
-			128, 256,	// Texture size.
-			0,		// No border.
-			GL_ALPHA, GL_UNSIGNED_BYTE, glImage);
+	// Allocate the texture.
+	// TODO: Texture data parameter?
+	texOsd.alloc(GLTex::FMT_ALPHA8, 128, 256);
+	texOsd.subImage2D(128, 256, 128, glImage);
 	free(glImage);
 
 	// OSD is dirty.
@@ -431,10 +407,7 @@ void OsdGL::init(void)
  */
 void OsdGL::end(void)
 {
-	if (d->texOsd > 0) {
-		glDeleteTextures(1, &d->texOsd);
-		d->texOsd = 0;
-	}
+	d->texOsd.dealloc();
 	if (d->displayList > 0) {
 		glDeleteLists(d->displayList, 1);
 		d->displayList = 0;
@@ -491,7 +464,7 @@ void OsdGL::draw(void)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Bind the OSD texture.
-	glBindTexture(GL_TEXTURE_2D, d->texOsd);
+	glBindTexture(GL_TEXTURE_2D, d->texOsd.name);
 
 	// Enable vertex and texture coordinate arrays.
 	glEnableClientState(GL_VERTEX_ARRAY);
