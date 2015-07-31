@@ -65,6 +65,14 @@ class OsdGL {
 		void draw(void);
 
 		/**
+		 * Set the display offset.
+		 * This is used for aspect ratio constraints.
+		 * @param x X offset.
+		 * @param y Y offset.
+		 */
+		void setDisplayOffset(double x, double y);
+
+		/**
 		 * Are messages present in the message queue?
 		 * This should be queried to determine if the
 		 * video backend needs to be updated.

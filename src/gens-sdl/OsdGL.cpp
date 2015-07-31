@@ -136,6 +136,10 @@ class OsdGLPrivate {
 
 		static void setGLColor(uint32_t color);
 		static void setGLColor(uint32_t color, float alpha);
+
+		// Display offset.
+		// This is used for aspect ratio constraints.
+		double offset_x, offset_y;
 };
 
 /** OsdGLPrivate **/
@@ -147,6 +151,7 @@ OsdGLPrivate::OsdGLPrivate()
 	, msgEnabled(true)
 	, fpsColor(0xFFFFFFFF)
 	, msgColor(0xFFFFFFFF)
+	, offset_x(0), offset_y(0)
 {
 	// Reserve space for at least 8 OSD messages.
 	osdList.reserve(8);
@@ -491,7 +496,9 @@ void OsdGL::draw(void)
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0, 320, 240, 0, -1.0f, 1.0f);
+	glOrtho(-d->offset_x, 320+d->offset_x,
+		240+d->offset_y, -d->offset_y,
+	        -1.0f, 1.0f);
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
@@ -572,6 +579,23 @@ void OsdGL::draw(void)
 	// Finished creating the GL display list.
 	glEndList();
 	d->dirty = false;
+}
+
+/**
+ * Set the display offset.
+ * This is used for aspect ratio constraints.
+ * @param x X offset.
+ * @param y Y offset.
+ */
+void OsdGL::setDisplayOffset(double x, double y)
+{
+	// NOTE: We're not going to bother checking if the
+	// values are the same, since they probably aren't.
+	d->offset_x = x;
+	d->offset_y = y;
+
+	// Redraw is needed.
+	d->dirty = true;
 }
 
 /**

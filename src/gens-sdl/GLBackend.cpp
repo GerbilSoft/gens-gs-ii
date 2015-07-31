@@ -215,24 +215,41 @@ void GLBackendPrivate::recalcAspectRatio(void)
 	prevAspectRatioConstraint = q->aspectRatioConstraint();
 	if (!prevAspectRatioConstraint) {
 		// No aspect ratio constraint.
+		// TODO: Center and/or left-align the OSD instead of
+		// stretching it, or enlarge the visible area?
 		glOrtho(-1, 1, -1, 1, -1, 1);
+		osd->setDisplayOffset(0.0, 0.0);
 	} else {
 		// Aspect ratio constraint.
 		const double screenRatio = ((double)q->m_winW / (double)q->m_winH);
 		const double texRatio = ((double)tex.texVisW / (double)tex.texVisH);
+		// OSD offsets.
+		// TODO: Optimize these calculations.
+		double offset_x, offset_y;
 
 		if (screenRatio > texRatio) {
 			// Screen is wider than the texture.
 			const double ratio = (screenRatio / texRatio);
 			glOrtho(-ratio, ratio, -1, 1, -1, 1);
+			// Adjust the OSD rectangle.
+			offset_x = ((tex.texVisW * ratio) - tex.texVisW) / 2;
+			offset_y = 0.0;
 		} else if (screenRatio < texRatio) {
 			// Screen is taller than the texture.
 			const double ratio = (texRatio / screenRatio);
 			glOrtho(-1, 1, -ratio, ratio, -1, 1);
+			// Adjust the OSD rectangle.
+			offset_x = 0.0;
+			offset_y = ((tex.texVisH * ratio) - tex.texVisH) / 2;
 		} else {
 			// Image has the correct aspect ratio.
 			glOrtho(-1, 1, -1, 1, -1, 1);
+			offset_x = 0.0;
+			offset_y = 0.0;
 		}
+
+		// Set the OSD offsets.
+		osd->setDisplayOffset(offset_x, offset_y);
 	}
 
 	// Reset the GL model view.
