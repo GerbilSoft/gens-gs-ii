@@ -357,35 +357,4 @@ void SdlHandler::update_audio(void)
 	}
 }
 
-/** Onscreen Display functions. **/
-
-/**
- * Print a message to the Onscreen Display.
- * @param duration Duration for the message to appear, in milliseconds.
- * @param msg Message. (printf-formatted; UTF-8)
- * @param ap Format arguments.
- */
-void SdlHandler::osd_vprintf(const int duration, const utf8_str *msg, va_list ap)
-{
-	if (m_vBackend) {
-		m_vBackend->osd_vprintf(duration, msg, ap);
-	}
-}
-
-/**
- * Print a message to the Onscreen Display.
- * @param duration Duration for the message to appear, in milliseconds.
- * @param msg Message. (printf-formatted; UTF-8)
- * @params ... Format arguments.
- */
-void SdlHandler::osd_printf(const int duration, const utf8_str *msg, ...)
-{
-	if (m_vBackend) {
-		va_list ap;
-		va_start(ap, msg);
-		m_vBackend->osd_vprintf(duration, msg, ap);
-		va_end(ap);
-	}
-}
-
 }

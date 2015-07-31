@@ -152,26 +152,6 @@ class SdlHandler {
 		 */
 		static GensKey_t scancodeToGensKey(SDL_Scancode scancode);
 
-		/** Onscreen Display functions. **/
-
-		/**
-		 * Print a message to the Onscreen Display.
-		 * @param duration Duration for the message to appear, in milliseconds.
-		 * @param msg Message. (printf-formatted; UTF-8)
-		 * @param ap Format arguments.
-		 */
-		void osd_vprintf(const int duration, const utf8_str *msg, va_list ap)
-			ATTR_FORMAT_PRINTF(3, 0);
-
-		/**
-		 * Print a message to the Onscreen Display.
-		 * @param duration Duration for the message to appear, in milliseconds.
-		 * @param msg Message. (printf-formatted; UTF-8)
-		 * @params ... Format arguments.
-		 */
-		void osd_printf(const int duration, const utf8_str *msg, ...)
-			ATTR_FORMAT_PRINTF(3, 4);
-
 	private:
 		/**
 		 * SDL audio callback.

@@ -93,6 +93,7 @@ using std::vector;
 namespace GensSdl {
 
 static SdlHandler *sdlHandler = nullptr;
+static VBackend *vBackend = nullptr;
 static Rom *rom = nullptr;
 static EmuContext *context = nullptr;
 static const char *rom_filename = nullptr;
@@ -166,8 +167,8 @@ static void gsdl_osd(OsdType osd_type, int param)
 	}
 
 	if (msg != nullptr) {
-		if (sdlHandler) {
-			sdlHandler->osd_printf(1500, msg, param);
+		if (vBackend) {
+			vBackend->osd_printf(1500, msg, param);
 		} else {
 			// SDL handler hasn't been created yet.
 			// Store the message for later.
@@ -349,7 +350,7 @@ static void doSaveSlot(int saveSlot)
 	}
 
 	// Show an OSD message.
-	sdlHandler->osd_printf(1500, "Slot %d [%s]", saveSlot, slot_state.c_str());
+	vBackend->osd_printf(1500, "Slot %d [%s]", saveSlot, slot_state.c_str());
 }
 
 /**
@@ -365,15 +366,15 @@ static void doLoadState(void)
 	int ret = context->zomgLoad(filename.c_str());
 	if (ret == 0) {
 		// State loaded.
-		sdlHandler->osd_printf(1500, "Save %d loaded.", saveSlot_selected);
+		vBackend->osd_printf(1500, "Save %d loaded.", saveSlot_selected);
 	} else {
 		// Error loading state.
 		if (ret == -ENOENT) {
 			// File not found.
-			sdlHandler->osd_printf(1500, "Save %d is empty.", saveSlot_selected);
+			vBackend->osd_printf(1500, "Save %d is empty.", saveSlot_selected);
 		} else {
 			// Other error.
-			sdlHandler->osd_printf(1500,
+			vBackend->osd_printf(1500,
 				"Error loading Slot %d:\n* %s",
 				saveSlot_selected, strerror(-ret));
 		}
@@ -393,10 +394,10 @@ static void doSaveState(void)
 	int ret = context->zomgSave(filename.c_str());
 	if (ret == 0) {
 		// State saved.
-		sdlHandler->osd_printf(1500, "Slot %d saved.", saveSlot_selected);
+		vBackend->osd_printf(1500, "Slot %d saved.", saveSlot_selected);
 	} else {
 		// Error saving state.
-		sdlHandler->osd_printf(1500,
+		vBackend->osd_printf(1500,
 				"Error saving Slot %d:\n* %s",
 				saveSlot_selected, strerror(-ret));
 	}
@@ -421,11 +422,11 @@ static void processSdlEvent(const SDL_Event *event) {
 					if (event->key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
 						// Hard Reset.
 						context->hardReset();
-						sdlHandler->osd_printf(1500, "Hard Reset.");
+						vBackend->osd_printf(1500, "Hard Reset.");
 					} else {
 						// Soft Reset.
 						context->softReset();
-						sdlHandler->osd_printf(1500, "Soft Reset.");
+						vBackend->osd_printf(1500, "Soft Reset.");
 					}
 					break;
 
@@ -453,9 +454,9 @@ static void processSdlEvent(const SDL_Event *event) {
 						// Take a screenshot.
 						int ret = GensSdl::doScreenShot(context->m_vdp->MD_Screen, rom);
 						if (ret >= 0) {
-							sdlHandler->osd_printf(1500, "Screenshot %d saved.", ret);
+							vBackend->osd_printf(1500, "Screenshot %d saved.", ret);
 						} else {
-							sdlHandler->osd_printf(1500, "Error saving screenshot:\n* %s", strerror(-ret));
+							vBackend->osd_printf(1500, "Error saving screenshot:\n* %s", strerror(-ret));
 						}
 					}
 					break;
@@ -626,6 +627,9 @@ int run(void)
 	if (sdlHandler->init_audio() < 0)
 		return EXIT_FAILURE;
 
+	// Get the Video Backend.
+	vBackend = sdlHandler->vBackend();
+
 	// Set the window title.
 	sdlHandler->set_window_title("Gens/GS II [SDL]");
 
@@ -633,7 +637,7 @@ int run(void)
 	if (!startup_queue.empty()) {
 		for (int i = 0; i < (int)startup_queue.size(); i++) {
 			const OsdStartup &startup = startup_queue.at(i);
-			sdlHandler->osd_printf(startup.duration, startup.msg, startup.param);
+			vBackend->osd_printf(startup.duration, startup.msg, startup.param);
 		}
 	}
 
@@ -816,6 +820,9 @@ int run(void)
 	// Save SRAM/EEPROM, if necessary.
 	// TODO: Move to EmuContext::~EmuContext()?
 	context->saveData();
+
+	// NULL out the VBackend before shutting down SDL.
+	vBackend = nullptr;
 
 	// Unregister the LibGens OSD handler.
 	lg_set_osd_fn(nullptr);
