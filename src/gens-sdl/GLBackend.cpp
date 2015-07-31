@@ -31,27 +31,9 @@ using LibGens::MdFb;
 // Onscreen Display.
 #include "OsdGL.hpp"
 
-// Byteswapping macros.
-#include "libgens/Util/byteswap.h"
-
-// GL_UNSIGNED_INT_8_8_8_8_REV is needed for native byte-order on PowerPC.
-// When used with GL_BGRA, it's effectively the same as GL_ARGB.
-#if GENS_BYTEORDER == GENS_BIG_ENDIAN
-#define SDLGL_UNSIGNED_BYTE GL_UNSIGNED_INT_8_8_8_8_REV
-#else
-#define SDLGL_UNSIGNED_BYTE GL_UNSIGNED_BYTE
-#endif
-
-// MSVC ships with *ancient* GL headers.
-// TODO: Use GLEW.
-#if !defined(GL_BGRA) && defined(GL_BGRA_EXT)
-#define GL_BGRA GL_BGRA_EXT
-#endif
-
-#if defined(GL_UNSIGNED_SHORT_1_5_5_5_REV) && \
-    defined(GL_UNSIGNED_SHORT_5_6_5)
-#define GL_HEADER_HAS_PACKED_PIXELS
-#endif
+// GL Texture struct.
+// TODO: Convert to a full class?
+#include "GLTex.h"
 
 namespace GensSdl {
 
@@ -74,13 +56,7 @@ class GLBackendPrivate {
 		LibGens::MdFb::ColorDepth lastBpp;
 
 		// OpenGL texture.
-		GLuint tex;		// Texture name.
-		int colorComponents;	// Number of color components. (3 == RGB; 4 == BGRA)
-		GLenum texFormat;	// Texture format. (GL_RGB, GL_BGRA)
-		GLenum texType;		// Texture type. (GL_UNSIGNED_BYTE, etc.)
-		// TODO: Size type?
-		int texW, texH;		// Texture size. (1x == 512x256 for pow2 textures.)
-		int texVisW, texVisH;	// Texture visible size. (1x == 320x240)
+		GLTex tex;
 
 		// Texture rectangle.
 		GLdouble texRectF[4][2];
@@ -119,16 +95,14 @@ class GLBackendPrivate {
 GLBackendPrivate::GLBackendPrivate(GLBackend *q)
 	: q(q)
 	, lastBpp(MdFb::BPP_MAX)
-	, tex(0)
-	, colorComponents(0)
-	, texFormat(0)
-	, texType(0)
-	, texW(0), texH(0)
-	, texVisW(0), texVisH(0)
 	, prevMD_W(0), prevMD_H(0)
 	, prevStretchMode(VBackend::STRETCH_MAX)
 	, osd(new OsdGL())
-{ }
+{
+	// Clear GLTex.
+	// TODO: Make it a regular class?
+	memset(&tex, 0, sizeof(tex));
+}
 
 GLBackendPrivate::~GLBackendPrivate()
 {
@@ -142,14 +116,14 @@ void GLBackendPrivate::reallocTexture(void)
 {
 	// TODO: makeCurrent()?
 
-	if (tex > 0) {
-		glDeleteTextures(1, &tex);
+	if (tex.name > 0) {
+		glDeleteTextures(1, &tex.name);
 	}
 
 	MdFb *fb = q->m_fb;
 	if (!fb) {
 		// No framebuffer.
-		tex = 0;
+		tex.name = 0;
 		lastBpp = MdFb::BPP_MAX;
 		return;
 	}
@@ -163,15 +137,15 @@ void GLBackendPrivate::reallocTexture(void)
 #ifdef GL_HEADER_HAS_PACKED_PIXELS
 		// TODO: Verify that packed pixels is actually supported using GLEW.
 		case MdFb::BPP_15:
-			colorComponents = 4;
-			texFormat = GL_BGRA;
-			texType = GL_UNSIGNED_SHORT_1_5_5_5_REV;
+			tex.components = 4;
+			tex.format = GL_BGRA;
+			tex.type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
 			break;
 
 		case MdFb::BPP_16:
-			colorComponents = 3;
-			texFormat = GL_RGB;
-			texType = GL_UNSIGNED_SHORT_5_6_5;
+			tex.components = 3;
+			tex.format = GL_RGB;
+			tex.type = GL_UNSIGNED_SHORT_5_6_5;
 			break;
 #else /* !GL_HEADER_HAS_PACKED_PIXELS */
 		case MdFb::BPP_15:
@@ -179,24 +153,24 @@ void GLBackendPrivate::reallocTexture(void)
 			// GL_EXT_packed_pixels / GL_APPLE_packed_pixels
 			// is required for 15-bit and 16-bit color.
 			// TODO: Error code?
-			tex = 0;
+			tex.name = 0;
 			lastBpp = MdFb::BPP_MAX;
 			return;
 #endif /* GL_HEADER_HAS_PACKED_PIXELS */
 
 		case MdFb::BPP_32:
 		default:
-			colorComponents = 4;
-			texFormat = GL_BGRA;
-			texType = SDLGL_UNSIGNED_BYTE;
+			tex.components = 4;
+			tex.format = GL_BGRA;
+			tex.type = SDLGL_UNSIGNED_BYTE;
 			break;
 	}
 
 	// Create and initialize a GL texture.
 	// TODO: Add support for NPOT textures and/or GL_TEXTURE_RECTANGLE_ARB.
 	glEnable(GL_TEXTURE_2D);
-	glGenTextures(1, &tex);
-	glBindTexture(GL_TEXTURE_2D, tex);
+	glGenTextures(1, &tex.name);
+	glBindTexture(GL_TEXTURE_2D, tex.name);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
@@ -206,24 +180,24 @@ void GLBackendPrivate::reallocTexture(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	// TODO: Determine texture size based on MDP renderer.
-	texVisW = fb->pxPerLine();
-	texVisH = fb->numLines();
-	texW = next_pow2s(texVisW);
-	texH = next_pow2s(texVisH);
+	tex.texVisW = fb->pxPerLine();
+	tex.texVisH = fb->numLines();
+	tex.texW = next_pow2s(tex.texVisW);
+	tex.texH = next_pow2s(tex.texVisH);
 
 	// Allocate a memory buffer to use for texture initialization.
 	// This will ensure that the entire texture is initialized to black.
 	// (This fixes garbage on the last column when using the Fast Blur shader.)
-	const size_t texSize = (texW * texH *
+	const size_t texSize = (tex.texW * tex.texH *
 				(lastBpp == MdFb::BPP_32 ? 4 : 2));
 	void *texBuf = calloc(1, texSize);
 
 	// Allocate the texture.
 	glTexImage2D(GL_TEXTURE_2D, 0,
-			colorComponents,
-			texW, texH,
+			tex.components,
+			tex.texW, tex.texH,
 			0,	// No border.
-			texFormat, texType, texBuf);
+			tex.format, tex.type, texBuf);
 
 	// Free the temporary texture buffer.
 	free(texBuf);
@@ -246,8 +220,8 @@ void GLBackendPrivate::recalcTexRectF(void)
 
 	// Default to no stretch.
 	double x = 0.0, y = 0.0;
-	double w = (double)texVisW / (double)texW;
-	double h = (double)texVisH / (double)texH;
+	double w = (double)tex.texVisW / (double)tex.texW;
+	double h = (double)tex.texVisH / (double)tex.texH;
 
 	// Save the current MD screen resolution.
 	prevMD_W = fb->imgWidth();
@@ -262,7 +236,7 @@ void GLBackendPrivate::recalcTexRectF(void)
 		if (imgXStart > 0) {
 			// Less than 320 pixels wide.
 			// Adjust horizontal stretch.
-			x = (double)imgXStart / (double)texW;
+			x = (double)imgXStart / (double)tex.texW;
 			w -= x;
 		}
 	}
@@ -275,7 +249,7 @@ void GLBackendPrivate::recalcTexRectF(void)
 		if (imgYStart > 0) {
 			// Less than 240 pixels tall.
 			// Adjust vertical stretch.
-			y = (double)imgYStart / (double)texH;
+			y = (double)imgYStart / (double)tex.texH;
 			h -= y;
 		}
 	}
@@ -361,7 +335,7 @@ void GLBackend::update(bool fb_dirty)
 
 		// Bind the texture.
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, d->tex);
+		glBindTexture(GL_TEXTURE_2D, d->tex.name);
 
 		// TODO: This only works for 1x.
 		// For other renderers, use non-MD screen buffer.
@@ -374,7 +348,7 @@ void GLBackend::update(bool fb_dirty)
 		glTexSubImage2D(GL_TEXTURE_2D, 0,
 				0, 0,					// x/y offset
 				m_fb->pxPerLine(), m_fb->numLines(),	// width/height
-				d->texFormat, d->texType, screen);
+				d->tex.format, d->tex.type, screen);
 
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 0);
@@ -382,7 +356,7 @@ void GLBackend::update(bool fb_dirty)
 		// MD Screen isn't dirty.
 		// Simply bind the texture.
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, d->tex);
+		glBindTexture(GL_TEXTURE_2D, d->tex.name);
 	}
 
 	// TODO: Enable shaders?
@@ -455,7 +429,7 @@ void GLBackend::resize(int width, int height)
 	} else {
 		// Aspect ratio constraint.
 		const double screenRatio = ((double)width / (double)height);
-		const double texRatio = ((double)d->texVisW / (double)d->texVisH);
+		const double texRatio = ((double)d->tex.texVisW / (double)d->tex.texVisH);
 
 		if (screenRatio > texRatio) {
 			// Screen is wider than the texture.
@@ -520,9 +494,9 @@ void GLBackend::endGL(void)
 	// Shut down the OSD.
 	d->osd->end();
 
-	if (d->tex > 0) {
-		glDeleteTextures(1, &d->tex);
-		d->tex = 0;
+	if (d->tex.name > 0) {
+		glDeleteTextures(1, &d->tex.name);
+		d->tex.name = 0;
 	}
 }
 

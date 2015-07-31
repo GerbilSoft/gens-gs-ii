@@ -63,6 +63,7 @@ SET(gens-sdl_H
 	str_lookup.hpp
 	OsdGL.hpp
 	OsdFont_VGA.hpp
+	GLTex.h
 	)
 
 # Main target.
