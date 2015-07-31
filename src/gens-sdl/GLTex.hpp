@@ -48,6 +48,7 @@ class GLTex
 			FMT_XRGB1555,	// 15-bit RGB (555)
 			FMT_RGB565,	// 16-bit RGB (565)
 			FMT_XRGB8888,	// 32-bit RGB (888)
+			FMT_ALPHA8,	// 8-bit alpha
 
 			FMT_MAX
 		};

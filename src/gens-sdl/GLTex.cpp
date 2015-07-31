@@ -120,6 +120,15 @@ int GLTex::alloc(Format format, int w, int h)
 			this->format = GL_BGRA;
 			this->type = SDLGL_UNSIGNED_BYTE;
 			break;
+		case FMT_ALPHA8:
+			// TODO: Does GL_ALPHA8 work everywhere?
+			this->intformat = GL_ALPHA8;
+			this->format = GL_ALPHA;
+			// TODO: Test this on PowerPC.
+			// GL_ALPHA is single-component, so we probably
+			// shouldn't use SDLGL_UNSIGNED_BYTE.
+			this->type = GL_UNSIGNED_BYTE;
+			break;
 	}
 
 	// Create and initialize a GL texture.
