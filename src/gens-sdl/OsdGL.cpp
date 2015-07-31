@@ -140,7 +140,15 @@ class OsdGLPrivate {
 		// Display offset.
 		// This is used for aspect ratio constraints.
 		double offset_x, offset_y;
+		double ortho[4];	// Order: Left, Right, Bottom, Top
+		// Default ortho[] values.
+		// New ortho[] values are calculated relative to the defaults.
+		static const double ortho_default[4];
 };
+
+// Default ortho[] values.
+// New ortho[] values are calculated relative to the defaults.
+const double OsdGLPrivate::ortho_default[4] = {0.0, 320.0, 240.0, 0.0};
 
 /** OsdGLPrivate **/
 
@@ -155,6 +163,10 @@ OsdGLPrivate::OsdGLPrivate()
 {
 	// Reserve space for at least 8 OSD messages.
 	osdList.reserve(8);
+
+	// Initialize the glOrtho() cache.
+	// TODO: Option to change the virtual 320x240 display?
+	memcpy(ortho, ortho_default, sizeof(ortho));
 }
 
 /**
@@ -496,9 +508,7 @@ void OsdGL::draw(void)
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(-d->offset_x, 320+d->offset_x,
-		240+d->offset_y, -d->offset_y,
-	        -1.0f, 1.0f);
+	glOrtho(d->ortho[0], d->ortho[1], d->ortho[2], d->ortho[3], -1.0f, 1.0f);
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
@@ -593,6 +603,12 @@ void OsdGL::setDisplayOffset(double x, double y)
 	// values are the same, since they probably aren't.
 	d->offset_x = x;
 	d->offset_y = y;
+
+	// Update the glOrtho() cache.
+	d->ortho[0] = d->ortho_default[0] - d->offset_x;
+	d->ortho[1] = d->ortho_default[1] + d->offset_x;
+	d->ortho[2] = d->ortho_default[2] + d->offset_y;
+	d->ortho[3] = d->ortho_default[3] - d->offset_y;
 
 	// Redraw is needed.
 	d->dirty = true;
