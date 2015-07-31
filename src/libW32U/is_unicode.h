@@ -1,6 +1,7 @@
 /***************************************************************************
  * libW32U: Win32 Unicode Translation Layer. (Mini Version)                *
- * W32U_mini.c: Main source file.                                          *
+ * is_unicode.h: W32U_IsUnicode() function.                                *
+ * INTERNAL USE ONLY; do NOT include this file directly!                   *
  *                                                                         *
  * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
@@ -19,56 +20,52 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#define __IN_W32U__
-#include "W32U_mini.h"
+#ifndef __LIBW32U_IS_UNICODE_H__
+#define __LIBW32U_IS_UNICODE_H__
 
-// C includes.
-#include <wchar.h>
-#include <stdlib.h>
+#ifndef _WIN32
+#error is_unicode.h should only be included on Win32!
+#endif
 
-// Windows includes.
+#ifndef __IN_W32U__
+#error Do not include is_unicode.h directly, include W32U_mini.h!
+#endif
+
 #include <windows.h>
 
-// W32U_IsUnicode()
-#define ISUNICODE_MAIN_INSTANCE
-#include "is_unicode.h"
+/**
+ * Indicates if the system is Unicode:
+ * - -1 == uninitialized
+ * -  0 == ANSI
+ *    1 == Unicode
+ * Define ISUNICODE_MAIN_INSTANCE to make W32U_IsUnicode()
+ * visible outside of the compilation unit and to declare
+ * the internal isUnicode variable. This should only be done
+ * once, in W32U_mini.c.
+ */
+extern int W32U_internal_isUnicode;
+#ifdef ISUNICODE_MAIN_INSTANCE
+int W32U_internal_isUnicode = -1;
+#endif
 
 /**
- * Convert a null-terminated multibyte string to UTF-16.
- * @param mbs Multibyte string. (null-terminated)
- * @param codepage mbs codepage.
- * @return UTF-16 string, or NULL on error.
+ * Check if the system is Unicode.
+ * @return 1 if the system is Unicode; 0 if the system is ANSI.
  */
-wchar_t *W32U_mbs_to_UTF16(const char *mbs, unsigned int codepage)
+#ifdef ISUNICODE_MAIN_INSTANCE
+int W32U_IsUnicode(void)
+#else
+static __inline int W32U_IsUnicode(void)
+#endif
 {
-	int cchWcs;
-	wchar_t *wcs;
-W32U_IsUnicode();
-	cchWcs = MultiByteToWideChar(codepage, 0, mbs, -1, nullptr, 0);
-	if (cchWcs <= 0)
-		return nullptr;
-
-	wcs = (wchar_t*)malloc(cchWcs * sizeof(wchar_t));
-	MultiByteToWideChar(codepage, 0, mbs, -1, wcs, cchWcs);
-	return wcs;
+	// NOTE: MSVC 2010 doesn't support initializing
+	// static variables with a function.
+	// TODO: Initialize it better on MinGW-w64?
+	// TODO: How slow is GetModuleHandleW()?
+	if (W32U_internal_isUnicode < 0) {
+		W32U_internal_isUnicode = (GetModuleHandleW(nullptr) != nullptr);
+	}
+	return W32U_internal_isUnicode;
 }
 
-/**
- * Convert a null-terminated UTF-16 string to multibyte.
- * @param wcs UTF-16 string. (null-terminated)
- * @param codepage mbs codepage.
- * @return Multibyte string, or NULL on error.
- */
-char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage)
-{
-	int cbMbs;
-	char *mbs;
-
-	cbMbs = WideCharToMultiByte(codepage, 0, wcs, -1, nullptr, 0, nullptr, nullptr);
-	if (cbMbs <= 0)
-		return nullptr;
-
-	mbs = (char*)malloc(cbMbs);
-	WideCharToMultiByte(codepage, 0, wcs, -1, mbs, cbMbs, nullptr, nullptr);
-	return mbs;
-}
+#endif /* __LIBW32U_IS_UNICODE_H__ */

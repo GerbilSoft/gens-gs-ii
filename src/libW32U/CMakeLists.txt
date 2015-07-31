@@ -20,6 +20,7 @@ SET(libW32U_H
 	W32U_mini.h
 	W32U_libc.h
 	W32U_argv.h
+	is_unicode.h
 	)
 
 ######################

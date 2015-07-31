@@ -37,23 +37,8 @@
 #endif
 #include <direct.h>
 
-/**
- * Check if the system is Unicode.
- * NOTE: This specific instance is NOT visible outside of this file.
- * @return 1 if the system is Unicode; 0 if the system is ANSI.
- */
-static __inline int W32U_IsUnicode(void)
-{
-	// NOTE: MSVC 2010 doesn't support initializing
-	// static variables with a function.
-	// TODO: Initialize it better on MinGW-w64?
-	// TODO: How slow is GetModuleHandleW()?
-	extern int W32U_internal_isUnicode;
-	if (W32U_internal_isUnicode < 0) {
-		W32U_internal_isUnicode = (GetModuleHandleW(nullptr) != nullptr);
-	}
-	return W32U_internal_isUnicode;
-}
+// W32U_IsUnicode()
+#include "is_unicode.h"
 
 /** fopen() **/
 
