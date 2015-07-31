@@ -221,6 +221,7 @@ void GLBackendPrivate::recalcAspectRatio(void)
 		osd->setDisplayOffset(0.0, 0.0);
 	} else {
 		// Aspect ratio constraint.
+		// TODO: Use integer arithmetic for ratio comparisons?
 		const double screenRatio = ((double)q->m_winW / (double)q->m_winH);
 		const double texRatio = ((double)tex.texVisW / (double)tex.texVisH);
 		// OSD offsets.
