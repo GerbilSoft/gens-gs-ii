@@ -19,6 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#define __IN_W32U__
 #include "W32U_argv.h"
 
 // C includes.
@@ -28,6 +29,9 @@
 
 // Windows includes.
 #include <windows.h>
+
+// W32U_IsUnicode()
+#include "is_unicode.h"
 
 // __wgetmainargs(), __getmainargs()
 typedef struct {
@@ -484,8 +488,7 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 		return 0;
 	}
 
-	// TODO: W32U_IsUnicode()?
-	isUnicode = (GetModuleHandleW(NULL) != NULL);
+	isUnicode = W32U_IsUnicode();
 	if (!isUnicode) {
 		// ANSI. Use __getmainargs().
 		// TODO: Free these variables later.
