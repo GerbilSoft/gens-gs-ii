@@ -93,6 +93,10 @@ class OsdGLPrivate {
 		};
 		vector<OsdMessage*> osdList;
 
+		// OSD fade-out time, in microseconds.
+		// TODO: Make this customizable.
+		static const int fadeOutTime = 250000;
+
 		/**
 		 * Convert a UTF-8 string to the internal character set.
 		 * @param str UTF-8 string.
@@ -131,6 +135,7 @@ class OsdGLPrivate {
 		uint32_t msgColor;
 
 		static void setGLColor(uint32_t color);
+		static void setGLColor(uint32_t color, float alpha);
 };
 
 /** OsdGLPrivate **/
@@ -358,16 +363,24 @@ void OsdGLPrivate::checkForExpiredMessages(void)
 		if (!osdMsg)
 			continue;
 
+		// End time plus fade-out.
+		const uint64_t endTimePlusFadeOut = (osdMsg->endTime + fadeOutTime);
+
 		if (!osdMsg->hasDisplayed) {
 			// Message hasn't been displayed yet.
 			// Reset its end time.
 			osdMsg->endTime = curTime + (osdMsg->duration * 1000);
 			isAllProcessed = false;
-		} else if (curTime >= osdMsg->endTime) {
+		} else if (curTime >= endTimePlusFadeOut) {
 			// Time has elapsed.
 			// Remove the message from the list.
 			delete osdList[i];
 			osdList[i] = nullptr;
+			dirty = true;
+		} else if (curTime >= osdMsg->endTime) {
+			// Time has elapsed, but the message is fading out.
+			// Make sure the message is redrawn.
+			isAllProcessed = false;
 			dirty = true;
 		} else {
 			// Message has not been processed yet.
@@ -390,6 +403,21 @@ inline void OsdGLPrivate::setGLColor(uint32_t color)
 {
 	// FIXME: 0xFFFFFF seems to map to (254,254,254)...
 	const uint8_t a = (color >> 24) & 0xFF;
+	const uint8_t r = (color >> 16) & 0xFF;
+	const uint8_t g = (color >>  8) & 0xFF;
+	const uint8_t b = (color >>  0) & 0xFF;
+	glColor4ub(r, g, b, a);
+}
+
+/**
+ * Set the OpenGL color
+ * @param color 32-bit ARGB color.
+ * @param alpha Alpha value.
+ */
+inline void OsdGLPrivate::setGLColor(uint32_t color, float alpha)
+{
+	// FIXME: 0xFFFFFF seems to map to (254,254,254)...
+	const uint8_t a = (uint8_t)(alpha * 255);
 	const uint8_t r = (color >> 16) & 0xFF;
 	const uint8_t g = (color >>  8) & 0xFF;
 	const uint8_t b = (color >>  0) & 0xFF;
@@ -491,6 +519,9 @@ void OsdGL::draw(void)
 	int y = (240 - d->chrH);
 	// TODO: Message Enable, Message Color.
 
+	// Current time is needed for message fade-out.
+	const uint64_t curTime = d->timer.getTime();
+
 	// TODO: Switch from vector to list?
 	// TODO: Move to OsdGLPrivate?
 	for (int i = (int)d->osdList.size() - 1; i >= 0; i--) {
@@ -506,10 +537,19 @@ void OsdGL::draw(void)
 		// Next line.
 		y -= d->chrH;
 
+		// Check for fade-out.
+		float alpha = 1.0f;
+		if (curTime > osdMsg->endTime) {
+			// Fading out.
+			alpha -= (curTime - osdMsg->endTime) / (float)d->fadeOutTime;
+			if (alpha < 0.0f) {
+				alpha = 0.0f;
+			}
+		}
 		// TODO: Make the drop shadow optional.
-		glColor4f(0.0, 0.0, 0.0, 1.0);
+		glColor4f(0.0f, 0.0f, 0.0f, alpha);
 		d->printLine(d->chrW+1, y+1, osdMsg->msg);
-		d->setGLColor(d->msgColor);
+		d->setGLColor(d->msgColor, alpha);
 		d->printLine(d->chrW, y, osdMsg->msg);
 	}
 
@@ -518,7 +558,7 @@ void OsdGL::draw(void)
 	glDisableClientState(GL_VERTEX_ARRAY);
 
 	// Reset the GL state.
-	glColor4f(1.0, 1.0, 1.0, 1.0);
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	glDisable(GL_BLEND);			// Disable GL blending.
 	glDisable(GL_TEXTURE_2D);		// Disable 2D textures.
 
