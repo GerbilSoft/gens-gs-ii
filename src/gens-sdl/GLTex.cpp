@@ -145,6 +145,8 @@ int GLTex::alloc(Format format, int w, int h)
 	// If the texture size is a power of two,
 	// we don't need to clear it because the
 	// caller will initialize the entire texture.
+	// TODO: Use glClearBuffer()?
+	// http://stackoverflow.com/questions/7195130/how-to-efficiently-initialize-texture-with-zeroes
 	void *texBuf = nullptr;
 	if (texW != texVisW || texH != texVisH) {
 		// Texture size is not a power of two.
