@@ -31,9 +31,8 @@ using LibGens::MdFb;
 // Onscreen Display.
 #include "OsdGL.hpp"
 
-// GL Texture struct.
-// TODO: Convert to a full class?
-#include "GLTex.h"
+// GL Texture wrpaper.
+#include "GLTex.hpp"
 
 namespace GensSdl {
 
@@ -64,16 +63,6 @@ class GLBackendPrivate {
 		// Previous stretch mode parameters.
 		int prevMD_W, prevMD_H;
 		VBackend::StretchMode_t prevStretchMode;
-
-		// Find the next highest power of two. (signed integers)
-		// http://en.wikipedia.org/wiki/Power_of_two#Algorithm_to_find_the_next-highest_power_of_two
-		template <class T>
-		static inline T next_pow2s(T k) {
-			k--;
-			for (int i = 1; i < (int)(sizeof(T)*CHAR_BIT); i <<= 1)
-				k = k | k >> i;
-			return k + 1;
-		}
 
 		// Onscreen Display.
 		OsdGL *osd;
@@ -116,10 +105,6 @@ void GLBackendPrivate::reallocTexture(void)
 {
 	// TODO: makeCurrent()?
 
-	if (tex.name > 0) {
-		glDeleteTextures(1, &tex.name);
-	}
-
 	MdFb *fb = q->m_fb;
 	if (!fb) {
 		// No framebuffer.
@@ -132,76 +117,22 @@ void GLBackendPrivate::reallocTexture(void)
 	lastBpp = fb->bpp();
 
 	// Determine the texture format and type.
-	// TODO: If using 15/16, make sure PACKED PIXELS are supported.
+	GLTex::Format format;
 	switch (lastBpp) {
-#ifdef GL_HEADER_HAS_PACKED_PIXELS
-		// TODO: Verify that packed pixels is actually supported using GLEW.
 		case MdFb::BPP_15:
-			tex.components = 4;
-			tex.format = GL_BGRA;
-			tex.type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
+			format = GLTex::FMT_XRGB1555;
 			break;
-
 		case MdFb::BPP_16:
-			tex.components = 3;
-			tex.format = GL_RGB;
-			tex.type = GL_UNSIGNED_SHORT_5_6_5;
+			format = GLTex::FMT_RGB565;
 			break;
-#else /* !GL_HEADER_HAS_PACKED_PIXELS */
-		case MdFb::BPP_15:
-		case MdFb::BPP_16:
-			// GL_EXT_packed_pixels / GL_APPLE_packed_pixels
-			// is required for 15-bit and 16-bit color.
-			// TODO: Error code?
-			tex.name = 0;
-			lastBpp = MdFb::BPP_MAX;
-			return;
-#endif /* GL_HEADER_HAS_PACKED_PIXELS */
-
 		case MdFb::BPP_32:
 		default:
-			tex.components = 4;
-			tex.format = GL_BGRA;
-			tex.type = SDLGL_UNSIGNED_BYTE;
+			format = GLTex::FMT_XRGB8888;
 			break;
 	}
 
-	// Create and initialize a GL texture.
-	// TODO: Add support for NPOT textures and/or GL_TEXTURE_RECTANGLE_ARB.
-	glEnable(GL_TEXTURE_2D);
-	glGenTextures(1, &tex.name);
-	glBindTexture(GL_TEXTURE_2D, tex.name);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
-	// GL filtering.
-	// TODO: Make it selectable: GL_LINEAR, GL_NEAREST
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	// TODO: Determine texture size based on MDP renderer.
-	tex.texVisW = fb->pxPerLine();
-	tex.texVisH = fb->numLines();
-	tex.texW = next_pow2s(tex.texVisW);
-	tex.texH = next_pow2s(tex.texVisH);
-
-	// Allocate a memory buffer to use for texture initialization.
-	// This will ensure that the entire texture is initialized to black.
-	// (This fixes garbage on the last column when using the Fast Blur shader.)
-	const size_t texSize = (tex.texW * tex.texH *
-				(lastBpp == MdFb::BPP_32 ? 4 : 2));
-	void *texBuf = calloc(1, texSize);
-
-	// Allocate the texture.
-	glTexImage2D(GL_TEXTURE_2D, 0,
-			tex.components,
-			tex.texW, tex.texH,
-			0,	// No border.
-			tex.format, tex.type, texBuf);
-
-	// Free the temporary texture buffer.
-	free(texBuf);
-	glDisable(GL_TEXTURE_2D);
+	// Allocate the GL texture.
+	tex.alloc(format, fb->pxPerLine(), fb->numLines());
 
 	// Recalculate the texture rectangle.
 	recalcTexRectF();
@@ -333,35 +264,21 @@ void GLBackend::update(bool fb_dirty)
 			screen = m_fb->fb32();
 		}
 
-		// Bind the texture.
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, d->tex.name);
-
-		// TODO: This only works for 1x.
-		// For other renderers, use non-MD screen buffer.
-
 		// (Re-)Upload the texture.
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, m_fb->pxPitch());
-		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 8); // TODO: 16 on amd64?
-
-		glTexSubImage2D(GL_TEXTURE_2D, 0,
-				0, 0,					// x/y offset
-				m_fb->pxPerLine(), m_fb->numLines(),	// width/height
-				d->tex.format, d->tex.type, screen);
-
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 0);
-	} else {
-		// MD Screen isn't dirty.
-		// Simply bind the texture.
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, d->tex.name);
+		d->tex.subImage2D(m_fb->pxPerLine(), m_fb->numLines(),
+				m_fb->pxPitch(), screen);
 	}
+
+	// Bind the texture.
+	// NOTE: Already done by d->tex.subImage2D(),
+	// but the function disables GL_TEXTURE_2D when it's done.
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, d->tex.name);
 
 	// TODO: Enable shaders?
 
 	// Clear the framebuffer first.
+	// TODO: Change to black once we're done debugging.
 	glClearColor(1.0, 0.0, 0.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 

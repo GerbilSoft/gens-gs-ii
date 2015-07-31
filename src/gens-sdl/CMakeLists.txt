@@ -48,6 +48,7 @@ SET(gens-sdl_SRCS
 	str_lookup.cpp
 	OsdGL.cpp
 	OsdFont_VGA.cpp
+	GLTex.cpp
 	)
 
 # Headers.
@@ -63,7 +64,7 @@ SET(gens-sdl_H
 	str_lookup.hpp
 	OsdGL.hpp
 	OsdFont_VGA.hpp
-	GLTex.h
+	GLTex.hpp
 	)
 
 # Main target.
