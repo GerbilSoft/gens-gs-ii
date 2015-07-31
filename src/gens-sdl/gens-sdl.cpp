@@ -520,6 +520,11 @@ static void processSdlEvent(const SDL_Event *event) {
 					doLoadState();
 					break;
 
+				case SDLK_F12:
+					// FIXME: TEMPORARY KEY BINDING for debugging.
+					vBackend->setAspectRatioConstraint(!vBackend->aspectRatioConstraint());
+					break;
+
 				default:
 					// Send the key to the KeyManager.
 					keyManager->keyDown(SdlHandler::scancodeToGensKey(event->key.keysym.scancode));

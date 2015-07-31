@@ -32,6 +32,7 @@ VBackend::VBackend()
 	, m_fullscreen(false)
 	, m_fb(nullptr)
 	, m_stretchMode(STRETCH_H)
+	, m_aspectRatioConstraint(true)
 { }
 
 VBackend::~VBackend()
@@ -44,7 +45,17 @@ VBackend::~VBackend()
 
 void VBackend::setStretchMode(StretchMode_t stretchMode)
 {
+	if (m_stretchMode == stretchMode)
+		return;
 	m_stretchMode = stretchMode;
+	setDirty();
+}
+
+void VBackend::setAspectRatioConstraint(bool aspectRatioConstraint)
+{
+	if (m_aspectRatioConstraint == aspectRatioConstraint)
+		return;
+	m_aspectRatioConstraint = aspectRatioConstraint;
 	setDirty();
 }
 

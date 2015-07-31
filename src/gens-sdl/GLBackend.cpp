@@ -63,6 +63,7 @@ class GLBackendPrivate {
 		// Previous stretch mode parameters.
 		int prevMD_W, prevMD_H;
 		VBackend::StretchMode_t prevStretchMode;
+		bool prevAspectRatioConstraint;
 
 		// Onscreen Display.
 		OsdGL *osd;
@@ -77,6 +78,11 @@ class GLBackendPrivate {
 		 * Recalculate the texture rectangle.
 		 */
 		void recalcTexRectF(void);
+
+		/**
+		 * Recalculate the aspect ratio.
+		 */
+		void recalcAspectRatio(void);
 };
 
 /** GLBackendPrivate **/
@@ -86,6 +92,7 @@ GLBackendPrivate::GLBackendPrivate(GLBackend *q)
 	, lastBpp(MdFb::BPP_MAX)
 	, prevMD_W(0), prevMD_H(0)
 	, prevStretchMode(VBackend::STRETCH_MAX)
+	, prevAspectRatioConstraint(true)
 	, osd(new OsdGL())
 {
 	// Clear GLTex.
@@ -196,6 +203,43 @@ void GLBackendPrivate::recalcTexRectF(void)
 	texRectF[3][1] = h;
 }
 
+/**
+ * Recalculate the aspect ratio.
+ */
+void GLBackendPrivate::recalcAspectRatio(void)
+{
+	// Set the OpenGL projection.
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	prevAspectRatioConstraint = q->aspectRatioConstraint();
+	if (!prevAspectRatioConstraint) {
+		// No aspect ratio constraint.
+		glOrtho(-1, 1, -1, 1, -1, 1);
+	} else {
+		// Aspect ratio constraint.
+		const double screenRatio = ((double)q->m_winW / (double)q->m_winH);
+		const double texRatio = ((double)tex.texVisW / (double)tex.texVisH);
+
+		if (screenRatio > texRatio) {
+			// Screen is wider than the texture.
+			const double ratio = (screenRatio / texRatio);
+			glOrtho(-ratio, ratio, -1, 1, -1, 1);
+		} else if (screenRatio < texRatio) {
+			// Screen is taller than the texture.
+			const double ratio = (texRatio / screenRatio);
+			glOrtho(-1, 1, -ratio, ratio, -1, 1);
+		} else {
+			// Image has the correct aspect ratio.
+			glOrtho(-1, 1, -1, 1, -1, 1);
+		}
+	}
+
+	// Reset the GL model view.
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+}
+
 /** GLBackend **/
 
 GLBackend::GLBackend()
@@ -294,6 +338,9 @@ void GLBackend::update(bool fb_dirty)
 	{
 		d->recalcTexRectF();
 	}
+	if (m_aspectRatioConstraint != d->prevAspectRatioConstraint) {
+		d->recalcAspectRatio();
+	}
 
 	// Draw the texture.
 	glEnableClientState(GL_VERTEX_ARRAY);
@@ -334,37 +381,8 @@ void GLBackend::resize(int width, int height)
 	// Initialize the OpenGL viewport.
 	glViewport(0, 0, width, height);
 
-	// Set the OpenGL projection.
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-	// TODO: Aspect ratio constraint property.
-	const bool aspectRatioConstraint = true;
-	if (!aspectRatioConstraint) {
-		// No aspect ratio constraint.
-		glOrtho(-1, 1, -1, 1, -1, 1);
-	} else {
-		// Aspect ratio constraint.
-		const double screenRatio = ((double)width / (double)height);
-		const double texRatio = ((double)d->tex.texVisW / (double)d->tex.texVisH);
-
-		if (screenRatio > texRatio) {
-			// Screen is wider than the texture.
-			const double ratio = (screenRatio / texRatio);
-			glOrtho(-ratio, ratio, -1, 1, -1, 1);
-		} else if (screenRatio < texRatio) {
-			// Screen is taller than the texture.
-			const double ratio = (texRatio / screenRatio);
-			glOrtho(-1, 1, -ratio, ratio, -1, 1);
-		} else {
-			// Image has the correct aspect ratio.
-			glOrtho(-1, 1, -1, 1, -1, 1);
-		}
-	}
-
-	// Reset the GL model view.
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	// Recalculate the aspect ratio.
+	d->recalcAspectRatio();
 }
 
 /** OpenGL functions. **/

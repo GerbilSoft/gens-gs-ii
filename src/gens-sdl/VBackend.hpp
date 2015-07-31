@@ -114,6 +114,10 @@ class VBackend {
 		StretchMode_t stretchMode(void) const;
 		void setStretchMode(StretchMode_t stretchMode);
 
+		// Aspect ratio constraint.
+		bool aspectRatioConstraint(void) const;
+		void setAspectRatioConstraint(bool aspectRatioConstraint);
+
 	public:
 		/** Onscreen Display functions. **/
 
@@ -168,6 +172,7 @@ class VBackend {
 
 		// Properties.
 		StretchMode_t m_stretchMode;
+		bool m_aspectRatioConstraint;
 };
 
 /** Property accessors. **/
@@ -180,6 +185,8 @@ inline void VBackend::clearDirty(void)
 	{ m_dirty = false; }
 inline VBackend::StretchMode_t VBackend::stretchMode(void) const
 	{ return m_stretchMode; }
+inline bool VBackend::aspectRatioConstraint(void) const
+	{ return m_aspectRatioConstraint; }
 
 }
 
