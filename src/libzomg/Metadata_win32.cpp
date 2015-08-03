@@ -193,16 +193,91 @@ static string getUserName_ansi(void)
 }
 
 /**
+ * Get the OS version. (Windows 8)
+ * @return OS version.
+ */
+static string getOSVersion_8(void)
+{
+	// ostringstream for the OS version.
+	ostringstream oss;
+
+	// Check if the product name is available in the registry.
+	//reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v ProductName
+	HKEY hKey;
+	LONG ret = RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", 0, KEY_READ, &hKey);
+	if (ret == ERROR_SUCCESS) {
+		// Key opened. Get the ProductName.
+		// TODO: Needs testing on 9x, 2000, and XP.
+		string regData;
+		ret = getRegValue(hKey, "ProductName", regData);
+		if (ret == ERROR_SUCCESS) {
+			// Product name retrieved.
+			// As of Windows 7 (or Vista), this always says
+			// "Windows (version) (edition)", so no MS or edition
+			// check is necessary.
+			oss << regData;
+		} else {
+			// Could not retrieve the product name.
+			return string();
+		}
+
+		// Get the service pack version.
+		ret = getRegValue(hKey, "CSDVersion", regData);
+		if (ret == ERROR_SUCCESS) {
+			// Service Pack version found.
+			// Only take numeric characters (or dots),
+			// starting from the end.
+			int pos = (int)regData.size() - 1;
+			for (; pos >= 0; pos--) {
+				if (!isdigit(regData[pos]) && regData[pos] != '.') {
+					pos++;
+					break;
+				}
+			}
+			if (pos >= 0 && pos < (int)regData.size()) {
+				oss << " SP" << regData.substr(pos);
+			}
+		}
+
+		// Get the version number.
+		ret = getRegValue(hKey, "CurrentVersion", regData);
+		if (ret == ERROR_SUCCESS) {
+			// Major/minor version number retrieved.
+			oss << " (" << regData;
+			// Try to get the build number.
+			// NOTE: On Windows 7+ (and probably Vista),
+			// "CurrentBuildNumber" and "CurrentBuild" both have
+			// the build number. On Windows XP, "CurrentBuildNumber"
+			// has the build number, but "CurrentBuild" has weird
+			// data: "1.511.1 () (Obsolete data - do not use)"
+			// Only fall back to "CurrentBuild" if "CurrentBuildNumber" fails.
+			// TODO: Check older versions.
+			ret = getRegValue(hKey, "CurrentBuildNumber", regData);
+			if (ret != ERROR_SUCCESS) {
+				ret = getRegValue(hKey, "CurrentBuild", regData);
+			}
+			if (ret == ERROR_SUCCESS) {
+				// Build number retrieved.
+				oss << '.' << regData;
+			}
+			oss << ')';
+		}
+
+		// Close the registry key.
+		// COMMIT NOTE: Forgot to close the key...
+		RegCloseKey(hKey);
+	}
+
+	return oss.str();
+}
+
+/**
  * Get the OS version.
  * @return OS version.
  */
 static string getOSVersion(void)
 {
 	// OS version.
-	// FIXME: This will return "Windows 8" on 8.1+.
-	// Potential workaround is NetWkstaGetInfo().
-	// There should also be a kernel function...
-	// http://www.codeproject.com/Articles/678606/Part-Overcoming-Windows-s-deprecation-of-GetVe
 	ostringstream oss;
 	OSVERSIONINFOEXA osVersionInfo;
 	osVersionInfo.dwOSVersionInfoSize = sizeof(osVersionInfo);
@@ -212,6 +287,19 @@ static string getOSVersion(void)
 	}
 
 	// Version info retrieved.
+	if (osVersionInfo.dwMajorVersion > 6 ||
+	    (osVersionInfo.dwMajorVersion == 6 && osVersionInfo.dwMinorVersion >= 2))
+	{
+		// Windows 8 or later.
+		// As of Windows 8.1, GetVersionEx() always returns
+		// Windows 8 unless the program has a version-specific
+		// manifest. We aren't targetting Windows 8, so we'll
+		// need to use an alternative method.
+		string os8 = getOSVersion_8();
+		if (!os8.empty())
+			return os8;
+	}
+
 	// Check if the product name is available in the registry.
 	//reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v ProductName
 	HKEY hKey;
