@@ -214,6 +214,9 @@ void MetadataPrivate::InitSystemMetadata(void)
 						break;
 				}
 			}
+
+			// Close the registry key.
+			RegCloseKey(hKey);
 		}
 
 		// Append service pack version.
