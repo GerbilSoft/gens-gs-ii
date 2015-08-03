@@ -171,7 +171,7 @@ int GLTex::alloc(Format format, int w, int h)
 			this->intformat,	// Internal format.
 			texW, texH,		// width/height
 			0,			// No border.
-			this->format, SDLGL_UNSIGNED_BYTE, texBuf);
+			this->format, this->type, texBuf);
 
 	// Free the temporary texture buffer.
 	free(texBuf);
