@@ -192,16 +192,16 @@ void GLTex::dealloc(void)
  * Image data must be in the format allocated in alloc().
  * @param w Width.
  * @param h Height.
- * @param pitch Pitch, in bytes.
+ * @param pxPitch Pitch, in pixels.
  * @param data Image data.
  */
-void GLTex::subImage2D(int w, int h, int pitch, const void *data)
+void GLTex::subImage2D(int w, int h, int pxPitch, const void *data)
 {
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, name);
 
 	// Set pixel storage properties.
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, pitch);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, pxPitch);
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 8);	// TODO: 16 on amd64?
 

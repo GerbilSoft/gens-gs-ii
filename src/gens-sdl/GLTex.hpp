@@ -60,6 +60,8 @@ class GLTex
 		 * @param h Height.
 		 * @return 0 on success; non-zero on error.
 		 */
+		// TODO: Make 'format' the third parameter?
+		// QImage does that.
 		int alloc(Format format, int w, int h);
 
 		/**
@@ -72,10 +74,10 @@ class GLTex
 		 * Image data must be in the format allocated in alloc().
 		 * @param w Width.
 		 * @param h Height.
-		 * @param pitch Pitch, in bytes.
+		 * @param pxPitch Pitch, in pixels.
 		 * @param data Image data.
 		 */
-		void subImage2D(int w, int h, int pitch, const void *data);
+		void subImage2D(int w, int h, int pxPitch, const void *data);
 
 	protected:
 		GLenum intformat;	// Internal format. (GL_RGB, GL_RGBA)
