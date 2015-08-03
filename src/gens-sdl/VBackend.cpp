@@ -88,7 +88,7 @@ bool VBackend::process_osd_messages(void)
  * @param msg Message. (printf-formatted; UTF-8)
  * @param ap Format arguments.
  */
-void VBackend::osd_vprintf(const int duration, const utf8_str *msg, va_list ap)
+void VBackend::osd_vprintf(int duration, const utf8_str *msg, va_list ap)
 {
 	// Default version prints to the console.
 	// TODO: Convert to local codepage on Windows?
@@ -103,7 +103,7 @@ void VBackend::osd_vprintf(const int duration, const utf8_str *msg, va_list ap)
  * @param msg Message. (printf-formatted; UTF-8)
  * @params ... Format arguments.
  */
-void VBackend::osd_printf(const int duration, const utf8_str *msg, ...)
+void VBackend::osd_printf(int duration, const utf8_str *msg, ...)
 {
 	va_list ap;
 	va_start(ap, msg);
