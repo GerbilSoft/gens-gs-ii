@@ -844,6 +844,34 @@ void OsdGL::preview_image(int duration, const Zomg_Img_Data_t *img_data)
 	const double txcH = d->preview.tex.ratioH();
 	GLTex::toCoords<double>(d->preview.txc, 0.0, 0.0, txcW, txcH);
 
+	// Handle certain resolutions with specific aspect ratios.
+	// - Always use 320px width.
+	// - If W is a multiple of 248, 256, or 320,
+	//   and H is a multiple of 192, 224, or 240,
+	//   use the base H multiple.
+	// - Otherwise, use 240px height.
+	// - TODO: Left bar for 248px?)
+	// - TODO: Adjust Y position?
+	// - TODO: Full-size (x448, x480) IM2 support?
+	const int imgW = 320;
+	int imgH = 240;
+	if (img_data->w % 248 == 0 ||
+		img_data->w % 256 == 0 ||
+		img_data->w % 320 == 0)
+	{
+		// Width is an expected size.
+		if (img_data->h % 240 == 0) {
+			// 240px height.
+			imgH = 240;
+		} else if (img_data->h % 224 == 0) {
+			// 224px height.
+			imgH = 224;
+		} else if (img_data->h % 192 == 0) {
+			// 192px height.
+			imgH = 192;
+		}
+	}
+
 	// Calculate the vertex coordinates.
 	// In a 320x240 virtual display, we want the preview to be
 	// 5/16ths the size (100x75), and located 16px from the
@@ -851,8 +879,9 @@ void OsdGL::preview_image(int duration, const Zomg_Img_Data_t *img_data)
 	// TODO: Get actual virtual display coordinates.
 	// TODO: Use float or double for vtx in case the values aren't even?
 	// TODO: Adjust vertical height if the image isn't exactly 320x240.
-	const int dispW = 320, dispH = 240;
-	const int vtxW = (dispW * 5 / 16), vtxH = (dispH * 5 / 16);
+	const int dispW = 320;
+	//const int dispH = 240;
+	const int vtxW = (imgW * 5 / 16), vtxH = (imgH * 5 / 16);
 	const int vtxX = dispW - vtxW - 16;
 	const int vtxY = 16;
 	GLTex::toCoords<int>(d->preview.vtx, vtxX, vtxY, vtxW, vtxH);
