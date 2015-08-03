@@ -794,10 +794,21 @@ void OsdGL::print(unsigned int duration, const utf8_str *msg)
 /**
  * Display a preview image.
  * @param duration Duration for the preview image to appear, in milliseconds.
- * @param img_data Preview image.
+ * @param img_data Image data. (If nullptr, or internal data is nullptr, hide the current image.)
  */
 void OsdGL::preview_image(int duration, const Zomg_Img_Data_t *img_data)
 {
+	if (!img_data || !img_data->data) {
+			// Null image. Hide the current preview image.
+		if (d->preview.visible) {
+			// endTime is adjusted so we can fade it out.
+			d->preview.endTime = d->timer.getTime();
+			d->preview.hasDisplayed = true;
+		}
+		// Nothing to do.
+		return;
+	}
+
 	// TODO: Add Zomg_Img_Data_t support to GLTex.
 	// TODO: Strip the alpha channel?
 

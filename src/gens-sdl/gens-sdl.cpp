@@ -365,10 +365,9 @@ static void doSaveSlot(int saveSlot)
 
 	// Show an OSD message.
 	vBackend->osd_printf(1500, "Slot %d [%s]", saveSlot, slot_state.c_str());
-	if (img_data.data != nullptr) {
-		vBackend->osd_preview_image(1500, &img_data);
-		free(img_data.data);
-	}
+	// If img_data.data is nullptr, this will hide the current image.
+	vBackend->osd_preview_image(1500, &img_data);
+	free(img_data.data);
 }
 
 /**

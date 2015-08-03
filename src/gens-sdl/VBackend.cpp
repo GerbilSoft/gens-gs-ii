@@ -114,7 +114,7 @@ void VBackend::osd_printf(int duration, const utf8_str *msg, ...)
 /**
  * Display a preview image on the Onscreen Display.
  * @param duration Duration for the preview image to appear, in milliseconds.
- * @param img_data Image data.
+ * @param img_data Image data. (If nullptr, or internal data is nullptr, hide the current image.)
  */
 void VBackend::osd_preview_image(int duration, const _Zomg_Img_Data_t *img_data)
 {

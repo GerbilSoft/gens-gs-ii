@@ -113,7 +113,7 @@ class OsdGL {
 		/**
 		 * Display a preview image.
 		 * @param duration Duration for the preview image to appear, in milliseconds.
-		 * @param img_data Preview image.
+		 * @param img_data Image data. (If nullptr, or internal data is nullptr, hide the current image.)
 		 */
 		void preview_image(int duration, const _Zomg_Img_Data_t *img_data);
 

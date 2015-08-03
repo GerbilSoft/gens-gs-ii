@@ -498,7 +498,7 @@ void GLBackend::osd_vprintf(int duration, const utf8_str *msg, va_list ap)
 /**
  * Display a preview image on the Onscreen Display.
  * @param duration Duration for the preview image to appear, in milliseconds.
- * @param img_data Image data.
+ * @param img_data Image data. (If nullptr, or internal data is nullptr, hide the current image.)
  */
 void GLBackend::osd_preview_image(int duration, const _Zomg_Img_Data_t *img_data)
 {
