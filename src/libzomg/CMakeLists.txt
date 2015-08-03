@@ -100,9 +100,13 @@ INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(zomg)
 TARGET_LINK_LIBRARIES(zomg ${MINIZIP_LIBRARY} ${PNG_LIBRARY})
 IF(WIN32)
-	# Secur32.dll is required for Metadata.cpp, which calls these functions:
+	# Secur32.dll is required for Metadata_win32.cpp, which calls these functions:
 	# - GetUserNameEx()
-	TARGET_LINK_LIBRARIES(zomg secur32)
+	# Advapi32.dll is required for Metadata_win32.cpp, which calls these functions:
+	# - RegOpenKeyEx()
+	# - RegQueryValueEx()
+	# - RegCloseKey()
+	TARGET_LINK_LIBRARIES(zomg secur32 advapi32)
 ENDIF(WIN32)
 
 # Set the compile definitions.
