@@ -161,6 +161,7 @@ class OsdGLPrivate {
 			// Coordinate arrays.
 			GLdouble txc[4][2];	// Texture coordinates.
 			GLint vtx[4][2];	// Vertex coordinates.
+			GLint vtx_border[4][2];	// Vertex coordinates. (border)
 			GLint vtx_sh[4][2];	// Vertex coordinates. (drop shadow)
 
 			preview_t()
@@ -620,8 +621,13 @@ void OsdGL::draw(void)
 		glVertexPointer(2, GL_INT, 0, d->preview.vtx_sh);
 		glDrawArrays(GL_QUADS, 0, 4);
 
+		// Border.
+		// FIXME: Move after drop shadow.
+		glColor4f(0.0f, 0.0f, 0.0f, alpha);
+		glVertexPointer(2, GL_INT, 0, d->preview.vtx_border);
+		glDrawArrays(GL_QUADS, 0, 4);
+
 		// Preview image.
-		// TODO: Border?
 		// TODO: Ignore the alpha channel of the preview image?
 		glEnable(GL_TEXTURE_2D);
 		glColor4f(1.0f, 1.0f, 1.0f, alpha);
@@ -872,11 +878,21 @@ void OsdGL::preview_image(int duration, const Zomg_Img_Data_t *img_data)
 	d->preview.vtx[3][0] = dispW - vtxW - 16;
 	d->preview.vtx[3][1] = 16 + vtxH;
 
+	// Border.
+	d->preview.vtx_border[0][0] = d->preview.vtx[0][0] - 1;
+	d->preview.vtx_border[0][1] = d->preview.vtx[0][1] - 1;
+	d->preview.vtx_border[1][0] = d->preview.vtx[1][0] + 1;
+	d->preview.vtx_border[1][1] = d->preview.vtx[1][1] - 1;
+	d->preview.vtx_border[2][0] = d->preview.vtx[2][0] + 1;
+	d->preview.vtx_border[2][1] = d->preview.vtx[2][1] + 1;
+	d->preview.vtx_border[3][0] = d->preview.vtx[3][0] - 1;
+	d->preview.vtx_border[3][1] = d->preview.vtx[3][1] + 1;
+
 	// Drop shadow.
 	// TODO: Is 4px the best size?
 	for (int i = 0; i < 4; i++) {
-		d->preview.vtx_sh[i][0] = d->preview.vtx[i][0] + 4;
-		d->preview.vtx_sh[i][1] = d->preview.vtx[i][1] + 4;
+		d->preview.vtx_sh[i][0] = d->preview.vtx_border[i][0] + 4;
+		d->preview.vtx_sh[i][1] = d->preview.vtx_border[i][1] + 4;
 	}
 
 	// Set the display parameters.
