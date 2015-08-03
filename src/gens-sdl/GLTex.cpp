@@ -160,10 +160,16 @@ int GLTex::alloc(Format format, int w, int h)
 	if (texW != texVisW || texH != texVisH) {
 		// Texture size is not a power of two.
 		// Initialize it here so filtering works properly.
-		const size_t texSize = (texW * texH *
-				(type == SDLGL_UNSIGNED_BYTE ? 4 : 2));
+		size_t texSize = texW * texH;
+		if (this->format != GL_ALPHA) {
+			if (this->type == SDLGL_UNSIGNED_BYTE) {
+				texSize *= 4;
+			} else {
+				texSize *= 2;
+			}
+		}
 		texBuf = calloc(1, texSize);
-		memset(texBuf, 0x44, texSize);
+		memset(texBuf, 0, texSize);
 	}
 
 	// Allocate the texture.
