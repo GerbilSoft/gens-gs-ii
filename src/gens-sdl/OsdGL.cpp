@@ -845,14 +845,13 @@ void OsdGL::preview_image(int duration, const Zomg_Img_Data_t *img_data)
 
 	// Calculate the vertex coordinates.
 	// In a 320x240 virtual display, we want the preview to be
-	// 3/8ths the size (120x90), and located 16px from the
+	// 5/16ths the size (100x75), and located 16px from the
 	// top-right border.
-	// TODO: 3/8ths still seems too big...
 	// TODO: Get actual virtual display coordinates.
 	// TODO: Use float or double for vtx in case the values aren't even?
 	// TODO: Adjust vertical height if the image isn't exactly 320x240.
 	const int dispW = 320, dispH = 240;
-	const int vtxW = (dispW * 3 / 8), vtxH = (dispH * 3 / 8);
+	const int vtxW = (dispW * 5 / 16), vtxH = (dispH * 5 / 16);
 	d->preview.vtx[0][0] = dispW - vtxW - 16;
 	d->preview.vtx[0][1] = 16;
 	d->preview.vtx[1][0] = dispW - 16;
