@@ -65,6 +65,44 @@ void MetadataPrivate::init_ctime(void)
 }
 
 /**
+ * Get a string from the registry.
+ * @param hKey         [in] Opened registry key.
+ * @param valueName    [in] Value name.
+ * @param str          [out] Output string.
+ * @return ERROR_SUCCESS on success; other Windows error code on error.
+ */
+static LONG getRegValue(HKEY hKey, const char *valueName, string &str)
+{
+	// TODO: RegOpenKeyExU().
+	DWORD type;
+	char buf[256];
+	DWORD cbBuf = sizeof(buf);
+	LONG ret = RegQueryValueExA(hKey, valueName, nullptr, &type, (LPBYTE)buf, &cbBuf);
+	if (ret != ERROR_SUCCESS) {
+		// Error reading the value.
+		// Don't bother trying to handle ERROR_MORE_DATA here.
+		return ret;
+	} else if (cbBuf > sizeof(buf)) {
+		// Somehow we read too much data...
+		return ERROR_MORE_DATA;
+	} else if (cbBuf == 0) {
+		// Empty string.
+		str.clear();
+		return ERROR_SUCCESS;
+	}
+
+	// Check if there are any trailing NULLs in buf[].
+	for (; cbBuf > 0; cbBuf--) {
+		if (buf[cbBuf-1] != 0)
+			break;
+	}
+
+	// Return the string.
+	str.assign(buf, cbBuf);
+	return ERROR_SUCCESS;
+}
+
+/**
  * Get the Windows username. (Unicode version)
  * The display name is checked first.
  * If it's empty or invalid, the username is checked.
@@ -177,17 +215,11 @@ void MetadataPrivate::InitSystemMetadata(void)
 		if (ret == ERROR_SUCCESS) {
 			// Key opened. Get the ProductName.
 			// TODO: Needs testing on 9x, 2000, and XP.
-			char productName[256];
-			DWORD cbProductName = sizeof(productName);
-			// 256 bytes should always be enough for the product name.
-			ret = RegQueryValueExA(hKey, "ProductName", nullptr, nullptr, (LPBYTE)productName, &cbProductName);
+			string productName;
+			ret = getRegValue(hKey, "ProductName", productName);
 			if (ret == ERROR_SUCCESS) {
 				// Product name retrieved.
-				// Make sure it's null-terminated.
-				if (cbProductName < sizeof(productName)) {
-					productName[cbProductName] = 0;
-				}
-				oss << string(productName);
+				oss << productName;
 			} else {
 				// Could not retrieve product name.
 				// Use a generic name.
@@ -201,6 +233,7 @@ void MetadataPrivate::InitSystemMetadata(void)
 						break;
 					case VER_PLATFORM_WIN32_NT:
 					default:
+						// TODO: Append OS version as well.
 						switch (osVersionInfo.wProductType) {
 							case VER_NT_WORKSTATION:
 							default:
@@ -219,7 +252,7 @@ void MetadataPrivate::InitSystemMetadata(void)
 			RegCloseKey(hKey);
 		}
 
-		// Append service pack version.
+		// Append the service pack version.
 		char spver[32];
 		if (osVersionInfo.wServicePackMajor > 0 || osVersionInfo.wServicePackMinor > 0) {
 			// Service Pack.
@@ -234,7 +267,7 @@ void MetadataPrivate::InitSystemMetadata(void)
 			oss << string(spver);
 		}
 
-		// Append version number.
+		// Append the version number.
 		snprintf(spver, sizeof(spver), " (%d.%d.%d)",
 			osVersionInfo.dwMajorVersion,
 			osVersionInfo.dwMinorVersion,
