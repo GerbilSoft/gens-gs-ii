@@ -158,8 +158,8 @@ void GLBackendPrivate::recalcTexRectF(void)
 
 	// Default to no stretch.
 	double x = 0.0, y = 0.0;
-	double w = (double)tex.texVisW / (double)tex.texW;
-	double h = (double)tex.texVisH / (double)tex.texH;
+	double w = tex.ratioW();
+	double h = tex.ratioH();
 
 	// Save the current MD screen resolution.
 	prevMD_W = fb->imgWidth();
@@ -175,7 +175,7 @@ void GLBackendPrivate::recalcTexRectF(void)
 			// Less than 320 pixels wide.
 			// Adjust horizontal stretch.
 			x = (double)imgXStart / (double)tex.texW;
-			w -= x;
+			w -= (2*x);
 		}
 	}
 
@@ -188,19 +188,15 @@ void GLBackendPrivate::recalcTexRectF(void)
 			// Less than 240 pixels tall.
 			// Adjust vertical stretch.
 			y = (double)imgYStart / (double)tex.texH;
-			h -= y;
+			h -= (2*y);
 		}
 	}
 
 	// Set the texture rectangle coordinates.
-	texRectF[0][0] = x;
-	texRectF[0][1] = y;
-	texRectF[1][0] = w;
-	texRectF[1][1] = y;
-	texRectF[2][0] = w;
-	texRectF[2][1] = h;
-	texRectF[3][0] = x;
-	texRectF[3][1] = h;
+	// NOTE: toCoords() adds X and Y to the second set of coordinate pairs.
+	// To adjust for this, we have to multiply the W and H differences
+	// by two above.
+	GLTex::toCoords(texRectF, x, y, w, h);
 }
 
 /**

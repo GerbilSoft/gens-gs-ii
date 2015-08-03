@@ -283,15 +283,7 @@ void OsdGLPrivate::printLine(int x, int y, const std::string &msg)
 			break;
 
 		// Vertex coordinates.
-		vtx[(i*8)+0] = x;
-		vtx[(i*8)+1] = y;
-		vtx[(i*8)+2] = x+chrW;
-		vtx[(i*8)+3] = y;
-		vtx[(i*8)+4] = x+chrW;
-		vtx[(i*8)+5] = y+chrH;
-		vtx[(i*8)+6] = x;
-		vtx[(i*8)+7] = y+chrH;
-
+		GLTex::toCoords(&vtx[i*8], x, y, chrW, chrH);
 		// Texture coordinates.
 		memcpy(&txc[i*8], &osdVertex[chr][0], sizeof(osdVertex[chr]));
 	}
@@ -848,17 +840,9 @@ void OsdGL::preview_image(int duration, const Zomg_Img_Data_t *img_data)
 				pxPitch, img_data->data);
 
 	// Calculate the texture coordinates.
-	// TODO: GLTex helper for this.
-	const double txcW = (double)d->preview.tex.texVisW / (double)d->preview.tex.texW;
-	const double txcH = (double)d->preview.tex.texVisH / (double)d->preview.tex.texH;
-	d->preview.txc[0][0] = 0.0;
-	d->preview.txc[0][1] = 0.0;
-	d->preview.txc[1][0] = txcW;
-	d->preview.txc[1][1] = 0.0;
-	d->preview.txc[2][0] = txcW;
-	d->preview.txc[2][1] = txcH;
-	d->preview.txc[3][0] = 0.0;
-	d->preview.txc[3][1] = txcH;
+	const double txcW = d->preview.tex.ratioW();
+	const double txcH = d->preview.tex.ratioH();
+	GLTex::toCoords<double>(d->preview.txc, 0.0, 0.0, txcW, txcH);
 
 	// Calculate the vertex coordinates.
 	// In a 320x240 virtual display, we want the preview to be
@@ -869,24 +853,12 @@ void OsdGL::preview_image(int duration, const Zomg_Img_Data_t *img_data)
 	// TODO: Adjust vertical height if the image isn't exactly 320x240.
 	const int dispW = 320, dispH = 240;
 	const int vtxW = (dispW * 5 / 16), vtxH = (dispH * 5 / 16);
-	d->preview.vtx[0][0] = dispW - vtxW - 16;
-	d->preview.vtx[0][1] = 16;
-	d->preview.vtx[1][0] = dispW - 16;
-	d->preview.vtx[1][1] = 16;
-	d->preview.vtx[2][0] = dispW - 16;
-	d->preview.vtx[2][1] = 16 + vtxH;
-	d->preview.vtx[3][0] = dispW - vtxW - 16;
-	d->preview.vtx[3][1] = 16 + vtxH;
+	const int vtxX = dispW - vtxW - 16;
+	const int vtxY = 16;
+	GLTex::toCoords<int>(d->preview.vtx, vtxX, vtxY, vtxW, vtxH);
 
 	// Border.
-	d->preview.vtx_border[0][0] = d->preview.vtx[0][0] - 1;
-	d->preview.vtx_border[0][1] = d->preview.vtx[0][1] - 1;
-	d->preview.vtx_border[1][0] = d->preview.vtx[1][0] + 1;
-	d->preview.vtx_border[1][1] = d->preview.vtx[1][1] - 1;
-	d->preview.vtx_border[2][0] = d->preview.vtx[2][0] + 1;
-	d->preview.vtx_border[2][1] = d->preview.vtx[2][1] + 1;
-	d->preview.vtx_border[3][0] = d->preview.vtx[3][0] - 1;
-	d->preview.vtx_border[3][1] = d->preview.vtx[3][1] + 1;
+	GLTex::toCoords<int>(d->preview.vtx_border, vtxX-1, vtxY-1, vtxW+2, vtxH+2);
 
 	// Drop shadow.
 	// TODO: Is 4px the best size?

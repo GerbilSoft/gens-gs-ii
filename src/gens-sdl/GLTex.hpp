@@ -79,6 +79,41 @@ class GLTex
 		 */
 		void subImage2D(int w, int h, int pxPitch, const void *data);
 
+	public:
+		/**
+		 * Convert x/y/width/height to texture or vertex coordinates.
+		 * @param coords	[out] Array for coordinates.
+		 * @param x		[in] X
+		 * @param y		[in] Y
+		 * @param width		[in] Width
+		 * @param height	[in] Height
+		 */
+		template<typename T>
+		static inline void toCoords(T coords[4][2], T x, T y, T width, T height);
+
+		/**
+		 * Convert x/y/width/height to texture or vertex coordinates.
+		 * @param coords	[out] Array for coordinates.
+		 * @param x		[in] X
+		 * @param y		[in] Y
+		 * @param width		[in] Width
+		 * @param height	[in] Height
+		 */
+		template<typename T>
+		static inline void toCoords(T coords[8], T x, T y, T width, T height);
+
+		/**
+		 * Get the visible texture ratio. (width)
+		 * @return Visible texture ratio. (width)
+		 */
+		inline double ratioW(void) const;
+
+		/**
+		 * Get the visible texture ratio. (height)
+		 * @return Visible texture ratio. (height)
+		 */
+		inline double ratioH(void) const;
+
 	protected:
 		GLenum intformat;	// Internal format. (GL_RGB, GL_RGBA)
 		GLenum format;		// Texture format. (GL_RGB, GL_BGRA)
@@ -102,6 +137,69 @@ class GLTex
 			return k + 1;
 		}
 };
+
+/**
+ * Convert x/y/width/height to texture or vertex coordinates.
+ * @param coords	[out] Array for coordinates.
+ * @param x		[in] X
+ * @param y		[in] Y
+ * @param width		[in] Width
+ * @param height	[in] Height
+ */
+template<typename T>
+inline void GLTex::toCoords(T coords[4][2], T x, T y, T width, T height)
+{
+	coords[0][0] = x;
+	coords[0][1] = y;
+	coords[1][0] = x+width;
+	coords[1][1] = y;
+	coords[2][0] = x+width;
+	coords[2][1] = y+height;
+	coords[3][0] = x;
+	coords[3][1] = y+height;
+}
+
+/**
+ * Convert x/y/width/height to texture or vertex coordinates.
+ * @param coords	[out] Array for coordinates.
+ * @param x		[in] X
+ * @param y		[in] Y
+ * @param width		[in] Width
+ * @param height	[in] Height
+ */
+template<typename T>
+inline void GLTex::toCoords(T coords[8], T x, T y, T width, T height)
+{
+	// NOTE: Essentially the same as the [4][2] version, but
+	// needed for OsdGLPrivate::printLine(), since it uses an
+	// allocated GLint* that doesn't match the [4][2] signature.
+	coords[0] = x;
+	coords[1] = y;
+	coords[2] = x+width;
+	coords[3] = y;
+	coords[4] = x+width;
+	coords[5] = y+height;
+	coords[6] = x;
+	coords[7] = y+height;
+}
+
+/**
+ * Get the visible texture ratio. (width)
+ * @return Visible texture ratio. (width)
+ */
+inline double GLTex::ratioW(void) const
+{
+	return (double)texVisW / (double)texW;
+}
+
+/**
+ * Get the visible texture ratio. (height)
+ * @return Visible texture ratio. (height)
+ */
+inline double GLTex::ratioH(void) const
+{
+	return (double)texVisH / (double)texH;
+}
 
 }
 
