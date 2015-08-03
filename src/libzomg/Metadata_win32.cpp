@@ -193,10 +193,10 @@ static string getUserName_ansi(void)
 }
 
 /**
- * Initialize system-specific metadata.
- * This function is implemented in OS-specific files.
+ * Get the OS version.
+ * @return OS version.
  */
-void MetadataPrivate::InitSystemMetadata(void)
+static string getOSVersion(void)
 {
 	// OS version.
 	// FIXME: This will return "Windows 8" on 8.1+.
@@ -206,91 +206,108 @@ void MetadataPrivate::InitSystemMetadata(void)
 	ostringstream oss;
 	OSVERSIONINFOEXA osVersionInfo;
 	osVersionInfo.dwOSVersionInfoSize = sizeof(osVersionInfo);
-	if (GetVersionExA((LPOSVERSIONINFOA)&osVersionInfo) != 0) {
-		// Version info retrieved.
-		// Check if the product name is available in the registry.
-		//reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v ProductName
-		HKEY hKey;
-		LONG ret = RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", 0, KEY_READ, &hKey);
+	if (GetVersionExA((LPOSVERSIONINFOA)&osVersionInfo) == 0) {
+		// Error retrieving OS version info.
+		return string();
+	}
+
+	// Version info retrieved.
+	// Check if the product name is available in the registry.
+	//reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v ProductName
+	HKEY hKey;
+	LONG ret = RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", 0, KEY_READ, &hKey);
+	if (ret == ERROR_SUCCESS) {
+		// Key opened. Get the ProductName.
+		// TODO: Needs testing on 9x, 2000, and XP.
+		string productName;
+		ret = getRegValue(hKey, "ProductName", productName);
 		if (ret == ERROR_SUCCESS) {
-			// Key opened. Get the ProductName.
-			// TODO: Needs testing on 9x, 2000, and XP.
-			string productName;
-			ret = getRegValue(hKey, "ProductName", productName);
-			if (ret == ERROR_SUCCESS) {
-				// Product name retrieved.
-				oss << productName;
-			} else {
-				// Could not retrieve product name.
-				// Use a generic name.
-				switch (osVersionInfo.dwPlatformId) {
-					case VER_PLATFORM_WIN32s:
-						// Yeah, right, like this is ever going to happen...
-						oss << "Windows 3.1";
-						break;
-					case VER_PLATFORM_WIN32_WINDOWS:
-						oss << "Windows 9x";
-						break;
-					case VER_PLATFORM_WIN32_NT:
-					default:
-						// Append the OS version.
-						oss << "Windows NT" << ' ' << osVersionInfo.dwMajorVersion << '.';
-						if (osVersionInfo.dwMinorVersion % 10 == 0) {
-							// NT 3.1 and 3.5 are internally
-							// 3.10 and 3.50. Remove the extra 0.
-							oss << (osVersionInfo.dwMinorVersion / 10);
-						} else {
-							// Use the full minor version.
-							// Needed for e.g. NT 3.51.
-							oss << osVersionInfo.dwMinorVersion;
-						}
+			// Product name retrieved.
+			// TODO: Remove "Microsoft"; append edition if not present.
+			oss << productName;
+		} else {
+			// Could not retrieve product name.
+			// Use a generic name.
+			switch (osVersionInfo.dwPlatformId) {
+				case VER_PLATFORM_WIN32s:
+					// Yeah, right, like this is ever going to happen...
+					oss << "Windows 3.1";
+					break;
+				case VER_PLATFORM_WIN32_WINDOWS:
+					oss << "Windows 9x";
+					break;
+				case VER_PLATFORM_WIN32_NT:
+				default:
+					// Append the OS version.
+					oss << "Windows NT" << ' ' << osVersionInfo.dwMajorVersion << '.';
+					if (osVersionInfo.dwMinorVersion % 10 == 0) {
+						// NT 3.1 and 3.5 are internally
+						// 3.10 and 3.50. Remove the extra 0.
+						oss << (osVersionInfo.dwMinorVersion / 10);
+					} else {
+						// Use the full minor version.
+						// Needed for e.g. NT 3.51.
+						oss << osVersionInfo.dwMinorVersion;
+					}
 
-						// Append the edition.
-						// TODO: Advanced Server, etc.?
-						oss << ' ';
-						switch (osVersionInfo.wProductType) {
-							case VER_NT_WORKSTATION:
-							default:
-								oss << "Workstation";
-								break;
-							case VER_NT_DOMAIN_CONTROLLER:
-							case VER_NT_SERVER:
-								oss << "Server";
-								break;
-						}
-						break;
-				}
+					// Append the edition.
+					// TODO: Advanced Server, etc.?
+					oss << ' ';
+					switch (osVersionInfo.wProductType) {
+						case VER_NT_WORKSTATION:
+						default:
+							oss << "Workstation";
+							break;
+						case VER_NT_DOMAIN_CONTROLLER:
+						case VER_NT_SERVER:
+							oss << "Server";
+							break;
+					}
+					break;
 			}
-
-			// Close the registry key.
-			RegCloseKey(hKey);
 		}
 
-		// Append the service pack version.
-		char spver[32];
-		if (osVersionInfo.wServicePackMajor > 0 || osVersionInfo.wServicePackMinor > 0) {
-			// Service Pack.
-			if (osVersionInfo.wServicePackMinor > 0) {
-				snprintf(spver, sizeof(spver), " SP%d.%d",
-					osVersionInfo.wServicePackMajor,
-					osVersionInfo.wServicePackMinor);
-			} else {
-				snprintf(spver, sizeof(spver), " SP%d",
-					osVersionInfo.wServicePackMajor);
-			}
-			oss << string(spver);
-		}
+		// Close the registry key.
+		RegCloseKey(hKey);
+	}
 
-		// Append the version number.
-		snprintf(spver, sizeof(spver), " (%d.%d.%d)",
-			osVersionInfo.dwMajorVersion,
-			osVersionInfo.dwMinorVersion,
-			osVersionInfo.dwBuildNumber);
+	// Append the service pack version.
+	char spver[32];
+	if (osVersionInfo.wServicePackMajor > 0 || osVersionInfo.wServicePackMinor > 0) {
+		// Service Pack.
+		if (osVersionInfo.wServicePackMinor > 0) {
+			snprintf(spver, sizeof(spver), " SP%d.%d",
+				osVersionInfo.wServicePackMajor,
+				osVersionInfo.wServicePackMinor);
+		} else {
+			snprintf(spver, sizeof(spver), " SP%d",
+				osVersionInfo.wServicePackMajor);
+		}
 		oss << string(spver);
 	}
-	sysInfo.osVersion = oss.str();
+
+	// Append the version number.
+	snprintf(spver, sizeof(spver), " (%d.%d.%d)",
+		osVersionInfo.dwMajorVersion,
+		osVersionInfo.dwMinorVersion,
+		osVersionInfo.dwBuildNumber);
+	oss << string(spver);
+
+	// Return the OS version.
+	return oss.str();
+}
+
+/**
+ * Initialize system-specific metadata.
+ * This function is implemented in OS-specific files.
+ */
+void MetadataPrivate::InitSystemMetadata(void)
+{
+	// OS version.
+	sysInfo.osVersion = getOSVersion();
 
 	// Get the username.
+	// TODO: Use libW32U?
 	if (GetModuleHandleW(nullptr)) {
 		// OS supports Unicode.
 		sysInfo.username = getUserName_unicode();
