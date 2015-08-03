@@ -161,6 +161,7 @@ class OsdGLPrivate {
 			// Coordinate arrays.
 			GLdouble txc[4][2];	// Texture coordinates.
 			GLint vtx[4][2];	// Vertex coordinates.
+			GLint vtx_sh[4][2];	// Vertex coordinates. (drop shadow)
 
 			preview_t()
 				: visible(false)
@@ -586,6 +587,7 @@ void OsdGL::draw(void)
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	// Current time is needed for message fade-out.
+	// TODO: Drop shadow fade-out looks "weird"...
 	const uint64_t curTime = d->timer.getTime();
 
 	// OSD preview image.
@@ -610,9 +612,18 @@ void OsdGL::draw(void)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		// TODO: Drop shadow for preview image.
+		// Drop shadow.
+		// NOTE: Alpha is divided by 2 due to the larger drop shadow.
+		// TODO: Do this with the OSD messages too?
+		glDisable(GL_TEXTURE_2D);
+		glColor4f(0.0f, 0.0f, 0.0f, alpha / 2);
+		glVertexPointer(2, GL_INT, 0, d->preview.vtx_sh);
+		glDrawArrays(GL_QUADS, 0, 4);
+
+		// Preview image.
 		// TODO: Border?
 		// TODO: Ignore the alpha channel of the preview image?
+		glEnable(GL_TEXTURE_2D);
 		glColor4f(1.0f, 1.0f, 1.0f, alpha);
 		glVertexPointer(2, GL_INT, 0, d->preview.vtx);
 		glTexCoordPointer(2, GL_DOUBLE, 0, d->preview.txc);
@@ -850,6 +861,13 @@ void OsdGL::preview_image(int duration, const Zomg_Img_Data_t *img_data)
 	d->preview.vtx[2][1] = 16 + vtxH;
 	d->preview.vtx[3][0] = dispW - vtxW - 16;
 	d->preview.vtx[3][1] = 16 + vtxH;
+
+	// Drop shadow.
+	// TODO: Is 4px the best size?
+	for (int i = 0; i < 4; i++) {
+		d->preview.vtx_sh[i][0] = d->preview.vtx[i][0] + 4;
+		d->preview.vtx_sh[i][1] = d->preview.vtx[i][1] + 4;
+	}
 
 	// Set the display parameters.
 	d->preview.duration = duration;
