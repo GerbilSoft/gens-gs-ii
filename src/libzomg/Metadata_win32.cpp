@@ -70,7 +70,7 @@ void MetadataPrivate::init_ctime(void)
  * If it's empty or invalid, the username is checked.
  * @return Windows username.
  */
-static inline string getUserName_unicode(void)
+static string getUserName_unicode(void)
 {
 	string ret;
 	wchar_t username[256];
@@ -111,7 +111,7 @@ static inline string getUserName_unicode(void)
  * If it's empty or invalid, the username is checked.
  * @return Windows username.
  */
-static inline string getUserName_ansi(void)
+static string getUserName_ansi(void)
 {
 	string ret;
 	char username[256];
