@@ -229,11 +229,7 @@ int PngReaderPrivate::readFromPng(png_structp png_ptr, png_infop info_ptr,
 	if (!has_alpha) {
 		// No alpha channel.
 		// Use filler instead.
-		png_set_filler(png_ptr, 0x00, PNG_FILLER_AFTER);
-	} else {
-		// We're using 0 for opaque for compatibility with no-alpha images.
-		// TODO: Add a parameter to disable alpha inversion or something.
-		png_set_invert_alpha(png_ptr);
+		png_set_filler(png_ptr, 0xFF, PNG_FILLER_AFTER);
 	}
 
 	// We're using "BGR" color.
