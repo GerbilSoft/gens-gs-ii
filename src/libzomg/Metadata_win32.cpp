@@ -233,15 +233,29 @@ void MetadataPrivate::InitSystemMetadata(void)
 						break;
 					case VER_PLATFORM_WIN32_NT:
 					default:
-						// TODO: Append OS version as well.
+						// Append the OS version.
+						oss << "Windows NT" << ' ' << osVersionInfo.dwMajorVersion << '.';
+						if (osVersionInfo.dwMinorVersion % 10 == 0) {
+							// NT 3.1 and 3.5 are internally
+							// 3.10 and 3.50. Remove the extra 0.
+							oss << (osVersionInfo.dwMinorVersion / 10);
+						} else {
+							// Use the full minor version.
+							// Needed for e.g. NT 3.51.
+							oss << osVersionInfo.dwMinorVersion;
+						}
+
+						// Append the edition.
+						// TODO: Advanced Server, etc.?
+						oss << ' ';
 						switch (osVersionInfo.wProductType) {
 							case VER_NT_WORKSTATION:
 							default:
-								oss << "Windows NT";
+								oss << "Workstation";
 								break;
 							case VER_NT_DOMAIN_CONTROLLER:
 							case VER_NT_SERVER:
-								oss << "Windows NT Server";
+								oss << "Server";
 								break;
 						}
 						break;
