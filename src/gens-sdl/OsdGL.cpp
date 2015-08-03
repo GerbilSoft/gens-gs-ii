@@ -47,6 +47,9 @@ using std::vector;
 // OSD font.
 #include "OsdFont_VGA.hpp"
 
+// ZOMG image data.
+#include "libzomg/img_data.h"
+
 namespace GensSdl {
 
 class OsdGLPrivate {
@@ -85,6 +88,7 @@ class OsdGLPrivate {
 
 		// OSD queue.
 		// NOTE: Manually allocating objects.
+		// FIXME: duration should probably be int to match the printf functions.
 		struct OsdMessage {
 			string msg;		// Message. (Converted to internal 8-bit charset.)
 			unsigned int duration;	// Duration, in milliseconds.
@@ -144,6 +148,29 @@ class OsdGLPrivate {
 		// Default ortho[] values.
 		// New ortho[] values are calculated relative to the defaults.
 		static const double ortho_default[4];
+
+		// Preview image.
+		// FIXME: duration should probably be int to match the printf functions.
+		struct preview_t {
+			GLTex tex;
+			bool visible;
+			bool hasDisplayed;
+			unsigned int duration;
+			uint64_t endTime;
+
+			// Coordinate arrays.
+			GLdouble txc[4][2];	// Texture coordinates.
+			GLint vtx[4][2];	// Vertex coordinates.
+
+			preview_t()
+				: visible(false)
+				, hasDisplayed(false)
+				, duration(0)
+				, endTime(0)
+			{
+				// Nothing but initialization here.
+			}
+		} preview;
 };
 
 // Default ortho[] values.
@@ -405,6 +432,34 @@ void OsdGLPrivate::checkForExpiredMessages(void)
 		}
 	}
 
+	// Process the preview image.
+	// TODO: Combine with OSD message processing code above?
+	if (preview.visible) {
+		// End time plus fade-out.
+		const uint64_t endTimePlusFadeOut = (preview.endTime + fadeOutTime);
+
+		if (!preview.hasDisplayed) {
+			// Preview image hasn't been displayed yet.
+			// Reset its end time.
+			preview.endTime = curTime + (preview.duration * 1000);
+			isAllProcessed = false;
+		} else if (curTime >= endTimePlusFadeOut) {
+			// Time has elapsed.
+			// Hide the preview image.
+			// NOTE: Texture isn't deallocated here...
+			preview.visible = false;
+			dirty = true;
+		} else if (curTime >= preview.endTime) {
+			// Time has elapsed, but the preview image is fading out.
+			// Make sure the preview image is redrawn.
+			isAllProcessed = false;
+			dirty = true;
+		} else {
+			// Preview image has not been processed yet.
+			isAllProcessed = false;
+		}
+	}
+
 	if (isAllProcessed) {
 		// TODO: Use an std::list and remove entries as they're processed?
 		// All messages have been processed.
@@ -470,6 +525,7 @@ void OsdGL::init(void)
 void OsdGL::end(void)
 {
 	d->texOsd.dealloc();
+	d->preview.tex.dealloc();
 	if (d->displayList > 0) {
 		glDeleteLists(d->displayList, 1);
 		d->displayList = 0;
@@ -525,20 +581,50 @@ void OsdGL::draw(void)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// Bind the OSD texture.
-	glBindTexture(GL_TEXTURE_2D, d->texOsd.name);
-
 	// Enable vertex and texture coordinate arrays.
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-	// TODO: Adjust for visible texture size.
-	int y = (240 - d->chrH);
-	// TODO: Message Enable, Message Color.
-
 	// Current time is needed for message fade-out.
 	const uint64_t curTime = d->timer.getTime();
 
+	// OSD preview image.
+	if (d->preview.visible) {
+		// Preview image is now being displayed.
+		d->preview.hasDisplayed = true;
+
+		// Check for fade-out.
+		float alpha = 1.0f;
+		if (curTime > d->preview.endTime) {
+			// Fading out.
+			alpha -= (curTime - d->preview.endTime) / (float)d->fadeOutTime;
+			if (alpha < 0.0f) {
+				alpha = 0.0f;
+			}
+		}
+
+		// Bind the preview texture.
+		glBindTexture(GL_TEXTURE_2D, d->preview.tex.name);
+		// Use linear filtering.
+		// TODO: GLTex function for this?
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		// TODO: Drop shadow for preview image.
+		// TODO: Border?
+		// TODO: Ignore the alpha channel of the preview image?
+		glColor4f(1.0f, 1.0f, 1.0f, alpha);
+		glVertexPointer(2, GL_INT, 0, d->preview.vtx);
+		glTexCoordPointer(2, GL_DOUBLE, 0, d->preview.txc);
+		glDrawArrays(GL_QUADS, 0, 4);
+	}
+
+	// Bind the OSD texture.
+	glBindTexture(GL_TEXTURE_2D, d->texOsd.name);
+	// TODO: Adjust for visible texture size.
+	int y = (240 - d->chrH);
+
+	// TODO: Message Enable, Message Color.
 	// TODO: Switch from vector to list?
 	// TODO: Move to OsdGLPrivate?
 	for (int i = (int)d->osdList.size() - 1; i >= 0; i--) {
@@ -622,8 +708,7 @@ void OsdGL::setDisplayOffset(double x, double y)
  */
 bool OsdGL::hasMessages(void) const
 {
-	// TODO: Check for OSD preview image.
-	return !d->osdList.empty();
+	return !d->osdList.empty() || d->preview.visible;
 }
 
 /**
@@ -692,6 +777,87 @@ void OsdGL::print(unsigned int duration, const utf8_str *msg)
 	}
 
 	// OSD is dirty.
+	d->dirty = true;
+}
+
+/**
+ * Display a preview image.
+ * @param duration Duration for the preview image to appear, in milliseconds.
+ * @param img_data Preview image.
+ */
+void OsdGL::preview_image(int duration, const Zomg_Img_Data_t *img_data)
+{
+	// TODO: Add Zomg_Img_Data_t support to GLTex.
+	// TODO: Strip the alpha channel?
+
+	// Determine the image format.
+	GLTex::Format format;
+	int pxPitch = img_data->pitch;
+	switch (img_data->bpp) {
+		case 15:
+			format = GLTex::FMT_XRGB1555;
+			pxPitch /= 2;
+			break;
+		case 16:
+			format = GLTex::FMT_RGB565;
+			pxPitch /= 2;
+			break;
+		case 32:
+			format = GLTex::FMT_XRGB8888;
+			pxPitch /= 4;
+			break;
+		default:
+			// Unsupported format.
+			d->preview.tex.dealloc();
+			return;
+	}
+
+	// Allocate the texture.
+	d->preview.tex.alloc(format, img_data->w, img_data->h);
+	// Upload the image data.
+	// NOTE: subImage2D takes pitch in pixels, not bytes.
+	d->preview.tex.subImage2D(img_data->w, img_data->h,
+				pxPitch, img_data->data);
+
+	// Calculate the texture coordinates.
+	// TODO: GLTex helper for this.
+	const double txcW = (double)d->preview.tex.texVisW / (double)d->preview.tex.texW;
+	const double txcH = (double)d->preview.tex.texVisH / (double)d->preview.tex.texH;
+	d->preview.txc[0][0] = 0.0;
+	d->preview.txc[0][1] = 0.0;
+	d->preview.txc[1][0] = txcW;
+	d->preview.txc[1][1] = 0.0;
+	d->preview.txc[2][0] = txcW;
+	d->preview.txc[2][1] = txcH;
+	d->preview.txc[3][0] = 0.0;
+	d->preview.txc[3][1] = txcH;
+
+	// Calculate the vertex coordinates.
+	// In a 320x240 virtual display, we want the preview to be
+	// 3/8ths the size (120x90), and located 16px from the
+	// top-right border.
+	// TODO: 3/8ths still seems too big...
+	// TODO: Get actual virtual display coordinates.
+	// TODO: Use float or double for vtx in case the values aren't even?
+	// TODO: Adjust vertical height if the image isn't exactly 320x240.
+	const int dispW = 320, dispH = 240;
+	const int vtxW = (dispW * 3 / 8), vtxH = (dispH * 3 / 8);
+	d->preview.vtx[0][0] = dispW - vtxW - 16;
+	d->preview.vtx[0][1] = 16;
+	d->preview.vtx[1][0] = dispW - 16;
+	d->preview.vtx[1][1] = 16;
+	d->preview.vtx[2][0] = dispW - 16;
+	d->preview.vtx[2][1] = 16 + vtxH;
+	d->preview.vtx[3][0] = dispW - vtxW - 16;
+	d->preview.vtx[3][1] = 16 + vtxH;
+
+	// Set the display parameters.
+	d->preview.duration = duration;
+	d->preview.endTime = d->timer.getTime() + (duration * 1000);
+	d->preview.visible = true;
+	d->preview.hasDisplayed = false;
+
+	// OSD is now dirty.
 	d->dirty = true;
 }
 

@@ -55,6 +55,7 @@ using LibGensKeys::KeyManager;
 
 // LibZomg
 #include "libzomg/Zomg.hpp"
+#include "libzomg/img_data.h"
 using LibZomg::ZomgBase;
 using LibZomg::Zomg;
 
@@ -327,9 +328,13 @@ static void doSaveSlot(int saveSlot)
 		return;
 	saveSlot_selected = saveSlot;
 
+	// Metadata variables.
+	string slot_state;
+	Zomg_Img_Data_t img_data;
+	img_data.data = nullptr;
+
 	// Check if the specified savestate exists.
 	// TODO: R_OK or just F_OK?
-	string slot_state;
 	string filename = getSavestateFilename(rom, saveSlot);
 	if (!access(filename.c_str(), F_OK)) {
 		// Savestate exists.
@@ -342,7 +347,16 @@ static void doSaveSlot(int saveSlot)
 			// Get the slot mtime.
 			slot_state = getSaveSlot_mtime(&zomg);
 
-			// TODO: Load the preview image.
+			// Get the preview image.
+			// TODO: Rename loadPreview() to loadPreviewImage()?
+			int ret = zomg.loadPreview(&img_data);
+			if (ret != 0) {
+				// Image load failed.
+				// TODO: Ensure all reading functions
+				// called by loadPreview() free the
+				// memory on error.
+				img_data.data = nullptr;
+			}
 		}
 	} else {
 		// Savestate does not exist.
@@ -351,6 +365,10 @@ static void doSaveSlot(int saveSlot)
 
 	// Show an OSD message.
 	vBackend->osd_printf(1500, "Slot %d [%s]", saveSlot, slot_state.c_str());
+	if (img_data.data != nullptr) {
+		vBackend->osd_preview_image(1500, &img_data);
+		free(img_data.data);
+	}
 }
 
 /**

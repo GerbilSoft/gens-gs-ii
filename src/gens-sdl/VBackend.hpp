@@ -40,6 +40,9 @@
 #define ATTR_FORMAT_PRINTF(fmt, varargs)
 #endif
 
+// ZOMG image data.
+struct _Zomg_Img_Data_t;
+
 namespace LibGens {
 	class MdFb;
 	class EmuContext;
@@ -151,6 +154,13 @@ class VBackend {
 		 */
 		void osd_printf(int duration, const utf8_str *msg, ...)
 			ATTR_FORMAT_PRINTF(3, 4);
+
+		/**
+		 * Display a preview image on the Onscreen Display.
+		 * @param duration Duration for the preview image to appear, in milliseconds.
+		 * @param img_data Image data.
+		 */
+		virtual void osd_preview_image(int duration, const _Zomg_Img_Data_t *img_data);
 
 	private:
 		// Dirty flag.

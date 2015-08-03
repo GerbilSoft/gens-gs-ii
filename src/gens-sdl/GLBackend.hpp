@@ -99,6 +99,13 @@ class GLBackend : public VBackend {
 		virtual void osd_vprintf(int duration, const utf8_str *msg, va_list ap) final
 			ATTR_FORMAT_PRINTF(3, 0);
 
+		/**
+		 * Display a preview image on the Onscreen Display.
+		 * @param duration Duration for the preview image to appear, in milliseconds.
+		 * @param img_data Image data.
+		 */
+		virtual void osd_preview_image(int duration, const _Zomg_Img_Data_t *img_data) final;
+
 	protected:
 		// Window size.
 		// TODO: Accessors?

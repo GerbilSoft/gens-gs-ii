@@ -111,4 +111,17 @@ void VBackend::osd_printf(int duration, const utf8_str *msg, ...)
 	va_end(ap);
 }
 
+/**
+ * Display a preview image on the Onscreen Display.
+ * @param duration Duration for the preview image to appear, in milliseconds.
+ * @param img_data Image data.
+ */
+void VBackend::osd_preview_image(int duration, const _Zomg_Img_Data_t *img_data)
+{
+	// Default implementation doesn't support OSD.
+	((void)duration);
+	((void)img_data);
+	return;
+}
+
 }
