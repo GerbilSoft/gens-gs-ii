@@ -60,8 +60,13 @@
 
 #elif defined(_MSC_VER)
 
-/* No versions of MSVC support char16_t/char32_t yet. */
+#if (_MSC_VER < 1900)
+/**
+ * MSVC 2015 (14.0) added support for Unicode character types.
+ * (char16_t, char32_t, related string types)
+ */
 #define CXX11_COMPAT_CHARTYPES
+#endif
 
 #if (_MSC_VER < 1700)
 /**
