@@ -126,12 +126,18 @@ namespace std {
 /** Other compatibility stuff. **/
 
 #ifdef _MSC_VER
+#if (_MSC_VER < 1900)
 /**
- * MSVC prefixes some POSIX/C99 functions with underscores,
- * and has completely different names for others.
+ * MSVC 2015 (14.0) supports snprintf() and vsnprintf().
+ * Older versions have them prefixed with underscores.
  */
 #define snprintf(str, size, format, ...) _snprintf(str, size, format, __VA_ARGS__)
 #define vsnprintf(str, size, format, ap) _vsnprintf(str, size, format, ap)
+#endif
+/**
+ * MSVC does not, and probably never will, define these functions.
+ * It has equivalent functions with different names, though.
+ */
 #define strcasecmp(s1, s2) _stricmp(s1, s2)
 #define strncasecmp(s1, s2, n) _strnicmp(s1, s2, n)
 #endif
