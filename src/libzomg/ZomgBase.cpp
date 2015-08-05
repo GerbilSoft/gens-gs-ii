@@ -61,7 +61,7 @@ bool ZomgBase::DetectFormat(const utf8_str *filename)
  * Get the savestate's modification time.
  * @return File modification time. (If 0, mtime is invalid.)
  */
-int ZomgBase::mtime(void) const
+time_t ZomgBase::mtime(void) const
 {
 	return m_mtime;
 }

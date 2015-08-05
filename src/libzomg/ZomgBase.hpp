@@ -111,7 +111,7 @@ class ZomgBase
 		 * Get the savestate's modification time.
 		 * @return File modification time. (If 0, mtime is invalid.)
 		 */
-		int mtime(void) const;
+		time_t mtime(void) const;
 
 		/** Load functions. **/
 
