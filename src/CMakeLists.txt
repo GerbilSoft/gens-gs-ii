@@ -16,15 +16,13 @@ INCLUDE(CheckCXXSourceCompiles)
 INCLUDE(CheckCXX11CompilerFlag)
 CHECK_CXX11_COMPILER_FLAG(GENS_CXX11_CXXFLAG)
 
-CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/c++11-compat.h.in" "${CMAKE_CURRENT_BINARY_DIR}/c++11-compat.h")
-
 # C++11 compatibility header.
 # NOTE: This must be included regardless of C++11 support in the compiler.
 # gcc-4.6 supports some C++11, but is missing explicit virtual overrides.
 IF(MSVC)
-	SET(GENS_CXX11_COMPAT_HEADER "-FI${CMAKE_BINARY_DIR}/src/c++11-compat.h")
+	SET(GENS_CXX11_COMPAT_HEADER "-FI${CMAKE_CURRENT_SOURCE_DIR}/c++11-compat.h")
 ELSE(MSVC)
-	SET(GENS_CXX11_COMPAT_HEADER "-include ${CMAKE_BINARY_DIR}/src/c++11-compat.h")
+	SET(GENS_CXX11_COMPAT_HEADER "-include ${CMAKE_CURRENT_SOURCE_DIR}/c++11-compat.h")
 ENDIF(MSVC)
 SET(GENS_CXXFLAG_CXX11_COMPAT ${GENS_CXX11_COMPAT_HEADER})
 
