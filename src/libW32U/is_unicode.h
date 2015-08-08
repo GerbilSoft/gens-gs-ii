@@ -66,7 +66,7 @@ static __inline int W32U_IsUnicode(void)
 	// TODO: Initialize it better on MinGW-w64?
 	// TODO: How slow is GetModuleHandleW()?
 	if (W32U_internal_isUnicode < 0) {
-		W32U_internal_isUnicode = (GetModuleHandleW(nullptr) != nullptr);
+		W32U_internal_isUnicode = (GetModuleHandleW(NULL) != NULL);
 		// Check for UTF-8 support.
 		// If not found, the program will exit.
 		W32U_CheckUTF8();
