@@ -1,8 +1,8 @@
 /***************************************************************************
  * libW32U: Win32 Unicode Translation Layer. (Mini Version)                *
- * W32U_mini.h: Main header. (include this!)                               *
+ * W32U_shlobj.c: ShellAPI functions.                                      *
  *                                                                         *
- * Copyright (c) 2008-2015 by David Korth.                                 *
+ * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -19,61 +19,50 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBW32U_W32U_MINI_H__
-#define __LIBW32U_W32U_MINI_H__
+#ifndef __LIBW32U_W32U_SHLOBJ_H__
+#define __LIBW32U_W32U_SHLOBJ_H__
 
 #ifndef _WIN32
-#error W32U_mini.h should only be included on Win32!
+#error W32U_shlobj.h should only be included on Win32!
 #endif
 
-// C includes.
-#include <wchar.h>
+#ifndef __IN_W32U__
+#error Do not include W32U_shlobj.h directly, include W32U_shlobj.h!
+#endif
+
+// Win32 includes.
+#include <windows.h>
+#include <shlobj.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * Check if the system is Unicode.
- * @return 1 if the system is Unicode; 0 if the system is ANSI.
- */
-int W32U_IsUnicode(void);
+/** SHGetFolderPathU() **/
 
 /**
- * Check if the system supports UTF-8.
- * If it doesn't, the program will show an
- * error message and then exit.
+ * Get a special folder path.
+ *
+ * NOTE: MSDN marks this function is marked as deprecated,
+ * since SHGetFolderPath() is available in Windows 2000+ and
+ * has some extra functionality, but special handling is
+ * needed to use that function on ANSI Windows. We don't need
+ * the extra functionality of SHGetFolderPath(), though.
+ *
+ * NOTE 2: lpszPath may need to be larger than MAX_PATH due to
+ * the expansion of UTF-16 characters to UTF-8.
+ *
+ * @param hwndOwner	[in] Reserved. (Set to NULL)
+ * @param lpszPath	[out] Output buffer.
+ * @param cbPath	[in] Size of lpszPath, in bytes.
+ * @param csidl	        [in] CSIDL value that identifies the folder.
+ * @param fCreate	[in] If non-zero the folder is created if it does not already exist.
+ * @return TRUE on success; FALSE on error.
  */
-void W32U_CheckUTF8(void);
-
-/**
- * Convert a null-terminated multibyte string to UTF-16.
- * @param mbs Multibyte string. (null-terminated)
- * @param codepage mbs codepage.
- * @return UTF-16 string, or nullptr on error.
- */
-wchar_t *W32U_mbs_to_UTF16(const char *mbs, unsigned int codepage);
-
-/**
- * Convert a null-terminated UTF-16 string to multibyte.
- * @param wcs UTF-16 string. (null-terminated)
- * @param codepage mbs codepage.
- * @return Multibyte string, or nullptr on error.
- */
-char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage);
-
-// W32U sub-headers.
-#ifndef __IN_W32U__
-#define __IN_W32U__
-
-#include "W32U_libc.h"
-#include "W32U_shlobj.h"
-
-#undef __IN_W32U__
-#endif /* __IN_W32U__ */
+BOOL SHGetSpecialFolderPathU(HWND hwndOwner, char *lpszPath, int cbPath, int csidl, BOOL fCreate);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __LIBW32U_W32U_MINI_H__ */
+#endif /* __LIBW32U_W32U_SHLOBJ_H__ */

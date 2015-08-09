@@ -34,7 +34,6 @@ using LibGens::Screenshot;
 #ifdef _WIN32
 // Windows
 #include <windows.h>
-#include <shlobj.h>
 #include "libW32U/W32U_mini.h"
 #else
 // Linux / Unix / Mac OS X.
@@ -103,14 +102,13 @@ std::string getConfigDir(const utf8_str *subdir)
 		// Determine the directory.
 #if defined(_WIN32)
 		// Windows.
-		WCHAR wpath[MAX_PATH];
-		if (SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_APPDATA, nullptr, SHGFP_TYPE_CURRENT, wpath))) {
-			// Convert from UTF-16 to UTF-8.
-			char *upath = W32U_UTF16_to_mbs(wpath, CP_UTF8);
-			if (upath) {
-				config_dir = string(upath);
-				config_dir += "\\gens-gs-ii";
-			}
+		// NOTE: Reserving more than MAX_PATH due to the
+		// expansion of UTF-16 characters to UTF-8.
+		char appData[MAX_PATH*3];
+		if (SHGetSpecialFolderPathU(nullptr, appData, sizeof(appData), CSIDL_APPDATA, FALSE)) {
+			// Path retrieved.
+			config_dir = string(appData);
+			config_dir += "\\gens-gs-ii";
 		}
 #else
 		// TODO: Mac OS X-specific path.

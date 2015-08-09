@@ -21,6 +21,7 @@ SET(libW32U_SRCS
 	W32U_mini.c
 	W32U_libc.c
 	W32U_argv.c
+	W32U_shlobj.c
 	)
 
 # Headers.
@@ -28,6 +29,7 @@ SET(libW32U_H
 	W32U_mini.h
 	W32U_libc.h
 	W32U_argv.h
+	W32U_shlobj.h
 	is_unicode.h
 	)
 
@@ -40,3 +42,7 @@ ADD_LIBRARY(W32U STATIC
 	)
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(W32U)
+
+# Shell32.dll is required for W32U_shlobj.c, which calls these functions:
+# - SHGetSpecialFolderPath()
+TARGET_LINK_LIBRARIES(W32U shell32)
