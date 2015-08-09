@@ -8,6 +8,14 @@ INCLUDE_DIRECTORIES(${gens-gs-ii_BINARY_DIR})
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../")
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/../")
 
+# libW32U source and binary directories.
+# Binary directory is needed for config.h.
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+
+# Write the config.h file.
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libW32U.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.libW32U.h")
+
 # Sources.
 SET(libW32U_SRCS
 	W32U_mini.c

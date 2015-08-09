@@ -11,8 +11,7 @@ STRING(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 SET(GENS_C_FLAGS_COMMON "-nologo -wd4355 -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE")
 SET(GENS_CXX_FLAGS_COMMON "${GENS_C_FLAGS_COMMON}")
 # NOTE: -tsaware is automatically set for Windows 2000 and later. (as of at least Visual Studio .NET 2003)
-# FIXME: If built as 64-bit, needs -subsystem:windows,5.02.
-SET(GENS_EXE_LINKER_FLAGS_COMMON "-nologo /manifest:no -subsystem:windows,5.01 -dynamicbase -nxcompat -largeaddressaware")
+SET(GENS_EXE_LINKER_FLAGS_COMMON "-nologo /manifest:no -dynamicbase -nxcompat -largeaddressaware")
 SET(GENS_SHARED_LINKER_FLAGS_COMMON "${GENS_EXE_LINKER_FLAGS_COMMON}")
 
 # Disable C++ RTTI and asynchronous exceptions.

@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <config.libW32U.h>
+
 #define __IN_W32U__
 #include "W32U_argv.h"
 
@@ -47,6 +49,7 @@ static char **saved_envpU = NULL;
 
 /** ANSI to UTF-16 **/
 
+#ifdef ENABLE_ANSI_WINDOWS
 /**
  * Convert UTF-8 arguments to UTF-16.
  * @param argcA		[in] Number of UTF-8 arguments.
@@ -283,6 +286,7 @@ out:
 	}
 	return 0;
 }
+#endif /* ENABLE_ANSI_WINDOWS */
 
 /** UTF-16 to UTF-8 **/
 
@@ -490,6 +494,7 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 
 	isUnicode = W32U_IsUnicode();
 	if (!isUnicode) {
+#ifdef ENABLE_ANSI_WINDOWS
 		// ANSI. Use __getmainargs().
 		// TODO: Free these variables later.
 		ret = getArgvAtoW(&argcW, &argvW, &envpW);
@@ -498,6 +503,10 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 			// TODO: What values?
 			goto out;
 		}
+#else /* !ENABLE_ANSI_WINDOWS */
+		// ANSI is not supported in this build.
+		return ERROR_CALL_NOT_IMPLEMENTED;
+#endif /* ENABLE_ANSI_WINDOWS */
 	} else {
 		// Unicode. Use __wgetmainargs().
 		// TODO: Get existing newmode from MSVCRT.

@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <config.libW32U.h>
+
 #define __IN_W32U__
 #include "W32U_mini.h"
 #include "W32U_libc.h"
@@ -80,6 +82,7 @@ FILE *W32U_fopen(const char *filename, const char *mode)
 		fRet = _wfopen(filenameW, modeW);
 		errno_ret = errno;
 	} else {
+#ifdef ENABLE_ANSI_WINDOWS
 		// ANSI version.
 		char *filenameA;
 		char *modeA;
@@ -105,6 +108,13 @@ FILE *W32U_fopen(const char *filename, const char *mode)
 		errno_ret = errno;
 		free(filenameA);
 		free(modeA);
+#else /* !ENABLE_ANSI_WINDOWS */
+		// ANSI is not supported in this build.
+		// TODO: Fail earlier to avoid an alloc()?
+		fRet = NULL;
+		errno_ret = ENOSYS;
+		goto fail; /* MSVC complains if a label is unreferenced. (C4102) */
+#endif /* ENABLE_ANSI_WINDOWS */
 	}
 
 fail:
@@ -149,6 +159,7 @@ int W32U_access(const char *path, int mode)
 		ret = _waccess(pathW, mode);
 		errno_ret = errno;
 	} else {
+#ifdef ENABLE_ANSI_WINDOWS
 		// ANSI version.
 		char *pathA;
 
@@ -165,6 +176,13 @@ int W32U_access(const char *path, int mode)
 		// It shouldn't, but POSIX is a bit vague...
 		errno_ret = errno;
 		free(pathA);
+#else /* !ENABLE_ANSI_WINDOWS */
+		// ANSI is not supported in this build.
+		// TODO: Fail earlier to avoid an alloc()?
+		ret = -1;
+		errno_ret = ENOSYS;
+		goto fail; /* MSVC complains if a label is unreferenced. (C4102) */
+#endif /* ENABLE_ANSI_WINDOWS */
 	}
 
 fail:
@@ -202,6 +220,7 @@ int W32U_mkdir(const char *path)
 		ret = _wmkdir(pathW);
 		errno_ret = errno;
 	} else {
+#ifdef ENABLE_ANSI_WINDOWS
 		// ANSI version.
 		char *pathA;
 
@@ -218,6 +237,13 @@ int W32U_mkdir(const char *path)
 		// It shouldn't, but POSIX is a bit vague...
 		errno_ret = errno;
 		free(pathA);
+#else /* !ENABLE_ANSI_WINDOWS */
+		// ANSI is not supported in this build.
+		// TODO: Fail earlier to avoid an alloc()?
+		ret = -1;
+		errno_ret = ENOSYS;
+		goto fail; /* MSVC complains if a label is unreferenced. (C4102) */
+#endif /* ENABLE_ANSI_WINDOWS */
 	}
 
 fail:
@@ -249,6 +275,7 @@ int W32U_stat64(const char *pathname, struct _stat64 *buf)
 		ret = _wstat64(pathnameW, buf);
 		errno_ret = errno;
 	} else {
+#ifdef ENABLE_ANSI_WINDOWS
 		// ANSI version.
 		char *pathnameA;
 
@@ -265,6 +292,13 @@ int W32U_stat64(const char *pathname, struct _stat64 *buf)
 		// It shouldn't, but POSIX is a bit vague...
 		errno_ret = errno;
 		free(pathnameA);
+#else /* !ENABLE_ANSI_WINDOWS */
+		// ANSI is not supported in this build.
+		// TODO: Fail earlier to avoid an alloc()?
+		ret = -1;
+		errno_ret = ENOSYS;
+		goto fail; /* MSVC complains if a label is unreferenced. (C4102) */
+#endif /* ENABLE_ANSI_WINDOWS */
 	}
 
 fail:

@@ -36,6 +36,15 @@ ENDIF(NOT WIN32)
 # Additional stuff.
 OPTION(BUILD_DOC "Build documentation." 1)
 
+# ANSI Windows support. (32-bit Windows only.)
+IF(WIN32 AND CMAKE_SIZEOF_VOID_P EQUAL 4)
+	OPTION(ENABLE_ANSI_WINDOWS "Enable support for ANSI Windows." 1)
+ELSE()
+	# Either 64-bit Windows or not Windows at all.
+	# Don't enable ANSI support.
+	SET(ENABLE_ANSI_WINDOWS 0)
+ENDIF()
+
 # Link-time optimization.
 OPTION(ENABLE_LTO "Enable link-time optimization. (Release builds only)" 0)
 

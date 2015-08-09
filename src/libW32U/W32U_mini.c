@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <config.libW32U.h>
+
 #define __IN_W32U__
 #include "W32U_mini.h"
 
@@ -59,6 +61,18 @@ void W32U_CheckUTF8(void)
 		char utf8[16];
 		wchar_t utf16[8];
 	} buf;
+
+	// TODO: Rename function to W32U_CheckOS()?
+#ifndef ENABLE_ANSI_WINDOWS
+	if (GetModuleHandleW(NULL) == NULL) {
+		// Unicode-only build running on an ANSI system.
+		MessageBoxA(NULL,
+			"This build of Gens/GS II is for Unicode systems only.\n\n"
+			"For ANSI support, rebuild with -DENABLE_ANSI_WINDOWS.",
+			"Unicode-Only Build", MB_ICONSTOP);
+		exit(EXIT_FAILURE);
+	}
+#endif
 
 	// Attempt to convert U+2602 from UTF-8 to UTF-16.
 	memset(buf.utf8, 0x5A, sizeof(buf.utf8));
