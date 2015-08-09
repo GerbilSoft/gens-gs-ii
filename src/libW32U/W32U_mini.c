@@ -62,7 +62,8 @@ void W32U_CheckUTF8(void)
 
 	// Attempt to convert U+2602 from UTF-8 to UTF-16.
 	memset(buf.utf8, 0x5A, sizeof(buf.utf8));
-	ret = MultiByteToWideChar(CP_UTF8, 0, utf8_src, -1, buf.utf16, sizeof(buf.utf16));
+	ret = MultiByteToWideChar(CP_UTF8, 0, utf8_src, -1,
+		buf.utf16, sizeof(buf.utf16)/sizeof(buf.utf16[0]));
 	if (ret != cchUtf16) {
 		// Wrong number of characters converted.
 		goto fail;
@@ -74,7 +75,8 @@ void W32U_CheckUTF8(void)
 
 	// Attempt to convert U+2602 from UTF-16 to UTF-8.
 	memset(buf.utf8, 0x5A, sizeof(buf.utf8));
-	ret = WideCharToMultiByte(CP_UTF8, 0, utf16_src, -1, buf.utf8, sizeof(buf.utf8), NULL, NULL);
+	ret = WideCharToMultiByte(CP_UTF8, 0, utf16_src, -1,
+		buf.utf8, sizeof(buf.utf8), NULL, NULL);
 	if (ret != cbUtf8) {
 		// Wrong number of characters converted.
 		goto fail;
