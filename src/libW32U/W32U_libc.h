@@ -57,6 +57,20 @@ extern "C" {
  */
 FILE *W32U_fopen(const char *filename, const char *mode);
 
+/** fseeko(), ftello() **/
+// On Linux, Large File Support redefines fseeko() and ftello()
+// to fseeko64() and ftello64(). fseek() and ftell() are left as-is.
+// MSVCRT doesn't have fseeko() or ftello(), so we'll define them
+// as _fseeki64() and _ftelli64().
+// (NOTE: MinGW-w64 does have fseeko(), ftello(), fseeko64() and
+//  ftello64(), and it uses the FILE_OFFSET_BITS macro. LFS appears
+//  to be required on both 32-bit and 64-bit Windows, unlike on Linux
+//  where it's only required on 32-bit.)
+#ifdef _MSC_VER
+#define fseeko(stream, offset, origin) _fseeki64(stream, offset, origin)
+#define ftello(stream) _ftelli64(stream)
+#endif /* _MSC_VER */
+
 /** access() **/
 
 // Redefine access() as W32U_access().

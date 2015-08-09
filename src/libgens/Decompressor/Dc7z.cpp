@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -53,12 +53,11 @@ using std::u16string;
 
 // Character set conversion.
 #include "libgenstext/Encoding.hpp"
-#if defined(_WIN32)
+#ifdef _WIN32
 #include "libW32U/W32U_mini.h"
-#endif
+#endif /* _WIN32 */
 
-namespace LibGens
-{
+namespace LibGens {
 
 /** Static class variable initialization. **/
 
@@ -202,8 +201,7 @@ bool Dc7z::DetectFormat(FILE *f)
 	static const uint8_t _7z_magic[] = {'7', 'z', 0xBC, 0xAF, 0x27, 0x1C};
 
 	// Seek to the beginning of the file.
-	// TODO: fseeko()/fseeko64() support on Linux.
-	fseek(f, 0, SEEK_SET);
+	fseeko(f, 0, SEEK_SET);
 
 	// Read the "magic number".
 	uint8_t header[sizeof(_7z_magic)];

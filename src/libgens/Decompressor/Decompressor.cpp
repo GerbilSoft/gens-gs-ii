@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -34,6 +34,7 @@
 using std::string;
 
 // Decompressors.
+// TODO: Make a Decompressor factory class.
 #ifdef HAVE_ZLIB
 #include "Decompressor/DcGzip.hpp"
 #include "Decompressor/DcZip.hpp"
@@ -43,8 +44,12 @@ using std::string;
 #endif /* HAVE_LZMA */
 #include "Decompressor/DcRar.hpp"
 
-namespace LibGens
-{
+#ifdef _WIN32
+// W32U (required for large files)
+#include "libW32U/W32U_mini.h"
+#endif /* _WIN32 */
+
+namespace LibGens {
 
 /**
  * Create a new Decompressor object.
@@ -112,17 +117,20 @@ int Decompressor::getFileInfo(mdp_z_entry_t **z_entry_out)
 	if (!m_file)
 		return -2;
 
-	// TODO: fseeko()/ftello()/fseeko64()/ftello64() support on Linux.
-	size_t filesize;
-	fseek(m_file, 0, SEEK_END);
-	filesize = ftell(m_file);
+	// NOTE: Using int64_t instead of size_t or off_t.
+	// sizeof(size_t) == sizeof(void*)
+	// sizeof(off_t) == 4 on MSVC regardless of architecture.
+	int64_t filesize;
+	fseeko(m_file, 0, SEEK_END);
+	filesize = ftello(m_file);
 
 	// Allocate an mdp_z_entry_t.
 	// NOTE: C-style malloc() is used because MDP is a C API.
 	mdp_z_entry_t *z_entry = (mdp_z_entry_t*)malloc(sizeof(mdp_z_entry_t));
 
 	// Set the elements of the list entry.
-	z_entry->filesize = filesize;
+	// FIXME: z_entry->filesize should be changed to int64_t.
+	z_entry->filesize = (size_t)filesize;
 	z_entry->filename = (!m_filename.empty() ? strdup(m_filename.c_str()) : nullptr);
 	z_entry->next = nullptr;
 
@@ -151,8 +159,7 @@ int Decompressor::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, s
 		return -2; // TODO: return -MDP_ERR_INVALID_PARAMETERS;
 
 	// Seek to the beginning of the file.
-	// TODO: fseeko()/fseeko64() support on Linux.
-	fseek(m_file, 0, SEEK_SET);
+	fseeko(m_file, 0, SEEK_SET);
 
 	// Read the file into the buffer.
 	*ret_siz = fread(buf, 1, siz, m_file);

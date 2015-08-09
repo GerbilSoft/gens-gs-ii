@@ -22,6 +22,12 @@
  ***************************************************************************/
 
 #include "DcRar.hpp"
+
+#ifndef _WIN32
+#error DcRar_Win32.cpp should only be compiled for Windows.
+#endif /* !_WIN32 */
+
+// UnRAR.dll
 #include "UnRAR_dll.hpp"
 
 // Win32 Unicode Translation Layer.
@@ -114,8 +120,7 @@ bool DcRar::DetectFormat(FILE *f)
 	static const uint8_t rar_magic[] = {'R', 'a', 'r', '!'};
 
 	// Seek to the beginning of the file.
-	// TODO: fseeko()/fseeko64() support on Linux.
-	fseek(f, 0, SEEK_SET);
+	fseeko(f, 0, SEEK_SET);
 
 	// Read the "magic number".
 	uint8_t header[sizeof(rar_magic)];
