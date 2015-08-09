@@ -110,7 +110,7 @@ wchar_t *W32U_mbs_to_UTF16(const char *mbs, unsigned int codepage)
 {
 	int cchWcs;
 	wchar_t *wcs;
-W32U_IsUnicode();
+
 	cchWcs = MultiByteToWideChar(codepage, 0, mbs, -1, nullptr, 0);
 	if (cchWcs <= 0)
 		return nullptr;
