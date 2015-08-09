@@ -57,16 +57,20 @@ FILE *W32U_fopen(const char *filename, const char *mode)
 {
 	wchar_t *filenameW, *modeW;
 	FILE *fRet;
+	int errno_ret = 0;
 
 	// Convert the filename from UTF-8 to UTF-16.
 	filenameW = W32U_mbs_to_UTF16(filename, CP_UTF8);
-	if (!filenameW)
+	if (!filenameW) {
+		errno = EINVAL;
 		return nullptr;
+	}
 
 	// Convert the mode from UTF-8 to UTF-16.
 	modeW = W32U_mbs_to_UTF16(mode, CP_UTF8);
 	if (!modeW) {
 		free(filenameW);
+		errno = EINVAL;
 		return nullptr;
 	}
 
@@ -74,6 +78,7 @@ FILE *W32U_fopen(const char *filename, const char *mode)
 	if (W32U_IsUnicode()) {
 		// Unicode version.
 		fRet = _wfopen(filenameW, modeW);
+		errno_ret = errno;
 	} else {
 		// ANSI version.
 		char *filenameA;
@@ -81,8 +86,10 @@ FILE *W32U_fopen(const char *filename, const char *mode)
 
 		// Convert the filename from UTF-16 to ANSI.
 		filenameA = W32U_UTF16_to_mbs(filenameW, CP_ACP);
-		if (!filenameA)
+		if (!filenameA) {
+			errno_ret = EINVAL;
 			goto fail;
+		}
 
 		// Convert the mode from UTF-16 to ANSI.
 		modeA = W32U_UTF16_to_mbs(modeW, CP_ACP);
@@ -93,6 +100,9 @@ FILE *W32U_fopen(const char *filename, const char *mode)
 
 		// Open the file.
 		fRet = fopen(filenameA, modeA);
+		// NOTE: Saving errno here in case free() resets it.
+		// It shouldn't, but POSIX is a bit vague...
+		errno_ret = errno;
 		free(filenameA);
 		free(modeA);
 	}
@@ -100,6 +110,7 @@ FILE *W32U_fopen(const char *filename, const char *mode)
 fail:
 	free(filenameW);
 	free(modeW);
+	errno = errno_ret;
 	return fRet;
 }
 
@@ -120,6 +131,7 @@ int W32U_access(const char *path, int mode)
 {
 	wchar_t *pathW;
 	int ret = -1;
+	int errno_ret = 0;
 
 	// NOTE: MSVCRT in Windows Vista and later will fail
 	// if mode contains X_OK.
@@ -135,6 +147,7 @@ int W32U_access(const char *path, int mode)
 	if (W32U_IsUnicode()) {
 		// Unicode version.
 		ret = _waccess(pathW, mode);
+		errno_ret = errno;
 	} else {
 		// ANSI version.
 		char *pathA;
@@ -142,17 +155,21 @@ int W32U_access(const char *path, int mode)
 		// Convert the filename from UTF-16 to ANSI.
 		pathA = W32U_UTF16_to_mbs(pathW, CP_ACP);
 		if (!pathA) {
-			errno = EINVAL;
+			errno_ret = EINVAL;
 			goto fail;
 		}
 
 		// Check the access.
 		ret = _access(pathA, mode);
+		// NOTE: Saving errno here in case free() resets it.
+		// It shouldn't, but POSIX is a bit vague...
+		errno_ret = errno;
 		free(pathA);
 	}
 
 fail:
 	free(pathW);
+	errno = errno_ret;
 	return ret;
 }
 
@@ -172,6 +189,7 @@ int W32U_mkdir(const char *path)
 {
 	wchar_t *pathW;
 	int ret = -1;
+	int errno_ret = 0;
 
 	pathW = W32U_mbs_to_UTF16(path, CP_UTF8);
 	if (!pathW) {
@@ -182,6 +200,7 @@ int W32U_mkdir(const char *path)
 	if (W32U_IsUnicode()) {
 		// Unicode version.
 		ret = _wmkdir(pathW);
+		errno_ret = errno;
 	} else {
 		// ANSI version.
 		char *pathA;
@@ -189,17 +208,21 @@ int W32U_mkdir(const char *path)
 		// Convert the filename from UTF-16 to ANSI.
 		pathA = W32U_UTF16_to_mbs(pathW, CP_ACP);
 		if (!pathA) {
-			errno = EINVAL;
+			errno_ret = EINVAL;
 			goto fail;
 		}
 
 		// Create the directory.
 		ret = _mkdir(pathA);
+		// NOTE: Saving errno here in case free() resets it.
+		// It shouldn't, but POSIX is a bit vague...
+		errno_ret = errno;
 		free(pathA);
 	}
 
 fail:
 	free(pathW);
+	errno = errno_ret;
 	return ret;
 }
 
@@ -213,6 +236,7 @@ int W32U_stat64(const char *pathname, struct _stat64 *buf)
 {
 	wchar_t *pathnameW;
 	int ret = -1;
+	int errno_ret = 0;
 
 	pathnameW = W32U_mbs_to_UTF16(pathname, CP_UTF8);
 	if (!pathnameW) {
@@ -223,6 +247,7 @@ int W32U_stat64(const char *pathname, struct _stat64 *buf)
 	if (W32U_IsUnicode()) {
 		// Unicode version.
 		ret = _wstat64(pathnameW, buf);
+		errno_ret = errno;
 	} else {
 		// ANSI version.
 		char *pathnameA;
@@ -230,16 +255,20 @@ int W32U_stat64(const char *pathname, struct _stat64 *buf)
 		// Convert the filename from UTF-16 to ANSI.
 		pathnameA = W32U_UTF16_to_mbs(pathnameW, CP_ACP);
 		if (!pathnameA) {
-			errno = EINVAL;
+			errno_ret = EINVAL;
 			goto fail;
 		}
 
 		// Get the file status.
 		ret = _stat64(pathnameA, buf);
+		// NOTE: Saving errno here in case free() resets it.
+		// It shouldn't, but POSIX is a bit vague...
+		errno_ret = errno;
 		free(pathnameA);
 	}
 
 fail:
 	free(pathnameW);
+	errno = errno_ret;
 	return ret;
 }
