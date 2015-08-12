@@ -35,10 +35,11 @@ IF(CMAKE_BUILD_TYPE MATCHES ^release)
 	SET(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
 ENDIF(CMAKE_BUILD_TYPE MATCHES ^release)
 
-# Test for static libgcc/libstdc++.
+# Test for various linker flags.
 # NOTE: Technically, --tsaware is only valid for EXEs, not DLLs,
 # but we should mark DLLs anyway.
-FOREACH(FLAG_TEST "-static-libgcc" "-static-libstdc++" "-Wl,--large-address-aware" "-Wl,--nxcompat" "-Wl,--dynamicbase" "-Wl,--tsaware")
+# TODO: Make static linkage a CMake option: --static-libgcc, --static-libstdc++
+FOREACH(FLAG_TEST "-Wl,--large-address-aware" "-Wl,--nxcompat" "-Wl,--dynamicbase" "-Wl,--tsaware")
 	# CMake doesn't like "+" characters in variable names.
 	STRING(REPLACE "+" "_" FLAG_TEST_VARNAME "${FLAG_TEST}")
 
