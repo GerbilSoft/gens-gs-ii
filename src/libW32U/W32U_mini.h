@@ -33,11 +33,18 @@
 extern "C" {
 #endif
 
+#ifndef __IN_W32U__
+// NOTE: W32U_IsUnicode() prototype conflicts with the
+// static inline version used in W32U code.
+// Don't declare the prototype here if we're compiling W32U.
+// (gcc complains; MSVC does not.)
+
 /**
  * Check if the system is Unicode.
  * @return 1 if the system is Unicode; 0 if the system is ANSI.
  */
 int W32U_IsUnicode(void);
+#endif /* __IN_W32U__ */
 
 /**
  * Check if the system supports UTF-8.

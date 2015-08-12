@@ -56,6 +56,9 @@ void W32U_CheckUTF8(void);
  * @return 1 if the system is Unicode; 0 if the system is ANSI.
  */
 #ifdef ISUNICODE_MAIN_INSTANCE
+#ifdef __cplusplus
+extern "C"
+#endif
 int W32U_IsUnicode(void)
 #else
 static __inline int W32U_IsUnicode(void)
