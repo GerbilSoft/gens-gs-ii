@@ -17,16 +17,16 @@ IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
 	# 64-bit, Unicode Windows only.
 	# (There is no 64-bit ANSI Windows.)
 	SET(GENS_C_FLAGS_WIN32 "${GENS_C_FLAGS_WIN32} -D_WIN32_WINNT=0x0502")
-	SET(GENS_EXE_LINKER_FLAGS_WIN32 "--subsystem windows:5.02")
+	SET(GENS_EXE_LINKER_FLAGS_WIN32 "-Wl,--subsystem,windows:5.02")
 ELSEIF(${ENABLE_ANSI_WINDOWS} EQUAL "ON")
 	# TODO: Enable CMP0012? (requires cmake-2.8.0)
 	# 32-bit, ANSI Windows support enabled.
 	SET(GENS_C_FLAGS_WIN32 "${GENS_C_FLAGS_WIN32} -D_WIN32_WINNT=0x0400")
-	SET(GENS_EXE_LINKER_FLAGS_WIN32 "--subsystem windows:4.00")
+	SET(GENS_EXE_LINKER_FLAGS_WIN32 "-Wl,--subsystem,windows:4.00")
 ELSE()
 	# 32-bit, Unicode Windows only.
 	SET(GENS_C_FLAGS_WIN32 "${GENS_C_FLAGS_WIN32} -D_WIN32_WINNT=0x0500")
-	SET(GENS_EXE_LINKER_FLAGS_WIN32 "--subsystem windows:5.00")
+	SET(GENS_EXE_LINKER_FLAGS_WIN32 "-Wl,--subsystem,windows:5.00")
 ENDIF()
 SET(GENS_SHARED_LINKER_FLAGS_WIN32 "${GENS_EXE_LINKER_FLAGS_WIN32}")
 
