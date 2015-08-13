@@ -27,8 +27,8 @@
 // POSIX macros are required on some platforms,
 // including MinGW-w64.
 // TODO: Properly detect localtime_r() on MinGW-w64.
-//#define _POSIX_SOURCE
-//#define _POSIX_C_SOURCE 1
+#define _POSIX_SOURCE
+#define _POSIX_C_SOURCE 1
 
 // C includes.
 #include <string.h>

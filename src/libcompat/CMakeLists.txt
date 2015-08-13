@@ -15,8 +15,32 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
 # Library checks.
 INCLUDE(CheckFunctionExists)
-# TODO: Define _POSIX_C_SOURCE >= 1 || _XOPEN_SOURCE || _BSD_SOURCE || _SVID_SOURCE || _POSIX_SOURCE ?
-CHECK_FUNCTION_EXISTS(localtime_r HAVE_LOCALTIME_R)
+MACRO(CHECK_FUNCTION_EXISTS_OR_INLINE FUNCTION HEADER SAMPLE_CODE VARIABLE)
+	# MinGW defines some reentrant functions as inline functions
+	# that are actually wrappers around MSVC "secure" functions.
+	# Check for the function as a regular function first, then check
+	# if it's available in the specified header.
+	CHECK_FUNCTION_EXISTS(${FUNCTION} ${VARIABLE})
+	IF(NOT ${VARIABLE})
+		# Function does not exist normally.
+		# Check if it's an inline function in the specified header.
+		MESSAGE(STATUS "Looking for ${FUNCTION} as an inline function")
+		CHECK_C_SOURCE_COMPILES(
+			"#define _POSIX_SOURCE
+			#define _POSIX_C_SOURCE 1
+			#include <${HEADER}>
+			int main(void) { ${SAMPLE_CODE} }"
+			${VARIABLE}_INLINE)
+		IF(${VARIABLE}_INLINE)
+			MESSAGE(STATUS "Looking for ${FUNCTION} as an inline function - found")
+			SET(${VARIABLE} 1 CACHE INTERNAL "Have function ${FUNCTION} (inline)")
+		ELSE(${VARIABLE}_INLINE)
+			MESSAGE(STATUS "Looking for ${FUNCTION} as an inline function - not found")
+			# ${VARIABLE} is already cached by CHECK_FUNCTION_EXISTS().
+		ENDIF(${VARIABLE}_INLINE)
+	ENDIF(NOT ${VARIABLE})
+ENDMACRO(CHECK_FUNCTION_EXISTS_OR_INLINE VARIABLE)
+CHECK_FUNCTION_EXISTS_OR_INLINE(localtime_r "time.h" "time_t tm; localtime_r(&tm, NULL);" HAVE_LOCALTIME_R)
 CHECK_FUNCTION_EXISTS(getpwuid_r HAVE_GETPWUID_R)
 
 # Write the config.h file.
