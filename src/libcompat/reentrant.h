@@ -1,8 +1,8 @@
 /***************************************************************************
- * gens-sdl: Gens/GS II basic SDL frontend.                                *
- * config.gens-sdl.h.in: gens-sdl configuration. (source file)             *
+ * libcompat: Compatibility library.                                       *
+ * reentrant.h: Reentrant functions.                                       *
  *                                                                         *
- * Copyright (c) 2008-2015 by David Korth.                                 *
+ * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -19,13 +19,53 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_SDL_CONFIG_H__
-#define __GENS_SDL_CONFIG_H__
+#ifndef __LIBCOMPAT_REENTRANT_H__
+#define __LIBCOMPAT_REENTRANT_H__
 
-/* Define to 1 if you have the `getpwuid_r` function. */
-#cmakedefine HAVE_GETPWUID_R 1
+#include <libcompat/config.libcompat.h>
 
-/* Define to 1 if you have the `localtime_r` function. */
-#cmakedefine HAVE_LOCALTIME_R 1
+// POSIX macros are required on some platforms,
+// including MinGW-w64.
+// TODO: Properly detect localtime_r() on MinGW-w64.
+//#define _POSIX_SOURCE
+//#define _POSIX_C_SOURCE 1
 
-#endif /* __GENS_SDL_CONFIG_H__ */
+// C includes.
+#include <string.h>
+#include <time.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifndef HAVE_LOCALTIME_R
+#ifdef _WIN32
+/**
+ * MinGW-w64's localtime_r() wrapper.
+ * Uses MSVCRT's localtime_s().
+ */
+static __forceinline struct tm *__cdecl localtime_r(const time_t *_Time, struct tm *_Tm)
+{
+	return localtime_s(_Tm, _Time) ? NULL : _Tm;
+}
+#else /* !_WIN32 */
+/**
+ * Generic localtime_r() wrapper.
+ * Uses localtime(), then immediately memcpy()'s the buffer.
+ */
+static __forceinline struct tm *__cdecl localtime_r(const time_t *_Time, struct tm *_Tm)
+{
+	struct tm *ret = localtime(_Time);
+	if (ret && _Tm) {
+		memcpy(_Tm, ret, sizeof(struct tm));
+	}
+	return ret;
+}
+#endif /* _WIN32 */
+#endif /* !HAVE_LOCALTIME_R */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __LIBCOMPAT_W32U_SHLOBJ_H__ */

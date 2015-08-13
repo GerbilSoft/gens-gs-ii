@@ -26,6 +26,11 @@
 
 #include <libzomg/config.libzomg.h>
 
+// Reentrant functions.
+// MUST be included before everything else due to
+// _POSIX_SOURCE and _POSIX_C_SOURCE definitions.
+#include "libcompat/reentrant.h"
+
 #include "Zomg.hpp"
 #include "zomg_byteswap.h"
 
@@ -133,22 +138,16 @@ int ZomgPrivate::initZomgSave(const utf8_str *filename)
 	memset(&this->zipfi, 0, sizeof(this->zipfi));
 
 	// Convert m_mtime to localtime.
-	struct tm *tm_local;
-#ifdef HAVE_LOCALTIME_R
-	struct tm tm_local_r;
-	tm_local = localtime_r(&q->m_mtime, &tm_local_r);
-#else /* !HAVE_LOCALTIME_R */
-	tm_local = localtime(&q->m_mtime);
-#endif /* HAVE_LOCALTIME_R */
-	if (tm_local) {
+	struct tm tm_local;
+	if (localtime_r(&q->m_mtime, &tm_local)) {
 		// Local time received.
 		// Convert to Zip time.
-		this->zipfi.tmz_date.tm_sec  = tm_local->tm_sec;
-		this->zipfi.tmz_date.tm_min  = tm_local->tm_min;
-		this->zipfi.tmz_date.tm_hour = tm_local->tm_hour;
-		this->zipfi.tmz_date.tm_mday = tm_local->tm_mday;
-		this->zipfi.tmz_date.tm_mon  = tm_local->tm_mon;
-		this->zipfi.tmz_date.tm_year = tm_local->tm_year;
+		this->zipfi.tmz_date.tm_sec  = tm_local.tm_sec;
+		this->zipfi.tmz_date.tm_min  = tm_local.tm_min;
+		this->zipfi.tmz_date.tm_hour = tm_local.tm_hour;
+		this->zipfi.tmz_date.tm_mday = tm_local.tm_mday;
+		this->zipfi.tmz_date.tm_mon  = tm_local.tm_mon;
+		this->zipfi.tmz_date.tm_year = tm_local.tm_year;
 	}
 
 	return 0;

@@ -19,8 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include <gens-sdl/config.gens-sdl.h>
-
 #include "Config.hpp"
 
 // LibGens
