@@ -67,9 +67,22 @@ static __inline int W32U_IsUnicode(void)
 	// NOTE: MSVC 2010 doesn't support initializing
 	// static variables with a function.
 	// TODO: Initialize it better on MinGW-w64?
-	// TODO: How slow is GetModuleHandleW()?
 	if (W32U_internal_isUnicode < 0) {
-		W32U_internal_isUnicode = (GetModuleHandleW(NULL) != NULL);
+		// NOTE: GetModuleHandleW() returns non-NULL on Win9x
+		// if KernelEx is installed. However, GetUserNameW()
+		// returns garbage, and other *W() functions probably
+		// don't work correctly, either.
+		// Check for Windows NT instead.
+		OSVERSIONINFOA osVersionInfo;
+		osVersionInfo.dwOSVersionInfoSize = sizeof(osVersionInfo);
+		if (GetVersionEx(&osVersionInfo) != 0) {
+			W32U_internal_isUnicode = (osVersionInfo.dwPlatformId == VER_PLATFORM_WIN32_NT);
+		} else {
+			// Error retrieving OS version info.
+			// Assume ANSI Windows.
+			W32U_internal_isUnicode = 0;
+		}
+
 		// Check for UTF-8 support.
 		// If not found, the program will exit.
 		W32U_CheckUTF8();

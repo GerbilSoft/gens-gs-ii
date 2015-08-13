@@ -25,6 +25,8 @@
 
 // System includes.
 #include <windows.h>
+#include "libW32U/W32U_mini.h"
+
 // Needed for GetUserNameEx();
 #define SECURITY_WIN32
 #include <security.h>
@@ -255,7 +257,7 @@ void MetadataPrivate::InitSystemMetadata(void)
 	sysInfo.osVersion = oss.str();
 
 	// Get the username.
-	if (GetModuleHandleW(nullptr)) {
+	if (W32U_IsUnicode()) {
 		// OS supports Unicode.
 		sysInfo.username = getUserName_unicode();
 	} else {
