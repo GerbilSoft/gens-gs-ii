@@ -237,21 +237,24 @@ void MetadataPrivate::InitSystemMetadata(void)
 		if (osVersionInfo.wServicePackMajor > 0 || osVersionInfo.wServicePackMinor > 0) {
 			// Service Pack.
 			if (osVersionInfo.wServicePackMinor > 0) {
-				snprintf(spver, sizeof(spver), " SP%d.%d",
+				snprintf(spver, sizeof(spver), " SP%u.%u",
 					osVersionInfo.wServicePackMajor,
 					osVersionInfo.wServicePackMinor);
 			} else {
-				snprintf(spver, sizeof(spver), " SP%d",
+				snprintf(spver, sizeof(spver), " SP%u",
 					osVersionInfo.wServicePackMajor);
 			}
 			oss << string(spver);
 		}
 
 		// Append version number.
-		snprintf(spver, sizeof(spver), " (%d.%d.%d)",
-			osVersionInfo.dwMajorVersion,
-			osVersionInfo.dwMinorVersion,
-			osVersionInfo.dwBuildNumber);
+		// NOTE: MinGw-w64 defines DWORD as unsigned long.
+		// We're casting it to plain old unsigned int
+		// to eliminate some warnings.
+		snprintf(spver, sizeof(spver), " (%u.%u.%u)",
+			(unsigned int)osVersionInfo.dwMajorVersion,
+			(unsigned int)osVersionInfo.dwMinorVersion,
+			(unsigned int)osVersionInfo.dwBuildNumber);
 		oss << string(spver);
 	}
 	sysInfo.osVersion = oss.str();
