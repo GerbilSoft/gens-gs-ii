@@ -110,7 +110,7 @@ std::string getConfigDir(const utf8_str *subdir)
 			config_dir = string(appData);
 			config_dir += "\\gens-gs-ii";
 		}
-#else
+#else /* !_WIN32 */
 		// TODO: Mac OS X-specific path.
 		char *home = getenv("HOME");
 		if (home) {
@@ -119,24 +119,19 @@ std::string getConfigDir(const utf8_str *subdir)
 		} else {
 			// HOME variable not found.
 			// Check the user's pwent.
-			struct passwd *pwd;
-#ifdef HAVE_GETPWUID_R
-#define PWD_FN "getpwuid_r"
-			char buf[2048];
-			struct passwd pwd_r;
+			// TODO: Can pwd_result be nullptr?
 			// TODO: Check for ENOMEM?
-			getpwuid_r(getuid(), &pwd_r, buf, sizeof(buf), &pwd);
-#else
-#define PWD_FN "getpwuid"
-			pwd = getpwuid(getuid());
-#endif
-			if (!pwd) {
+			char buf[2048];
+			struct passwd pwd;
+			struct passwd *pwd_result;
+			int ret = getpwuid_r(getuid(), &pwd, buf, sizeof(buf), &pwd_result);
+			if (ret != 0 || !pwd_result) {
 				// getpwuid() failed.
-				fprintf(stderr, PWD_FN "() failed; cannot get user's home directory.\n");
+				fprintf(stderr, "getpwuid_r() failed; cannot get user's home directory.\n");
 				exit(EXIT_FAILURE);
 			}
 
-			config_dir = string(pwd->pw_dir);
+			config_dir = string(pwd_result->pw_dir);
 		}
 		config_dir += "/.config/gens-gs-ii";
 #endif
