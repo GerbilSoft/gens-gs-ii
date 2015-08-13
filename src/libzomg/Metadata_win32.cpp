@@ -72,10 +72,24 @@ void MetadataPrivate::init_ctime(void)
  */
 static inline string getUserName_unicode(void)
 {
+	// GetUserNameExW() was added in Windows 2000.
+	// Dynamically load the function to prevent issues
+	// with older versions of Windows.
 	string ret;
 	wchar_t username[256];
-	DWORD cchUsername = ARRAY_SIZE(username);
-	int wret = GetUserNameExW(NameDisplay, username, &cchUsername);
+	DWORD cchUsername = 0;
+	int wret = 0;
+
+	HMODULE hSecur32 = LoadLibraryW(L"SECUR32.DLL");
+	if (hSecur32) {
+		typedef BOOLEAN (WINAPI *PFNGETUSERNAMEEXW)(EXTENDED_NAME_FORMAT, LPWSTR, PULONG);
+		PFNGETUSERNAMEEXW pfnGetUserNameExW = (PFNGETUSERNAMEEXW)GetProcAddress(hSecur32, "GetUserNameExW");
+		if (pfnGetUserNameExW) {
+			wret = pfnGetUserNameExW(NameDisplay, username, &cchUsername);
+		}
+		FreeLibrary(hSecur32);
+	}
+
 	if (wret == 0 || cchUsername == 0) {
 		// Error retrieving display name.
 		wret = GetUserNameW(username, &cchUsername);
@@ -113,18 +127,18 @@ static inline string getUserName_unicode(void)
  */
 static inline string getUserName_ansi(void)
 {
+	// GetUserNameExA() was added in Windows 2000.
+	// As such, there's no point in attempting to
+	// use it on ANSI Windows, so we'll go directly
+	// to GetUserNameA() instead.
 	string ret;
 	char username[256];
 	DWORD cbUsername = ARRAY_SIZE(username);
-	int wret = GetUserNameExA(NameDisplay, username, &cbUsername);
+	int wret = GetUserNameA(username, &cbUsername);
 	if (wret == 0 || cbUsername == 0) {
-		// Error retrieving display name.
-		wret = GetUserNameA(username, &cbUsername);
-		if (wret == 0 || cbUsername == 0) {
-			// Error retrieving username.
-			// TODO: Check Registered Owner in the registry?
-			cbUsername = 0;
-		}
+		// Error retrieving username.
+		// TODO: Check Registered Owner in the registry?
+		cbUsername = 0;
 	}
 
 	if (cbUsername > 0) {
