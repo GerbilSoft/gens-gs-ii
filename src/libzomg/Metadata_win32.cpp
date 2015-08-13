@@ -25,7 +25,7 @@
 
 // System includes.
 #include <windows.h>
-#include "libW32U/W32U_mini.h"
+#include "libcompat/W32U/W32U_mini.h"
 
 // Needed for GetUserNameEx();
 #define SECURITY_WIN32

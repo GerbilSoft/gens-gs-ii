@@ -33,7 +33,7 @@
 // MiniZip Win32 I/O handler.
 #include "../extlib/minizip/iowin32u.h"
 // Win32 Unicode Translation Layer.
-#include "libW32U/W32U_mini.h"
+#include "libcompat/W32U/W32U_mini.h"
 #endif
 
 // C includes.

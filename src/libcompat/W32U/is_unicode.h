@@ -1,5 +1,5 @@
 /***************************************************************************
- * libW32U: Win32 Unicode Translation Layer. (Mini Version)                *
+ * libcompat/W32U: Win32 Unicode Translation Layer. (Mini Version)         *
  * is_unicode.h: W32U_IsUnicode() function.                                *
  * INTERNAL USE ONLY; do NOT include this file directly!                   *
  *                                                                         *
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBW32U_IS_UNICODE_H__
-#define __LIBW32U_IS_UNICODE_H__
+#ifndef __LIBCOMPAT_W32U_IS_UNICODE_H__
+#define __LIBCOMPAT_W32U_IS_UNICODE_H__
 
 #ifndef _WIN32
 #error is_unicode.h should only be included on Win32!
@@ -90,4 +90,4 @@ static __inline int W32U_IsUnicode(void)
 	return W32U_internal_isUnicode;
 }
 
-#endif /* __LIBW32U_IS_UNICODE_H__ */
+#endif /* __LIBCOMPAT_W32U_IS_UNICODE_H__ */

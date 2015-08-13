@@ -1,6 +1,6 @@
 /***************************************************************************
- * libW32U: Win32 Unicode Translation Layer. (Mini Version)                *
- * config.libW32U.h.in: libW32U configuration. (source file)               *
+ * libcompat: Compatibility library.                                       *
+ * config.libcompat.h.in: libcompat configuration. (source file)           *
  *                                                                         *
  * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
@@ -19,10 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBW32U_CONFIG_LIBW32U_H__
-#define __LIBW32U_CONFIG_LIBW32U_H__
+#ifndef __LIBCOMPAT_CONFIG_LIBCOMPAT_H__
+#define __LIBCOMPAT_CONFIG_LIBCOMPAT_H__
 
 /* Define to 1 if support for ANSI Windows should be enabled. */
 #cmakedefine ENABLE_ANSI_WINDOWS 1
 
-#endif /* __LIBW32U_CONFIG_LIBW32U_H__ */
+#endif /* __LIBCOMPAT_CONFIG_LIBCOMPAT_H__ */

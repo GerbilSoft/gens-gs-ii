@@ -98,7 +98,7 @@ ADD_LIBRARY(zomg STATIC
 	)
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(zomg)
-TARGET_LINK_LIBRARIES(zomg ${MINIZIP_LIBRARY} ${PNG_LIBRARY})
+TARGET_LINK_LIBRARIES(zomg compat ${MINIZIP_LIBRARY} ${PNG_LIBRARY})
 IF(WIN32)
 	# Secur32.dll is required for Metadata.cpp, which calls these functions:
 	# - GetUserNameEx()

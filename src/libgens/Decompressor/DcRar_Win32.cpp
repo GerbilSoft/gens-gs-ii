@@ -30,8 +30,10 @@
 // UnRAR.dll
 #include "UnRAR_dll.hpp"
 
-// Win32 Unicode Translation Layer.
-#include "libW32U/W32U_mini.h"
+// Win32 Unicode Translation Laye#ifdef _WIN32
+// Needed for proper Unicode filename support on Windows.
+// Also required for large file support.
+#include "libcompat/W32U/W32U_mini.h"
 
 // C includes.
 #include <stdlib.h>

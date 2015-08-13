@@ -70,18 +70,13 @@ ADD_EXECUTABLE(gens-sdl
 	${gens-sdl_SRCS}
 	${gens-sdl_H}
 	)
-TARGET_LINK_LIBRARIES(gens-sdl gens genskeys zomg)
+TARGET_LINK_LIBRARIES(gens-sdl compat gens genskeys zomg)
 
 # Additional libraries.
 TARGET_LINK_LIBRARIES(gens-sdl
 	${SDL2_LIBRARY}
 	${OPENGL_gl_LIBRARY}
 	)
-
-IF(WIN32)
-	# Link in libW32U for character set conversion.
-	TARGET_LINK_LIBRARIES(gens-sdl W32U)
-ENDIF(WIN32)
 
 # Split debug information.
 INCLUDE(SetMSVCDebugPath)

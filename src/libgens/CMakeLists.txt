@@ -291,7 +291,7 @@ ADD_LIBRARY(gens STATIC
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(gens)
 
-TARGET_LINK_LIBRARIES(gens genstext ${ZLIB_LIBRARY} ${MINIZIP_LIBRARY} zomg)
+TARGET_LINK_LIBRARIES(gens compat genstext ${ZLIB_LIBRARY} ${MINIZIP_LIBRARY} zomg)
 IF(GENS_ENABLE_EMULATION)
 	TARGET_LINK_LIBRARIES(gens starscream mdZ80)
 ENDIF(GENS_ENABLE_EMULATION)
@@ -308,8 +308,6 @@ IF(HAVE_LZMA)
 	TARGET_LINK_LIBRARIES(gens ${7z_LIBRARY} ${LZMA_LIBRARY})
 ENDIF(HAVE_LZMA)
 IF(WIN32)
-	# Link in libW32U for character set conversion.
-	TARGET_LINK_LIBRARIES(gens W32U)
 	# version.dll is required for DcRar_Win32.cpp, which calls these functions:
 	# - GetFileVersionInfoSize()
 	# - GetFileVersionInfo()

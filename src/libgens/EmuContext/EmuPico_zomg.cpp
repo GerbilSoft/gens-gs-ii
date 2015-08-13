@@ -64,9 +64,10 @@
 #include <string>
 using std::string;
 
-// Win32 Unicode Translation Layer.
 #ifdef _WIN32
-#include "libW32U/W32U_mini.h"
+// Win32 Unicode Translation Layer.
+// Needed for proper Unicode filename support on Windows.
+#include "libcompat/W32U/W32U_mini.h"
 #endif
 
 #include "Util/byteswap.h"

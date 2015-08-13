@@ -62,8 +62,10 @@ using LibZomg::Zomg;
 #ifdef _WIN32
 // Windows
 #include <windows.h>
-#include "libW32U/W32U_mini.h"
-#include "libW32U/W32U_argv.h"
+// Win32 Unicode Translation Layer.
+// Needed for proper Unicode filename support on Windows.
+#include "libcompat/W32U/W32U_mini.h"
+#include "libcompat/W32U/W32U_argv.h"
 #else
 // Linux, Unix, Mac OS X
 #include <unistd.h>

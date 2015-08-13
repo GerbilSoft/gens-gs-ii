@@ -1,5 +1,5 @@
 /***************************************************************************
- * libW32U: Win32 Unicode Translation Layer. (Mini Version)                *
+ * libcompat/W32U: Win32 Unicode Translation Layer. (Mini Version)         *
  * W32U_argv.h: UTF-8 conversion for argv[].                               *
  *                                                                         *
  * Copyright (c) 2008-2015 by David Korth.                                 *
@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBW32U_W32U_ARGV_H__
-#define __LIBW32U_W32U_ARGV_H__
+#ifndef __LIBCOMPAT_W32U_W32U_ARGV_H__
+#define __LIBCOMPAT_W32U_W32U_ARGV_H__
 
 #ifndef _WIN32
 #error W32U_argv.h should only be included on Win32!
@@ -48,4 +48,4 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[]);
 }
 #endif
 
-#endif /* __LIBW32U_W32U_ARGV_H__ */
+#endif /* __LIBCOMPAT_W32U_W32U_ARGV_H__ */

@@ -45,9 +45,11 @@ using std::string;
 #include "Decompressor/DcRar.hpp"
 
 #ifdef _WIN32
-// W32U (required for large files)
-#include "libW32U/W32U_mini.h"
-#endif /* _WIN32 */
+// Win32 Unicode Translation Laye#ifdef _WIN32
+// Needed for proper Unicode filename support on Windows.
+// Also required for large file support.
+#include "libcompat/W32U/W32U_mini.h"
+#endif
 
 namespace LibGens {
 

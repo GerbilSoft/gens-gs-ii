@@ -1,5 +1,5 @@
 /***************************************************************************
- * libW32U: Win32 Unicode Translation Layer. (Mini Version)                *
+ * libcompat/W32U: Win32 Unicode Translation Layer. (Mini Version)         *
  * W32U_shlobj.c: ShellAPI functions.                                      *
  *                                                                         *
  * Copyright (c) 2015 by David Korth.                                      *
@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBW32U_W32U_SHLOBJ_H__
-#define __LIBW32U_W32U_SHLOBJ_H__
+#ifndef __LIBCOMPAT_W32U_SHLOBJ_H__
+#define __LIBCOMPAT_W32U_SHLOBJ_H__
 
 #ifndef _WIN32
 #error W32U_shlobj.h should only be included on Win32!
@@ -65,4 +65,4 @@ BOOL SHGetSpecialFolderPathU(HWND hwndOwner, char *lpszPath, int cbPath, int csi
 }
 #endif
 
-#endif /* __LIBW32U_W32U_SHLOBJ_H__ */
+#endif /* __LIBCOMPAT_W32U_SHLOBJ_H__ */
