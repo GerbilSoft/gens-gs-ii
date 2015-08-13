@@ -13,22 +13,28 @@ SET(GENS_C_FLAGS_WIN32 "-fshort-wchar -DSTRICT -DWIN32_LEAN_AND_MEAN -DNOMINMAX"
 # - If 32-bit and ANSI Windows support is enabled: 4.00
 # - If 32-bit and ANSI Windows support is disabled: 5.00
 # - If 64-bit: 5.02
+# TODO: Does CMAKE_CREATE_*_EXE also affect DLLs?
 IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
 	# 64-bit, Unicode Windows only.
 	# (There is no 64-bit ANSI Windows.)
 	SET(GENS_C_FLAGS_WIN32 "${GENS_C_FLAGS_WIN32} -D_WIN32_WINNT=0x0502")
-	SET(GENS_EXE_LINKER_FLAGS_WIN32 "-Wl,--subsystem,windows:5.02")
+	SET(CMAKE_CREATE_WIN32_EXE "-Wl,--subsystem,windows:5.02")
+	SET(CMAKE_CREATE_CONSOLE_EXE "-Wl,--subsystem,console:5.02")
 ELSEIF(${ENABLE_ANSI_WINDOWS} STREQUAL "ON")
 	# TODO: Enable CMP0012? (requires cmake-2.8.0)
 	# 32-bit, ANSI Windows support enabled.
 	SET(GENS_C_FLAGS_WIN32 "${GENS_C_FLAGS_WIN32} -D_WIN32_WINNT=0x0400")
-	SET(GENS_EXE_LINKER_FLAGS_WIN32 "-Wl,--subsystem,windows:4.00")
+	SET(CMAKE_CREATE_WIN32_EXE "-Wl,--subsystem,windows:4.00")
+	SET(CMAKE_CREATE_CONSOLE_EXE "-Wl,--subsystem,console:4.00")
 ELSE()
 	# 32-bit, Unicode Windows only.
 	SET(GENS_C_FLAGS_WIN32 "${GENS_C_FLAGS_WIN32} -D_WIN32_WINNT=0x0500")
-	SET(GENS_EXE_LINKER_FLAGS_WIN32 "-Wl,--subsystem,windows:5.00")
+	SET(CMAKE_CREATE_WIN32_EXE "-Wl,--subsystem,windows:5.00")
+	SET(CMAKE_CREATE_CONSOLE_EXE "-Wl,--subsystem,console:5.00")
 ENDIF()
-SET(GENS_SHARED_LINKER_FLAGS_WIN32 "${GENS_EXE_LINKER_FLAGS_WIN32}")
+
+SET(GENS_EXE_LINKER_FLAGS_WIN32 "")
+SET(GENS_SHARED_LINKER_FLAGS_WIN32 "")
 
 # Release build: Prefer static libraries.
 IF(CMAKE_BUILD_TYPE MATCHES ^release)
