@@ -857,12 +857,9 @@ int main(int argc, char *argv[])
 {
 #ifdef _WIN32
 	// Convert command line parameters to UTF-8.
-	// TODO: Also for ANSI.
-	if (W32U_IsUnicode()) {
-		if (W32U_GetArgvU(&argc, &argv, nullptr) != 0) {
-			// ERROR!
-			return EXIT_FAILURE;
-		}
+	if (W32U_GetArgvU(&argc, &argv, nullptr) != 0) {
+		// ERROR!
+		return EXIT_FAILURE;
 	}
 #endif /* _WIN32 */
 
