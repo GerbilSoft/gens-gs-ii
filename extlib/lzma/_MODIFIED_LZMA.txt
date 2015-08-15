@@ -7,6 +7,9 @@ The following changes have been made to the original:
 - MtCoder (multi-threaded coder) has been removed.
 - Threads.c/Threads.h (Windows-specific) have been removed.
 - LzfindMt.c/LzFindMt.h (Windows-specific) have been removed.
+- fseek() and ftell() have been replaced with fseeko() and ftello()
+  for Large File Support on Unix and Linux platforms. (7z uses native
+  Win32 functions on Windows, so Windows is not affected by this change.)
 
 To obtain the original LZMA SDK 9.20, visit
 http://www.7-zip.org/sdk.html
