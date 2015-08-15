@@ -405,8 +405,8 @@ QString AboutDialogPrivate::GetDebugInfo(void)
 #endif /* defined(__i386__) || defined(__amd64__) */
 	sDebugInfo += sLineBreak;
 
-	//: Timing method: Function used to handle emulation timing.
 	LibGens::Timing timing;
+	//: Timing method: Function used to handle emulation timing.
 	sDebugInfo += AboutDialog::tr("Timing method: %1")
 		.arg(QLatin1String(timing.GetTimingMethodName(timing.getTimingMethod()))) +
 		QLatin1String("()") + sLineBreak + sLineBreak;
