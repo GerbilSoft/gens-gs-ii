@@ -42,6 +42,10 @@ MACRO(CHECK_FUNCTION_EXISTS_OR_INLINE FUNCTION HEADER SAMPLE_CODE VARIABLE)
 ENDMACRO(CHECK_FUNCTION_EXISTS_OR_INLINE VARIABLE)
 CHECK_FUNCTION_EXISTS_OR_INLINE(localtime_r "time.h" "time_t tm; localtime_r(&tm, NULL);" HAVE_LOCALTIME_R)
 CHECK_FUNCTION_EXISTS(getpwuid_r HAVE_GETPWUID_R)
+# NOTE: These should either both be present or both be absent.
+# We'll test for both of them anyway.
+CHECK_FUNCTION_EXISTS(_fseeki64 HAVE_FSEEKI64)
+CHECK_FUNCTION_EXISTS(_ftelli64 HAVE_FTELLI64)
 
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libcompat.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.libcompat.h")

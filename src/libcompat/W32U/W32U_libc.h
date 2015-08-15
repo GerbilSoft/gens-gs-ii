@@ -30,6 +30,9 @@
 #error Do not include W32U_libc.h directly, include W32U_mini.h!
 #endif
 
+// libcompat configuration.
+#include <libcompat/config.libcompat.h>
+
 // C includes.
 #include <wchar.h>
 #include <stdio.h>
@@ -66,9 +69,21 @@ FILE *W32U_fopen(const char *filename, const char *mode);
 //  ftello64(), and it uses the FILE_OFFSET_BITS macro. LFS appears
 //  to be required on both 32-bit and 64-bit Windows, unlike on Linux
 //  where it's only required on 32-bit.)
+// TODO: Use _fseeki64() and _ftelli64() on MinGW-w64 to avoid
+// use of wrapper functions?
 #ifdef _MSC_VER
+#ifdef HAVE_FSEEKI64
 #define fseeko(stream, offset, origin) _fseeki64(stream, offset, origin)
+#else /* !HAVE_FSEEKI64 */
+#warning MSVC is missing _fseeki64(), files over 2 GB may not be handled correctly
+#define fseeko(stream, offset, origin) fseek(stream, (int)offset, origin)
+#endif /* HAVE_FSEEKI64 */
+#ifdef HAVE_FTELLI64
 #define ftello(stream) _ftelli64(stream)
+#else /* !HAVE_FTELLI64 */
+#warning MSVC is missing _ftelli64(), files over 2 GB may not be handled correctly
+#define ftello(stream) (__int64)ftell(stream)
+#endif /* HAVE_FTELLI64 */
 #endif /* _MSC_VER */
 
 /** access() **/

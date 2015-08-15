@@ -31,4 +31,10 @@
 /* Define to 1 if you have the `getpwuid_r` function. */
 #cmakedefine HAVE_GETPWUID_R 1
 
+/* Define to 1 if you have the `_fseeki64` function. */
+#cmakedefine HAVE_FSEEKI64 1
+
+/* Define to 1 if you have the `_ftelli64` function. */
+#cmakedefine HAVE_FTELLI64 1
+
 #endif /* __LIBCOMPAT_CONFIG_LIBCOMPAT_H__ */
