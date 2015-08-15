@@ -226,49 +226,57 @@ static int process_pcm(FILE *f_pcm, FILE *f_wav,
 		       uint32_t sample_rate,
 		       uint32_t *samples_processed)
 {
+	// WAV header.
+	wav_header_t wav_header;
+	// Chunk and Subchunk IDs.
+	static const char chunk_RIFF[4] = {'R', 'I', 'F', 'F'};
+	static const char chunk_WAVE[4] = {'W', 'A', 'V', 'E'};
+	static const char chunk_fmt[4]  = {'f', 'm', 't', ' '};
+	static const char chunk_data[4] = {'d', 'a', 't', 'a'};
+
+	// PCM and WAV buffers.
+	uint8_t buf_pcm[4096];
+	uint8_t buf_wav[4096];
+	int ret;			// fread() return value.
+	int i;				// `for` loop counter.
+	int found_end_flag = 0;		// Set if the PCM end flag 0xFF is found.
+	int end_flag_code = 1;		// End flag error code.
+	int wav_length = 0;		// WAV data length.
+
+	// Create the WAV header.
+	// This will be written after the PCM data is converted.
+	memset(&wav_header, 0, sizeof(wav_header));
+
+	// RIFF
+	memcpy(wav_header.riff.ChunkID, chunk_RIFF, sizeof(chunk_RIFF));
+	// ChunkSize will be filled in after the conversion is completed.
+	memcpy(wav_header.riff.Format, chunk_WAVE, sizeof(chunk_WAVE));
+
+	// fmt
+	memcpy(wav_header.fmt.SubchunkID, chunk_fmt, sizeof(chunk_fmt));
+	wav_header.fmt.SubchunkSize	= cpu_to_le32(sizeof(wav_header.fmt) - 8);
+	wav_header.fmt.AudioFormat	= cpu_to_le16(1);		// PCM
+	wav_header.fmt.NumChannels	= cpu_to_le16(1);
+	wav_header.fmt.SampleRate	= cpu_to_le32(sample_rate);
+	wav_header.fmt.BitsPerSample	= cpu_to_le16(8);
+	wav_header.fmt.BlockAlign	= cpu_to_le16(1);		// Each sample is 8 bits.
+	wav_header.fmt.ByteRate		= cpu_to_le32(sample_rate);	// sample_rate bytes per sample.
+
+	// data
+	memcpy(wav_header.data.SubchunkID, chunk_data, sizeof(chunk_data));
+	// SubchunkSize will be filled in after the conversion is completed.
+
+	// Negative max length == all the PCM.
 	if (max_length < 0) {
 		max_length = INT_MAX;
 	}
 
 	// Seek to the starting position within the PCM file.
 	fseeko(f_pcm, start_pos, SEEK_SET);
-
-	// Create the WAV header.
-	// This will be written after the PCM data is converted.
-	wav_header_t wav_header = {
-		.riff = {
-			.ChunkID	= {'R', 'I', 'F', 'F'},
-			.ChunkSize	= cpu_to_le32(0),		// will be filled in after conversion is completed
-			.Format		= {'W', 'A', 'V', 'E'},
-		},
-
-		.fmt = {
-			.SubchunkID	= {'f', 'm', 't', ' '},
-			.SubchunkSize	= cpu_to_le32(sizeof(wav_header.fmt) - 8),
-			.AudioFormat	= cpu_to_le16(1),		// PCM
-			.NumChannels	= cpu_to_le16(1),
-			.SampleRate	= cpu_to_le32(sample_rate),
-			.BitsPerSample	= cpu_to_le16(8),
-			.BlockAlign	= cpu_to_le16(1),		// Each sample is 8 bits.
-			.ByteRate	= cpu_to_le32(sample_rate),	// sample_rate bytes per sample.
-		},
-
-		.data = {
-			.SubchunkID	= {'d', 'a', 't', 'a'},
-			.SubchunkSize	= cpu_to_le32(0),		// will be filled in after conversion is completed
-		},
-	};
-
 	// Seek to immediately after the WAV header.
 	fseeko(f_wav, (int64_t)sizeof(wav_header), SEEK_SET);
 
 	// Read 4 KB at a time.
-	uint8_t buf_pcm[4096];
-	uint8_t buf_wav[4096];
-	int ret;
-	int found_end_flag = 0;		// Set if the PCM end flag 0xFF is found.
-	int end_flag_code = 1;		// End flag error code.
-	int64_t wav_length = 0;		// WAV data length.
 	while (!feof(f_pcm) && !found_end_flag) {
 		ret = fread(buf_pcm, 1, sizeof(buf_pcm), f_pcm);
 		if ((wav_length + ret) > max_length || (wav_length + ret) < 0) {
@@ -279,7 +287,7 @@ static int process_pcm(FILE *f_pcm, FILE *f_wav,
 			end_flag_code = 2;
 		}
 
-		for (int i = 0; i < ret; i++) {
+		for (i = 0; i < ret; i++) {
 			// Sega CD PCM uses sign-magnitude format.
 			if (buf_pcm[i] == 0xFF) {
 				// End of PCM.
@@ -343,8 +351,10 @@ int main(int argc, char *argv[])
         }
 #endif /* _WIN32 */
 
+#ifndef NO_OPTERR
 	// Prevent getopt() from handling errors itself.
 	opterr = 0;
+#endif
 	
 	while (1) {
 		int c;
