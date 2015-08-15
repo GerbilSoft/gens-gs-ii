@@ -57,6 +57,9 @@ static __inline int getopt(int argc, char *const argv[], const char *optstring)
 #define option vlc_option
 #define optarg vlc_getopt_state.arg
 #define optind vlc_getopt_state.ind
+/* opterr and optopt aren't available. */
+#define NO_OPTERR
+#define NO_OPTOPT
 #endif
 
 #endif /* __LIBCOMPAT_COMPAT_GETOPT_H__ */
