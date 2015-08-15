@@ -342,7 +342,17 @@ int main(int argc, char *argv[])
 	int max_length = -1;
 	uint32_t sample_rate = def_sample_rate;
 	char *out_filename = NULL;
-	
+	const char *pcm_filename = NULL;
+
+	// Opened files.
+	FILE *f_pcm = NULL;
+	FILE *f_wav = NULL;
+
+	// process_pcm() variables.
+	uint32_t samples_processed = 0;
+	int ret = -1;
+	int mins = 0, secs = 0, csecs = 0;
+
 #ifdef _WIN32
         // Convert command line parameters to UTF-8.
         if (W32U_GetArgvU(&argc, &argv, nullptr) != 0) {
@@ -459,8 +469,8 @@ int main(int argc, char *argv[])
 	}
 
 	// Attempt to open the file.
-	const char *pcm_filename = argv[optind];
-	FILE *f_pcm = fopen(pcm_filename, "rb");
+	pcm_filename = argv[optind];
+	f_pcm = fopen(pcm_filename, "rb");
 	if (!f_pcm) {
 		fprintf(stderr, "%s: Error opening '%s': %s\n",
 			argv[0], pcm_filename, strerror(errno));
@@ -468,7 +478,6 @@ int main(int argc, char *argv[])
 	}
 
 	// Open the output file.
-	FILE *f_wav;
 	if (out_filename) {
 		// Output filename specified.
 		f_wav = fopen(out_filename, "wb");
@@ -477,10 +486,13 @@ int main(int argc, char *argv[])
 		// Create it by taking the source filename and changing its extension to ".wav".
 		const size_t pcm_filename_len = strlen(pcm_filename);
 		const size_t out_filename_len = pcm_filename_len + 16;
+		char *src_slash_pos, *dot_pos;
+
+		// Allocate a new buffer for the filename.
 		out_filename = (char*)malloc(out_filename_len);
 
 		// Strip the source filename of any directories.
-		char *src_slash_pos = strrchr(pcm_filename, DIRSEP_CHR);
+		src_slash_pos = strrchr(pcm_filename, DIRSEP_CHR);
 		if (src_slash_pos) {
 			strncpy(out_filename, (src_slash_pos + 1), out_filename_len);
 		} else {
@@ -488,7 +500,7 @@ int main(int argc, char *argv[])
 		}
 
 		// Search for a '.' in the filename, starting from the end.
-		char *dot_pos = strrchr(out_filename, '.');
+		dot_pos = strrchr(out_filename, '.');
 		if (!dot_pos) {
 			// No dot found. Append ".wav" to the filename.
 			// TODO: strlcat()?
@@ -527,8 +539,7 @@ int main(int argc, char *argv[])
 	}
 
 	// Process the file.
-	uint32_t samples_processed = 0;
-	int ret = process_pcm(f_pcm, f_wav, start_pos, max_length,
+	ret = process_pcm(f_pcm, f_wav, start_pos, max_length,
 			      sample_rate, &samples_processed);
 
 	// Close the files.
@@ -536,9 +547,9 @@ int main(int argc, char *argv[])
 	fclose(f_pcm);
 
 	// Print statistics.
-	const int mins = (samples_processed / sample_rate / 60);
-	const int secs = (samples_processed / sample_rate % 60);
-	const int csecs = ((samples_processed * 100) / sample_rate % 100);
+	mins = (samples_processed / sample_rate / 60);
+	secs = (samples_processed / sample_rate % 60);
+	csecs = ((samples_processed * 100) / sample_rate % 100);
 
 	printf("%s: %s converted to WAV:\n"
 		"- Sample rate: %d Hz\n"
