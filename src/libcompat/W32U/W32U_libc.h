@@ -136,6 +136,9 @@ int W32U_mkdir(const char *path);
 // For now, the caller will have to ensure it uses struct _stat64.
 
 // Redefine stat() as W32U_stat64().
+#ifdef stat
+#undef stat
+#endif
 #define stat(pathname, buf) W32U_stat64(pathname, buf)
 
 /**
