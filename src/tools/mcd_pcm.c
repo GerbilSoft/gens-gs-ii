@@ -27,6 +27,14 @@
 // libcompat provides getopt_long() on platforms that don't have it.
 #include "libcompat/compat_getopt.h"
 
+#ifdef _WIN32
+// Win32 Unicode Translation Layer.
+// Needed for proper Unicode filename support on Windows.
+// Also required for large file support.
+#include "libcompat/W32U/W32U_mini.h"
+#include "libcompat/W32U/W32U_argv.h"
+#endif
+
 // strdup() requires __USE_BSD when compiling without GNU extensions.
 #define __USE_BSD 1
 #include <string.h>
@@ -225,16 +233,16 @@ static void print_help(char *argv0)
  * - other on error
  */
 static int process_pcm(FILE *f_pcm, FILE *f_wav,
-		       long start_pos, long max_length,
+		       int64_t start_pos, int max_length,
 		       uint32_t sample_rate,
 		       uint32_t *samples_processed
       		)
 {
 	if (max_length < 0)
-		max_length = LONG_MAX;
+		max_length = INT_MAX;
 	
 	// Seek to the starting position within the PCM file.
-	fseek(f_pcm, start_pos, SEEK_SET);
+	fseeko(f_pcm, start_pos, SEEK_SET);
 	
 	// Create the WAV header.
 	// This will be written after the PCM data is converted.
@@ -267,7 +275,7 @@ static int process_pcm(FILE *f_pcm, FILE *f_wav,
 	};
 	
 	// Seek to immediately after the WAV header.
-	fseek(f_wav, sizeof(wav_header), SEEK_SET);
+	fseeko(f_wav, (int64_t)sizeof(wav_header), SEEK_SET);
 	
 	// Read 4 KB at a time.
 	uint8_t buf_pcm[4096];
@@ -322,7 +330,7 @@ static int process_pcm(FILE *f_pcm, FILE *f_wav,
 	}
 	
 	// Write the WAV header.
-	fseek(f_wav, 0, SEEK_SET);
+	fseeko(f_wav, 0, SEEK_SET);
 	wav_header.data.SubchunkSize = cpu_to_le32(wav_length);
 	wav_header.riff.ChunkSize    = cpu_to_le32(wav_length +
 						   sizeof(wav_header.data) +
@@ -342,11 +350,19 @@ static int process_pcm(FILE *f_pcm, FILE *f_wav,
 int main(int argc, char *argv[])
 {
 	// Options.
-	long start_pos = 0;
-	long max_length = -1;
+	int64_t start_pos = 0;
+	int max_length = -1;
 	uint32_t sample_rate = def_sample_rate;
 	char *out_filename = NULL;
 	
+#ifdef _WIN32
+        // Convert command line parameters to UTF-8.
+        if (W32U_GetArgvU(&argc, &argv, nullptr) != 0) {
+                // ERROR!
+                return EXIT_FAILURE;
+        }
+#endif /* _WIN32 */
+
 	// Prevent getopt() from handling errors itself.
 	opterr = 0;
 	
@@ -354,7 +370,7 @@ int main(int argc, char *argv[])
 	{
 		int c;
 		
-		// Temporary end pointer for strtol().
+		// Temporary end pointer for strtol() and strtoll().
 		char *strtol_endptr;
 		
 		// Get command line options.
@@ -381,7 +397,7 @@ int main(int argc, char *argv[])
 			// Parameters.
 			case 's':
 				// Starting position within the file.
-				start_pos = (size_t)strtol(optarg, &strtol_endptr, 0);
+				start_pos = strtoll(optarg, &strtol_endptr, 0);
 				if (strtol_endptr == optarg || *strtol_endptr != 0)
 				{
 					fprintf(stderr, "%s: invalid starting position %s\n"
@@ -393,7 +409,7 @@ int main(int argc, char *argv[])
 			
 			case 'l':
 				// Maximum length to decode.
-				max_length = (size_t)strtol(optarg, &strtol_endptr, 0);
+				max_length = (int)strtol(optarg, &strtol_endptr, 0);
 				if (strtol_endptr == optarg || *strtol_endptr != 0)
 				{
 					fprintf(stderr, "%s: invalid length %s\n"
@@ -405,7 +421,7 @@ int main(int argc, char *argv[])
 			
 			case 'r':
 				// Sample rate.
-				sample_rate = (size_t)strtol(optarg, &strtol_endptr, 0);
+				sample_rate = (uint32_t)strtol(optarg, &strtol_endptr, 0);
 				if (strtol_endptr == optarg || *strtol_endptr != 0 || sample_rate <= 0)
 				{
 					fprintf(stderr, "%s: invalid sample rate %s\n"
@@ -567,7 +583,7 @@ int main(int argc, char *argv[])
 			printf("- End of file reached.\n");
 			break;
 		case -2:
-			printf("- Maximum length (%ld bytes) reached.\n", max_length);
+			printf("- Maximum length (%d bytes) reached.\n", max_length);
 			break;
 		default:
 			printf("- Unknown return code %d from process_pcm().\n", ret);
