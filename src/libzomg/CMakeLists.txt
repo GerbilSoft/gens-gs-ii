@@ -18,12 +18,6 @@ INCLUDE_DIRECTORIES(${MINIZIP_INCLUDE_DIR})
 INCLUDE(CheckPNG)
 INCLUDE_DIRECTORIES(${PNG_INCLUDE_DIR})
 
-# Library checks.
-INCLUDE(CheckFunctionExists)
-# TODO: Define _POSIX_C_SOURCE >= 1 || _XOPEN_SOURCE || _BSD_SOURCE || _SVID_SOURCE || _POSIX_SOURCE ?
-CHECK_FUNCTION_EXISTS(localtime_r HAVE_LOCALTIME_R)
-CHECK_FUNCTION_EXISTS(getpwuid_r HAVE_GETPWUID_R)
-
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libzomg.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.libzomg.h")
 
@@ -98,7 +92,7 @@ ADD_LIBRARY(zomg STATIC
 	)
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(zomg)
-TARGET_LINK_LIBRARIES(zomg ${MINIZIP_LIBRARY} ${PNG_LIBRARY})
+TARGET_LINK_LIBRARIES(zomg compat ${MINIZIP_LIBRARY} ${PNG_LIBRARY})
 IF(WIN32)
 	# Secur32.dll is required for Metadata_win32.cpp, which calls these functions:
 	# - GetUserNameEx()

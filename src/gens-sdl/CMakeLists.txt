@@ -25,15 +25,6 @@ INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 # TODO: FIND_PACKAGE(OpenGL) here even though it's in the root CMakeLists.txt?
 INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
 
-# Library checks.
-INCLUDE(CheckFunctionExists)
-# TODO: Define _POSIX_C_SOURCE >= 1 || _XOPEN_SOURCE || _BSD_SOURCE || _SVID_SOURCE || _POSIX_SOURCE ?
-CHECK_FUNCTION_EXISTS(getpwuid_r HAVE_GETPWUID_R)
-CHECK_FUNCTION_EXISTS(localtime_r HAVE_LOCALTIME_R)
-
-# Write the config.h file.
-CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.gens-sdl.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.gens-sdl.h")
-
 # Sources.
 SET(gens-sdl_SRCS
 	gens-sdl.cpp
@@ -72,7 +63,7 @@ ADD_EXECUTABLE(gens-sdl
 	${gens-sdl_SRCS}
 	${gens-sdl_H}
 	)
-TARGET_LINK_LIBRARIES(gens-sdl gens genskeys zomg)
+TARGET_LINK_LIBRARIES(gens-sdl compat gens genskeys zomg)
 
 # Additional libraries.
 TARGET_LINK_LIBRARIES(gens-sdl

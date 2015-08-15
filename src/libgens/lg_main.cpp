@@ -47,11 +47,6 @@
 #include <string>
 using std::string;
 
-// Win32 Unicode Translation Layer.
-#ifdef _WIN32
-#include "Win32/W32U_mini.h"
-#endif
-
 namespace LibGens {
 
 static bool ms_IsInit = false;
@@ -136,11 +131,6 @@ int Init(void)
 	// Detect CPU flags.
 	LibGens_GetCPUFlags();
 
-	// Win32 Unicode Translation Layer.
-#ifdef _WIN32
-	W32U_Init();
-#endif
-
 	// Initialize LibGens subsystems.
 	M68K::Init();
 	M68K_Mem::Init();
@@ -187,11 +177,6 @@ int End(void)
 	Z80_MD_Mem::End();
 	
 	SoundMgr::End();
-	
-	// Win32 Unicode Translation Layer.
-#ifdef _WIN32
-	W32U_End();
-#endif
 	
 	ms_IsInit = false;
 	return 0;

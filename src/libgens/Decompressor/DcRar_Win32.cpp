@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -22,10 +22,18 @@
  ***************************************************************************/
 
 #include "DcRar.hpp"
+
+#ifndef _WIN32
+#error DcRar_Win32.cpp should only be compiled for Windows.
+#endif /* !_WIN32 */
+
+// UnRAR.dll
 #include "UnRAR_dll.hpp"
 
-// Win32 Unicode Translation Layer.
-#include "../Win32/W32U_mini.h"
+// Win32 Unicode Translation Laye#ifdef _WIN32
+// Needed for proper Unicode filename support on Windows.
+// Also required for large file support.
+#include "libcompat/W32U/W32U_mini.h"
 
 // C includes.
 #include <stdlib.h>
@@ -55,8 +63,7 @@
 #include <sstream>
 using std::string;
 
-namespace LibGens
-{
+namespace LibGens {
 
 /** Static class variable initialization. **/
 
@@ -115,8 +122,7 @@ bool DcRar::DetectFormat(FILE *f)
 	static const uint8_t rar_magic[] = {'R', 'a', 'r', '!'};
 
 	// Seek to the beginning of the file.
-	// TODO: fseeko()/fseeko64() support on Linux.
-	fseek(f, 0, SEEK_SET);
+	fseeko(f, 0, SEEK_SET);
 
 	// Read the "magic number".
 	uint8_t header[sizeof(rar_magic)];
@@ -163,7 +169,7 @@ int DcRar::getFileInfo(mdp_z_entry_t **z_entry_out)
 	if (!filenameW)
 		return -9; // TODO: Figure out an MDP error code for this.
 
-	if (!W32U_IsUnicode) {
+	if (!W32U_IsUnicode()) {
 		// System isn't using Unicode.
 		// Convert the filename from UTF-16 to ANSI.
 		filenameA = W32U_UTF16_to_mbs(filenameW, CP_ACP);
@@ -180,7 +186,7 @@ int DcRar::getFileInfo(mdp_z_entry_t **z_entry_out)
 	rar_open.CmtBuf = nullptr;
 	rar_open.CmtBufSize = 0;
 
-	if (W32U_IsUnicode) {
+	if (W32U_IsUnicode()) {
 		// Unicode mode.
 		rar_open.ArcName = nullptr;
 		rar_open.ArcNameW = filenameW;
@@ -313,7 +319,7 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
 	if (!filenameW)
 		return -9; // TODO: Figure out an MDP error code for this.
 
-	if (!W32U_IsUnicode) {
+	if (!W32U_IsUnicode()) {
 		// System doesn't support Unicode.
 		// Convert the filename from UTF-16 to ANSI.
 		filenameA = W32U_UTF16_to_mbs(filenameW, CP_ACP);
@@ -330,7 +336,7 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
 	rar_open.CmtBuf = nullptr;
 	rar_open.CmtBufSize = 0;
 
-	if (W32U_IsUnicode) {
+	if (W32U_IsUnicode()) {
 		// Unicode mode.
 		rar_open.ArcName = nullptr;
 		rar_open.ArcNameW = filenameW;
@@ -515,8 +521,7 @@ uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
 		return -1;
 
 	// Make sure that this is a regular file.
-	// FIXME: W32U version of stat()?
-	struct stat st_buf;
+	struct _stat64 st_buf;
 	if (stat(extprg, &st_buf) != 0)
 		return -4;
 	if (!S_ISREG(st_buf.st_mode))

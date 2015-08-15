@@ -39,9 +39,9 @@ using std::string;
 using std::u16string;
 
 #ifdef _WIN32
-// W32U_mini
+// Win32 Unicode Translation Layer.
 // Needed for proper Unicode filename support on Windows.
-#include "Win32/W32U_mini.h"
+#include "libcompat/W32U/W32U_mini.h"
 #endif
 
 // Character set conversion.

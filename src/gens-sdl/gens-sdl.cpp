@@ -19,7 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include <gens-sdl/config.gens-sdl.h>
+// Reentrant functions.
+// MUST be included before everything else due to
+// _POSIX_SOURCE and _POSIX_C_SOURCE definitions.
+#include "libcompat/reentrant.h"
 
 #include "SdlHandler.hpp"
 #include "Config.hpp"
@@ -63,7 +66,10 @@ using LibZomg::Zomg;
 #ifdef _WIN32
 // Windows
 #include <windows.h>
-#include "libgens/Win32/W32U_mini.h"
+// Win32 Unicode Translation Layer.
+// Needed for proper Unicode filename support on Windows.
+#include "libcompat/W32U/W32U_mini.h"
+#include "libcompat/W32U/W32U_argv.h"
 #else
 // Linux, Unix, Mac OS X
 #include <unistd.h>
@@ -82,6 +88,7 @@ using LibZomg::Zomg;
 // C includes. (C++ namespace)
 #include <cstdio>
 #include <cstdlib>
+#include <cassert>
 
 // C++ includes.
 #include <string>
@@ -229,30 +236,6 @@ static clks_t clks;
 
 // Save slot.
 static int saveSlot_selected = 0;
-
-// HACK: MinGW-w64 has localtime_r(), but cmake isn't detecting it.
-// I don't have MinGW-w64 set up right now, so just assume that
-// localtime_r() exists on Windows if using gcc.
-#if defined(_WIN32) && defined(__GNUC__)
-#define HAVE_LOCALTIME_R
-#endif
-
-#ifndef HAVE_LOCALTIME_R
-/**
- * localtime_r() custom implementation.
- * TODO: Split into a separate file?
- * @param timep
- * @param result
- * @return
- */
-static inline struct tm *localtime_r(const time_t *time_p, struct tm *result) {
-	struct tm *ret = localtime(time_p);
-	if (ret && result) {
-		memcpy(result, ret, sizeof(struct tm));
-	}
-	return ret;
-}
-#endif /* HAVE_LOCALTIME_R */
 
 /**
  * Get the modification time string for the specified save file.
@@ -873,7 +856,14 @@ int run(void)
 int main(int argc, char *argv[])
 {
 #ifdef _WIN32
-	W32U_Init();
+	// Convert command line parameters to UTF-8.
+	// TODO: Also for ANSI.
+	if (W32U_IsUnicode()) {
+		if (W32U_GetArgvU(&argc, &argv, nullptr) != 0) {
+			// ERROR!
+			return EXIT_FAILURE;
+		}
+	}
 #endif /* _WIN32 */
 
 	if (argc < 2) {

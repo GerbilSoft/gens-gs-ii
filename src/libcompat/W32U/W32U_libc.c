@@ -1,10 +1,8 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
- * W32U_mini.c: Win32 Unicode Translation Layer. (Mini Version)            *
+ * libcompat/W32U: Win32 Unicode Translation Layer. (Mini Version)         *
+ * W32U_libc.h: MSVCRT functions.                                          *
  *                                                                         *
- * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
- * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,12 +19,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <config.libcompat.h>
+
+#define __IN_W32U__
 #include "W32U_mini.h"
+#include "W32U_libc.h"
 
 // C includes.
 #include <wchar.h>
-#include <stdlib.h>
 #include <errno.h>
+#include <stdlib.h>
 
 // Win32 includes.
 #include <io.h>
@@ -37,71 +39,10 @@
 #endif
 #include <direct.h>
 
-/**
- * Indicates if the system is Unicode.
- * NOTE: Do NOT edit this variable outside of W32U!
- */
-int W32U_IsUnicode = 0;
+// W32U_IsUnicode()
+#include "is_unicode.h"
 
-/**
- * Initialize the Win32 Unicode Translation Layer.
- * @return 0 on success; non-zero on error.
- */
-int W32U_Init(void)
-{
-	W32U_IsUnicode = (GetModuleHandleW(nullptr) != nullptr);
-	return 0;
-}
-
-/**
- * Shut down the Win32 Unicode Translation Layer.
- * @return 0 on success; non-zero on error.
- */
-int W32U_End(void)
-{
-	W32U_IsUnicode = 0;
-	return 0;
-}
-
-/**
- * Convert a null-terminated multibyte string to UTF-16.
- * @param mbs Multibyte string. (null-terminated)
- * @param codepage mbs codepage.
- * @return UTF-16 string, or NULL on error.
- */
-wchar_t *W32U_mbs_to_UTF16(const utf8_str *mbs, unsigned int codepage)
-{
-	int cchWcs;
-	wchar_t *wcs;
-
-	cchWcs = MultiByteToWideChar(codepage, 0, mbs, -1, nullptr, 0);
-	if (cchWcs <= 0)
-		return nullptr;
-
-	wcs = (wchar_t*)malloc(cchWcs * sizeof(wchar_t));
-	MultiByteToWideChar(codepage, 0, mbs, -1, wcs, cchWcs);
-	return wcs;
-}
-
-/**
- * Convert a null-terminated UTF-16 string to multibyte.
- * @param wcs UTF-16 string. (null-terminated)
- * @param codepage mbs codepage.
- * @return Multibyte string, or NULL on error.
- */
-char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage)
-{
-	int cbMbs;
-	char *mbs;
-
-	cbMbs = WideCharToMultiByte(codepage, 0, wcs, -1, nullptr, 0, nullptr, nullptr);
-	if (cbMbs <= 0)
-		return nullptr;
-
-	mbs = (char*)malloc(cbMbs);
-	WideCharToMultiByte(codepage, 0, wcs, -1, mbs, cbMbs, nullptr, nullptr);
-	return mbs;
-}
+/** fopen() **/
 
 // Make sure fopen() isn't redefined.
 #ifdef fopen
@@ -114,36 +55,44 @@ char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage)
  * @param mode File mode.
  * @return File pointer, or NULL on error.
  */
-FILE *W32U_fopen(const utf8_str *filename, const utf8_str *mode)
+FILE *W32U_fopen(const char *filename, const char *mode)
 {
 	wchar_t *filenameW, *modeW;
 	FILE *fRet;
+	int errno_ret = 0;
 
 	// Convert the filename from UTF-8 to UTF-16.
 	filenameW = W32U_mbs_to_UTF16(filename, CP_UTF8);
-	if (!filenameW)
+	if (!filenameW) {
+		errno = EINVAL;
 		return nullptr;
+	}
 
 	// Convert the mode from UTF-8 to UTF-16.
 	modeW = W32U_mbs_to_UTF16(mode, CP_UTF8);
 	if (!modeW) {
 		free(filenameW);
+		errno = EINVAL;
 		return nullptr;
 	}
 
 	fRet = nullptr;
-	if (W32U_IsUnicode) {
+	if (W32U_IsUnicode()) {
 		// Unicode version.
 		fRet = _wfopen(filenameW, modeW);
+		errno_ret = errno;
 	} else {
+#ifdef ENABLE_ANSI_WINDOWS
 		// ANSI version.
 		char *filenameA;
 		char *modeA;
 
 		// Convert the filename from UTF-16 to ANSI.
 		filenameA = W32U_UTF16_to_mbs(filenameW, CP_ACP);
-		if (!filenameA)
+		if (!filenameA) {
+			errno_ret = EINVAL;
 			goto fail;
+		}
 
 		// Convert the mode from UTF-16 to ANSI.
 		modeA = W32U_UTF16_to_mbs(modeW, CP_ACP);
@@ -154,15 +103,28 @@ FILE *W32U_fopen(const utf8_str *filename, const utf8_str *mode)
 
 		// Open the file.
 		fRet = fopen(filenameA, modeA);
+		// NOTE: Saving errno here in case free() resets it.
+		// It shouldn't, but POSIX is a bit vague...
+		errno_ret = errno;
 		free(filenameA);
 		free(modeA);
+#else /* !ENABLE_ANSI_WINDOWS */
+		// ANSI is not supported in this build.
+		// TODO: Fail earlier to avoid an alloc()?
+		fRet = NULL;
+		errno_ret = ENOSYS;
+		goto fail; /* MSVC complains if a label is unreferenced. (C4102) */
+#endif /* ENABLE_ANSI_WINDOWS */
 	}
 
 fail:
 	free(filenameW);
 	free(modeW);
+	errno = errno_ret;
 	return fRet;
 }
+
+/** access() **/
 
 // Make sure access() isn't redefined.
 #ifdef access
@@ -175,10 +137,11 @@ fail:
  * @param mode Mode.
  * @return 0 if the file has the given mode; -1 if not or if the file does not exist.
  */
-int W32U_access(const utf8_str *path, int mode)
+int W32U_access(const char *path, int mode)
 {
 	wchar_t *pathW;
 	int ret = -1;
+	int errno_ret = 0;
 
 	// NOTE: MSVCRT in Windows Vista and later will fail
 	// if mode contains X_OK.
@@ -191,29 +154,44 @@ int W32U_access(const utf8_str *path, int mode)
 		return -1;
 	}
 
-	if (W32U_IsUnicode) {
+	if (W32U_IsUnicode()) {
 		// Unicode version.
 		ret = _waccess(pathW, mode);
+		errno_ret = errno;
 	} else {
+#ifdef ENABLE_ANSI_WINDOWS
 		// ANSI version.
 		char *pathA;
 
 		// Convert the filename from UTF-16 to ANSI.
 		pathA = W32U_UTF16_to_mbs(pathW, CP_ACP);
 		if (!pathA) {
-			errno = EINVAL;
+			errno_ret = EINVAL;
 			goto fail;
 		}
 
 		// Check the access.
 		ret = _access(pathA, mode);
+		// NOTE: Saving errno here in case free() resets it.
+		// It shouldn't, but POSIX is a bit vague...
+		errno_ret = errno;
 		free(pathA);
+#else /* !ENABLE_ANSI_WINDOWS */
+		// ANSI is not supported in this build.
+		// TODO: Fail earlier to avoid an alloc()?
+		ret = -1;
+		errno_ret = ENOSYS;
+		goto fail; /* MSVC complains if a label is unreferenced. (C4102) */
+#endif /* ENABLE_ANSI_WINDOWS */
 	}
 
 fail:
 	free(pathW);
+	errno = errno_ret;
 	return ret;
 }
+
+/** mkdir() **/
 
 // Make sure mkdir() isn't redefined.
 #ifdef mkdir
@@ -225,10 +203,11 @@ fail:
  * @param path Pathname.
  * @return 0 on success; -1 on error.
  */
-int W32U_mkdir(const utf8_str *path)
+int W32U_mkdir(const char *path)
 {
 	wchar_t *pathW;
 	int ret = -1;
+	int errno_ret = 0;
 
 	pathW = W32U_mbs_to_UTF16(path, CP_UTF8);
 	if (!pathW) {
@@ -236,26 +215,94 @@ int W32U_mkdir(const utf8_str *path)
 		return -1;
 	}
 
-	if (W32U_IsUnicode) {
+	if (W32U_IsUnicode()) {
 		// Unicode version.
 		ret = _wmkdir(pathW);
+		errno_ret = errno;
 	} else {
+#ifdef ENABLE_ANSI_WINDOWS
 		// ANSI version.
 		char *pathA;
 
 		// Convert the filename from UTF-16 to ANSI.
 		pathA = W32U_UTF16_to_mbs(pathW, CP_ACP);
 		if (!pathA) {
-			errno = EINVAL;
+			errno_ret = EINVAL;
 			goto fail;
 		}
 
 		// Create the directory.
 		ret = _mkdir(pathA);
+		// NOTE: Saving errno here in case free() resets it.
+		// It shouldn't, but POSIX is a bit vague...
+		errno_ret = errno;
 		free(pathA);
+#else /* !ENABLE_ANSI_WINDOWS */
+		// ANSI is not supported in this build.
+		// TODO: Fail earlier to avoid an alloc()?
+		ret = -1;
+		errno_ret = ENOSYS;
+		goto fail; /* MSVC complains if a label is unreferenced. (C4102) */
+#endif /* ENABLE_ANSI_WINDOWS */
 	}
 
 fail:
 	free(pathW);
+	errno = errno_ret;
+	return ret;
+}
+
+/**
+ * Get file status.
+ * @param pathname Pathname.
+ * @param buf Stat buffer.
+ * @return 0 on success; -1 on error.
+ */
+int W32U_stat64(const char *pathname, struct _stat64 *buf)
+{
+	wchar_t *pathnameW;
+	int ret = -1;
+	int errno_ret = 0;
+
+	pathnameW = W32U_mbs_to_UTF16(pathname, CP_UTF8);
+	if (!pathnameW) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (W32U_IsUnicode()) {
+		// Unicode version.
+		ret = _wstat64(pathnameW, buf);
+		errno_ret = errno;
+	} else {
+#ifdef ENABLE_ANSI_WINDOWS
+		// ANSI version.
+		char *pathnameA;
+
+		// Convert the filename from UTF-16 to ANSI.
+		pathnameA = W32U_UTF16_to_mbs(pathnameW, CP_ACP);
+		if (!pathnameA) {
+			errno_ret = EINVAL;
+			goto fail;
+		}
+
+		// Get the file status.
+		ret = _stat64(pathnameA, buf);
+		// NOTE: Saving errno here in case free() resets it.
+		// It shouldn't, but POSIX is a bit vague...
+		errno_ret = errno;
+		free(pathnameA);
+#else /* !ENABLE_ANSI_WINDOWS */
+		// ANSI is not supported in this build.
+		// TODO: Fail earlier to avoid an alloc()?
+		ret = -1;
+		errno_ret = ENOSYS;
+		goto fail; /* MSVC complains if a label is unreferenced. (C4102) */
+#endif /* ENABLE_ANSI_WINDOWS */
+	}
+
+fail:
+	free(pathnameW);
+	errno = errno_ret;
 	return ret;
 }

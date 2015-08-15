@@ -26,7 +26,9 @@
 #include "libgenstext/StringManip.hpp"
 
 #ifdef _WIN32
-#include "../Win32/W32U_mini.h"
+// Win32 Unicode Translation Layer.
+// Needed for proper Unicode filename support on Windows.
+#include "libcompat/W32U/W32U_mini.h"
 #endif
 
 // ZOMG

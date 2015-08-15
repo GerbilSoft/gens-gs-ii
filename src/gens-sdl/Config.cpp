@@ -19,8 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include <gens-sdl/config.gens-sdl.h>
-
 #include "Config.hpp"
 
 // LibGens
@@ -34,8 +32,9 @@ using LibGens::Screenshot;
 #ifdef _WIN32
 // Windows
 #include <windows.h>
-#include <shlobj.h>
-#include "libgens/Win32/W32U_mini.h"
+// Win32 Unicode Translation Layer.
+// Needed for proper Unicode filename support on Windows.
+#include "libcompat/W32U/W32U_mini.h"
 #else
 // Linux / Unix / Mac OS X.
 #include <unistd.h>
@@ -103,16 +102,15 @@ std::string getConfigDir(const utf8_str *subdir)
 		// Determine the directory.
 #if defined(_WIN32)
 		// Windows.
-		WCHAR wpath[MAX_PATH];
-		if (SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_APPDATA, nullptr, SHGFP_TYPE_CURRENT, wpath))) {
-			// Convert from UTF-16 to UTF-8.
-			char *upath = W32U_UTF16_to_mbs(wpath, CP_UTF8);
-			if (upath) {
-				config_dir = string(upath);
-				config_dir += "\\gens-gs-ii";
-			}
+		// NOTE: Reserving more than MAX_PATH due to the
+		// expansion of UTF-16 characters to UTF-8.
+		char appData[MAX_PATH*3];
+		if (SHGetSpecialFolderPathU(nullptr, appData, sizeof(appData), CSIDL_APPDATA, FALSE)) {
+			// Path retrieved.
+			config_dir = string(appData);
+			config_dir += "\\gens-gs-ii";
 		}
-#else
+#else /* !_WIN32 */
 		// TODO: Mac OS X-specific path.
 		char *home = getenv("HOME");
 		if (home) {
@@ -121,24 +119,19 @@ std::string getConfigDir(const utf8_str *subdir)
 		} else {
 			// HOME variable not found.
 			// Check the user's pwent.
-			struct passwd *pwd;
-#ifdef HAVE_GETPWUID_R
-#define PWD_FN "getpwuid_r"
-			char buf[2048];
-			struct passwd pwd_r;
+			// TODO: Can pwd_result be nullptr?
 			// TODO: Check for ENOMEM?
-			getpwuid_r(getuid(), &pwd_r, buf, sizeof(buf), &pwd);
-#else
-#define PWD_FN "getpwuid"
-			pwd = getpwuid(getuid());
-#endif
-			if (!pwd) {
+			char buf[2048];
+			struct passwd pwd;
+			struct passwd *pwd_result;
+			int ret = getpwuid_r(getuid(), &pwd, buf, sizeof(buf), &pwd_result);
+			if (ret != 0 || !pwd_result) {
 				// getpwuid() failed.
-				fprintf(stderr, PWD_FN "() failed; cannot get user's home directory.\n");
+				fprintf(stderr, "getpwuid_r() failed; cannot get user's home directory.\n");
 				exit(EXIT_FAILURE);
 			}
 
-			config_dir = string(pwd->pw_dir);
+			config_dir = string(pwd_result->pw_dir);
 		}
 		config_dir += "/.config/gens-gs-ii";
 #endif

@@ -32,6 +32,11 @@
 // MiniZip
 #include "minizip/zip.h"
 
+#ifdef _WIN32
+// Win32 Unicode Translation Layer.
+#include "libcompat/W32U/W32U_mini.h"
+#endif
+
 // C includes.
 #include <stdint.h>
 #include <stdlib.h>

@@ -264,9 +264,6 @@ IF(WIN32)
 		Decompressor/DcRar.hpp
 		Decompressor/UnRAR_dll.hpp
 		)
-	SET(libgens_COMPAT_SRCS
-		Win32/W32U_mini.c
-		)
 ELSE()
 	SET(libgens_DECOMPRESSOR_SRCS
 		${libgens_DECOMPRESSOR_SRCS}
@@ -290,12 +287,11 @@ ADD_LIBRARY(gens STATIC
 	${libgens_VDP_SRCS} ${libgens_VDP_H}
 	${libgens_IO_SRCS} ${libgens_IO_H}
 	${libgens_DECOMPRESSOR_SRCS} ${libgens_DECOMPRESSOR_H}
-	${libgens_COMPAT_SRCS}
 	)
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(gens)
 
-TARGET_LINK_LIBRARIES(gens genstext ${ZLIB_LIBRARY} ${MINIZIP_LIBRARY} zomg)
+TARGET_LINK_LIBRARIES(gens compat genstext ${ZLIB_LIBRARY} ${MINIZIP_LIBRARY} zomg)
 IF(GENS_ENABLE_EMULATION)
 	TARGET_LINK_LIBRARIES(gens starscream mdZ80)
 ENDIF(GENS_ENABLE_EMULATION)

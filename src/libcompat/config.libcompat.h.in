@@ -1,8 +1,8 @@
 /***************************************************************************
- * gens-sdl: Gens/GS II basic SDL frontend.                                *
- * config.gens-sdl.h.in: gens-sdl configuration. (source file)             *
+ * libcompat: Compatibility library.                                       *
+ * config.libcompat.h.in: libcompat configuration. (source file)           *
  *                                                                         *
- * Copyright (c) 2008-2015 by David Korth.                                 *
+ * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -19,13 +19,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_SDL_CONFIG_H__
-#define __GENS_SDL_CONFIG_H__
+#ifndef __LIBCOMPAT_CONFIG_LIBCOMPAT_H__
+#define __LIBCOMPAT_CONFIG_LIBCOMPAT_H__
 
-/* Define to 1 if you have the `getpwuid_r` function. */
-#cmakedefine HAVE_GETPWUID_R 1
+/* Define to 1 if support for ANSI Windows should be enabled. */
+#cmakedefine ENABLE_ANSI_WINDOWS 1
 
 /* Define to 1 if you have the `localtime_r` function. */
 #cmakedefine HAVE_LOCALTIME_R 1
 
-#endif /* __GENS_SDL_CONFIG_H__ */
+/* Define to 1 if you have the `getpwuid_r` function. */
+#cmakedefine HAVE_GETPWUID_R 1
+
+/* Define to 1 if you have the `_fseeki64` function. */
+#cmakedefine HAVE_FSEEKI64 1
+
+/* Define to 1 if you have the `_ftelli64` function. */
+#cmakedefine HAVE_FTELLI64 1
+
+#endif /* __LIBCOMPAT_CONFIG_LIBCOMPAT_H__ */

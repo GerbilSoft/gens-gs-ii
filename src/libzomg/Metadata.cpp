@@ -21,6 +21,11 @@
 
 #include <libzomg/config.libzomg.h>
 
+// Reentrant functions.
+// MUST be included before everything else due to
+// _POSIX_SOURCE and _POSIX_C_SOURCE definitions.
+#include "libcompat/reentrant.h"
+
 #include "Metadata.hpp"
 
 // C includes. (C++ namespace)
@@ -352,23 +357,19 @@ int Metadata::toPngData(png_structp png_ptr, png_infop info_ptr, int metaFlags) 
 		// NOTE: This must be in LOCAL time.
 		// Format: "yyyy:MM:dd hh:mm:ss"
 		// NOTE: PNG specification says to use RFC-822, but Windows doesn't recognize it.
-		struct tm *ctime_tm;
-#ifdef HAVE_LOCALTIME_R
-		struct tm ctime_tm_r;
-		ctime_tm = localtime_r(&d->ctime.seconds, &ctime_tm_r);
-#else /* !HAVE_LOCALTIME_R */
-		ctime_tm = localtime(&d->ctime.seconds);
-#endif /* HAVE_LOCALTIME_R */
-		char ctime_str[24];
-		snprintf(ctime_str, sizeof(ctime_str), "%04d:%02d:%02d %02d:%02d:%02d",
-			 ctime_tm->tm_year+1900, ctime_tm->tm_mon+1, ctime_tm->tm_mday,
-			 ctime_tm->tm_hour, ctime_tm->tm_min, ctime_tm->tm_sec);
+		struct tm ctime_tm;
+		if (localtime_r(&d->ctime.seconds, &ctime_tm)) {
+			char ctime_str[24];
+			snprintf(ctime_str, sizeof(ctime_str), "%04d:%02d:%02d %02d:%02d:%02d",
+				 ctime_tm.tm_year+1900, ctime_tm.tm_mon+1, ctime_tm.tm_mday,
+				 ctime_tm.tm_hour, ctime_tm.tm_min, ctime_tm.tm_sec);
 
-		// FIXME: Needs to be non-const...
-		txt.key = (png_charp)"Creation Time";
-		txt.text = ctime_str;
-		txt.text_length = strlen(ctime_str);
-		png_set_text(png_ptr, info_ptr, &txt, 1);
+			// FIXME: Needs to be non-const...
+			txt.key = (png_charp)"Creation Time";
+			txt.text = ctime_str;
+			txt.text_length = strlen(ctime_str);
+			png_set_text(png_ptr, info_ptr, &txt, 1);
+		}
 	}
 
 	// Done.

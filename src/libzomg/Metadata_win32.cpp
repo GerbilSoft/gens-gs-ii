@@ -25,6 +25,8 @@
 
 // System includes.
 #include <windows.h>
+#include "libcompat/W32U/W32U_mini.h"
+
 // Needed for GetUserNameEx();
 #define SECURITY_WIN32
 #include <security.h>
@@ -110,12 +112,27 @@ static LONG getRegValue(HKEY hKey, const char *valueName, string &str)
  */
 static string getUserName_unicode(void)
 {
+	// GetUserNameExW() was added in Windows 2000.
+	// Dynamically load the function to prevent issues
+	// with older versions of Windows.
 	string ret;
 	wchar_t username[256];
 	DWORD cchUsername = ARRAY_SIZE(username);
-	int wret = GetUserNameExW(NameDisplay, username, &cchUsername);
+	int wret = 0;
+
+	HMODULE hSecur32 = LoadLibraryW(L"SECUR32.DLL");
+	if (hSecur32) {
+		typedef BOOLEAN (WINAPI *PFNGETUSERNAMEEXW)(EXTENDED_NAME_FORMAT, LPWSTR, PULONG);
+		PFNGETUSERNAMEEXW pfnGetUserNameExW = (PFNGETUSERNAMEEXW)GetProcAddress(hSecur32, "GetUserNameExW");
+		if (pfnGetUserNameExW) {
+			wret = pfnGetUserNameExW(NameDisplay, username, &cchUsername);
+		}
+		FreeLibrary(hSecur32);
+	}
+
 	if (wret == 0 || cchUsername == 0) {
 		// Error retrieving display name.
+		cchUsername = ARRAY_SIZE(username);
 		wret = GetUserNameW(username, &cchUsername);
 		if (wret == 0 || cchUsername == 0) {
 			// Error retrieving username.
@@ -151,18 +168,18 @@ static string getUserName_unicode(void)
  */
 static string getUserName_ansi(void)
 {
+	// GetUserNameExA() was added in Windows 2000.
+	// As such, there's no point in attempting to
+	// use it on ANSI Windows, so we'll go directly
+	// to GetUserNameA() instead.
 	string ret;
 	char username[256];
 	DWORD cbUsername = ARRAY_SIZE(username);
-	int wret = GetUserNameExA(NameDisplay, username, &cbUsername);
+	int wret = GetUserNameA(username, &cbUsername);
 	if (wret == 0 || cbUsername == 0) {
-		// Error retrieving display name.
-		wret = GetUserNameA(username, &cbUsername);
-		if (wret == 0 || cbUsername == 0) {
-			// Error retrieving username.
-			// TODO: Check Registered Owner in the registry?
-			cbUsername = 0;
-		}
+		// Error retrieving username.
+		// TODO: Check Registered Owner in the registry?
+		cbUsername = 0;
 	}
 
 	if (cbUsername > 0) {
@@ -364,18 +381,21 @@ static string getOSVersion(void)
 	if (osVersionInfo.wServicePackMajor > 0 || osVersionInfo.wServicePackMinor > 0) {
 		// Service Pack.
 		if (osVersionInfo.wServicePackMinor > 0) {
-			snprintf(spver, sizeof(spver), " SP%d.%d",
+			snprintf(spver, sizeof(spver), " SP%u.%u",
 				osVersionInfo.wServicePackMajor,
 				osVersionInfo.wServicePackMinor);
 		} else {
-			snprintf(spver, sizeof(spver), " SP%d",
+			snprintf(spver, sizeof(spver), " SP%u",
 				osVersionInfo.wServicePackMajor);
 		}
 		oss << string(spver);
 	}
 
 	// Append the version number.
-	snprintf(spver, sizeof(spver), " (%d.%d.%d)",
+	// NOTE: MinGW-w64 defines DWORD as unsigned long.
+	// We're casting it to plain old unsigned int
+	// to eliminate some warnings.
+	snprintf(spver, sizeof(spver), " (%u.%u.%u)",
 		osVersionInfo.dwMajorVersion,
 		osVersionInfo.dwMinorVersion,
 		osVersionInfo.dwBuildNumber);
@@ -395,8 +415,7 @@ void MetadataPrivate::InitSystemMetadata(void)
 	sysInfo.osVersion = getOSVersion();
 
 	// Get the username.
-	// TODO: Use libW32U?
-	if (GetModuleHandleW(nullptr)) {
+	if (W32U_IsUnicode()) {
 		// OS supports Unicode.
 		sysInfo.username = getUserName_unicode();
 	} else {

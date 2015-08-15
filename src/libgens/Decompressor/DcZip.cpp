@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -31,7 +31,11 @@
 #ifdef _WIN32
 // MiniZip Win32 I/O handler.
 #include "../../extlib/minizip/iowin32u.h"
-#endif /* _WIn32 */
+// Win32 Unicode Translation Laye#ifdef _WIN32
+// Needed for proper Unicode filename support on Windows.
+// Also required for large file support.
+#include "libcompat/W32U/W32U_mini.h"
+#endif /* _WIN32 */
 
 // LOG_MSG() subsystem.
 #include "macros/log_msg.h"
@@ -40,8 +44,7 @@
 #include <string>
 using std::string;
 
-namespace LibGens
-{
+namespace LibGens {
 
 /**
  * Create a new DcZip object.
@@ -99,8 +102,7 @@ bool DcZip::DetectFormat(FILE *f)
 	static const uint8_t zip_magic[] = {'P', 'K', 0x03, 0x04};
 
 	// Seek to the beginning of the file.
-	// TODO: fseeko()/fseeko64() support on Linux.
-	fseek(f, 0, SEEK_SET);
+	fseeko(f, 0, SEEK_SET);
 
 	// Read the "magic number".
 	uint8_t header[sizeof(zip_magic)];
