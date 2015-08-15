@@ -76,9 +76,13 @@ System=MD
 Creator=Genesis Emulator
 CreatorVersion=2.12.194
 CreatorVcsVersion=git: master/12345678
+OS=Linux 4.1.2
+CPU=Some CPU
+CreationTime=2015/07/21 09:50 PM EDT
 Author=Mario Mario
 ROM=Sonic the Hedgehog (W) (REV01) [!].gen
-ROM CRC32=0xAFE05EEE
+ROM_CRC32=0xAFE05EEE
+ROM_Size=524288
 Region=U
 Description=Sample savestate from Sonic 1.
 Extensions=
@@ -91,9 +95,13 @@ Fields: ('*' indicates required; '-' indicates optional.)
 - Creator: Program that created the savestate.
 - CreatorVersion: Version of Creator.
 - CreatorVcsVersion: Version control identifier of Creator.
+- CreationTime: Creation time. (TODO: Time format is not final.)
+- OS: Name and version of the host system's OS.
+- CPU: Name of the host system's CPU.
 - Author: Person who created the savestate.
 - ROM: Filename of the ROM file used to create the savestate.
-- ROM CRC32: CRC32 checksum of the ROM file used to create the savestate.
+- ROM_CRC32: CRC32 checksum of the ROM file used to create the savestate.
+- ROM_Size: Size of the ROM image.
 - Region: Region code of the system used to create the savestate.
 - Description: A short description of the savestate.
 - Extensions: Any extensions to the base format, comma-separated.

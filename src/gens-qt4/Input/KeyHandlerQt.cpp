@@ -43,10 +43,6 @@
 #if defined(Q_WS_X11)
 #include <X11/keysym.h>
 #elif defined(Q_WS_WIN)
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
 #include <windows.h>
 #endif
 

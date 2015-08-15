@@ -1,6 +1,6 @@
 /***************************************************************************
  * libzomg: Zipped Original Memory from Genesis.                           *
- * ZomgIni.hpp: ZOMG.ini handler.                                          *
+ * Metadata.cpp: Metadata handler for savestates and screenshots.          *
  *                                                                         *
  * Copyright (c) 2013-2015 by David Korth.                                 *
  *                                                                         *
@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBZOMG_ZOMGINI_HPP__
-#define __LIBZOMG_ZOMGINI_HPP__
+#ifndef __LIBZOMG_METADATA_HPP__
+#define __LIBZOMG_METADATA_HPP__
 
 // C includes.
 #include <stdint.h>
@@ -28,57 +28,91 @@
 // C++ includes.
 #include <string>
 
-namespace LibZomg
-{
+// PNG structs.
+// NOTE: Copied fron png.h to avoid having to include it here.
+extern "C" {
+struct png_struct_def;
+typedef struct png_struct_def png_struct;
+typedef png_struct * png_structp;
 
-class ZomgIniPrivate;
+struct png_info_def;
+typedef struct png_info_def png_info;
+typedef png_info * png_infop;
+}
 
-class ZomgIni
+namespace LibZomg {
+
+class MetadataPrivate;
+class Metadata
 {
 	public:
-		ZomgIni();
-		~ZomgIni();
+		Metadata();
+		~Metadata();
 
 	private:
-		friend class CdDrivePrivate;
+		friend class MetadataPrivate;
 		// NOTE: Non-const to allow clear() to work more efficiently.
-		ZomgIniPrivate *d;
+		MetadataPrivate *d;
 
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add LibZomg-specific version of Q_DISABLE_COPY().
-		ZomgIni(const ZomgIni &);
-		ZomgIni &operator=(const ZomgIni &);
+		Metadata(const Metadata &);
+		Metadata &operator=(const Metadata &);
 
 	public:
 		/**
-		 * Clear the loaded ZOMG.ini data.
+		 * Initialize the system and program metadata.
+		 * This function should only be run once at program startup.
+		 * System information will be obtained by the Metadata class.
+		 *
+		 * @param creator		[in, opt] Emulator name.
+		 * @param creatorVersion	[in, opt] Emulator version.
+		 * @param creatorVcsVersion	[in, opt] Emulator's version control version, e.g. git tag.
+		 */
+		static void InitProgramMetadata(const char *creator,
+						const char *creatorVersion,
+						const char *creatorVcsVersion);
+
+		/**
+		 * Clear the loaded metadata.
 		 */
 		void clear(void);
 
+		enum MetadataFlags {
+			// Default is everything except Author.
+			// (CreationTime, Emulator, OSandCPU, and RomInfo.)
+			MF_Default	= -1,
+
+			MF_None		= 0,
+			MF_CreationTime	= (1 << 0),
+			MF_Emulator	= (1 << 1),
+			MF_OSandCPU	= (1 << 2),
+			MF_Author	= (1 << 3),
+			MF_RomInfo	= (1 << 4),
+		};
+
 		/**
-		 * Save the ZOMG.ini file.
+		 * Export the metadata as ZOMG.ini.
+		 * @param metaFlags Metadata to export. (See MetadataFlags for values.)
 		 * @return String representation of ZOMG.ini.
 		 */
-		std::string save(void) const;
+		std::string toZomgIni(int metaFlags = MF_Default) const;
 
-		/** Property get/set functions. **/
+		/**
+		 * Export the metadata in PNG chunks.
+		 * @param png_ptr PNG pointer.
+		 * @param info_ptr PNG info pointer.
+		 * @param metaFlags Metadata to export. (See MetadataFlags for values.)
+		 * @return 0 on success; non-zero on error.
+		 */
+		int toPngData(png_structp png_ptr, png_infop info_ptr, int metaFlags = MF_Default) const;
+
+		/** File metadata functions. **/
 		// TODO: Use macros?
 
-		// TODO: Use bitfield with system IDs instead of a string.
+		// TODO: Use MDP system ID enumeration instead of a string.
 		std::string systemId(void) const;
 		void setSystemId(const std::string &systemId);
-
-		std::string creator(void) const;
-		void setCreator(const std::string &creator);
-
-		std::string creatorVersion(void) const;
-		void setCreatorVersion(const std::string &creatorVersion);
-
-		std::string creatorVcsVersion(void) const;
-		void setCreatorVcsVersion(const std::string &creatorVcsVersion);
-
-		std::string author(void) const;
-		void setAuthor(const std::string &author);
 
 		std::string romFilename(void) const;
 		void setRomFilename(const std::string &romFilename);
@@ -99,4 +133,4 @@ class ZomgIni
 
 }
 
-#endif /* __LIBZOMG_ZOMGINI_HPP__ */
+#endif /* __LIBZOMG_METADATA_HPP__ */

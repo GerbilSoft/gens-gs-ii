@@ -211,6 +211,7 @@ static void emit(const char *fmt, ...) {
 		fprintf(stderr, "Bad news: Tried to emit() to null file\n");
 		exit(1);
 	}
+	va_end(a);
 }
 
 /* Dump all options.  This is delivered to stderr and to the code file. */

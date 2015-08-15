@@ -47,7 +47,7 @@ namespace LibGens { namespace Tests {
 class Z80Tests : public ::testing::Test
 {
 	protected:
-		Z80Tests() : m_Z80(nullptr) { }
+		Z80Tests() : m_Z80(nullptr), halt(false) { }
 		virtual ~Z80Tests() { }
 
 		virtual void SetUp(void) override;

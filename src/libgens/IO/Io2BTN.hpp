@@ -40,15 +40,20 @@ class Io2BTN : public Device
 		Io2BTN &operator=(const Io2BTN &);
 
 	public:
-		// Device type.
-		// Should be overridden by subclasses.
-		virtual IoManager::IoType_t type(void) const override;
+		/**
+		 * Reset Device data that only affects the device
+		 * and not the emulation-side registers.
+		 *
+		 * Should be overridden by subclasses that have
+		 * device-specific data.
+		 */
+		virtual void resetDev(void) final;
 
 		/**
 		 * Update the I/O device.
 		 * Runs the internal device update.
 		 */
-		virtual void update(void) override;
+		virtual void update(void) final;
 
 	public:
 		// SMS: Pause button.

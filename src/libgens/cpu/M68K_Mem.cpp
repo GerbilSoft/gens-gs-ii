@@ -39,7 +39,7 @@
 // MD emulator.
 // Required to access controller I/O ports.
 // TODO: SMS/GG?
-#include "MD/EmuMD.hpp"
+#include "EmuContext/EmuMD.hpp"
 
 // Sound Manager.
 #include "sound/SoundMgr.hpp"
@@ -49,11 +49,11 @@
 Ram_68k_t Ram_68k;
 
 // EmuContext
-#include "../EmuContext.hpp"
+#include "EmuContext/EmuContext.hpp"
 
 // Miscellaneous.
-#include "../Util/byteswap.h"
-#include "../macros/log_msg.h"
+#include "Util/byteswap.h"
+#include "macros/log_msg.h"
 
 // C wrapper functions for Starscream.
 #ifdef __cplusplus
@@ -131,7 +131,29 @@ const uint8_t M68K_Mem::msc_M68KBank_Def_MD[8] =
 	M68K_BANK_CARTRIDGE,
 
 	// $A00000 - $BFFFFF: I/O area.
-	M68K_BANK_IO,
+	M68K_BANK_MD_IO,
+
+	// $C00000 - $DFFFFF: VDP. (specialized mirroring)
+	M68K_BANK_VDP,
+
+	// $E00000 - $FFFFFF: RAM. (64K mirroring)
+	M68K_BANK_RAM
+};
+
+/**
+ * Default M68K bank type IDs for Pico.
+ */
+const uint8_t M68K_Mem::msc_M68KBank_Def_Pico[8] =
+{
+	// $000000 - $9FFFFF: ROM cartridge.
+	M68K_BANK_CARTRIDGE, M68K_BANK_CARTRIDGE,
+	M68K_BANK_CARTRIDGE, M68K_BANK_CARTRIDGE,
+
+	// $800000 - $9FFFFF: I/O area.
+	M68K_BANK_PICO_IO,
+
+	// $A00000 - $BFFFFF: Unused.
+	M68K_BANK_UNUSED,
 
 	// $C00000 - $DFFFFF: VDP. (specialized mirroring)
 	M68K_BANK_VDP,
@@ -249,6 +271,7 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 			}
 
 			// 'SEGA' register.
+			// TODO: Is this readable?
 			return tmss_reg.a14000.b[(address & 3) ^ U32DATA_U8_INVERT];
 		}
 
@@ -296,7 +319,7 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 			// NOTE: Reads from even addresses are handled the same as odd addresses.
 			// (Least-significant bit is ignored.)
 			uint8_t ret = 0xFF;
-			const LibGens::IoManager *const ioManager = EmuMD::m_ioManager;
+			const LibGens::IoManager *const ioManager = EmuContext::m_ioManager;
 			switch (address & 0x1E) {
 				case 0x00: {
 					// 0xA10001: Genesis version register.
@@ -433,6 +456,74 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_TMSS_Rom(uint32_t address)
 	return tmss_reg.readByte(address);
 }
 
+/**
+ * [Pico] Read a byte from the I/O area.
+ * @param address Address.
+ * @return Byte from the I/O area.
+ */
+inline uint8_t M68K_Mem::M68K_Read_Byte_Pico_IO(uint32_t address)
+{
+	// I/O area is $800000-$80001F.
+	// TODO: Check for mirroring?
+	if (address > 0x80001F) {
+		// Invalid area.
+		return 0xFF;
+	}
+
+	LibGens::IoManager *const ioManager = EmuContext::m_ioManager;
+	uint8_t ret = 0xFF; // TODO: Default to prefetched data?
+	switch (address & 0x1F) {
+		case 0x01:
+			// Version register.
+			// ?vv? ????, where v can be:
+			// - 00: JP
+			// - 01: EU
+			// - 10: USA
+			// - 11: ??
+			// TODO: Verify this?
+			break;
+		case 0x03:
+			// Buttons.
+			ret = ioManager->picoReadButtons();
+			break;
+		case 0x05:
+			// Most-significant byte of pen X coordinate.
+			break;
+		case 0x07:
+			// Least-significant byte of pen X coordinate.
+			break;
+		case 0x09:
+			// Most-significant byte of pen Y coordinate.
+			break;
+		case 0x0B:
+			// Least-significant byte of pen Y coordinate.
+			break;
+		case 0x0D:
+			// Page register.
+			ret = ioManager->picoCurPageReg();
+			break;
+		case 0x10: case 0x11:
+			// ADPCM data register. (word)
+			// TODO: Return number of free bytes left in the PCM FIFO.
+			break;
+		case 0x12: case 0x13:
+			// ADPCM control register. (word)
+			// Bit 15 = 0: PCM is "busy".
+			break;
+		case 0x19: case 0x1B: case 0x1D: case 0x1F:
+			// TMSS register.
+			// Odd bytes here contain "SEGA".
+			// TODO: Is this readable?
+			// NOTE: TMSS ROM is not present!
+			ret = tmss_reg.a14000.b[((address >> 1) & 3) ^ U32DATA_U8_INVERT];
+			break;
+		default:
+			break;
+	}
+
+	return ret;
+}
+
 /** Read Word functions. **/
 
 /**
@@ -540,6 +631,7 @@ inline uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 			}
 
 			// 'SEGA' register.
+			// TODO: Is this readable?
 			return tmss_reg.a14000.w[((address & 2) >> 1) ^ U32DATA_U16_INVERT];
 		}
 
@@ -587,7 +679,7 @@ inline uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 			 * 0xA1001F: Control Port 3: Serial Control.
 			 */
 			uint8_t ret = 0xFF;
-			const LibGens::IoManager *const ioManager = EmuMD::m_ioManager;
+			const LibGens::IoManager *const ioManager = EmuContext::m_ioManager;
 			switch (address & 0x1E) {
 				case 0x00: {
 					// 0xA10001: Genesis version register.
@@ -703,6 +795,75 @@ inline uint16_t M68K_Mem::M68K_Read_Word_TMSS_Rom(uint32_t address)
 {
 	// TODO: Remove this function?
 	return tmss_reg.readWord(address);
+}
+
+/**
+ * [Pico] Read a word from the I/O area.
+ * @param address Address.
+ * @return Word from the I/O area.
+ */
+inline uint16_t M68K_Mem::M68K_Read_Word_Pico_IO(uint32_t address)
+{
+	// I/O area is $800000-$80001F.
+	// TODO: Check for mirroring?
+	if (address > 0x80001F) {
+		// Invalid area.
+		return 0xFFFF;
+	}
+
+	LibGens::IoManager *const ioManager = EmuContext::m_ioManager;
+	uint16_t ret = 0xFFFF; // TODO: Default to prefetched data?
+	switch (address & 0x1E) {
+		case 0x00:
+			// Version register.
+			// ?vv? ????, where v can be:
+			// - 00: JP
+			// - 01: EU
+			// - 10: USA
+			// - 11: ??
+			// TODO: Verify this?
+			break;
+		case 0x02:
+			// Buttons.
+			ret = 0xFF00 | ioManager->picoReadButtons();
+			break;
+		case 0x04:
+			// Most-significant byte of pen X coordinate.
+			break;
+		case 0x06:
+			// Least-significant byte of pen X coordinate.
+			break;
+		case 0x08:
+			// Most-significant byte of pen Y coordinate.
+			break;
+		case 0x0A:
+			// Least-significant byte of pen Y coordinate.
+			break;
+		case 0x0C:
+			// Page register.
+			ret = 0xFF00 | ioManager->picoCurPageReg();
+			break;
+		case 0x10:
+			// ADPCM data register. (word)
+			// TODO: Return number of free bytes left in the PCM FIFO.
+			break;
+		case 0x12:
+			// ADPCM control register. (word)
+			// Bit 15 = 0: PCM is "busy".
+			break;
+		case 0x18: case 0x1A: case 0x1C: case 0x1E:
+			// TMSS register.
+			// Odd bytes here contain "SEGA".
+			// TODO: Is this readable?
+			// TODO: Prefetch for high bytes?
+			// NOTE: TMSS ROM is not present!
+			ret = tmss_reg.a14000.b[((address >> 1) & 3) ^ U32DATA_U8_INVERT];
+			break;
+		default:
+			break;
+	}
+
+	return ret;
 }
 
 
@@ -885,7 +1046,7 @@ inline void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 			 * 0xA1001F: Control Port 3: Serial Control.
 			 */
 			// TODO: Do byte writes to even addresses (e.g. 0xA10002) work?
-			LibGens::IoManager *const ioManager = EmuMD::m_ioManager;
+			LibGens::IoManager *const ioManager = EmuContext::m_ioManager;
 			switch (address & 0x1E) {
 				default:
 				case 0x00: /// 0xA10001: Genesis version register.
@@ -970,6 +1131,40 @@ inline void M68K_Mem::M68K_Write_Byte_VDP(uint32_t address, uint8_t data)
 		default:
 			// Invalid VDP port.
 			// TODO: M68K should lock up.
+			break;
+	}
+}
+
+/**
+ * [Pico] Write a byte to the I/O area.
+ * @param address Address.
+ * @param data Byte to write.
+ */
+inline void M68K_Mem::M68K_Write_Byte_Pico_IO(uint32_t address, uint8_t data)
+{
+	// I/O area is $800000-$80001F.
+	// TODO: Check for mirroring?
+	if (address > 0x80001F) {
+		// Invalid area.
+		return;
+	}
+
+	switch (address & 0x1E) {
+		case 0x10:
+			// ADPCM data register. (word)
+			// TODO
+			break;
+		case 0x12:
+			// ADPCM control register. (word)
+			// TODO
+			break;
+		case 0x18: case 0x1A: case 0x1C: case 0x1E:
+			// TMSS register.
+			// Odd bytes here contain "SEGA".
+			// NOTE: TMSS ROM is not present!
+			tmss_reg.a14000.b[((address >> 1) & 3) ^ U32DATA_U8_INVERT] = data;
+			break;
+		default:
 			break;
 	}
 }
@@ -1155,7 +1350,7 @@ inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 			 */
 			// TODO: Is there special handling for word writes,
 			// or is it just "LSB is written"?
-			LibGens::IoManager *const ioManager = EmuMD::m_ioManager;
+			LibGens::IoManager *const ioManager = EmuContext::m_ioManager;
 			switch (address & 0x1E) {
 				default:
 				case 0x00: /// 0xA10001: Genesis version register.
@@ -1244,7 +1439,43 @@ inline void M68K_Mem::M68K_Write_Word_VDP(uint32_t address, uint16_t data)
 	}
 }
 
+/**
+ * [Pico] Write a word to the I/O area.
+ * @param address Address.
+ * @param data Word to write.
+ */
+inline void M68K_Mem::M68K_Write_Word_Pico_IO(uint32_t address, uint16_t data)
+{
+	// I/O area is $800000-$80001F.
+	// TODO: Check for mirroring?
+	if (address > 0x80001F) {
+		// Invalid area.
+		return;
+	}
+
+	switch (address & 0x1E) {
+		case 0x10:
+			// ADPCM data register. (word)
+			// TODO
+			break;
+		case 0x12:
+			// ADPCM control register. (word)
+			// TODO
+			break;
+		case 0x18: case 0x1A: case 0x1C: case 0x1E:
+			// TMSS register.
+			// Odd bytes here contain "SEGA".
+			// NOTE: TMSS ROM is not present!
+			tmss_reg.a14000.b[((address >> 1) & 3) ^ U32DATA_U8_INVERT] = (data & 0xFF);
+			break;
+		default:
+			break;
+	}
+}
+
+
 /** Public init and read/write functions. **/
+
 
 /**
  * Update the TMSS mapping.
@@ -1280,6 +1511,10 @@ void M68K_Mem::InitSys(M68K::SysID system)
 		case M68K::SYSID_MD:
 			memcpy(ms_M68KBank_Type, msc_M68KBank_Def_MD, sizeof(ms_M68KBank_Type));
 			UpdateTmssMapping();
+			break;
+
+		case M68K::SYSID_PICO:
+			memcpy(ms_M68KBank_Type, msc_M68KBank_Def_Pico, sizeof(ms_M68KBank_Type));
 			break;
 
 		default:
@@ -1339,10 +1574,11 @@ uint8_t M68K_Mem::M68K_RB(uint32_t address)
 			return ms_RomCartridge->readByte(address);
 
 		// Other MD banks.
-		case M68K_BANK_IO:		return M68K_Read_Byte_Misc(address);
+		case M68K_BANK_MD_IO:		return M68K_Read_Byte_Misc(address);
 		case M68K_BANK_VDP:		return M68K_Read_Byte_VDP(address);
 		case M68K_BANK_RAM:		return M68K_Read_Byte_Ram(address);
 		case M68K_BANK_TMSS_ROM:	return M68K_Read_Byte_TMSS_Rom(address);
+		case M68K_BANK_PICO_IO:		return M68K_Read_Byte_Pico_IO(address);
 	}
 
 	// Should not get here...
@@ -1370,10 +1606,11 @@ uint16_t M68K_Mem::M68K_RW(uint32_t address)
 			return ms_RomCartridge->readWord(address);
 
 		// Other MD banks.
-		case M68K_BANK_IO:		return M68K_Read_Word_Misc(address);
+		case M68K_BANK_MD_IO:		return M68K_Read_Word_Misc(address);
 		case M68K_BANK_VDP:		return M68K_Read_Word_VDP(address);
 		case M68K_BANK_RAM:		return M68K_Read_Word_Ram(address);
 		case M68K_BANK_TMSS_ROM:	return M68K_Read_Word_TMSS_Rom(address);
+		case M68K_BANK_PICO_IO:		return M68K_Read_Word_Pico_IO(address);
 	}
 	
 	// Should not get here...
@@ -1405,9 +1642,10 @@ void M68K_Mem::M68K_WB(uint32_t address, uint8_t data)
 			break;
 
 		// Other MD banks.
-		case M68K_BANK_IO:	M68K_Write_Byte_Misc(address, data); break;
+		case M68K_BANK_MD_IO:	M68K_Write_Byte_Misc(address, data); break;
 		case M68K_BANK_VDP:	M68K_Write_Byte_VDP(address, data); break;
 		case M68K_BANK_RAM:	M68K_Write_Byte_Ram(address, data); break;
+		case M68K_BANK_PICO_IO:	M68K_Write_Byte_Pico_IO(address, data); break;
 	}
 }
 
@@ -1436,9 +1674,10 @@ void M68K_Mem::M68K_WW(uint32_t address, uint16_t data)
 			break;
 
 		// Other MD banks.
-		case M68K_BANK_IO:	M68K_Write_Word_Misc(address, data); break;
+		case M68K_BANK_MD_IO:	M68K_Write_Word_Misc(address, data); break;
 		case M68K_BANK_VDP:	M68K_Write_Word_VDP(address, data); break;
 		case M68K_BANK_RAM:	M68K_Write_Word_Ram(address, data); break;
+		case M68K_BANK_PICO_IO:	M68K_Write_Word_Pico_IO(address, data); break;
 	}
 }
 

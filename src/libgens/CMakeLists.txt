@@ -25,13 +25,23 @@ INCLUDE_DIRECTORIES(${MINIZIP_INCLUDE_DIR})
 
 # Library checks.
 INCLUDE(CheckLibraryExists)
-CHECK_LIBRARY_EXISTS(c sigaction "" HAVE_SIGACTION)	# libc: sigaction()
 
-# FIXME: Non-Windows only?
-CHECK_LIBRARY_EXISTS(rt clock_gettime "" HAVE_LIBRT)	# librt: clock_gettime()
-IF(HAVE_LIBRT)
-	SET(RT_LIBRARY rt)
-ENDIF(HAVE_LIBRT)
+# sigaction()
+CHECK_FUNCTION_EXISTS(sigaction HAVE_SIGACTION)
+
+# clock_gettime() [non-Windows only]
+UNSET(RT_LIBRARY)
+IF(NOT WIN32)
+	CHECK_FUNCTION_EXISTS(clock_gettime HAVE_CLOCK_GETTIME)
+	IF(NOT HAVE_CLOCK_GETTIME)
+		# clock_gettime() may be in librt.
+		CHECK_LIBRARY_EXISTS(rt clock_gettime "" HAVE_CLOCK_GETTIME)
+		IF(HAVE_CLOCK_GETTIME)
+			SET(HAVE_CLOCK_GETTIME_IN_LIBRT 1)
+			SET(RT_LIBRARY rt)
+		ENDIF(HAVE_CLOCK_GETTIME)
+	ENDIF(NOT HAVE_CLOCK_GETTIME)
+ENDIF(NOT WIN32)
 
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libgens.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.libgens.h")
@@ -51,37 +61,96 @@ CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/Util/byteorder.h.in" "${CMAKE_CURREN
 # Sources.
 SET(libgens_SRCS
 	lg_main.cpp
-	MD/EmuMD.cpp
-	MD/EmuMD_zomg.cpp
 	cpu/M68K.cpp
 	cpu/M68K_Mem.cpp
 	sound/Psg.cpp
 	sound/PsgDebug.cpp
 	sound/Ym2612.cpp
 	macros/log_msg.c
-	Util/byteswap.c
 	Rom.cpp
-	Util/gens_siginfo.c
-	Util/cpuflags.c
 	Effects/CrazyEffect.cpp
 	Effects/PausedEffect.cpp
 	Effects/FastBlur.cpp
-	Util/Timing.cpp
 	cpu/Z80.cpp
 	cpu/Z80_MD_Mem.cpp
 	Save/SRam.cpp
 	credits.c
 	lg_osd.c
 	sound/SoundMgr.cpp
-	EmuContext.cpp
 	Data/32X/fw_32x.c
-	Util/MdFb.cpp
 	Cartridge/RomCartridgeMD.cpp
 	Save/EEPRomI2C.cpp
 	Save/EEPRomI2C_File.cpp
 	Save/EEPRomI2C_DB.cpp
 	Save/EEPRomI2C_Debug.cpp
-	MD/TmssReg.cpp
+	)
+
+SET(libgens_UTIL_SRCS
+	Util/byteswap.c
+	Util/gens_siginfo.c
+	Util/cpuflags.c
+	Util/MdFb.cpp
+	Util/Screenshot.cpp
+	)
+
+SET(libgens_UTIL_H
+	Util/byteswap.h
+	Util/gens_siginfo.h
+	Util/cpuflags.h
+	Util/MdFb.hpp
+	Util/Screenshot.hpp
+	)
+
+# OS-specific timing functions.
+SET(libgens_TIMING_SRCS
+	Util/Timing.cpp
+	)
+SET(libgens_TIMING_H
+	Util/Timing.hpp
+	)
+IF(WIN32)
+	SET(libgens_TIMING_SRCS
+		${libgens_TIMING_SRCS}
+		Util/Timing_win32.cpp
+		)
+ELSEIF(APPLE)
+	SET(libgens_TIMING_SRCS
+		${libgens_TIMING_SRCS}
+		Util/Timing_mac.cpp
+		)
+ELSE()
+	SET(libgens_TIMING_SRCS
+		${libgens_TIMING_SRCS}
+		Util/Timing_unix.cpp
+		)
+ENDIF()
+
+SET(libgens_EMUCONTEXT_SRCS
+	EmuContext/EmuContext.cpp
+	EmuContext/EmuContextFactory.cpp
+
+	# MD
+	EmuContext/EmuMD.cpp
+	EmuContext/EmuMD_zomg.cpp
+	EmuContext/TmssReg.cpp
+
+	# Pico
+	EmuContext/EmuPico.cpp
+	EmuContext/EmuPico_zomg.cpp
+	)
+
+# TODO: All headers, or just public headers?
+SET(libgens_EMUCONTEXT_H
+	EmuContext/EmuContext.hpp
+	EmuContext/EmuContextFactory.hpp
+
+	# MD
+	EmuContext/EmuMD.hpp
+	EmuContext/SysVersion.hpp
+	EmuContext/TmssReg.hpp
+
+	# Pico
+	EmuContext/EmuPico.hpp
 	)
 
 SET(libgens_VDP_SRCS
@@ -121,12 +190,15 @@ SET(libgens_IO_SRCS
 	IO/IoManager_p.cpp
 	IO/IoManager_btnNames.cpp
 	IO/Device.cpp
+	IO/DeviceFactory.cpp
+	# Standard controllers
 	IO/Io3BTN.cpp
 	IO/Io6BTN.cpp
 	IO/Io2BTN.cpp
 	IO/IoMegaMouse.cpp
 	IO/IoXE1AP.cpp
 	IO/IoColecoVision.cpp
+	IO/IoPico.cpp
 	# Multitaps
 	IO/IoTeamPlayer.cpp
 	IO/Io4WPM.cpp
@@ -139,12 +211,15 @@ SET(libgens_IO_H
 	IO/IoManager.hpp
 	IO/IoManager_p.hpp
 	IO/Device.hpp
+	IO/DeviceFactory.hpp
+	# Standard controllers
 	IO/Io3BTN.hpp
 	IO/Io6BTN.hpp
 	IO/Io2BTN.hpp
 	IO/IoMegaMouse.hpp
 	IO/IoXE1AP.hpp
 	IO/IoColecoVision.hpp
+	IO/IoPico.hpp
 	# Multitaps
 	IO/IoTeamPlayer.hpp
 	IO/Io4WPM.hpp
@@ -189,9 +264,6 @@ IF(WIN32)
 		Decompressor/DcRar.hpp
 		Decompressor/UnRAR_dll.hpp
 		)
-	SET(libgens_COMPAT_SRCS
-		Win32/W32U_mini.c
-		)
 ELSE()
 	SET(libgens_DECOMPRESSOR_SRCS
 		${libgens_DECOMPRESSOR_SRCS}
@@ -209,24 +281,23 @@ ENDIF()
 
 ADD_LIBRARY(gens STATIC
 	${libgens_SRCS}
-	${libgens_VDP_SRCS}
-	${libgens_VDP_H}
-	${libgens_IO_SRCS}
-	${libgens_IO_H}
-	${libgens_DECOMPRESSOR_SRCS}
-	${libgens_DECOMPRESSOR_H}
-	${libgens_COMPAT_SRCS}
+	${libgens_UTIL_SRCS} ${libgens_UTIL_H}
+	${libgens_TIMING_SRCS} ${libgens_TIMING_H}
+	${libgens_EMUCONTEXT_SRCS} ${libgens_EMUCONTEXT_H}
+	${libgens_VDP_SRCS} ${libgens_VDP_H}
+	${libgens_IO_SRCS} ${libgens_IO_H}
+	${libgens_DECOMPRESSOR_SRCS} ${libgens_DECOMPRESSOR_H}
 	)
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(gens)
 
-TARGET_LINK_LIBRARIES(gens genstext ${ZLIB_LIBRARY} ${MINIZIP_LIBRARY} zomg)
+TARGET_LINK_LIBRARIES(gens compat genstext ${ZLIB_LIBRARY} ${MINIZIP_LIBRARY} zomg)
 IF(GENS_ENABLE_EMULATION)
 	TARGET_LINK_LIBRARIES(gens starscream mdZ80)
 ENDIF(GENS_ENABLE_EMULATION)
-IF(HAVE_LIBRT)
+IF(HAVE_CLOCK_GETTIME_IN_LIBRT)
 	TARGET_LINK_LIBRARIES(gens ${RT_LIBRARY})
-ENDIF(HAVE_LIBRT)
+ENDIF(HAVE_CLOCK_GETTIME_IN_LIBRT)
 IF(HAVE_ICONV)
 	TARGET_LINK_LIBRARIES(gens ${ICONV_LIBRARY})
 ENDIF(HAVE_ICONV)

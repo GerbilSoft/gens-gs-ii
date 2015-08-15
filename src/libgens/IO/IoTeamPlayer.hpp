@@ -47,17 +47,13 @@ class IoTeamPlayer : public Device
 		 * Should be overridden by subclasses that have
 		 * device-specific data.
 		 */
-		virtual void resetDev(void) override;
-
-		// Device type.
-		// Should be overridden by subclasses.
-		virtual IoManager::IoType_t type(void) const override;
+		virtual void resetDev(void) final;
 
 		/**
 		 * Update the I/O device.
 		 * Runs the internal device update.
 		 */
-		virtual void update(void) override;
+		virtual void update(void) final;
 
 		/**
 		 * Set a sub-device.
@@ -66,7 +62,7 @@ class IoTeamPlayer : public Device
 		 * @param ioDevice I/O device.
 		 * @return 0 on success; non-zero on error.
 		 */
-		virtual int setSubDevice(int virtPort, Device *ioDevice) override;
+		virtual int setSubDevice(int virtPort, Device *ioDevice) final;
 
 	protected:
 		/**
@@ -152,8 +148,10 @@ class IoTeamPlayer : public Device
 			TP_DT_MAX
 		};
 
-		// Connected controllers.
-		// NOTE: This object does NOT own these IoDevices.
+		/**
+		 * Connected controllers.
+		 * NOTE: This object does NOT own these IoDevices.
+		 */
 		Device *pads[4];
 
 		// Team Player data.

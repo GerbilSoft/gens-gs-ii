@@ -31,13 +31,16 @@
 #include "libzomg/Zomg.hpp"
 
 // LibGens includes.
-#include "libgens/MD/EmuMD.hpp"
+#include "libgens/EmuContext/EmuContext.hpp"
+using LibGens::EmuContext;
 
 // LibGens video includes.
 #include "libgens/Vdp/Vdp.hpp"
 #include "libgens/Util/MdFb.hpp"
+#include "libgens/Util/Screenshot.hpp"
 using LibGens::Vdp;
 using LibGens::MdFb;
+using LibGens::Screenshot;
 
 // LibGens CPU includes.
 #include "libgens/cpu/M68K.hpp"
@@ -57,7 +60,6 @@ using LibGens::MdFb;
 #include <QtGui/QImageReader>
 
 // LibZomg's image writer class.
-#include "libzomg/PngWriter.hpp"
 #include "libzomg/img_data.h"
 
 namespace GensQt4 {
@@ -451,7 +453,7 @@ void EmuManager::processQEmuRequest(void)
 			case EmuRequest_t::RQT_AUTOFIX_CHANGE:
 				// Set the Auto Fix Checksum setting.
 				// TODO: Apply changes immediately?
-				LibGens::EmuContext::SetAutoFixChecksum(rq.autoFixChecksum);
+				EmuContext::SetAutoFixChecksum(rq.autoFixChecksum);
 				break;
 
 			case EmuRequest_t::RQT_PALETTE_SETTING:
@@ -491,7 +493,7 @@ void EmuManager::doScreenShot(void)
 	// Get the ROM filename (without extension).
 	// TODO: Remove all extensions, not just the base?
 	// Otherwise, S1.bin.gz will save as S1.bin_000.png.
-	const QString romFilename = QString::fromUtf8(m_rom->filenameBaseNoExt().c_str());
+	const QString romFilename = QString::fromUtf8(m_rom->filename_baseNoExt().c_str());
 
 	// Add the current directory, number, and .png extension.
 	// TODO: Enumerate QImageWriter for supported image formats.
@@ -509,32 +511,9 @@ void EmuManager::doScreenShot(void)
 	} while (QFile::exists(scrFilename));
 
 	// Take the screenshot.
-	// TODO: Separate function to create an img_data from an MdFb.
-	// NOTE: LibZomg doesn't depend on LibGens, so it can't use MdFb directly.
-	// TODO: Store VPix and HPixBegin in the MdFb.
-	Vdp *vdp = gqt4_emuContext->m_vdp;
-	MdFb *fb = vdp->MD_Screen->ref();
-	const int startY = ((240 - vdp->getVPix()) / 2);
-	const int startX = (vdp->getHPixBegin());
-
-	// TODO: Option to save the full framebuffer, not just active display?
-	Zomg_Img_Data_t img_data;
-	img_data.w = vdp->getHPix();
-	img_data.h = vdp->getVPix();
-
-	const MdFb::ColorDepth bpp = fb->bpp();
-	if (bpp == MdFb::BPP_32) {
-		img_data.data = (void*)(fb->lineBuf32(startY) + startX);
-		img_data.pitch = (fb->pxPitch() * sizeof(uint32_t));
-		img_data.bpp = 32;
-	} else {
-		img_data.data = (void*)(fb->lineBuf16(startY) + startX);
-		img_data.pitch = (fb->pxPitch() * sizeof(uint16_t));
-		img_data.bpp = (bpp == MdFb::BPP_16 ? 16 : 15);
-	}
-
-	LibZomg::PngWriter pngWriter;
-	int ret = pngWriter.writeToFile(&img_data, scrFilename.toUtf8().constData());
+	MdFb *fb = gqt4_emuContext->m_vdp->MD_Screen->ref();
+	int ret = Screenshot::toFile(fb, m_rom, scrFilename.toUtf8().constData());
+	fb->unref();
 
 	// Done using the framebuffer.
 	fb->unref();

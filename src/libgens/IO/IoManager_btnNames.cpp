@@ -161,6 +161,23 @@ IoManager::ButtonName_t IoManager::ButtonName(IoType_t ioType, int btnIdx)
 			}
 			break;
 
+		/** Sega Pico. **/
+
+		case IOT_PICO:
+			switch (btnIdx) {
+				case BTNI_UP:			return BTNNAME_UP;
+				case BTNI_DOWN:			return BTNNAME_DOWN;
+				case BTNI_LEFT:			return BTNNAME_LEFT;
+				case BTNI_RIGHT:		return BTNNAME_RIGHT;
+				case BTNI_PICO_BUTTON:		return BTNNAME_PICO_BUTTON;
+				case BTNI_PICO_PAGEDOWN:	return BTNNAME_PICO_PAGEDOWN;
+				case BTNI_PICO_PAGEUP:		return BTNNAME_PICO_PAGEUP;
+				case BTNI_PICO_PEN:		return BTNNAME_PICO_PEN;
+				default:
+					break;
+			}
+			break;
+
 		case IOT_NONE:
 		default:
 			break;
@@ -320,6 +337,23 @@ int IoManager::NextLogicalButton(IoType_t ioType, int btnIdx)
 				default:
 					break;
 			}
+
+		/** Sega Pico. **/
+
+		case IOT_PICO:
+			switch (btnIdx) {
+				case BTNI_UP:			return BTNI_DOWN;
+				case BTNI_DOWN:			return BTNI_LEFT;
+				case BTNI_LEFT:			return BTNI_RIGHT;
+				case BTNI_RIGHT:		return BTNI_PICO_BUTTON;
+				case BTNI_PICO_BUTTON:		return BTNI_PICO_PEN;
+				case BTNI_PICO_PEN:		return BTNI_PICO_PAGEUP;
+				case BTNI_PICO_PAGEUP:		return BTNI_PICO_PAGEDOWN;
+				case BTNI_PICO_PAGEDOWN:
+				default:
+					break;
+			}
+			break;
 
 		default:
 			break;

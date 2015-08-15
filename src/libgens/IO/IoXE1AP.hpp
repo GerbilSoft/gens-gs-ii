@@ -44,28 +44,26 @@ class IoXE1AP : public Device
 		 * Should be overridden by subclasses that have
 		 * device-specific data.
 		 */
-		virtual void resetDev(void) override;
-
-		// Device type.
-		// Should be overridden by subclasses.
-		virtual IoManager::IoType_t type(void) const override;
+		virtual void resetDev(void) final;
 
 		/**
 		 * Update the I/O device.
 		 * Runs the internal device update.
 		 */
-		virtual void update(void) override;
+		virtual void update(void) final;
 
 		/**
 		 * Device port was read.
 		 * Only applies to devices on physical ports.
 		 * Needed for some devices that have partially-unclocked protocols.
 		 */
-		virtual void update_onRead(void);
+		virtual void update_onRead(void) final;
 
 	private:
-		// Latency counter.
-		// Needed due to the unclocked protocol.
+		/**
+		 * Latency counter.
+		 * Needed due to the unclocked protocol.
+		 */
 		int latency;
 };
 

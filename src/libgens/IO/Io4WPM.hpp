@@ -41,15 +41,11 @@ class Io4WPM : public Device
 		Io4WPM &operator=(const Io4WPM &);
 
 	public:
-		// Device type.
-		// Should be overridden by subclasses.
-		virtual IoManager::IoType_t type(void) const override;
-
 		/**
 		 * Update the I/O device.
 		 * Runs the internal device update.
 		 */
-		virtual void update(void) override;
+		virtual void update(void) final;
 
 		// 4WP slave device.
 		// NOTE: This object does NOT own this Device.

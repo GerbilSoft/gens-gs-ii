@@ -96,6 +96,10 @@ void VdpPrivate::updateVdpAddrCache_m5(unsigned int updateMask)
 		// Update the table masks.
 		Win_Tbl_Mask = 0xF000;
 		Spr_Tbl_Mask = 0xFC00;
+
+		// Update the MdFb image parameters.
+		q->MD_Screen->setImgWidth(320);
+		q->MD_Screen->setImgXStart(0);
 	} else {
 		// H32 mode.
 		H_Cell = 32;
@@ -106,6 +110,10 @@ void VdpPrivate::updateVdpAddrCache_m5(unsigned int updateMask)
 		// Update the table masks.
 		Win_Tbl_Mask = 0xF800;
 		Spr_Tbl_Mask = 0xFE00;
+
+		// Update the MdFb image parameters.
+		q->MD_Screen->setImgWidth(256);
+		q->MD_Screen->setImgXStart(32);
 	}
 
 	if (!is128KB()) {

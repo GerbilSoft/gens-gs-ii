@@ -25,12 +25,6 @@
 #include "VdpPalette_p.hpp"
 
 #ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
 #include <windows.h>
 #endif /* _WIN32 */
 
@@ -46,26 +40,7 @@ VdpPalettePrivate::VdpPalettePrivate(VdpPalette *q)
 	, m5m4bits(0)
 	, mdShadowHighlight(false)
 	, isAppOs(false)
-{
-#ifdef _WIN32
-	// Check for an app-based OS.
-	// TODO: More comprehensive Win8 check.
-	// (Use function from KERNEL32 directly?)
-	OSVERSIONINFOA versionInfo;
-	versionInfo.dwOSVersionInfoSize = sizeof(versionInfo);
-	BOOL ret = GetVersionExA(&versionInfo);
-	if (ret) {
-		if (versionInfo.dwMajorVersion > 6 ||
-		    (versionInfo.dwMajorVersion == 6 &&
-		     versionInfo.dwMinorVersion >= 2))
-		{
-			// App-based OS detected.
-			// Use 16 colors to "fit in".
-			isAppOs = true;
-		}
-	}
-#endif /* _WIN32 */
-}
+{ }
 
 /**
  * Apply masking to the background color index.

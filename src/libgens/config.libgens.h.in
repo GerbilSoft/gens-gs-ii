@@ -27,8 +27,8 @@
 /* Define to 1 if you have the `sigaction' function. */
 #cmakedefine HAVE_SIGACTION 1
 
-/* Define to 1 if you have the `rt' library (-lrt). */
-#cmakedefine HAVE_LIBRT 1
+/* Define to 1 if you have the `clock_gettime' function. */
+#cmakedefine HAVE_CLOCK_GETTIME 1
 
 /* Define to 1 if you have the `zlib` library (-lz). */
 #cmakedefine HAVE_ZLIB 1

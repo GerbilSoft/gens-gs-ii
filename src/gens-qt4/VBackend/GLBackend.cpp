@@ -32,7 +32,6 @@
 // LibGens includes.
 #include "libgens/Vdp/Vdp.hpp"
 #include "libgens/Util/Timing.hpp"
-#include "libgens/MD/EmuMD.hpp"
 
 // Win32 requires GL/glext.h for OpenGL 1.2/1.3.
 // TODO: Verify this - MSVC doesn't have glext.h.
@@ -1032,8 +1031,8 @@ void GLBackend::printOsdLine(int x, int y, const QString &msg)
 	glTexCoordPointer(2, GL_FLOAT, 0, txc);
 	glDrawArrays(GL_QUADS, 0, msg.size()*4);
 
-	delete txc;
-	delete vtx;
+	delete[] txc;
+	delete[] vtx;
 }
 
 /**

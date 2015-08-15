@@ -31,15 +31,10 @@ namespace LibGens { namespace IO {
 IoColecoVision::IoColecoVision()
 	: Device()
 {
+	m_type = IoManager::IOT_COLECOVISION;
+
 	// resetDev() can't be called from the base constructor.
 	resetDev();
-}
-
-// Device type.
-// Should be overridden by subclasses.
-IoManager::IoType_t IoColecoVision::type(void) const
-{
-	return IoManager::IOT_COLECOVISION;
 }
 
 /**

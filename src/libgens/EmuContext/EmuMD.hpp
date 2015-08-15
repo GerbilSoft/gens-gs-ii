@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,16 +21,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_MD_EMUMD_HPP__
-#define __LIBGENS_MD_EMUMD_HPP__
+#ifndef __LIBGENS_EMUCONTEXT_EMUMD_HPP__
+#define __LIBGENS_EMUCONTEXT_EMUMD_HPP__
 
-#include "../EmuContext.hpp"
+#include "EmuContext.hpp"
 
 // Needed for FORCE_INLINE.
 #include "../macros/common.h"
 
-namespace LibGens
-{
+namespace LibGens {
 
 class EmuMD : public EmuContext
 {
@@ -38,6 +37,13 @@ class EmuMD : public EmuContext
 		EmuMD(Rom *rom, SysVersion::RegionCode_t region = SysVersion::REGION_US_NTSC);
 		~EmuMD();
 
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		EmuMD(const EmuMD &);
+		EmuMD &operator=(const EmuMD &);
+
+	public:
 		/**
 		 * Perform a soft reset.
 		 * @return 0 on success; non-zero on error.
@@ -124,4 +130,4 @@ class EmuMD : public EmuContext
 
 }
 
-#endif /* __LIBGENS_MD_EMUMD_HPP__ */
+#endif /* __LIBGENS_EMUCONTEXT_EMUMD_HPP__ */

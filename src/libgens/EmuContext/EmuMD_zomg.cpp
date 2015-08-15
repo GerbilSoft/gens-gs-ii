@@ -35,12 +35,11 @@
 #include "cpu/M68K.hpp"
 #include "cpu/Z80_MD_Mem.hpp"
 #include "cpu/Z80.hpp"
-#include "MD/EmuMD.hpp"
 #include "Cartridge/RomCartridgeMD.hpp"
 
 // ZOMG save structs.
 #include "libzomg/Zomg.hpp"
-#include "libzomg/ZomgIni.hpp"
+#include "libzomg/Metadata.hpp"
 #include "libzomg/zomg_vdp.h"
 #include "libzomg/zomg_psg.h"
 #include "libzomg/zomg_ym2612.h"
@@ -50,16 +49,16 @@
 #include "libzomg/zomg_md_z80_ctrl.h"
 #include "libzomg/zomg_md_tmss_reg.h"
 
-// ZOMG image data.
-#include "libzomg/img_data.h"
+// Screenshots.
+#include "Util/Screenshot.hpp"
 
 // C includes.
 #include <stdint.h>
-#include <error.h>
 
 // C includes. (C++ namespace)
 #include <cstdio>
 #include <cstring>
+#include <cerrno>
 
 // OS-specific includes.
 #ifdef _WIN32
@@ -72,9 +71,10 @@
 #include <string>
 using std::string;
 
-// Win32 Unicode Translation Layer.
 #ifdef _WIN32
-#include "Win32/W32U_mini.h"
+// Win32 Unicode Translation Layer.
+// Needed for proper Unicode filename support on Windows.
+#include "libcompat/W32U/W32U_mini.h"
 #endif
 
 #include "Util/byteswap.h"
@@ -84,16 +84,21 @@ namespace LibGens {
 /**
  * Load the current state from a ZOMG file.
  * @param filename	[in] ZOMG file.
- * @return 0 on success; non-zero on error.
- * TODO: Error code constants.
+ * @return 0 on success; negative errno on error.
  */
 int EmuMD::zomgLoad(const utf8_str *filename)
 {
 	// Make sure the file exists.
 	if (access(filename, F_OK))
 		return -ENOENT;
+	if (access(filename, R_OK))
+		return -EACCES;
 
 	// Make sure this is a ZOMG file.
+	// TODO: More comprehensive error if the file simply
+	// can't be opened instead of being the wrong format?
+	// TODO: Better error description for wrong format?
+	// (Maybe use MDP error codes instead of POSIX later...)
 	if (!LibZomg::Zomg::DetectFormat(filename))
 		return -EINVAL;
 
@@ -206,99 +211,45 @@ int EmuMD::zomgLoad(const utf8_str *filename)
 /**
  * Save the current state to a ZOMG file.
  * @param filename	[in] ZOMG file.
- * @return 0 on success; non-zero on error.
- * TODO: Error code constants.
+ * @return 0 on success; negative errno on error.
  */
 int EmuMD::zomgSave(const utf8_str *filename) const
 {
+	// TODO: More comprehensive error reporting.
 	LibZomg::Zomg zomg(filename, LibZomg::Zomg::ZOMG_SAVE);
 	if (!zomg.isOpen())
 		return -ENOENT;
 
 	// Rom object has some useful ROM information.
 	if (!m_rom)
-		return -2;
+		return -EINVAL;
 
 	// Create ZOMG.ini.
-	LibZomg::ZomgIni zomgIni;
-	zomgIni.setSystemId("MD");
-	zomgIni.setCreator("Gens/GS II");
+	LibZomg::Metadata metadata;
+	metadata.setSystemId("MD");
+	// TODO: System metadata flags, e.g. save author name.
 
-	// LibGens version.
-	// TODO: Add easy "MDP version to string" function.
-	char lg_version_str[16];
-	snprintf(lg_version_str, sizeof(lg_version_str), "%d.%d.%d",
-		(LibGens::version >> 24),
-		((LibGens::version >> 16) & 0xFF),
-		(LibGens::version & 0xFF));
-	zomgIni.setCreatorVersion(string(lg_version_str));
-	if (LibGens::version_vcs)
-		zomgIni.setCreatorVcsVersion(string(LibGens::version_vcs));
+	// ROM information.
+	metadata.setRomFilename(m_rom->filename_base());
+	metadata.setRomCrc32(m_rom->rom_crc32());
 
-	// TODO: Get username for debugging builds. Make this optional later.
-	zomgIni.setAuthor("Joe User");
-
-	// TODO: Move base path triming code to LibGensText later?
-	string rom_filename(m_rom->filename());
-#ifdef _WIN32
-	const char chr_slash = '\\';
-#else
-	const char chr_slash = '/';
-#endif
-	size_t slash_pos = rom_filename.find_last_of(chr_slash);
-	if (slash_pos != string::npos) {
-		if ((slash_pos + 1) <= rom_filename.size() && slash_pos > 0) {
-			// Check for another slash.
-			slash_pos = rom_filename.find_last_of(chr_slash, slash_pos - 1);
-			if (slash_pos != string::npos) {
-				// Trim the filename.
-				rom_filename = rom_filename.substr(slash_pos + 1);
-			}
-		} else {
-			// Trim the filename.
-			rom_filename = rom_filename.substr(slash_pos + 1);
-		}
-	}
-	zomgIni.setRomFilename(rom_filename);
-
-	// ROM CRC32.
-	zomgIni.setRomCrc32(m_rom->rom_crc32());
-
-	zomgIni.setDescription("Some description; should probably\nbe left\\blank.");
-	zomgIni.setExtensions("EXT,THAT,DOESNT,EXIST,LOL");
+	// Additional metadata.
+	metadata.setDescription("Some description; should probably\nbe left\\blank.");
+	// TODO: Remove these fake extensions before release.
+	metadata.setExtensions("EXT,THAT,DOESNT,EXIST,LOL");
 
 	// Save ZOMG.ini.
-	int ret = zomg.saveZomgIni(&zomgIni);
+	int ret = zomg.saveZomgIni(&metadata);
 	if (ret != 0) {
 		// Error saving ZOMG.ini.
 		return ret;
 	}
 
 	// Create the preview image.
-	// TODO: Separate function to create an img_data from an MdFb.
-	// NOTE: LibZomg doesn't depend on LibGens, so it can't use MdFb directly.
-	// TODO: Store VPix and HPixBegin in the MdFb.
+	// TODO: Use the existing metadata?
+	// TODO: Check the return value?
 	MdFb *fb = m_vdp->MD_Screen->ref();
-	const int startY = ((240 - m_vdp->getVPix()) / 2);
-	const int startX = (m_vdp->getHPixBegin());
-
-	// TODO: Option to save the full framebuffer, not just active display?
-	Zomg_Img_Data_t img_data;
-	img_data.w = m_vdp->getHPix();
-	img_data.h = m_vdp->getVPix();
-
-	const MdFb::ColorDepth bpp = fb->bpp();
-	if (bpp == MdFb::BPP_32) {
-		img_data.data = (void*)(fb->lineBuf32(startY) + startX);
-		img_data.pitch = (fb->pxPitch() * sizeof(uint32_t));
-		img_data.bpp = 32;
-	} else {
-		img_data.data = (void*)(fb->lineBuf16(startY) + startX);
-		img_data.pitch = (fb->pxPitch() * sizeof(uint16_t));
-		img_data.bpp = (bpp == MdFb::BPP_16 ? 16 : 15);
-	}
-
-	zomg.savePreview(&img_data);
+	Screenshot::toZomg(&zomg, fb, m_rom);
 	fb->unref();
 
 	// TODO: This is MD only!

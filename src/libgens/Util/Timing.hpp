@@ -32,26 +32,18 @@
 // C includes. (C++ namespace)
 #include <ctime>
 
-// OS-specific headers.
-#if defined(_WIN32)
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
-typedef ULONGLONG (WINAPI *GETTICKCOUNT64PROC)(void);
-#elif defined(__APPLE__)
-#include <mach/mach_time.h>
-#endif
-
 namespace LibGens {
 
+class TimingPrivate;
 class Timing
 {
 	public:
 		Timing();
 		~Timing();
 
+	protected:
+		friend class TimingPrivate;
+		TimingPrivate *const d;
 	private:
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
@@ -61,19 +53,20 @@ class Timing
 	public:
 		enum TimingMethod {
 			TM_UNKNOWN,
+
+			// POSIX
 			TM_GETTIMEOFDAY,
-#ifdef HAVE_LIBRT
 			TM_CLOCK_GETTIME,
-#endif /* HAVE_LIBRT */
-#ifdef _WIN32
+
+			// Windows-specific.
 			TM_GETTICKCOUNT,
 			TM_GETTICKCOUNT64,
 			TM_QUERYPERFORMANCECOUNTER,
-#endif /* _WIN32 */
-#ifdef __APPLE__
+
+			// Mac OS X-specific.
 			// http://www.wand.net.nz/~smr26/wordpress/2009/01/19/monotonic-time-in-mac-os-x/
 			TM_MACH_ABSOLUTE_TIME,
-#endif
+
 			TM_MAX
 		};
 
@@ -86,6 +79,13 @@ class Timing
 		 * @return Timing method name. (ASCII)
 		 */
 		static const char *GetTimingMethodName(TimingMethod tMethod);
+
+		/**
+		 * Reset the timer base.
+		 * This will invalidate all previous timer values
+		 * when compared to new timer values.
+		 */
+		void resetBase(void);
 
 		/**
 		 * Get the elapsed time in seconds.
@@ -102,19 +102,15 @@ class Timing
 	protected:
 		TimingMethod m_tMethod;
 
-		// Base value for seconds.
+		// Timer base value.
 		// Needed to prevent overflow.
-		time_t m_tv_sec_base;
-
-#if defined(_WIN32)
-		// GetTickCount64() function pointer.
-		HMODULE m_hKernel32;
-		GETTICKCOUNT64PROC m_pGetTickCount64;
-		// Performance Frequency.
-		LARGE_INTEGER m_perfFreq;
-#elif defined(__APPLE__)
-		// Mach timebase information.
-		mach_timebase_info_data_t m_timebase_info;
+#if !defined(_WIN32) && !defined(__APPLE__)
+		// Timer may be 32-bit on Linux.
+		// TODO: Fix that.
+		time_t m_timer_base;
+#else
+		// Timer is always 64-bit on Windows and Mac OS X.
+		uint64_t m_timer_base;
 #endif
 };
 

@@ -38,6 +38,12 @@
 using std::string;
 using std::u16string;
 
+#ifdef _WIN32
+// Win32 Unicode Translation Layer.
+// Needed for proper Unicode filename support on Windows.
+#include "libcompat/W32U/W32U_mini.h"
+#endif
+
 // Character set conversion.
 #include "libgenstext/Encoding.hpp"
 #include "libgenstext/StringManip.hpp"
@@ -76,7 +82,8 @@ class RomPrivate
 
 	public:
 		// System ID and ROM format detection functions.
-		static Rom::RomFormat DetectFormat(const uint8_t *header, size_t header_size);
+		static Rom::RomFormat DetectFormat(const uint8_t *header, size_t header_size, size_t rom_size);
+		// NOTE: 'header' must be deinterleaved.
 		static Rom::MDP_SYSTEM_ID DetectSystem(const uint8_t *header, size_t header_size, Rom::RomFormat fmt);
 
 		// ROM file and decompressor variables.
@@ -101,8 +108,10 @@ class RomPrivate
 		Rom::RomFormat romFormat_override;
 
 		// ROM information.
+		// TODO: Only keep start/end indexes for base/baseNoExt?
 		std::string filename;		// ROM filename.
-		std::string filenameBaseNoExt;	// ROM filename. (basename; no extension)
+		std::string filename_base;	// ROM filename. (Basename, with extension.)
+		std::string filename_baseNoExt;	// ROM filename. (Basename, no extension.)
 		unsigned int romSize;		// ROM size.
 
 		// ROM names.
@@ -116,6 +125,13 @@ class RomPrivate
 		 */
 		int regionCode;
 		static int DetectRegionCodeMD(const char countryCodes[16]);
+
+		/**
+		 * Decode a Super Magic Drive interleaced block.
+		 * @param dest Destination block. (Must be 16 KB.)
+		 * @param src Source block. (Must be 16 KB.)
+		 */
+		void DecodeSMDBlock(uint8_t *dest, const uint8_t *src);
 
 		/** ROM header functions. **/
 		int loadRomHeader(Rom::MDP_SYSTEM_ID sysOverride, Rom::RomFormat fmtOverride);
@@ -191,8 +207,9 @@ RomPrivate::RomPrivate(Rom *q, const utf8_str *filename,
 	// Save the filename for later.
 	this->filename = string(filename);
 
-	// Remove the directories and extension from the ROM filename.
-	filenameBaseNoExt = LibGensText::FilenameNoExt(this->filename);
+	// Cache a few forms of the filename.
+	filename_base = LibGensText::FilenameBase(this->filename);
+	filename_baseNoExt = LibGensText::FilenameBaseNoExt(this->filename);
 
 	// Open the ROM file.
 	file = fopen(filename, "rb");
@@ -319,19 +336,19 @@ RomPrivate::~RomPrivate()
  * Detect a ROM's format.
  * @param header ROM header.
  * @param header_size ROM header size.
+ * @param rom_size ROM size. (Used for interleaved format detection.)
  * @return ROM format.
  */
-Rom::RomFormat RomPrivate::DetectFormat(const uint8_t *header, size_t header_size)
+Rom::RomFormat RomPrivate::DetectFormat(const uint8_t *header, size_t header_size, size_t rom_size)
 {
 	/** ISO-9660 (CD-ROM) check. **/
 	// ISO-9660 magic from file-5.03: ftp://ftp.astron.com/pub/file/
-	const char iso9660_magic[] = {'C', 'D', '0', '0', '1'};
-	const char segacd_magic[] = {'S', 'E', 'G', 'A', 'D', 'I', 'S', 'C', 'S', 'Y', 'S', 'T', 'E', 'M'};
-	
-	if (header_size >= 65536)
-	{
+	static const char iso9660_magic[] = {'C', 'D', '0', '0', '1'};
+	static const char segacd_magic[] = {'S', 'E', 'G', 'A', 'D', 'I', 'S', 'C', 'S', 'Y', 'S', 'T', 'E', 'M'};
+
+	if (header_size >= 65536) {
 		// Check for Sega CD images.
-		
+
 		// ISO-9660 magic.
 		if (!memcmp(&header[0x9311], iso9660_magic, sizeof(iso9660_magic)))
 			return Rom::RFMT_CD_BIN_2352;
@@ -341,7 +358,7 @@ Rom::RomFormat RomPrivate::DetectFormat(const uint8_t *header, size_t header_siz
 			return Rom::RFMT_CD_ISO_2352;
 		if (!memcmp(&header[0x8001], iso9660_magic, sizeof(iso9660_magic)))
 			return Rom::RFMT_CD_ISO_2048;
-		
+
 		// SEGADISCSYSTEM magic.
 		// NOTE: We can't reliably detect the sector size using this method.
 		// Assume 2352-byte sectors for BIN, 2048-byte sectors for ISO.
@@ -351,122 +368,93 @@ Rom::RomFormat RomPrivate::DetectFormat(const uint8_t *header, size_t header_siz
 			return Rom::RFMT_CD_ISO_2048;
 	}
 	/** END: ISO-9660 (CD-ROM) check. **/
-	
-	/** SMD-format (.SMD) ROM check. **/
-	if (header_size >= 0x4200)
-	{
+
+	/**
+	 * SMD-format (.SMD) ROM check.
+	 * ROM size must be a multiple of 16 KB,
+	 * excluding the 512-byte header.
+	 */
+	if (header_size >= 0x4200 && ((rom_size - 512) % 16384) == 0) {
 		// 16,384 bytes (one SMD bank) + 512 bytes (SMD header).
 		const char sega_magic[] = {'S', 'E', 'G', 'A'};
-		if (memcmp(&header[0x100], sega_magic, sizeof(sega_magic)) != 0)
-		{
+		if (memcmp(&header[0x100], sega_magic, sizeof(sega_magic)) != 0) {
 			// "SEGA" not found in the ROM header.
 			// This is possibly an SMD-format ROM.
 			if ((header[0x08] == 0xAA && header[0x09] == 0xBB && header[0x0A] == 0x06) ||
 			    (header[0x280] == 'E' && header[0x281] == 'A'))
 			{
 				// This is an SMD-format ROM.
-				if (header[0x02] == 0x00)
+				// TODO: Add a property "headerSize" indicating how many
+				// bytes to reserve for the header when loading a ROM.
+				// TODO: Respect the "number of ROM banks" field?
+				if (header[0x02] == 0x00) {
 					return Rom::RFMT_SMD;
-				else
+				} else {
 					return Rom::RFMT_SMD_SPLIT;
+				}
 			}
 		}
 	}
-	
+
 	/** MGD-format (.MD) ROM check. */
-	if (header_size >= 0x100)
-	{
+	// NOTE: ".md" is used by No-Intro for plain binary dumps
+	// TODO: Make sure rom_size is even?
+	if (header_size >= 0x100) {
 		// MGD format is interleaved without blocks.
 		// The odd bytes in the MD header are located at 0x80.
-		if (header[0x80] == 'E' && header[0x81] == 'A')
-		{
+		if (header[0x80] == 'E' && header[0x81] == 'A') {
 			// Odd bytes of "SEGA" found in the ROM header.
 			// This is probably an MGD ROM.
 			return Rom::RFMT_MGD;
 		}
 	}
-	
+
 	// Assuming plain binary ROM.
 	return Rom::RFMT_BINARY;
 }
 
 /**
  * Detect a ROM's system ID.
- * @param header ROM header.
+ * @param header ROM header. (deinterleaved)
  * @param header_size ROM header size.
  * @param fmt ROM format.
  * @return System ID.
  */
 Rom::MDP_SYSTEM_ID RomPrivate::DetectSystem(const uint8_t *header, size_t header_size, Rom::RomFormat fmt)
 {
-	if (fmt >= Rom::RFMT_CD_CUE)
-	{
+	if (fmt >= Rom::RFMT_CD_CUE) {
 		// CD-ROM. Assume Sega CD.
 		// TODO: Sega CD 32X detection.
 		return Rom::MDP_SYSTEM_MCD;
 	}
-	
+
 	// TODO: SMS/GG/SG-1000 detection.
-	
-	if (fmt == Rom::RFMT_SMD && header_size >= 0x4200)
-	{
-		// SMD format check.
-		if (header[0x0300] == 0xF9)
+
+	// 'header' has already been deinterleaved by the calling function.
+
+	// Check for 32X.
+	static const char _32X_magic[] = {'3', '2', 'X'};
+	static const char mars_magic[] = {'M', 'A', 'R', 'S'};
+	if (header_size >= 0x412 && header[0x0200] == 0x4E) {
+		if (!memcmp(&header[0x0105], _32X_magic, sizeof(_32X_magic)) ||
+		    !memcmp(&header[0x040E], mars_magic, sizeof(mars_magic)))
 		{
-			if ((header[0x0282] == '3' && header[0x0283] == 'X') ||
-			    (header[0x0407] == 'A' && header[0x0408] == 'S'))
-			{
-				// 32X ROM.
-				return Rom::MDP_SYSTEM_32X;
-			}
-		}
-		else
-		{
-			// Assume MD.
-			return Rom::MDP_SYSTEM_MD;
+			// 32X ROM.
+			return Rom::MDP_SYSTEM_32X;
 		}
 	}
-	else if (fmt == Rom::RFMT_MGD && header_size >= 0x200)
-	{
-		// MGD format check.
-		if (header[0x100] == 0xF9)
-		{
-			if ((header[0x0082] == '3' && header[0x0083] == 'X') ||
-			    (header[0x0207] == 'A' && header[0x0208] == 'S'))
-			{
-				// 32X ROM.
-				return Rom::MDP_SYSTEM_32X;
-			}
-		}
-		else
-		{
-			// Assume MD.
-			return Rom::MDP_SYSTEM_MD;
+
+	// Check for Pico.
+	const char pico_magic[] = {'P', 'I', 'C', 'O'};
+	if (header_size >= 0x200) {
+		if (!memcmp(&header[0x0105], pico_magic, sizeof(pico_magic))) {
+			// Pico ROM.
+			return Rom::MDP_SYSTEM_PICO;
 		}
 	}
-	else
-	{
-		// Plain binary format check.
-		const char _32X_magic[] = {'3', '2', 'X'};
-		const char mars_magic[] = {'M', 'A', 'R', 'S'};
-		if (header_size >= 0x412 && header[0x0200] == 0x4E)
-		{
-			if (!memcmp(&header[0x0105], _32X_magic, sizeof(_32X_magic)) ||
-			    !memcmp(&header[0x040E], mars_magic, sizeof(mars_magic)))
-			{
-				// 32X ROM.
-				return Rom::MDP_SYSTEM_32X;
-			}
-		}
-		else
-		{
-			// Assume MD.
-			return Rom::MDP_SYSTEM_MD;
-		}
-	}
-	
-	// If all else fails, assume MD.
-	// TODO: Add support for SMS, GG, Pico, etc.
+
+	// Assume MD.
+	// TODO: Add support for SMS, GG, etc.
 	return Rom::MDP_SYSTEM_MD;
 }
 
@@ -527,6 +515,40 @@ int RomPrivate::DetectRegionCodeMD(const char countryCodes[16])
 }
 
 /**
+ * Decode a Super Magic Drive interleaved block.
+ * @param dest Destination block. (Must be 16 KB.)
+ * @param src Source block. (Must be 16 KB.)
+ */
+void RomPrivate::DecodeSMDBlock(uint8_t *dest, const uint8_t *src)
+{
+	// First 8 KB of the source block is ODD bytes.
+	const uint8_t *end_block = src + 8192;
+	for (uint8_t *odd = dest + 1; src < end_block; odd += 16, src += 8) {
+		*(odd +  0) = *(src + 0);
+		*(odd +  2) = *(src + 1);
+		*(odd +  4) = *(src + 2);
+		*(odd +  6) = *(src + 3);
+		*(odd +  8) = *(src + 4);
+		*(odd + 10) = *(src + 5);
+		*(odd + 12) = *(src + 6);
+		*(odd + 14) = *(src + 7);
+	}
+
+	// Second 8 KB of the source block is EVEN bytes.
+	end_block = src + 8192;
+	for (uint8_t *even = dest; src < end_block; even += 16, src += 8) {
+		*(even +  0) = *(src + 0);
+		*(even +  2) = *(src + 1);
+		*(even +  4) = *(src + 2);
+		*(even +  6) = *(src + 3);
+		*(even +  8) = *(src + 4);
+		*(even + 10) = *(src + 5);
+		*(even + 12) = *(src + 6);
+		*(even + 14) = *(src + 7);
+	}
+}
+
+/**
  * Load the ROM header from the selected ROM file.
  * @param sysOverride System override.
  * @param fmtOverride Format override.
@@ -534,49 +556,97 @@ int RomPrivate::DetectRegionCodeMD(const char countryCodes[16])
  */
 int RomPrivate::loadRomHeader(Rom::MDP_SYSTEM_ID sysOverride, Rom::RomFormat fmtOverride)
 {
-	if (!z_entry_sel)
-	{
+	if (!z_entry_sel) {
 		// No file selected!
 		return -1;
 	}
-	
+
 	// Save the override values as the detected system and ROM format.
 	// If specified as UNKNOWN, they will be detected later.
 	sysId = sysOverride;
 	romFormat = fmtOverride;
 	
 	// Get the ROM size.
-	// TODO: If it's an MD ROM over 6 MB, return an error.
 	// TODO: Save the internal filename for multi-file archives.
 	romSize = z_entry_sel->filesize;
-	
+
 	// Load the ROM header for detection purposes.
-	uint8_t header[ROM_HEADER_SIZE];
-	size_t header_size;
-	int ret = decomp->getFile(z_entry_sel, header, sizeof(header), &header_size);
-	if (ret != 0 || header_size == 0)
-	{
-		// File read error.
+	static const size_t ROM_HEADER_SIZE = 65536+512;
+	uint8_t *header = (uint8_t*)malloc(ROM_HEADER_SIZE);
+	if (!header) {
+		// Memory allocation error.
 		// TODO: Error code constants.
 		return -2;
 	}
-	
+
+	size_t header_size;
+	int ret = decomp->getFile(z_entry_sel, header, ROM_HEADER_SIZE, &header_size);
+	if (ret != 0 || header_size == 0) {
+		// File read error.
+		// TODO: Error code constants.
+		free(header);
+		return -3;
+	}
+
 	// If the header size is smaller than the header buffer,
 	// clear the rest of the header buffer.
-	if (header_size < sizeof(header))
-		memset(&header[header_size], 0x00, (sizeof(header) - header_size));
-	
-	if (romFormat == Rom::RFMT_UNKNOWN)
-		romFormat = DetectFormat(header, header_size);
-	if (sysId == Rom::MDP_SYSTEM_UNKNOWN)
+	if (header_size < sizeof(header)) {
+		memset(&header[header_size], 0x00, (ROM_HEADER_SIZE - header_size));
+	}
+
+	// Detect the ROM format first.
+	if (romFormat == Rom::RFMT_UNKNOWN) {
+		romFormat = DetectFormat(header, header_size, romSize);
+	}
+
+	// Adjust the ROM size for certain interleaved ROM formats.
+	switch (romFormat) {
+		case Rom::RFMT_SMD:
+		case Rom::RFMT_SMD_SPLIT: {
+			// Super Magic Drive.
+			// NOTE: Split SMD isn't supported, but it has
+			// the 512-byte header, so we should handle it
+			// the same as regular SMD for now.
+			if (romSize > 512) {
+				romSize -= 512;
+			}
+
+			// Deinterleave the ROM header.
+			// Note that the actual SMD data starts at byte 512.
+			static const size_t BIN_HEADER_SIZE = 65536;
+			uint8_t *smd_header = header;
+			header = (uint8_t*)malloc(BIN_HEADER_SIZE);
+			header_size = BIN_HEADER_SIZE;
+			// TODO: Use pointer arithmetic?
+			for (size_t i = 0; i < BIN_HEADER_SIZE; i += 16384) {
+				DecodeSMDBlock(&header[i], &smd_header[i + 512]);
+			}
+			free(smd_header);
+		}
+
+		case Rom::RFMT_MGD:
+			// Multi Game Doctor.
+			// TODO: Need to read data from the second half of the ROM...
+			break;
+
+		default:
+			break;
+	}
+
+	// Detect the system ID after adjusting for interleaved formats.
+	if (sysId == Rom::MDP_SYSTEM_UNKNOWN) {
 		sysId = DetectSystem(header, header_size, romFormat);
-	
+	}
+
+	// TODO: If it's an MD ROM over 32 MB, return an error.
+
 	/** MD-only stuff here. **/
-	
+
 	// Load the ROM header information.
 	readHeaderMD(header, header_size);
-	
+
 	// ROM header loaded.
+	free(header);
 	return 0;
 }
 
@@ -673,6 +743,9 @@ Rom::~Rom()
  * Load the ROM image into a buffer.
  * @param buf Buffer.
  * @param siz Buffer size.
+ * For most ROM formats, siz should be equal to the ROM size.
+ * For SMD format, siz should be ROM size + 512, since the header
+ * is read into the buffer as well. It's removed afterwards.
  * @return Positive value indicating amount of data read on success; 0 or negative on error.
  * TODO: Error code constants!
  */
@@ -692,17 +765,67 @@ int Rom::loadRom(void *buf, size_t siz)
 		return -4;
 	}
 
-	if (d->romFormat != RFMT_BINARY) {
-		// Unsupported ROM format.
-		return -5;
-	}
-
 	// Load the ROM image.
 	// TODO: Error handling.
 	size_t ret_siz = 0;
-	d->decomp->getFile(d->z_entry_sel, buf, siz, &ret_siz);
+	switch (d->romFormat) {
+		case Rom::RFMT_BINARY:
+			// Plain binary ROM file.
+ 			d->decomp->getFile(d->z_entry_sel, buf, siz, &ret_siz);
+			break;
+
+		case RFMT_SMD:
+		case RFMT_SMD_SPLIT: {
+			// TODO: Split SMD isn't supported.
+			// Handling it as plain SMD for now.
+			if (siz < (d->romSize + 512)) {
+				// Not enough space for the SMD header.
+				return -4;
+			}
+
+			// Read the SMD data.
+			d->decomp->getFile(d->z_entry_sel, buf, siz, &ret_siz);
+			if (ret_siz <= 512) {
+				// ROM is too small.
+				ret_siz = 0;
+				break;
+			} else {
+				// Skip the header.
+				ret_siz -= 512;
+			}
+
+			// Temporary SMD block buffer.
+			uint8_t *smd_block = (uint8_t*)malloc(16384);
+
+			// Process 16 KB blocks.
+			// NOTE: If ret_siz isn't a multiple of 16 KB,
+			// the last block will not be decoded properly.
+			size_t remain = ret_siz;
+			const uint8_t *buf_read = &((uint8_t*)buf)[512];
+			uint8_t *buf_write = (uint8_t*)buf;
+			for (; remain >= 16384; remain -= 16384, buf_read += 16384, buf_write += 16384) {
+				memcpy(smd_block, buf_read, 16384);
+				d->DecodeSMDBlock(buf_write, smd_block);
+			}
+
+			if (remain > 0) {
+				// SMD isn't a multiple of 16 KB.
+				// The last block will not be decoded properly.
+				// (...or at all.)
+				memmove(buf_write, buf_read, remain);
+			}
+
+			free(smd_block);
+			break;
+               }
+
+		default:
+			// Unsupported ROM format.
+			return -5;
+	}
 
 	// Calculate the CRC32.
+	// TODO: Also MD5?
 	d->rom_crc32 = crc32(0, (const Bytef*)buf, siz);
 
 	// Return the number of bytes read.
@@ -765,12 +888,19 @@ string Rom::filename(void) const
 
 /**
  * Get the ROM filename.
- * (Basename, no extension)
- * TODO: Rename to filename_baseNoExt()?
+ * (Basename, with extension.)
  * @return ROM filename (UTF-8), or nullptr on error.
  */
-string Rom::filenameBaseNoExt(void) const
-	{ return d->filenameBaseNoExt; }
+string Rom::filename_base(void) const
+	{ return d->filename_base; }
+
+/**
+ * Get the ROM filename.
+ * (Basename, no extension.)
+ * @return ROM filename (UTF-8), or nullptr on error.
+ */
+string Rom::filename_baseNoExt(void) const
+	{ return d->filename_baseNoExt; }
 
 /**
  * Get the ROM filename of the selected file in a multi-file archive.
@@ -787,6 +917,21 @@ string Rom::z_filename(void) const
 
 /**
  * Get the ROM filename of the selected file in a multi-file archive.
+ * (Basename, with extension.)
+ * @return ROM filename (UTF-8), or empty string on error.
+ */
+string Rom::z_filename_base(void) const
+{
+	// TODO: Cache it?
+	string tmp = z_filename();
+	if (!tmp.empty()) {
+		tmp = LibGensText::FilenameBase(tmp);
+	}
+	return tmp;
+}
+
+/**
+ * Get the ROM filename of the selected file in a multi-file archive.
  * (Basename, no extension.)
  * @return ROM filename (UTF-8), or empty string on error.
  */
@@ -795,7 +940,7 @@ string Rom::z_filename_baseNoExt(void) const
 	// TODO: Cache it?
 	string tmp = z_filename();
 	if (!tmp.empty()) {
-		tmp = LibGensText::FilenameNoExt(tmp);
+		tmp = LibGensText::FilenameBaseNoExt(tmp);
 	}
 	return tmp;
 }

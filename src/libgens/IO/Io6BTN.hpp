@@ -47,24 +47,20 @@ class Io6BTN : public Device
 		 * Should be overridden by subclasses that have
 		 * device-specific data.
 		 */
-		virtual void resetDev(void) override;
-
-		// Device type.
-		// Should be overridden by subclasses.
-		virtual IoManager::IoType_t type(void) const override;
+		virtual void resetDev(void) final;
 
 		/**
 		 * Update the I/O device.
 		 * Runs the internal device update.
 		 */
-		virtual void update(void) override;
+		virtual void update(void) final;
 
 		/**
 		 * One scanline worth of time has passed.
 		 * Needed for some devices that reset after a period of time,
 		 * e.g. 6BTN controllers.
 		 */
-		virtual void update_onScanline(void) override;
+		virtual void update_onScanline(void) final;
 
 	private:
 		// Scanline counter.

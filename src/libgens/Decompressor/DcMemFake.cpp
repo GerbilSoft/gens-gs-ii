@@ -31,7 +31,7 @@
 #ifdef _WIN32
 // Win32 requires io.h for dup() and close().
 #include <io.h>
-#endif /* _WIn32 */
+#endif /* _WIN32 */
 
 // C++ includes.
 #include <string>

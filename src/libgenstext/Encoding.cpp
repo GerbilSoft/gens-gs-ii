@@ -2,7 +2,7 @@
  * libgenstext: Gens/GS II Text Manipulation Library.                      *
  * Encoding.cpp: Character encoding functions.                             *
  *                                                                         *
- * Copyright (c) 2009-2013 by David Korth.                                 *
+ * Copyright (c) 2009-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -26,10 +26,6 @@
 
 // Determine which character set decoder to use.
 #if defined(_WIN32)
-# define WIN32_LEAN_AND_MEAN
-# ifndef NOMINMAX
-#  define NOMINMAX
-# endif
 # include <windows.h>
 #elif defined(HAVE_ICONV)
 #  include <iconv.h>
@@ -49,14 +45,13 @@ using std::u16string;
 #include <cstdlib>
 #include <cstring>
 
-namespace LibGensText
-{
+namespace LibGensText {
 
 #if defined(_WIN32)
 /**
  * Convert a null-terminated multibyte string to UTF-16.
- * @param mbs Multibyte string. (null-terminated)
- * @param codepage mbs codepage.
+ * @param mbs		[in] Multibyte string. (null-terminated)
+ * @param codepage	[in] mbs codepage.
  * @return Allocated UTF-16 string, or NULL on error. (Must be free()'d after use!)
  */
 static wchar_t *W32U_mbs_to_UTF16(const char *mbs, unsigned int codepage)
@@ -71,9 +66,33 @@ static wchar_t *W32U_mbs_to_UTF16(const char *mbs, unsigned int codepage)
 }
 
 /**
+ * Convert a multibyte string to UTF-16.
+ * @param mbs		[in] Multibyte string.
+ * @param cbMbs		[in] Length of mbs, in bytes.
+ * @param codepage	[in] mbs codepage.
+ * @param cchWcs_ret	[out, opt] Number of characters in the returned string.
+ * @return Allocated UTF-16 string, or NULL on error. (Must be free()'d after use!)
+ * NOTE: Returned string might NOT be NULL-terminated!
+ */
+static wchar_t *W32U_mbs_to_UTF16(const char *mbs, int cbMbs,
+		unsigned int codepage, int *cchWcs_ret)
+{
+	int cchWcs = MultiByteToWideChar(codepage, 0, mbs, cbMbs, nullptr, 0);
+	if (cchWcs <= 0)
+		return nullptr;
+
+	wchar_t *wcs = (wchar_t*)malloc(cchWcs * sizeof(wchar_t));
+	MultiByteToWideChar(codepage, 0, mbs, cbMbs, wcs, cchWcs);
+
+	if (cchWcs_ret)
+		*cchWcs_ret = cchWcs;
+	return wcs;
+}
+
+/**
  * Convert a null-terminated UTF-16 string to multibyte.
- * @param wcs UTF-16 string. (null-terminated)
- * @param codepage mbs codepage.
+ * @param wcs		[in] UTF-16 string. (null-terminated)
+ * @param codepage	[in] mbs codepage.
  * @return Allocated multibyte string, or NULL on error. (Must be free()'d after use!)
  */
 static char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage)
@@ -81,9 +100,33 @@ static char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage)
 	int cbMbs = WideCharToMultiByte(codepage, 0, wcs, -1, nullptr, 0, nullptr, nullptr);
 	if (cbMbs <= 0)
 		return nullptr;
-
+ 
 	char *mbs = (char*)malloc(cbMbs);
 	WideCharToMultiByte(codepage, 0, wcs, -1, mbs, cbMbs, nullptr, nullptr);
+	return mbs;
+}
+
+/**
+ * Convert a UTF-16 string to multibyte.
+ * @param wcs		[in] UTF-16 string.
+ * @param cchWcs	[in] Length of wcs, in characters.
+ * @param codepage	[in] mbs codepage.
+ * @param cbMbs_ret	[out, opt] Number of bytes in the returned string.
+ * @return Allocated multibyte string, or NULL on error. (Must be free()'d after use!)
+ * NOTE: Returned string might NOT be NULL-terminated!
+ */
+static char *W32U_UTF16_to_mbs(const wchar_t *wcs, int cchWcs,
+		unsigned int codepage, int *cbMbs_ret)
+{
+	int cbMbs = WideCharToMultiByte(codepage, 0, wcs, cchWcs, nullptr, 0, nullptr, nullptr);
+	if (cbMbs <= 0)
+		return nullptr;
+
+	char *mbs = (char*)malloc(cbMbs);
+	WideCharToMultiByte(codepage, 0, wcs, cchWcs, mbs, cbMbs, nullptr, nullptr);
+
+	if (cbMbs_ret)
+		*cbMbs_ret = cbMbs;
 	return mbs;
 }
 
@@ -177,7 +220,7 @@ static char *gens_iconv(const char *src, size_t src_bytes_len,
  * @param src UTF-16 string. (host-endian)
  * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
  */
-std::string Utf16_to_Utf8(const std::u16string& src)
+std::string Utf16_to_Utf8(const u16string& src)
 {
 	// The raw char16_t* version is used in Dc7z.cpp,
 	// so we'll make the std::u16string version a wrapper
@@ -193,57 +236,96 @@ std::string Utf16_to_Utf8(const std::u16string& src)
  */
 string Utf16_to_Utf8(const char16_t *src, size_t len)
 {
-	char *mbs = nullptr;
 #if defined(_WIN32)
 	// Win32 version.
-	// TODO: Use the "len" parameter.
-	mbs = W32U_UTF16_to_mbs((wchar_t*)src, CP_UTF8);
+	int cbMbs;
+	char *mbs = W32U_UTF16_to_mbs((wchar_t*)src, (int)len, CP_UTF8, &cbMbs);
+	if (!mbs) {
+		return string();
+	}
+	string ret(mbs, cbMbs);
+	free(mbs);
+	return ret;
 #elif defined(HAVE_ICONV)
 	// iconv version.
-	mbs = gens_iconv((char*)src, len * 2, UTF16_ENCODING, "UTF-8");
+	char *mbs = gens_iconv((char*)src, len * 2, UTF16_ENCODING, "UTF-8");
+	if (!mbs) {
+		return string();
+	}
+	string ret(mbs);
+	free(mbs);
+	return ret;
 #else
 	// No translation supported.
 	// TODO: #error?
 	return string();
 #endif
-
-	if (!mbs)
-		return string();
-
-	// Convert the allocated data to an std::string.
-	string ret(mbs);
-	free(mbs);
-	return ret;
 }
 
 /**
  * Convert UTF-8 to UTF-16 (host-endian).
- * @param src UTF-8 string. (null-terminated)
+ * @param src UTF-8 string.
  * @return UTF-16 string, or empty string on error.
  */
 u16string Utf8_to_Utf16(const string& src)
 {
-	char16_t *wcs = nullptr;
 #if defined(_WIN32)
 	// Win32 version. Use W32U_mini.
-	// TODO: Use the source string's length.
-	wcs = (char16_t*)W32U_mbs_to_UTF16(src.c_str(), CP_UTF8);
+	int cchWcs;
+	char16_t *wcs = (char16_t*)W32U_mbs_to_UTF16(src.c_str(), (int)src.size(), CP_UTF8, &cchWcs);
+	if (!wcs) {
+		return u16string();
+	}
+	u16string ret(wcs, cchWcs);
+	free(wcs);
+	return ret;
 #elif defined(HAVE_ICONV)
 	// iconv version.
-	wcs = (char16_t*)gens_iconv(src.data(), src.size(), "UTF-8", UTF16_ENCODING);
+	char16_t *wcs = (char16_t*)gens_iconv(src.data(), src.size(), "UTF-8", UTF16_ENCODING);
+	if (!wcs) {
+		return u16string();
+	}
+	u16string ret(wcs);
+	free(wcs);
+	return ret;
 #else
 	// No translation supported.
 	// TODO: #error?
 	return u16string();
 #endif
+}
 
-	if (!wcs)
+/**
+ * Convert UTF-8 to UTF-16 (host-endian).
+ * @param src UTF-8 string.
+ * @return UTF-16 string, or empty string on error.
+ */
+u16string Utf8_to_Utf16(const char *src, size_t len)
+{
+#if defined(_WIN32)
+	// Win32 version. Use W32U_mini.
+	int cchWcs;
+	char16_t *wcs = (char16_t*)W32U_mbs_to_UTF16(src, len, CP_UTF8, &cchWcs);
+	if (!wcs) {
 		return u16string();
-
-	// Convert the allocated data to an std::u16string.
+	}
+	u16string ret(wcs, cchWcs);
+	free(wcs);
+	return ret;
+#elif defined(HAVE_ICONV)
+	// iconv version.
+	char16_t *wcs = (char16_t*)gens_iconv(src, len, "UTF-8", UTF16_ENCODING);
+	if (!wcs) {
+		return u16string();
+	}
 	u16string ret(wcs);
 	free(wcs);
 	return ret;
+#else
+	// No translation supported.
+	// TODO: #error?
+	return u16string();
+#endif
 }
 
 /**

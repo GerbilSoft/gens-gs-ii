@@ -34,6 +34,9 @@ namespace LibGens { namespace IO {
 Io4WPS::Io4WPS()
 	: Device()
 {
+	m_type = IoManager::IOT_4WP_SLAVE;
+	m_hasDPad = false;
+
 	// No controllers are associated initially.
 	memset(pads, 0, sizeof(pads));
 
@@ -53,13 +56,6 @@ void Io4WPS::resetDev(void)
 	Device::resetDev();	// TODO: typedef super?
 	// Default to device detection.
 	player = 0x7;
-}
-
-// Device type.
-// Should be overridden by subclasses.
-IoManager::IoType_t Io4WPS::type(void) const
-{
-	return IoManager::IOT_4WP_SLAVE;
 }
 
 /**

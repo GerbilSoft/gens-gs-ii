@@ -684,7 +684,7 @@ void GeneralConfigWindow::on_btnExtPrgUnRAR_clicked(void)
 #else
 			tr("rar or unrar") + QLatin1String(" (rar unrar);;") +
 #endif
-			tr("All Files") + QLatin1String(" (*.*)"));
+			tr("All files") + QLatin1String(" (*.*)"));
 
 	if (filename.isEmpty())
 		return;

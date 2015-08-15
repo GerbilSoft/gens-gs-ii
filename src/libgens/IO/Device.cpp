@@ -26,6 +26,8 @@
 namespace LibGens { namespace IO {
 
 Device::Device()
+	: m_type(IoManager::IOT_NONE)
+	, m_hasDPad(true)
 {
 	// TODO: Add pointer-based 'copy' constructor
 	// to copy MD-side data.
@@ -59,6 +61,7 @@ void Device::reset(void)
 void Device::resetDev(void) {
 	counter = 0;
 	buttons = ~0;
+	buttons_prev = ~0;
 	deviceData = 0xFF;
 	updateTristateInputCache();
 }
@@ -67,7 +70,24 @@ void Device::resetDev(void) {
 // Should be overridden by subclasses.
 IoManager::IoType_t Device::type(void) const
 {
-	return IoManager::IOT_NONE;
+	return m_type;
+}
+
+/**
+ * Does this device have a standard D-Pad as buttons 0-3?
+ *
+ * This is used by IoManager to determine if the D-Pad
+ * buttons should be constrained such that the user can't
+ * press both U+D or L+R at the same time.
+ *
+ * The default is true. Devices that don't have a standard
+ * D-Pad should set m_hasDPad = false in their constructor.
+ *
+ * @return True if this device has a standard D-Pad.
+ */
+bool Device::hasDPad(void) const
+{
+	return m_hasDPad;
 }
 
 /**
@@ -78,6 +98,7 @@ IoManager::IoType_t Device::type(void) const
 void Device::update(uint32_t buttons)
 {
 	// Save the buttons and update the device.
+	this->buttons_prev = this->buttons;
 	this->buttons = buttons;
 	update();
 }

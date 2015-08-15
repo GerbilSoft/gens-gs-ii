@@ -43,15 +43,11 @@ class IoColecoVision : public Device
 		IoColecoVision &operator=(const IoColecoVision &);
 
 	public:
-		// Device type.
-		// Should be overridden by subclasses.
-		virtual IoManager::IoType_t type(void) const override;
-
 		/**
 		 * Update the I/O device.
 		 * Runs the internal device update.
 		 */
-		virtual void update(void) override;
+		virtual void update(void) final;
 
 	private:
 		// TODO: Quadrature encoder.

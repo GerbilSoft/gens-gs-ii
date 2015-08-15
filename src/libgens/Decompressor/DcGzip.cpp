@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -28,11 +28,6 @@
 #include <string.h>
 #include <stdint.h>
 
-#ifdef _WIN32
-// Win32 requires io.h for dup() and close().
-#include <io.h>
-#endif /* _WIn32 */
-
 // C++ includes.
 #include <string>
 using std::string;
@@ -47,8 +42,16 @@ using std::string;
 #define gzclose_w(file) gzclose(file)
 #endif
 
-namespace LibGens
-{
+#ifdef _WIN32
+// Win32 requires io.h for dup() and close().
+#include <io.h>
+// Win32 Unicode Translation Layer.
+// Needed for proper Unicode filename support on Windows.
+// Also required for large file support.
+#include "libcompat/W32U/W32U_mini.h"
+#endif /* _WIN32 */
+
+namespace LibGens {
 
 /**
  * Create a new DcGzip object.
@@ -61,7 +64,7 @@ DcGzip::DcGzip(FILE *f, const utf8_str *filename)
 {
 	// Seek to the beginning of the file and flush the stream.
 	// Otherwise, zlib won't properly detect it as gzipped.
-	fseek(f, 0, SEEK_SET);
+	fseeko(f, 0, SEEK_SET);
 	fflush(f);
 
 	// Duplicate the file handle for gzdopen.
@@ -105,8 +108,7 @@ DcGzip::~DcGzip()
 bool DcGzip::DetectFormat(FILE *f)
 {
 	// Seek to the beginning of the file.
-	// TODO: fseeko()/fseeko64() support on Linux.
-	fseek(f, 0, SEEK_SET);
+	fseeko(f, 0, SEEK_SET);
 
 	// Read the "magic number".
 	uint8_t header[2];

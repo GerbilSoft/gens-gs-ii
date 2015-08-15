@@ -222,7 +222,9 @@ void M68K::UpdateSysBanking(void)
 	int cur_fetch = 0x20;
 	switch (ms_LastSysID) {
 		case SYSID_MD:
+		case SYSID_PICO:
 			// Sega Genesis / Mega Drive.
+			// Also Pico. (This only adds cartridge ROM.)
 			cur_fetch += M68K_Mem::UpdateSysBanking(&M68K_Fetch[cur_fetch], 10);
 			break;
 

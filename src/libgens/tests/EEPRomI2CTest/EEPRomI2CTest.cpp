@@ -205,7 +205,7 @@ void EEPRomI2CTest::CompareByteArrays(const uint8_t *expected, const uint8_t *ac
 
 	// TODO: Use stringstream instead?
 	const uint8_t *pE = expected, *pA = actual;
-	for (size_t i = 0; i < size; i++, pE++, pA++) {
+	for (unsigned int i = 0; i < size; i++, pE++, pA++) {
 		if (i % 16 == 0) {
 			// New line.
 			if (i > 0) {

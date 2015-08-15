@@ -169,12 +169,26 @@ int PngReaderPrivate::readFromPng(png_structp png_ptr, png_infop info_ptr,
 
 	// Read the PNG image header.
 	int bit_depth, color_type;
-	png_get_IHDR(png_ptr, info_ptr, &img_data->w, &img_data->h, &bit_depth, &color_type,
+	png_get_IHDR(png_ptr, info_ptr,
+		     &img_data->w, &img_data->h,
+		     &bit_depth, &color_type,
 		     nullptr, nullptr, nullptr);
 	if (img_data->w <= 0 || img_data->h <= 0) {
 		// Invalid image size.
 		// TODO: Better error code?
 		return -EINVAL;
+	}
+
+	// Check for pHYs.
+	if (png_get_valid(png_ptr, info_ptr, PNG_INFO_pHYs)) {
+		// TODO: Only if unit_type == PNG_RESOLUTION_UNKNOWN?
+		png_get_pHYs(png_ptr, info_ptr,
+			     &img_data->phys_x, &img_data->phys_y,
+			     nullptr);
+	} else {
+		// No pHYs.
+		img_data->phys_x = 0;
+		img_data->phys_y = 0;
 	}
 
 	// Apply some conversions to ensure the returned
@@ -215,11 +229,7 @@ int PngReaderPrivate::readFromPng(png_structp png_ptr, png_infop info_ptr,
 	if (!has_alpha) {
 		// No alpha channel.
 		// Use filler instead.
-		png_set_filler(png_ptr, 0x00, PNG_FILLER_AFTER);
-	} else {
-		// We're using 0 for opaque for compatibility with no-alpha images.
-		// TODO: Add a parameter to disable alpha inversion or something.
-		png_set_invert_alpha(png_ptr);
+		png_set_filler(png_ptr, 0xFF, PNG_FILLER_AFTER);
 	}
 
 	// We're using "BGR" color.

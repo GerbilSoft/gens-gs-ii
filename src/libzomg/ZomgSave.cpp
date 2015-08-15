@@ -26,7 +26,7 @@
 
 #include "Zomg.hpp"
 #include "zomg_byteswap.h"
-#include "ZomgIni.hpp"
+#include "Metadata.hpp"
 
 // MiniZip
 #include "minizip/zip.h"
@@ -58,17 +58,44 @@ using std::string;
 #include "PngWriter.hpp"
 #include "img_data.h"
 
+// OS-dependent Zip fields.
+// References:
+// - https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT
+// - http://unix.stackexchange.com/questions/14705/the-zip-formats-external-file-attribute
+// - http://nadeausoftware.com/articles/2012/01/c_c_tip_how_use_compiler_predefined_macros_detect_operating_system
+#if defined(__APPLE__)
+# if defined(__MACH__)
+#  define ZIP_CREATOR_SYSTEM 19			/* OS X (Darwin) */
+/* TODO: ZIP_EXTERNAL_FA for Mac OS X. */
+#  error Needs ZIP_EXTERNAL_FA for Mac OS X.
+# else
+#  define ZIP_CREATOR_SYSTEM 7			/* Macintosh */
+#  define ZIP_EXTERNAL_FA 0			/* No reliable data for this... */
+# endif
+#elif defined(__unix) || defined(__unix__) || \
+      defined(__linux) || defined(__linux__)
+# define ZIP_CREATOR_SYSTEM 3			/* UNIX */
+# define ZIP_EXTERNAL_FA (0100644 << 16)	/* UNIX file permissions + MS-DOS */
+#else
+# define ZIP_CREATOR_SYSTEM 0			/* MS-DOS, OS/2, Windows, other FAT-based systems */
+# define ZIP_EXTERNAL_FA 0
+#endif
+
+#define ZIP_VERSION_MADE_BY (ZIP_CREATOR_SYSTEM << 8)
+
 #include "Zomg_p.hpp"
 namespace LibZomg {
 
 /**
  * Save a file to the ZOMG file.
- * @param filename Filename to save in the ZOMG file.
- * @param buf Buffer containing the file contents.
- * @param len Length of the buffer.
+ * @param filename     [in] Filename to save in the ZOMG file.
+ * @param buf          [in] Buffer containing the file contents.
+ * @param len          [in] Length of the buffer.
+ * @param fileType     [in] File type, e.g. binary or text.
  * @return 0 on success; non-zero on error.
  */
-int ZomgPrivate::saveToZomg(const utf8_str *filename, const void *buf, int len)
+int ZomgPrivate::saveToZomg(const utf8_str *filename, const void *buf, int len,
+			    ZomgZipFileType_t fileType)
 {
 	if (q->m_mode != ZomgBase::ZOMG_SAVE || !this->zip)
 		return -EBADF;
@@ -77,10 +104,11 @@ int ZomgPrivate::saveToZomg(const utf8_str *filename, const void *buf, int len)
 	zip_fileinfo zipfi;
 	memcpy(&zipfi.tmz_date, &this->zipfi.tmz_date, sizeof(zipfi.tmz_date));
 	zipfi.dosDate = 0;
-	zipfi.internal_fa = 0x0000; // TODO: Set to 0x0001 for text files.
-	zipfi.external_fa = 0x0000; // MS-DOS directory attribute byte.
+	assert(fileType >= ZOMG_FILE_BINARY && fileType <= ZOMG_FILE_TEXT);
+	zipfi.internal_fa = fileType;
+	zipfi.external_fa = ZIP_EXTERNAL_FA;	// External attributes. (OS-dependent)
 
-	int ret = zipOpenNewFileInZip(
+	int ret = zipOpenNewFileInZip4(
 		this->zip,		// zipFile
 		filename,		// Filename in the Zip archive
 		&zipfi,			// File information (timestamp, attributes)
@@ -90,7 +118,17 @@ int ZomgPrivate::saveToZomg(const utf8_str *filename, const void *buf, int len)
 		0,			// size_extrafield_global,
 		nullptr,		// comment
 		Z_DEFLATED,		// method
-		Z_DEFAULT_COMPRESSION	// level
+		Z_DEFAULT_COMPRESSION,  // level
+		// The following values, except for versionMadeBy,
+		// are all defaults from zipOpenNewFileInZip().
+		0,			// raw
+		-MAX_WBITS,		// windowBits
+		DEF_MEM_LEVEL,		// memLevel
+		Z_DEFAULT_STRATEGY,	// strategy
+		nullptr,		// password
+		0,			// crcForCrypting
+		ZIP_VERSION_MADE_BY,	// versionMadeBy
+		0			// flagBase
 		);
 
 	if (ret != UNZ_OK) {
@@ -119,26 +157,51 @@ int ZomgPrivate::saveToZomg(const utf8_str *filename, const void *buf, int len)
 /**
  * Save ZOMG.ini.
  * This function MUST be called before any other function when saving!
- * @param zomgIni ZomgIni class with information about the savestate.
+ * @param metadata Metadata class with information about the savestate.
  * @return 0 on success; non-zero on error.
  */
-int Zomg::saveZomgIni(const ZomgIni *zomgIni)
+int Zomg::saveZomgIni(const Metadata *metadata)
 {
-	string zomgIniStr = zomgIni->save();
+	// TODO: Synchronize Zip timestamp with metadata?
+	// TODO: Save system ID? (once it's an enum...)
+	// TODO: Return an error in other functions if metadata wasn't saved.
+
+	string zomgIniStr = metadata->toZomgIni();
 	if (zomgIniStr.empty())
 		return -1;
 
 	// Write ZOMG.ini to the ZOMG file.
 	// TODO: Set a flag indicating ZOMG.ini has been saved.
-	return d->saveToZomg("ZOMG.ini", zomgIniStr.data(), zomgIniStr.size());
+	return d->saveToZomg("ZOMG.ini",
+		zomgIniStr.data(), zomgIniStr.size(),
+		ZomgPrivate::ZOMG_FILE_TEXT);
 }
 
 /**
  * Save the preview image.
- * @param img_data Image data.
+ *
+ * NOTE: Defined here as well as in ZomgBase because otherwise,
+ * gcc and MSVC will complain that there's no matching function call.
+ * FIXME: Figure out why, and/or remove this function.
+ *
+ * No metadata other than creation time will be saved.
+ * @param img_data	[in] Image data.
  * @return 0 on success; non-zero on error.
  */
-int Zomg::savePreview(const Zomg_Img_Data_t *img_data)
+int Zomg::savePreview(const _Zomg_Img_Data_t *img_data)
+{
+	return savePreview(img_data, nullptr, Metadata::MF_Default);
+}
+
+/**
+ * Save the preview image.
+ * @param img_data	[in] Image data.
+ * @param metadata	[in, opt] Extra metadata.
+ * @param metaFlags	[in, opt] Metadata flags.
+ * @return 0 on success; non-zero on error.
+ */
+int Zomg::savePreview(const Zomg_Img_Data_t *img_data,
+		      const Metadata *metadata, int metaFlags)
 {
 	if (m_mode != ZomgBase::ZOMG_SAVE || !d->zip)
 		return -EBADF;
@@ -147,10 +210,10 @@ int Zomg::savePreview(const Zomg_Img_Data_t *img_data)
 	zip_fileinfo zipfi;
 	memcpy(&zipfi.tmz_date, &d->zipfi.tmz_date, sizeof(zipfi.tmz_date));
 	zipfi.dosDate = 0;
-	zipfi.internal_fa = 0x0000; // Binary file.
-	zipfi.external_fa = 0x0000; // MS-DOS directory attribute byte.
+	zipfi.internal_fa = ZomgPrivate::ZOMG_FILE_BINARY;
+	zipfi.external_fa = ZIP_EXTERNAL_FA;	// External attributes. (OS-dependent)
 
-	int ret = zipOpenNewFileInZip(
+	int ret = zipOpenNewFileInZip4(
 		d->zip,			// zipFile
 		"preview.png",		// Filename in the Zip archive
 		&zipfi,			// File information (timestamp, attributes)
@@ -160,7 +223,17 @@ int Zomg::savePreview(const Zomg_Img_Data_t *img_data)
 		0,			// size_extrafield_global,
 		nullptr,		// comment
 		Z_DEFLATED,		// method
-		Z_DEFAULT_COMPRESSION	// level
+		Z_DEFAULT_COMPRESSION,	// level
+		// The following values, except for versionMadeBy,
+		// are all defaults from zipOpenNewFileInZip().
+		0,			// raw
+		-MAX_WBITS,		// windowBits
+		DEF_MEM_LEVEL,		// memLevel
+		Z_DEFAULT_STRATEGY,	// strategy
+		nullptr,		// password
+		0,			// crcForCrypting
+		ZIP_VERSION_MADE_BY,	// versionMadeBy
+		0			// flagBase
 		);
 
 	if (ret != UNZ_OK) {
@@ -170,7 +243,7 @@ int Zomg::savePreview(const Zomg_Img_Data_t *img_data)
 
 	// Write the file.
 	PngWriter pngWriter;	// TODO: Make it static?
-	ret = pngWriter.writeToZip(img_data, d->zip);
+	ret = pngWriter.writeToZip(img_data, d->zip, metadata, metaFlags);
 	zipCloseFileInZip(d->zip);	// TODO: Check the return value!
 
 	return ret;

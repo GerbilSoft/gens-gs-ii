@@ -33,19 +33,9 @@
 // Decompressor subsystem.
 #include "Decompressor/Decompressor.hpp"
 
-// SysVersion::RegionCode_t
-// TODO: Move somewhere else.
-#include "MD/SysVersion.hpp"
-
-/**
- * ROM_HEADER_SIZE: Number of bytes used for ROM type detection.
- */
-#define ROM_HEADER_SIZE 65536
-
 namespace LibGens {
 
 class RomPrivate;
-
 class Rom
 {
 	public:
@@ -145,16 +135,30 @@ class Rom
 
 		/**
 		 * Get the ROM filename.
-		 * (Basename, no extension)
+		 * (Basename, with extension.)
 		 * @return ROM filename (UTF-8), or empty string on error.
 		 */
-		std::string filenameBaseNoExt(void) const;
+		std::string filename_base(void) const;
+
+		/**
+		 * Get the ROM filename.
+		 * (Basename, no extension.)
+		 * @return ROM filename (UTF-8), or empty string on error.
+		 */
+		std::string filename_baseNoExt(void) const;
 
 		/**
 		 * Get the ROM filename of the selected file in a multi-file archive.
 		 * @return ROM filename (UTF-8), or empty string on error.
 		 */
 		std::string z_filename(void) const;
+
+		/**
+		 * Get the ROM filename of the selected file in a multi-file archive.
+		 * (Basename, with extension.)
+		 * @return ROM filename (UTF-8), or empty string on error.
+		 */
+		std::string z_filename_base(void) const;
 
 		/**
 		 * Get the ROM filename of the selected file in a multi-file archive.

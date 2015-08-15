@@ -28,7 +28,13 @@
 
 // LibGens includes.
 #include "libgens/Util/Timing.hpp"
-#include "libgens/MD/EmuMD.hpp"
+#include "libgens/Rom.hpp"
+using LibGens::Rom;
+
+#include "libgens/EmuContext/EmuContext.hpp"
+#include "libgens/EmuContext/EmuContextFactory.hpp"
+using LibGens::EmuContext;
+using LibGens::EmuContextFactory;
 
 // LibGens Sound Manager.
 // Needed for LibGens::SoundMgr::MAX_SAMPLING_RATE.
@@ -165,31 +171,44 @@ EmuManager::~EmuManager()
 int EmuManager::openRom(void)
 {
 	// TODO: Proper compressed file support.
+#ifdef HAVE_ZLIB
 	#define ZLIB_EXT " *.zip *.zsg *.gz"
+#else
+	#define ZLIB_EXT ""
+#endif
+#ifdef HAVE_LZMA
 	#define LZMA_EXT " *.7z"
+#else
+	#define LZMA_EXT ""
+#endif
 	#define RAR_EXT " *.rar"
 
 	// TODO: Set the default filename.
+	// TODO: Check what filter is selected and use it to
+	// override system autodetection.
 	QString filename = QFileDialog::getOpenFileName(nullptr,
 			tr("Open ROM"),		// Dialog title
 			QString(),		// Default filename.
+			tr("All supported ROM images") +
+			QLatin1String(
+				" (*.bin *.gen *.md *.smd *.pco"
+				ZLIB_EXT LZMA_EXT RAR_EXT
+				");;") +
 			tr("Sega Genesis ROM images") +
 			QLatin1String(
 				" (*.bin *.gen *.md *.smd"
-#ifdef HAVE_ZLIB
-				ZLIB_EXT
-#endif /* HAVE_ZLIB */
-#ifdef HAVE_LZMA
-				LZMA_EXT
-#endif /* HAVE_LZMA */
-				RAR_EXT
-				");;"
-				) +
+				ZLIB_EXT LZMA_EXT RAR_EXT
+				");;") +
+			tr("Sega Pico ROM images") +
+			QLatin1String(
+				" (*.bin *.pco"
+				ZLIB_EXT LZMA_EXT RAR_EXT
+				");;") +
 #if 0
 			tr("Sega Genesis / 32X ROMs; Sega CD disc images") +
 			"(*.bin *.smd *.gen *.32x *.cue *.iso *.raw" ZLIB_EXT LZMA_EXT RAR_EXT ");;" +
 #endif
-			tr("All Files") + QLatin1String(" (*.*)"));
+			tr("All files") + QLatin1String(" (*.*)"));
 
 	if (filename.isEmpty())
 		return -1;
@@ -323,38 +342,10 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	const QChar chrNewline(L'\n');
 	const QChar chrSpace(L' ');
 
-	// Check the system ID.
-	if (rom->sysId() != LibGens::Rom::MDP_SYSTEM_MD) {
-		// Only MD ROM images are supported.
-		const LibGens::Rom::MDP_SYSTEM_ID errSysId = rom->sysId();
-		delete rom;
-
-		// TODO: Specify GensWindow as parent window.
-		// TODO: Move this out of EmuManager and simply use return codes?
-		// (how would we indicate what system the ROM is for...)
-		QMessageBox::critical(nullptr,
-				//: A ROM image was selected for a system that Gens/GS II does not currently support. (error title)
-				tr("Unsupported System"),
-				//: A ROM image was selected for a system that Gens/GS II does not currently support. (error description)
-				tr("The selected ROM image is designed for a system that"
-				   " is not currently supported by Gens/GS II.") +
-				chrNewline + chrNewline +
-				//: Indicate what system the ROM image is for.
-				tr("Selected ROM's system: %1").arg(SysName_l(errSysId)) +
-				chrNewline + chrNewline +
-				//: List of systems that Gens/GS II currently supports.
-				tr("Supported systems:") + chrNewline +
-				chrBullet + chrSpace + SysName_l(LibGens::Rom::MDP_SYSTEM_MD)
-				);
-
-		return 3;
-	}
-
 	// Check the ROM format.
-	// TODO: Remove this once all ROM formats are supported.
-	if (rom->romFormat() != LibGens::Rom::RFMT_BINARY) {
-		// Only binary ROM images are supported.r
-		LibGens::Rom::RomFormat errRomFormat = rom->romFormat();
+	if (!EmuContextFactory::isRomFormatSupported(rom)) {
+		// ROM format is not supported.
+		const Rom::RomFormat errRomFormat = rom->romFormat();
 		delete rom;
 
 		// Get the ROM format.
@@ -368,19 +359,47 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 		// TODO: Move this out of EmuManager and simply use return codes?
 		// (how would we indicate what format the ROM was in...)
 		QMessageBox::critical(nullptr,
-				//: A ROM image was selected in a format that Gens/GS II does not currently support. (error title)
-				tr("Unsupported ROM Format"),
-				//: A ROM image was selected in a format that Gens/GS II does not currently support. (error description)
-				tr("The selected ROM image is in a format that is not currently supported by Gens/GS II.") +
-				chrNewline + chrNewline +
-				//: Indicate what format the ROM image is in.
-				tr("Selected ROM image format: %1").arg(sRomFormat) +
-				chrNewline + chrNewline +
-				//: List of ROM formats that Gens/GS II currently supports.
-				tr("Supported ROM formats:") + chrNewline +
-				chrBullet + chrSpace + RomFormat(LibGens::Rom::RFMT_BINARY)
-				);
+			//: A ROM image was selected in a format that Gens/GS II does not currently support. (error title)
+			tr("Unsupported ROM Format"),
+			//: A ROM image was selected in a format that Gens/GS II does not currently support. (error description)
+			tr("The selected ROM image is in a format that is not currently supported by Gens/GS II.") +
+			chrNewline + chrNewline +
+			//: Indicate what format the ROM image is in.
+			tr("Selected ROM image format: %1").arg(sRomFormat) +
+			chrNewline + chrNewline +
+			//: List of ROM formats that Gens/GS II currently supports.
+			tr("Supported ROM formats:") + chrNewline +
+			chrBullet + chrSpace + RomFormat(LibGens::Rom::RFMT_BINARY) + chrNewline +
+			chrBullet + chrSpace + RomFormat(LibGens::Rom::RFMT_SMD)
+			// NOTE: Not listing RFMT_SMD_SPLIT because it isn't fully supported.
+			);
+		return 3;
+	}
 
+	// Check the system ID.
+	if (!EmuContextFactory::isRomSystemSupported(rom)) {
+		// System is not supported.
+		const LibGens::Rom::MDP_SYSTEM_ID errSysId = rom->sysId();
+		delete rom;
+
+		// TODO: Specify GensWindow as parent window.
+		// TODO: Move this out of EmuManager and simply use return codes?
+		// (how would we indicate what system the ROM is for...)
+		QMessageBox::critical(nullptr,
+			//: A ROM image was selected for a system that Gens/GS II does not currently support. (error title)
+			tr("Unsupported System"),
+			//: A ROM image was selected for a system that Gens/GS II does not currently support. (error description)
+			tr("The selected ROM image is designed for a system that"
+				" is not currently supported by Gens/GS II.") +
+			chrNewline + chrNewline +
+			//: Indicate what system the ROM image is for.
+			tr("Selected ROM's system: %1").arg(SysName_l(errSysId)) +
+			chrNewline + chrNewline +
+			//: List of systems that Gens/GS II currently supports.
+			tr("Supported systems:") + chrNewline +
+			chrBullet + chrSpace + SysName_l(LibGens::Rom::MDP_SYSTEM_MD) + chrNewline +
+			chrBullet + chrSpace + SysName_l(LibGens::Rom::MDP_SYSTEM_PICO)
+			);
 		return 4;
 	}
 
@@ -405,28 +424,32 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	// Autofix Checksum.
 	// NOTE: This must be set *before* creating the emulation context!
 	// Otherwise, it won't work until Hard Reset.
-	LibGens::EmuContext::SetAutoFixChecksum(
+	EmuContext::SetAutoFixChecksum(
 			gqt4_cfg->get(QLatin1String("autoFixChecksum")).toBool());
 
-	// Create a new MD emulation context.
+	// Delete any existing emulation context.
 	// FIXME: Delete gqt4_emuContext after VBackend is finished using it. (MEMORY LEAK)
 	m_vBackend->setEmuContext(nullptr);
 	delete gqt4_emuContext;
-	gqt4_emuContext = new LibGens::EmuMD(rom, lg_region);
-	m_vBackend->setEmuContext(gqt4_emuContext);
-	rom->close();	// TODO: Let EmuMD handle this...
 
-	if (!gqt4_emuContext->isRomOpened()) {
+	// Create the emulation context.
+	// TODO: Move the emuContext to GensWindow.
+	gqt4_emuContext = EmuContextFactory::createContext(rom);
+	rom->close();	// TODO: Let EmuContext handle this...
+
+	if (!gqt4_emuContext || !gqt4_emuContext->isRomOpened()) {
 		// Error loading the ROM image in EmuMD.
 		// TODO: EmuMD error code constants.
 		// TODO: Show an error message.
 		fprintf(stderr, "Error: Initialization of gqt4_emuContext failed. (TODO: Error code.)\n");
-		m_vBackend->setEmuContext(nullptr);
 		delete gqt4_emuContext;
 		gqt4_emuContext = nullptr;
 		delete rom;
 		return 5;
 	}
+
+	// Set the VBackend's emulation context.
+	m_vBackend->setEmuContext(gqt4_emuContext);
 
 	// Save the Rom class pointer as m_rom.
 	m_rom = rom;
@@ -639,7 +662,7 @@ QString EmuManager::romName(void)
 
 		// Return the ROM filename, without extensions.
 		// TODO: Also the zfilename?
-		return QString::fromUtf8(m_rom->filenameBaseNoExt().c_str());
+		return QString::fromUtf8(m_rom->filename_baseNoExt().c_str());
 	}
 
 	// Return the ROM name.
@@ -672,7 +695,7 @@ QString EmuManager::getSaveStateFilename(void)
 
 	const QString filename =
 		gqt4_cfg->configPath(PathConfig::GCPATH_SAVESTATES) +
-		QString::fromUtf8(m_rom->filenameBaseNoExt().c_str()) +
+		QString::fromUtf8(m_rom->filename_baseNoExt().c_str()) +
 		QChar(L'.') + QString::number(m_saveSlot) +
 		QLatin1String(".zomg");
 	return filename;

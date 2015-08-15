@@ -2,7 +2,7 @@
  * libgenscd: Gens/GS II CD-ROM Handler Library.                           *
  * ScsiSpti.hpp: SPTI (Windows NT) SCSI device handler class.              *
  *                                                                         *
- * Copyright (c) 2013 by David Korth.                                      *
+ * Copyright (c) 2013-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -29,14 +29,9 @@
 // ScsiBase class.
 #include "ScsiBase.hpp"
 
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
 #include <windows.h>
 
-namespace LibGensCD
-{
+namespace LibGensCD {
 
 class ScsiSpti : public ScsiBase
 {

@@ -46,7 +46,7 @@
 #include "Vdp/Vdp.hpp"
 
 // TODO: Get rid of EmuContext.
-#include "../EmuContext.hpp"
+#include "EmuContext/EmuContext.hpp"
 
 /* Message logging. */
 #include "macros/log_msg.h"

@@ -28,15 +28,25 @@
 extern "C" {
 #endif
 
+// TODO: Replace this with a C++ class using the "listener" or "observer" pattern.
+// Also, send the EmuContext the message was sent from.
+
 typedef enum
 {
 	OSD_UNKNOWN = 0,
+
+	// Save files.
 	OSD_SRAM_LOAD,		// param: Number of bytes loaded.
 	OSD_SRAM_SAVE,		// param: Number of bytes saved.
 	OSD_SRAM_AUTOSAVE,	// param: Number of bytes saved.
 	OSD_EEPROM_LOAD,	// param: Number of bytes loaded.
 	OSD_EEPROM_SAVE,	// param: Number of bytes saved.
 	OSD_EEPROM_AUTOSAVE,	// param: Number of bytes saved.
+
+	// Sega Pico.
+	OSD_PICO_PAGESET,	// Sega Pico: Page Set.
+	OSD_PICO_PAGEUP,	// Sega Pico: Page Up.
+	OSD_PICO_PAGEDOWN,	// Sega Pico: Page Down.
 	
 	OSD_MAX
 } OsdType;

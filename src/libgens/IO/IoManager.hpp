@@ -100,6 +100,21 @@ class IoManager
 		uint8_t readStartGG(void) const;
 
 		/**
+		 * Sega Pico I/O functions.
+		 * Button read is mapped to Port 1.
+		 */
+		uint8_t picoReadButtons(void) const;
+
+		// Page register.
+		// FIXME: Huckle & Lowly's Busiest Day Ever don't have
+		// page 5; page 6 is the "paint" section. May need to
+		// add an "unusable page" feature.
+		static const uint8_t PICO_MAX_PAGES = 8;
+		uint8_t picoCurPageNum(void) const;
+		int setPicoCurPageNum(uint8_t pg);
+		uint8_t picoCurPageReg(void) const;
+
+		/**
 		 * Update an I/O device.
 		 * @param virtPort Virtual port.
 		 * @param buttons New button state.
@@ -181,6 +196,9 @@ class IoManager
 
 			// ColecoVision.
 			IOT_COLECOVISION,
+
+			// Sega Pico.
+			IOT_PICO,
 
 			// Multitaps.
 			IOT_TEAMPLAYER,
@@ -266,6 +284,12 @@ class IoManager
 		 */
 		void setDevType(VirtPort_t virtPort, IoType_t ioType);
 
+		/** Properties. **/
+
+		// Constrain D-Pad input.
+		bool constrainDPad(void) const;
+		void setConstrainDPad(bool constrainDPad);
+
 		/**
 		 * Logical button names.
 		 * These are used for button name trnaslation in the UI.
@@ -321,6 +345,12 @@ class IoManager
 			BTNNAME_CV_KEYPAD_ASTERISK,
 			BTNNAME_CV_KEYPAD_0,
 			BTNNAME_CV_KEYPAD_OCTOTHORPE,
+
+			// Sega Pico buttons.
+			BTNNAME_PICO_BUTTON,	// Red button
+			BTNNAME_PICO_PAGEDOWN,	// Page Down
+			BTNNAME_PICO_PAGEUP,	// Page Up
+			BTNNAME_PICO_PEN,	// Pen button
 
 			BTNNAME_MAX
 		};
@@ -391,6 +421,12 @@ class IoManager
 			BTNI_CV_KEYPAD_ASTERISK		= 17,
 			BTNI_CV_KEYPAD_0		= 18,
 			BTNI_CV_KEYPAD_OCTOTHORPE	= 19,
+
+			// Sega Pico buttons.
+			BTNI_PICO_BUTTON	= 4,	// Red button
+			BTNI_PICO_PAGEDOWN	= 5,	// Page Down
+			BTNI_PICO_PAGEUP	= 6,	// Page Up
+			BTNI_PICO_PEN		= 7,	// Pen button
 
 			BTNI_MAX	= 20
 		};

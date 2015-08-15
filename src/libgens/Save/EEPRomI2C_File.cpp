@@ -25,6 +25,12 @@
 #include "macros/common.h"
 #include "libgenstext/StringManip.hpp"
 
+#ifdef _WIN32
+// Win32 Unicode Translation Layer.
+// Needed for proper Unicode filename support on Windows.
+#include "libcompat/W32U/W32U_mini.h"
+#endif
+
 // ZOMG
 #include "libzomg/Zomg.hpp"
 #include "libzomg/zomg_eeprom.h"
@@ -77,7 +83,7 @@ void EEPRomI2C::setFilename(const string &filename)
 	}
 
 	// Remove any subdirectories and extensions from the ROM filename.
-	d->filename = LibGensText::FilenameNoExt(filename);
+	d->filename = LibGensText::FilenameBaseNoExt(filename);
 	// Append our extension.
 	d->filename += '.';
 	d->filename += d->fileExt;

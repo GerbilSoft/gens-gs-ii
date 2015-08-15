@@ -54,6 +54,13 @@ std::string Utf16_to_Utf8(const char16_t *src, size_t len);
 std::u16string Utf8_to_Utf16(const std::string& src);
 
 /**
+ * Convert UTF-8 to UTF-16 (host-endian).
+ * @param src UTF-8 string.
+ * @return UTF-16 string, or empty string on error.
+ */
+std::u16string Utf8_to_Utf16(const char *src, size_t len);
+
+/**
  * Convert Shift-JIS to UTF-8.
  * @param src Shift-JIS string.
  * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)

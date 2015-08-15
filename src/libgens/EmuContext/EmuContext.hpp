@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,27 +21,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_EMUCONTEXT_HPP__
-#define __LIBGENS_EMUCONTEXT_HPP__
+#ifndef __LIBGENS_EMUCONTEXT_EMUCONTEXT_HPP__
+#define __LIBGENS_EMUCONTEXT_EMUCONTEXT_HPP__
 
 // Controller I/O manager.
-#include "IO/IoManager.hpp"
+#include "../IO/IoManager.hpp"
 
 // ROM image class.
-#include "Rom.hpp"
+#include "../Rom.hpp"
 
 // Region code.
 // TODO: Make the region code non-console-specific.
-#include "MD/SysVersion.hpp"
+#include "SysVersion.hpp"
 
 // VDP.
-#include "Vdp/Vdp.hpp"
+#include "../Vdp/Vdp.hpp"
 
 // C++ includes.
 #include <string>
 
-namespace LibGens
-{
+namespace LibGens {
 
 class EmuContext
 {
@@ -49,6 +48,12 @@ class EmuContext
 		EmuContext(Rom *rom, SysVersion::RegionCode_t region = SysVersion::REGION_US_NTSC);
 		EmuContext(MdFb *fb, Rom *rom, SysVersion::RegionCode_t region = SysVersion::REGION_US_NTSC);
 		virtual ~EmuContext();
+
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		EmuContext(const EmuContext &);
+		EmuContext &operator=(const EmuContext &);
 
 	private:
 		void init(MdFb *fb, Rom *rom, SysVersion::RegionCode_t region);
@@ -125,16 +130,14 @@ class EmuContext
 		/**
 		 * Load the current state from a ZOMG file.
 		 * @param filename	[in] ZOMG file.
-		 * @return 0 on success; non-zero on error.
-		 * TODO: Error code constants.
+		 * @return 0 on success; negative errno on error.
 		 */
 		virtual int zomgLoad(const utf8_str *filename) = 0;
 
 		/**
 		 * Save the current state to a ZOMG file.
 		 * @param filename	[in] ZOMG file.
-		 * @return 0 on success; non-zero on error.
-		 * TODO: Error code constants.
+		 * @return 0 on success; negative errno on error.
 		 */
 		virtual int zomgSave(const utf8_str *filename) const = 0;
 
@@ -228,4 +231,4 @@ inline const Rom *EmuContext::rom(void) const
 
 }
 
-#endif /* __LIBGENS_EMUCONTEXT_HPP__ */
+#endif /* __LIBGENS_EMUCONTEXT_EMUCONTEXT_HPP__ */

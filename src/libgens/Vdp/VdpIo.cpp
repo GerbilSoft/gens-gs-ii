@@ -36,7 +36,7 @@
 #include "Cartridge/RomCartridgeMD.hpp"
 
 // Emulation Context.
-#include "../EmuContext.hpp"
+#include "EmuContext/EmuContext.hpp"
 
 // C wrapper functions for Starscream.
 #ifdef __cplusplus

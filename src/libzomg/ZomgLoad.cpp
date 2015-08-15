@@ -343,9 +343,11 @@ int Zomg::loadVdpCtrl_16(Zomg_VDP_ctrl_16_t *ctrl)
 int Zomg::loadVRam(void *vram, size_t siz, ZomgByteorder_t byteorder)
 {
 	int ret = d->loadFromZomg("common/VRam.bin", vram, siz);
-	// TODO: MD only; Sega 8-bit systems use ZOMG_BYTEORDER_8.
-	// TODO: Clear the rest of vram if ret < siz.
-	LoadMemByteswap<ZOMG_BYTEORDER_16BE>(vram, siz, byteorder);
+	if (ret > 0) {
+		// TODO: MD only; Sega 8-bit systems use ZOMG_BYTEORDER_8.
+		// TODO: Clear the rest of vram if ret < siz.
+		LoadMemByteswap<ZOMG_BYTEORDER_16BE>(vram, siz, byteorder);
+	}
 	return ret;
 }
 
@@ -360,9 +362,11 @@ int Zomg::loadVRam(void *vram, size_t siz, ZomgByteorder_t byteorder)
 int Zomg::loadCRam(Zomg_CRam_t *cram, ZomgByteorder_t byteorder)
 {
 	int ret = d->loadFromZomg("common/CRam.bin", cram->md, sizeof(cram->md));
-	// TODO: MD only; GG is 16LE; SMS is 8.
-	// TODO: Clear the rest of cram if ret < sizeof(cram->md).
-	LoadMemByteswap<ZOMG_BYTEORDER_16BE>(cram, sizeof(cram->md), byteorder);
+	if (ret > 0) {
+		// TODO: MD only; GG is 16LE; SMS is 8.
+		// TODO: Clear the rest of cram if ret < sizeof(cram->md).
+		LoadMemByteswap<ZOMG_BYTEORDER_16BE>(cram, sizeof(cram->md), byteorder);
+	}
 	return ret;
 }
 
@@ -378,8 +382,10 @@ int Zomg::loadCRam(Zomg_CRam_t *cram, ZomgByteorder_t byteorder)
 int Zomg::loadMD_VSRam(uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder)
 {
 	int ret = d->loadFromZomg("MD/VSRam.bin", vsram, siz);
-	// TODO: Clear the rest of vsram if ret < siz.
-	LoadMemByteswap<ZOMG_BYTEORDER_16BE>(vsram, siz, byteorder);
+	if (ret > 0) {
+		// TODO: Clear the rest of vsram if ret < siz.
+		LoadMemByteswap<ZOMG_BYTEORDER_16BE>(vsram, siz, byteorder);
+	}
 	return ret;
 }
 
@@ -395,8 +401,10 @@ int Zomg::loadMD_VSRam(uint16_t *vsram, size_t siz, ZomgByteorder_t byteorder)
 int Zomg::loadMD_VDP_SAT(uint16_t *vdp_sat, size_t siz, ZomgByteorder_t byteorder)
 {
 	int ret = d->loadFromZomg("MD/vdp_sat.bin", vdp_sat, siz);
-	// TODO: Clear the rest of the vdp_sat if ret < siz.
-	LoadMemByteswap<ZOMG_BYTEORDER_16BE>(vdp_sat, siz, byteorder);
+	if (ret > 0) {
+		// TODO: Clear the rest of the vdp_sat if ret < siz.
+		LoadMemByteswap<ZOMG_BYTEORDER_16BE>(vdp_sat, siz, byteorder);
+	}
 	return ret;
 }
 
@@ -506,8 +514,10 @@ int Zomg::loadZ80Reg(Zomg_Z80RegSave_t *state)
 int Zomg::loadM68KMem(uint16_t *mem, size_t siz, ZomgByteorder_t byteorder)
 {
 	int ret = d->loadFromZomg("MD/M68K_mem.bin", mem, siz);
-	// TODO: Clear the rest of mem if ret < siz.
-	LoadMemByteswap<ZOMG_BYTEORDER_16BE>(mem, siz, byteorder);
+	if (ret > 0) {
+		// TODO: Clear the rest of mem if ret < siz.
+		LoadMemByteswap<ZOMG_BYTEORDER_16BE>(mem, siz, byteorder);
+	}
 	return ret;
 }
 

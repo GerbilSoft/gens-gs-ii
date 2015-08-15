@@ -23,11 +23,19 @@
 #include "img_data.h"
 #include "zomg_byteswap.h"
 
+// ZOMG metadata.
+#include "Metadata.hpp"
+
 // libpng
 #include <png.h>
 
 // MiniZip
 #include "minizip/zip.h"
+
+#ifdef _WIN32
+// Win32 Unicode Translation Layer.
+#include "libcompat/W32U/W32U_mini.h"
+#endif
 
 // C includes.
 #include <stdint.h>
@@ -135,13 +143,16 @@ class PngWriterPrivate
 
 		/**
 		 * Internal PNG write function.
-		 * @param png_ptr PNG pointer.
-		 * @param info_ptr PNG info pointer.
-		 * @param img_data PNG image data.
+		 * @param png_ptr	[in] PNG pointer.
+		 * @param info_ptr	[in] PNG info pointer.
+		 * @param img_data	[in] PNG image data.
+		 * @param metadata	[in, opt] Extra metadata.
+		 * @param metaFlags	[in, opt] Metadata flags.
 		 * @return 0 on success; negative errno on error.
 		 */
 		static int writeToPng(png_structp png_ptr, png_infop info_ptr,
-				      const Zomg_Img_Data_t *img_data);
+				      const Zomg_Img_Data_t *img_data,
+				      const Metadata *metadata, int metaFlags);
 };
 
 PngWriterPrivate::PngWriterPrivate(PngWriter *q)
@@ -222,17 +233,22 @@ void PngWriterPrivate::png_io_minizip_flush(png_structp png_ptr)
 
 /**
  * Internal PNG write function.
- * @param png_ptr PNG pointer.
- * @param info_ptr PNG info pointer.
- * @param img_data PNG image data.
+ * @param png_ptr	[in] PNG pointer.
+ * @param info_ptr	[in] PNG info pointer.
+ * @param img_data	[in] PNG image data.
+ * @param metadata	[in, opt] Extra metadata.
+ * @param metaFlags	[in, opt] Metadata flags.
  * @return 0 on success; negative errno on error.
  */
 int PngWriterPrivate::writeToPng(png_structp png_ptr, png_infop info_ptr,
-				 const Zomg_Img_Data_t *img_data)
+				 const Zomg_Img_Data_t *img_data,
+				 const Metadata *metadata, int metaFlags)
 {
 	// Row pointers and/or buffer.
 	// These need to be allocated here so they can be freed
 	// in case an error occurs.
+	// FIXME: gcc-5.2 is showing this warning:
+	// warning: variable ‘row’ might be clobbered by ‘longjmp’ or ‘vfork’ [-Wclobbered]
 	union {
 		void *p;
 
@@ -302,43 +318,25 @@ int PngWriterPrivate::writeToPng(png_structp png_ptr, png_infop info_ptr,
 		}
 	}
 
-	// TODO: Separate function for time and text handling?
-	// TODO: Add emulator and ROM information.
+	// Write the pHYs chunk.
+	if (img_data->phys_x > 0 && img_data->phys_y > 0) {
+		png_set_pHYs(png_ptr, info_ptr,
+			     img_data->phys_x, img_data->phys_y,
+			     PNG_RESOLUTION_UNKNOWN);
+	}
 
-	// Write the current time.
-	// TODO: Use GetSystemTime() on Windows.
-	// TODO: Is there a way to get 64-bit time_t on 32-bit Linux?
-	time_t cur_time = time(nullptr);
-	png_time cur_png_time;
-	png_convert_from_time_t(&cur_png_time, cur_time);
-	png_set_tIME(png_ptr, info_ptr, &cur_png_time);
-
-	// Write the current time as a string.
-	// This is used by Windows for "Date taken:".
-	// NOTE: This must be in LOCAL time.
-	// TODO: Use localtime_r() if available.
-	// Format: "yyyy:MM:dd hh:mm:ss"
-	struct tm *cur_local_time = localtime(&cur_time);
-	char cur_time_str[24];
-	snprintf(cur_time_str, sizeof(cur_time_str), "%04d:%02d:%02d %02d:%02d:%02d",
-		 cur_local_time->tm_year+1900, cur_local_time->tm_mon+1, cur_local_time->tm_mday,
-		 cur_local_time->tm_hour, cur_local_time->tm_min, cur_local_time->tm_sec);
-
-	png_text txt_png_time;
-	txt_png_time.compression = PNG_TEXT_COMPRESSION_NONE;
-	// FIXME: Needs to be non-const...
-	txt_png_time.key = (png_charp)"Creation Time";
-	txt_png_time.text = cur_time_str;
-	txt_png_time.text_length = strlen(cur_time_str);
-	txt_png_time.itxt_length = 0;
-	txt_png_time.lang = nullptr;
-	txt_png_time.lang_key = nullptr;
-	png_set_text(png_ptr, info_ptr, &txt_png_time, 1);
+	// PNG metadata.
+	if (metadata) {
+		metadata->toPngData(png_ptr, info_ptr, metaFlags);
+	} else {
+		// No metadata specified.
+		// Use a blank Metadata object, which is basically CreationTime only.
+		Metadata metadata_default;
+		metadata_default.toPngData(png_ptr, info_ptr, metaFlags);
+	}
 
 	// Write the PNG header to the file.
 	png_write_info(png_ptr, info_ptr);
-
-	// TODO: Other text fields.
 
 	// Write the image.
 	switch (img_data->bpp) {
@@ -404,11 +402,29 @@ PngWriter::~PngWriter()
 
 /**
  * Write an image to a PNG file.
- * @param img_data Image data.
- * @param filename PNG file.
+ * No metadata other than creation time will be saved.
+ * @param img_data	[in] Image data.
+ * @param filename	[in] PNG file.
  * @return 0 on success; negative errno on error.
  */
-int PngWriter::writeToFile(const _Zomg_Img_Data_t *img_data, const char *filename)
+int PngWriter::writeToFile(const Zomg_Img_Data_t *img_data,
+			   const char *filename)
+{
+	return writeToFile(img_data, filename, nullptr, Metadata::MF_Default);
+}
+
+/**
+ * Write an image to a PNG file.
+ * @param img_data	[in] Image data.
+ * @param filename	[in] PNG file.
+ * @param metadata	[in, opt] Extra metadata.
+ * @param metaFlags	[in, opt] Metadata flags.
+ * @return 0 on success; negative errno on error.
+ */
+int PngWriter::writeToFile(const Zomg_Img_Data_t *img_data,
+			   const char *filename,
+			   const Metadata *metadata,
+			   int metaFlags)
 {
 	// TODO: Combine more of writeToFile() and writeToZip().
 	if (!filename || !img_data || !img_data->data ||
@@ -432,14 +448,6 @@ int PngWriter::writeToFile(const _Zomg_Img_Data_t *img_data, const char *filenam
 		return -EINVAL;
 	}
 
-	// Output file.
-	// TODO: Convert filename to Unicode or ANSI on Windows.
-	FILE *f = fopen(filename, "wb");
-	if (!f) {
-		// Error opening the output file.
-		return -errno;
-	}
-
 	png_structp png_ptr;
 	png_infop info_ptr;
 
@@ -454,11 +462,20 @@ int PngWriter::writeToFile(const _Zomg_Img_Data_t *img_data, const char *filenam
 		return -ENOMEM;
 	}
 
+	// Output file.
+	// TODO: Convert filename to Unicode or ANSI on Windows.
+	FILE *f = fopen(filename, "wb");
+	if (!f) {
+		// Error opening the output file.
+		png_destroy_write_struct(&png_ptr, &info_ptr);
+		return -errno;
+	}
+
 	// Initialize standard file I/O.
 	png_init_io(png_ptr, f);
 
 	// Write to PNG.
-	int ret = d->writeToPng(png_ptr, info_ptr, img_data);
+	int ret = d->writeToPng(png_ptr, info_ptr, img_data, metadata, metaFlags);
 	fclose(f);
 	if (ret != 0) {
 		// Failed to write the PNG file.
@@ -472,11 +489,28 @@ int PngWriter::writeToFile(const _Zomg_Img_Data_t *img_data, const char *filenam
 
 /**
  * Write an image to a PNG file in a ZIP file.
- * @param img_data Image data.
- * @param zfile ZIP file. (Must have a file open for writing.)
+ * No metadata other than creation time will be saved.
+ * @param img_data	[in] Image data.
+ * @param zfile		[in] ZIP file. (Must have a file open for writing.)
  * @return 0 on success; negative errno on error.
  */
-int PngWriter::writeToZip(const _Zomg_Img_Data_t *img_data, zipFile zfile)
+int PngWriter::writeToZip(const Zomg_Img_Data_t *img_data, zipFile zfile)
+{
+	return writeToZip(img_data, zfile, nullptr, Metadata::MF_Default);
+}
+
+/**
+ * Write an image to a PNG file in a ZIP file.
+ * @param img_data	[in] Image data.
+ * @param zfile		[in] ZIP file. (Must have a file open for writing.)
+ * @param metadata	[in, opt] Extra metadata.
+ * @param metaFlags	[in, opt] Metadata flags.
+ * @return 0 on success; negative errno on error.
+ */
+int PngWriter::writeToZip(const Zomg_Img_Data_t *img_data,
+			  zipFile zfile,
+			  const Metadata *metadata,
+			  int metaFlags)
 {
 	// TODO: Combine more of writeToFile() and writeToZip().
 	if (!zfile || !img_data || !img_data->data ||
@@ -519,7 +553,7 @@ int PngWriter::writeToZip(const _Zomg_Img_Data_t *img_data, zipFile zfile)
 
 	// Write to PNG.
 	// TODO: If it fails, delete the file from the ZIP?
-	int ret = d->writeToPng(png_ptr, info_ptr, img_data);
+	int ret = d->writeToPng(png_ptr, info_ptr, img_data, metadata, metaFlags);
 	png_destroy_write_struct(&png_ptr, &info_ptr);
 	return ret;
 }

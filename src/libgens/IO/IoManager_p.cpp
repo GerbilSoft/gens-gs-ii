@@ -59,6 +59,9 @@ const IoManagerPrivate::IoDevInfo IoManagerPrivate::ioDevInfo[IoManager::IOT_MAX
 	// ColecoVision.
 	{'COLV', 20, false},	// IOT_COLECOVISION
 
+	// Sega Pico.
+	{'PICO', 8, true},	// IOT_PICO
+
 	// Multitaps.
 	{'TEAM', 0, true},	// IOT_TEAMPLAYER
 	{'4WPM', 0, true},	// IOT_4WP_MASTER
@@ -68,6 +71,7 @@ const IoManagerPrivate::IoDevInfo IoManagerPrivate::ioDevInfo[IoManager::IOT_MAX
 
 IoManagerPrivate::IoManagerPrivate(IoManager *q)
 	: q(q)
+	, constrainDPad(true)
 {
 	// Clear the I/O devices array.
 	memset(ioDevices, 0, sizeof(ioDevices));

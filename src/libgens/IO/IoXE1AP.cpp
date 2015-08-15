@@ -27,7 +27,13 @@ namespace LibGens { namespace IO {
 
 IoXE1AP::IoXE1AP()
 	: Device()
-{ }
+{
+	m_type = IoManager::IOT_XE_1AP;
+	m_hasDPad = false;	// Analog joystick; no D-Pad.
+
+	// resetDev() can't be called from the base constructor.
+	resetDev();
+}
 
 /**
  * Reset Device data that only affects the device
@@ -39,13 +45,6 @@ IoXE1AP::IoXE1AP()
 void IoXE1AP::resetDev(void)
 {
 	this->latency = 0;
-}
-
-// Device type.
-// Should be overridden by subclasses.
-IoManager::IoType_t IoXE1AP::type(void) const
-{
-	return IoManager::IOT_XE_1AP;
 }
 
 /**

@@ -1,0 +1,1 @@
+/* Dummy C file to force compilation as a C library. */

@@ -59,9 +59,26 @@ class Device
 		 */
 		virtual void resetDev(void);
 
-		// Device type.
-		// Should be overridden by subclasses.
-		virtual IoManager::IoType_t type(void) const;
+		/**
+		 * Device type.
+		 * Subclasses must set m_type in their constructor.
+		 * @return Device type.
+		 */
+		IoManager::IoType_t type(void) const;
+
+		/**
+		 * Does this device have a standard D-Pad as buttons 0-3?
+		 *
+		 * This is used by IoManager to determine if the D-Pad
+		 * buttons should be constrained such that the user can't
+		 * press both U+D or L+R at the same time.
+		 *
+		 * The default is true. Devices that don't have a standard
+		 * D-Pad should set m_hasDPad = false in their constructor.
+		 *
+		 * @return True if this device has a standard D-Pad.
+		 */
+		bool hasDPad(void) const;
 
 		// Device-side variables.
 		int counter;			// Internal counter.
@@ -85,6 +102,16 @@ class Device
 			IOPIN_TH	= 0x40	// D6
 		};
 
+	protected:
+		/**
+		 * Device type.
+		 * Subclasses must set this field in their constructor.
+		 */
+		IoManager::IoType_t m_type;
+
+		// Does this device have a standard D-Pad as buttons 0-3?
+		bool m_hasDPad;
+
 		/**
 		 * Controller bitfield.
 		 * Format:
@@ -95,6 +122,9 @@ class Device
 		 */
 		uint32_t buttons;
 
+		// Previous buttons value.
+		uint32_t buttons_prev;
+
 		/**
 		 * Update the tristate cache for data coming from the MD.
 		 * NOTE: "In" == MD to controller; "Out" == controller to MD.
@@ -102,6 +132,16 @@ class Device
 		inline void updateTristateInputCache(void) {
 			// TODO: Apply the device data?
 			mdData_tris = (~ctrl | mdData);
+		}
+
+	public:
+		/**
+		 * Get the buttons bitfield.
+		 * Used by some multitaps.
+		 * @return Buttons bitfield.
+		 */
+		inline uint32_t getButtons(void) const {
+			return this->buttons;
 		}
 
 		/**

@@ -28,6 +28,9 @@ namespace LibGens { namespace IO {
 IoMegaMouse::IoMegaMouse()
 	: Device()
 {
+	m_type = IoManager::IOT_MEGA_MOUSE;
+	m_hasDPad = false;
+
 	// resetDev() can't be called from the base constructor.
 	resetDev();
 }
@@ -47,13 +50,6 @@ void IoMegaMouse::resetDev(void)
 	latch.signOver = 0;
 	latch.relX = 0;
 	latch.relY = 0;
-}
-
-// Device type.
-// Should be overridden by subclasses.
-IoManager::IoType_t IoMegaMouse::type(void) const
-{
-	return IoManager::IOT_MEGA_MOUSE;
 }
 
 /**

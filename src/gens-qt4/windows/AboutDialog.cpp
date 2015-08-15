@@ -66,8 +66,7 @@
 #include "VBackend/GLBackend.hpp"
 
 #include "ui_AboutDialog.h"
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class AboutDialogPrivate
 {
@@ -501,10 +500,6 @@ QString AboutDialogPrivate::GetDebugInfo(void)
 
 
 #ifdef Q_OS_WIN32
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
 #include <windows.h>
 
 /**

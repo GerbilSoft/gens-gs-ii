@@ -32,7 +32,6 @@
 // LibGens includes.
 #include "libgens/Rom.hpp"
 #include "libgens/IO/IoManager.hpp"
-#include "libgens/MD/SysVersion.hpp"
 
 // LibGensKeys: Key Manager
 #include "libgenskeys/KeyManager.hpp"

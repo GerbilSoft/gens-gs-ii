@@ -8,32 +8,22 @@ INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}")
 # Include the extlib directory.
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../extlib/")
 
-# Check for C++ 2011 support.
-# If C++ 2011 isn't available, compatibility definitions will be enabled.
-# NOTE: CHECK_CXX11_COMPILER_FLAG() needs to be called here again.
-# It worked without this previously due to old config.h files in the build directory.
-INCLUDE(CheckCXXSourceCompiles)
-INCLUDE(CheckCXX11CompilerFlag)
-CHECK_CXX11_COMPILER_FLAG(GENS_CXX11_CXXFLAG)
-
-CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/c++11-compat.h.in" "${CMAKE_CURRENT_BINARY_DIR}/c++11-compat.h")
-
 # C++11 compatibility header.
 # NOTE: This must be included regardless of C++11 support in the compiler.
 # gcc-4.6 supports some C++11, but is missing explicit virtual overrides.
 IF(MSVC)
-	SET(GENS_CXX11_COMPAT_HEADER "-FI${CMAKE_BINARY_DIR}/src/c++11-compat.h")
+	SET(GENS_CXX11_COMPAT_HEADER "-FI${CMAKE_CURRENT_SOURCE_DIR}/c++11-compat.h")
 ELSE(MSVC)
-	SET(GENS_CXX11_COMPAT_HEADER "-include ${CMAKE_BINARY_DIR}/src/c++11-compat.h")
+	SET(GENS_CXX11_COMPAT_HEADER "-include ${CMAKE_CURRENT_SOURCE_DIR}/c++11-compat.h")
 ENDIF(MSVC)
 SET(GENS_CXXFLAG_CXX11_COMPAT ${GENS_CXX11_COMPAT_HEADER})
 
 # Add the C++11 compatibility header to CFLAGS/CXXFLAGS.
-# TODO: Move -DQT_NO_DEBUG to gens-qt4?
-SET(CMAKE_C_FLAGS_DEBUG		"${CMAKE_C_FLAGS_DEBUG} ${GENS_CXX11_COMPAT_HEADER}")
-SET(CMAKE_CXX_FLAGS_DEBUG	"${CMAKE_CXX_FLAGS_DEBUG} ${GENS_CXXFLAG_CXX11_COMPAT}")
-SET(CMAKE_C_FLAGS_RELEASE	"-DQT_NO_DEBUG ${CMAKE_C_FLAGS_RELEASE} ${GENS_CXX11_COMPAT_HEADER}")
-SET(CMAKE_CXX_FLAGS_RELEASE	"-DQT_NO_DEBUG ${CMAKE_CXX_FLAGS_RELEASE} ${GENS_CXXFLAG_CXX11_COMPAT}")
+SET(CMAKE_C_FLAGS	"${CMAKE_C_FLAGS} ${GENS_CXX11_COMPAT_HEADER}")
+SET(CMAKE_CXX_FLAGS	"${CMAKE_CXX_FLAGS} ${GENS_CXXFLAG_CXX11_COMPAT}")
+
+# Compatibility library. (Includes W32U Mini.)
+ADD_SUBDIRECTORY(libcompat)
 
 # Source Code subdirectories.
 ADD_SUBDIRECTORY(libzomg)
@@ -41,5 +31,11 @@ ADD_SUBDIRECTORY(libgenstext)
 ADD_SUBDIRECTORY(libgens)
 ADD_SUBDIRECTORY(libgenscd)
 ADD_SUBDIRECTORY(libgenskeys)
-ADD_SUBDIRECTORY(gens-qt4)
 ADD_SUBDIRECTORY(tools)
+
+IF(ENABLE_GENS_QT4)
+	ADD_SUBDIRECTORY(gens-qt4)
+ENDIF(ENABLE_GENS_QT4)
+IF(ENABLE_GENS_SDL)
+	ADD_SUBDIRECTORY(gens-sdl)
+ENDIF(ENABLE_GENS_SDL)
