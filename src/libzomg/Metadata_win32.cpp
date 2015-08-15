@@ -249,7 +249,7 @@ void MetadataPrivate::InitSystemMetadata(void)
 		}
 
 		// Append version number.
-		// NOTE: MinGw-w64 defines DWORD as unsigned long.
+		// NOTE: MinGW-w64 defines DWORD as unsigned long.
 		// We're casting it to plain old unsigned int
 		// to eliminate some warnings.
 		snprintf(spver, sizeof(spver), " (%u.%u.%u)",
