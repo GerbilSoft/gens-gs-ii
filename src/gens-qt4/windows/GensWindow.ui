@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>320</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="mnuFile">
@@ -109,7 +109,7 @@
     </property>
     <widget class="QMenu" name="mnuOptionsSoundTest">
      <property name="title">
-      <string>SoundTest</string>
+      <string notr="true">SoundTest</string>
      </property>
      <addaction name="actionSound11"/>
      <addaction name="actionSound16"/>
@@ -410,7 +410,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>&amp;11,025 Hz</string>
+    <string notr="true">&amp;11,025 Hz</string>
    </property>
   </action>
   <action name="actionSound16">
@@ -418,7 +418,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>1&amp;6,000 Hz</string>
+    <string notr="true">1&amp;6,000 Hz</string>
    </property>
   </action>
   <action name="actionSound22">
@@ -426,7 +426,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>&amp;22,050 Hz</string>
+    <string notr="true">&amp;22,050 Hz</string>
    </property>
   </action>
   <action name="actionSound32">
@@ -434,7 +434,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>&amp;32,000 Hz</string>
+    <string notr="true">&amp;32,000 Hz</string>
    </property>
   </action>
   <action name="actionSound44">
@@ -442,7 +442,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>&amp;44,100 Hz</string>
+    <string notr="true">&amp;44,100 Hz</string>
    </property>
   </action>
   <action name="actionSound48">
@@ -450,17 +450,17 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>4&amp;8,000 Hz</string>
+    <string notr="true">4&amp;8,000 Hz</string>
    </property>
   </action>
   <action name="actionSoundMono">
    <property name="text">
-    <string>&amp;Mono</string>
+    <string notr="true">&amp;Mono</string>
    </property>
   </action>
   <action name="actionSoundStereo">
    <property name="text">
-    <string>&amp;Stereo</string>
+    <string notr="true">&amp;Stereo</string>
    </property>
   </action>
   <action name="actionHelpAbout">
