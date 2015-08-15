@@ -149,6 +149,21 @@ int W32U_mkdir(const char *path);
  */
 int W32U_stat64(const char *pathname, struct _stat64 *buf);
 
+/** strtoll(), strtoull() **/
+
+/**
+ * MSVC 2013 added proper support for strtoll() and strtoull().
+ * Older verisons don't have these functions, but they do have
+ * the equivalent functions _strtoi64() and _strtoui64().
+ */
+
+#ifdef _MSC_VER
+#if _MSC_VER < 1800
+#define strtoll(nptr, endptr, base)  _strtoi64(nptr, endptr, base)
+#define strtoull(nptr, endptr, base) _strtoui64(nptr, endptr, base)
+#endif /* _MSC_VER < 1800 */
+#endif /* _MSC_VER */
+
 #ifdef __cplusplus
 }
 #endif
