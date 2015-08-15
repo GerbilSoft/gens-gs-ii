@@ -381,7 +381,7 @@ ADD_EXECUTABLE(gens-qt4
 	)
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(gens-qt4)
-TARGET_LINK_LIBRARIES(gens-qt4 gens ${ZLIB_LIBRARY} genscd genskeys)
+TARGET_LINK_LIBRARIES(gens-qt4 compat gens ${ZLIB_LIBRARY} genscd genskeys)
 ADD_DEPENDENCIES(gens-qt4 translations_target)
 
 # Additional libraries.

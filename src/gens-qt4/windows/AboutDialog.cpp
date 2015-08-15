@@ -65,6 +65,12 @@
 // GLBackend is required in order to obtain list of extensions.
 #include "VBackend/GLBackend.hpp"
 
+#ifdef _WIN32
+// Win32 Unicode Translation Layer.
+// Needed to determine if we're using Unicode or ANSI.
+#include "libcompat/W32U/W32U_mini.h"
+#endif
+
 #include "ui_AboutDialog.h"
 namespace GensQt4 {
 
@@ -626,7 +632,7 @@ QString AboutDialogPrivate::GetSysCodePageInfo(void)
 	}
 
 	// Is Gens/GS II using Unicode?
-	if (GetModuleHandleW(nullptr) != nullptr) {
+	if (W32U_IsUnicode()) {
 		//: Win32: Unicode strings are being used. (WinNT)
 		sCodePageInfo += AboutDialog::tr("Using Unicode strings for Win32 API.");
 	} else {
