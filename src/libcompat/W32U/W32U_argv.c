@@ -257,14 +257,14 @@ static int getArgvAtoW(int *p_argcW, wchar_t **p_argvW[], wchar_t **p_envpW[])
 	// since they're NULL-terminated.
 
 	// Convert argvA from ANSI to UTF-16.
-	ret = convertArgsAtoW(argcA, argvA, &argcW, &argvW);
+	ret = convertArgsAtoW(argcA, (const char**)argvA, &argcW, &argvW);
 	if (ret != 0) {
 		// An error occurred.
 		goto out;
 	}
 
 	// Convert envpA from ANSI to UTF-16.
-	ret = convertEnvpAtoW(envpA, &envpW);
+	ret = convertEnvpAtoW((const char**)envpA, &envpW);
 	if (ret != 0) {
 		// An error occurred.
 		goto out;
@@ -528,14 +528,14 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 	// since they're NULL-terminated.
 
 	// Convert argvW from UTF-16 to UTF-8.
-	ret = convertArgsWtoU(argcW, argvW, &argcU, &argvU);
+	ret = convertArgsWtoU(argcW, (const wchar_t**)argvW, &argcU, &argvU);
 	if (ret != 0) {
 		// An error occurred.
 		goto out;
 	}
 
 	// Convert envpW from UTF-16 to UTF-8.
-	ret = convertEnvpWtoU(envpW, &envpU);
+	ret = convertEnvpWtoU((const wchar_t**)envpW, &envpU);
 	if (ret != 0) {
 		// An error occurred.
 		goto out;
