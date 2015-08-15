@@ -69,8 +69,8 @@ static int convertArgsAtoW(int argcA, const char *argvA[], int *p_argcW, wchar_t
 	int cbArgvWPtr, cchArgvWStr;
 	int cchArgvWStrLeft;
 	// UTF-16 data.
-	int argcW;
-	wchar_t **argvW;
+	int argcW = 0;
+	wchar_t **argvW = NULL;
 	// UTF-16 block pointer.
 	wchar_t *strW;
 
@@ -152,7 +152,7 @@ static int convertEnvpAtoW(const char *envpA[], wchar_t **p_envpW[])
 	// Temporary envpA pointer.
 	const char **ptrA;
 	// UTF-16 data.
-	wchar_t **envpW;
+	wchar_t **envpW = NULL;
 	wchar_t **envpW_tmp;
 	// UTF-16 block pointer.
 	wchar_t *strW;
@@ -309,8 +309,8 @@ static int convertArgsWtoU(int argcW, const wchar_t *argvW[], int *p_argcU, char
 	int cbArgvUPtr, cbArgvUStr;
 	int cbArgvUStrLeft;
 	// UTF-8 data.
-	int argcU;
-	char **argvU;
+	int argcU = 0;
+	char **argvU = NULL;
 	// UTF-8 block pointer.
 	char *strU;
 
@@ -392,7 +392,7 @@ static int convertEnvpWtoU(const wchar_t *envpW[], char **p_envpU[])
 	// Temporary envpW pointer.
 	const wchar_t **ptrW;
 	// UTF-8 data.
-	char **envpU;
+	char **envpU = NULL;
 	char **envpU_tmp;
 	// UTF-8 block pointer.
 	char *strU;
@@ -528,7 +528,7 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 	// since they're NULL-terminated.
 
 	// Convert argvW from UTF-16 to UTF-8.
-	ret = convertArgsWtoU(argcW, (const wchar_t**)argvW, &argcU, &argvU);
+	ret = convertArgsWtoU(argcW, (const wchar_t**) argvW, &argcU, &argvU);
 	if (ret != 0) {
 		// An error occurred.
 		goto out;
