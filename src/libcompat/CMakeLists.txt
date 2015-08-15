@@ -20,6 +20,8 @@ MACRO(CHECK_FUNCTION_EXISTS_OR_INLINE FUNCTION HEADER SAMPLE_CODE VARIABLE)
 	# that are actually wrappers around MSVC "secure" functions.
 	# Check for the function as a regular function first, then check
 	# if it's available in the specified header.
+	IF(NOT DEFINED ${VARIABLE})
+
 	CHECK_FUNCTION_EXISTS(${FUNCTION} ${VARIABLE})
 	IF(NOT ${VARIABLE})
 		# Function does not exist normally.
@@ -39,6 +41,8 @@ MACRO(CHECK_FUNCTION_EXISTS_OR_INLINE FUNCTION HEADER SAMPLE_CODE VARIABLE)
 			# ${VARIABLE} is already cached by CHECK_FUNCTION_EXISTS().
 		ENDIF(${VARIABLE}_INLINE)
 	ENDIF(NOT ${VARIABLE})
+
+	ENDIF(NOT DEFINED ${VARIABLE})
 ENDMACRO(CHECK_FUNCTION_EXISTS_OR_INLINE VARIABLE)
 CHECK_FUNCTION_EXISTS_OR_INLINE(localtime_r "time.h" "time_t tm; localtime_r(&tm, NULL);" HAVE_LOCALTIME_R)
 CHECK_FUNCTION_EXISTS(getpwuid_r HAVE_GETPWUID_R)
