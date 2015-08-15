@@ -51,6 +51,14 @@ IF(WIN32)
 	INCLUDE(cmake/platform/win32.cmake)
 ENDIF(WIN32)
 
+# Check for Large File Support.
+INCLUDE(CheckLargeFileSupport)
+CHECK_LARGE_FILE_SUPPORT()
+IF(NOT "${LFS_DEFINITIONS}" STREQUAL "")
+	SET(GENS_C_FLAGS_COMMON "${GENS_C_FLAGS_COMMON} ${LFS_DEFINITIONS}")
+	SET(GENS_CXX_FLAGS_COMMON "${GENS_CXX_FLAGS_COMMON} ${LFS_DEFINITIONS}")
+ENDIF()
+
 # Set CMAKE flags.
 # TODO: RelWithDebInfo / MinSizeRel?
 # Common
