@@ -1,7 +1,7 @@
 /***************************************************************************
- * c++11-compat.h.in: C++ 2011 compatibility header.                       *
+ * c++11-compat.h: C++ 2011 compatibility header.                          *
  *                                                                         *
- * Copyright (c) 2011-2013 by David Korth.                                 *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -125,23 +125,6 @@ namespace std {
 
 /** Other compatibility stuff. **/
 
-#ifdef _MSC_VER
-#if (_MSC_VER < 1900)
-/**
- * MSVC 2015 (14.0) supports snprintf() and vsnprintf().
- * Older versions have them prefixed with underscores.
- */
-#define snprintf(str, size, format, ...) _snprintf(str, size, format, __VA_ARGS__)
-#define vsnprintf(str, size, format, ap) _vsnprintf(str, size, format, ap)
-#endif
-/**
- * MSVC does not, and probably never will, define these functions.
- * It has equivalent functions with different names, though.
- */
-#define strcasecmp(s1, s2) _stricmp(s1, s2)
-#define strncasecmp(s1, s2, n) _strnicmp(s1, s2, n)
-#endif
-
 /**
  * MSVC (and old gcc) doesn't have __func__.
  * Reference: http://gcc.gnu.org/onlinedocs/gcc/Function-Names.html
@@ -152,6 +135,14 @@ namespace std {
 # else
 #  define __func__ "<unknown>"
 # endif
+#endif
+
+/**
+ * Older versions of MSVC aren't C99-compliant, but they
+ * do have equivalent functions with different names.
+ */
+#ifdef _MSC_VER
+#include "msvc-c99-compat.h"
 #endif
 
 /**
