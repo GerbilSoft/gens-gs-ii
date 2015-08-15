@@ -79,7 +79,7 @@ static inline string getUserName_unicode(void)
 	// with older versions of Windows.
 	string ret;
 	wchar_t username[256];
-	DWORD cchUsername = 0;
+	DWORD cchUsername = ARRAY_SIZE(username);
 	int wret = 0;
 
 	HMODULE hSecur32 = LoadLibraryW(L"SECUR32.DLL");
@@ -94,6 +94,7 @@ static inline string getUserName_unicode(void)
 
 	if (wret == 0 || cchUsername == 0) {
 		// Error retrieving display name.
+		cchUsername = ARRAY_SIZE(username)
 		wret = GetUserNameW(username, &cchUsername);
 		if (wret == 0 || cchUsername == 0) {
 			// Error retrieving username.
