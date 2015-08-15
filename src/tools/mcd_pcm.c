@@ -66,19 +66,16 @@ static const uint32_t def_sample_rate = 12500000 / 384;
 /* Description from http://ccrma.stanford.edu/courses/422/projects/WaveFormat/ */
 /* All values are little-endian, except for character fields. */
 #pragma pack(1)
-typedef struct PACKED _wav_header_t
-{
+typedef struct PACKED _wav_header_t {
 	/* RIFF chunk descriptor. */
-	struct PACKED
-	{
+	struct PACKED {
 		char		ChunkID[4];	/* Contains "RIFF". */
 		uint32_t	ChunkSize;	/* Size of the whole WAV, minus 8. */
 		char		Format[4];	/* Contains "WAVE". */
 	} riff;
-	
+
 	/* "fmt " sub-chunk. */
-	struct PACKED
-	{
+	struct PACKED {
 		char		SubchunkID[4];	/* Contains "fmt ". */
 		uint32_t	SubchunkSize;	/* Size of the subchunk, minus 8. */
 		uint16_t	AudioFormat;	/* PCM == 1 */
@@ -89,8 +86,7 @@ typedef struct PACKED _wav_header_t
 		uint16_t	BitsPerSample;
 	} fmt;
 	
-	struct PACKED
-	{
+	struct PACKED {
 		char		SubchunkID[4];	/* Contains "data". */
 		uint32_t	SubchunkSize;	/* Size of the whole WAV, minus 8, minus size of riff and fmt. */
 	} data;
@@ -146,29 +142,24 @@ typedef struct PACKED _wav_header_t
 	#define cpu_to_le32(x)  __swab32(x)
 #endif
 
-
 static void print_prg_info(void)
 {
 	fprintf(stderr, "mcd_pcm: Sega CD PCM Utility. (Version ");
 	
-	if (MCD_PCM_VERSION & 0xFFFF)
-	{
+	if (MCD_PCM_VERSION & 0xFFFF) {
 		fprintf(stderr, "%d.%d.%d",
 			((MCD_PCM_VERSION >> 24) & 0xFF),
 			((MCD_PCM_VERSION >> 16) & 0xFF),
 			(MCD_PCM_VERSION & 0xFFFF));
-	}
-	else
-	{
+	} else {
 		fprintf(stderr, "%d.%d",
 			((MCD_PCM_VERSION >> 24) & 0xFF),
 			((MCD_PCM_VERSION >> 16) & 0xFF));
 	}
-	
+
 	fprintf(stderr, ")\n"
 		"Copyright (c) 2011 by David Korth.\n");
 }
-
 
 static void print_gpl(void)
 {
@@ -189,11 +180,10 @@ static void print_gpl(void)
 		"\n");
 }
 
-
 static void print_help(char *argv0)
 {
 	print_prg_info();
-	
+
 	fprintf(stderr,
 		"\n"
 		"Usage: %s [OPTION] pcm_file.bin\n"
@@ -217,9 +207,8 @@ static void print_help(char *argv0)
 		argv0, def_sample_rate);
 }
 
-
 /**
- * process_pcm(): Process the PCM data.
+ * Process PCM data.
  * @param f_pcm			[in] PCM file. (input)
  * @param f_wav			[in] WAV file. (output)
  * @param start_pos		[in] Starting position within the PCM file.
@@ -227,36 +216,33 @@ static void print_help(char *argv0)
  * @param sample_rate		[in] Sample rate to encode in the WAV header.
  * @param samples_processed	[out] If not NULL, will contain number of samples processed.
  * @return Error code:
- * -  0 on success.
- * - -1 if EOF is hit before the PCM end flag.
- * - -2 if max_length is hit before the PCM end flag.
+ * - 0 on success.
+ * - 1 if EOF is hit before the PCM end flag.
+ * - 2 if max_length is hit before the PCM end flag.
  * - other on error
  */
 static int process_pcm(FILE *f_pcm, FILE *f_wav,
 		       int64_t start_pos, int max_length,
 		       uint32_t sample_rate,
-		       uint32_t *samples_processed
-      		)
+		       uint32_t *samples_processed)
 {
-	if (max_length < 0)
+	if (max_length < 0) {
 		max_length = INT_MAX;
-	
+	}
+
 	// Seek to the starting position within the PCM file.
 	fseeko(f_pcm, start_pos, SEEK_SET);
-	
+
 	// Create the WAV header.
 	// This will be written after the PCM data is converted.
-	wav_header_t wav_header =
-	{
-		.riff =
-		{
+	wav_header_t wav_header = {
+		.riff = {
 			.ChunkID	= {'R', 'I', 'F', 'F'},
 			.ChunkSize	= cpu_to_le32(0),		// will be filled in after conversion is completed
 			.Format		= {'W', 'A', 'V', 'E'},
 		},
-		
-		.fmt =
-		{
+
+		.fmt = {
 			.SubchunkID	= {'f', 'm', 't', ' '},
 			.SubchunkSize	= cpu_to_le32(sizeof(wav_header.fmt) - 8),
 			.AudioFormat	= cpu_to_le16(1),		// PCM
@@ -266,70 +252,62 @@ static int process_pcm(FILE *f_pcm, FILE *f_wav,
 			.BlockAlign	= cpu_to_le16(1),		// Each sample is 8 bits.
 			.ByteRate	= cpu_to_le32(sample_rate),	// sample_rate bytes per sample.
 		},
-		
-		.data =
-		{
+
+		.data = {
 			.SubchunkID	= {'d', 'a', 't', 'a'},
 			.SubchunkSize	= cpu_to_le32(0),		// will be filled in after conversion is completed
 		},
 	};
-	
+
 	// Seek to immediately after the WAV header.
 	fseeko(f_wav, (int64_t)sizeof(wav_header), SEEK_SET);
-	
+
 	// Read 4 KB at a time.
 	uint8_t buf_pcm[4096];
 	uint8_t buf_wav[4096];
 	int ret;
 	int found_end_flag = 0;		// Set if the PCM end flag 0xFF is found.
-	int end_flag_code = -1;		// End flag error code.
+	int end_flag_code = 1;		// End flag error code.
 	int64_t wav_length = 0;		// WAV data length.
-	while (!feof(f_pcm) && !found_end_flag)
-	{
+	while (!feof(f_pcm) && !found_end_flag) {
 		ret = fread(buf_pcm, 1, sizeof(buf_pcm), f_pcm);
-		if ((wav_length + ret) > max_length || (wav_length + ret) < 0)
-		{
+		if ((wav_length + ret) > max_length || (wav_length + ret) < 0) {
 			// Either we hit the maximum length,
 			// or overflow occurred.
 			ret = (max_length - wav_length);
 			found_end_flag = 1;
-			end_flag_code = -2;
+			end_flag_code = 2;
 		}
-		
-		for (int i = 0; i < ret; i++)
-		{
+
+		for (int i = 0; i < ret; i++) {
 			// Sega CD PCM uses sign-magnitude format.
-			if (buf_pcm[i] == 0xFF)
-			{
+			if (buf_pcm[i] == 0xFF) {
 				// End of PCM.
 				ret = i;
 				found_end_flag = 1;
 				end_flag_code = 0;
 				break;
 			}
-			
+
 			// Convert sign-magnitude to unsigned 8-bit.
-			if (buf_pcm[i] & 0x80)
-			{
+			if (buf_pcm[i] & 0x80) {
 				// Sign bit is set: negative sample.
 				// Unsigned 8-bit range: 0x00 - 0x7F
 				buf_wav[i] = (0x80 - (buf_pcm[i] & ~0x80));
-			}
-			else
-			{
+			} else {
 				// Sign bit is not set: positive sample.
 				// Unsigned 8-bit range: 0x80 - 0xFF
 				buf_wav[i] = (0x80 + buf_pcm[i]);
 			}
 		}
-		
+
 		// Write the WAV data.
 		fwrite(buf_wav, 1, ret, f_wav);
-		
+
 		// Increase the wav_length counter.
 		wav_length += ret;
 	}
-	
+
 	// Write the WAV header.
 	fseeko(f_wav, 0, SEEK_SET);
 	wav_header.data.SubchunkSize = cpu_to_le32(wav_length);
@@ -338,11 +316,12 @@ static int process_pcm(FILE *f_pcm, FILE *f_wav,
 						   sizeof(wav_header.fmt) +
 						   sizeof(wav_header.riff) - 8);
 	fwrite(&wav_header, 1, sizeof(wav_header), f_wav);
-	
+
 	// If samples_processed is not NULL, return the number of samples processed.
-	if (samples_processed)
+	if (samples_processed) {
 		*samples_processed = wav_length;
-	
+	}
+
 	// Return the end flag error code.
 	return end_flag_code;
 }
@@ -367,16 +346,14 @@ int main(int argc, char *argv[])
 	// Prevent getopt() from handling errors itself.
 	opterr = 0;
 	
-	while (1)
-	{
+	while (1) {
 		int c;
-		
+
 		// Temporary end pointer for strtol() and strtoll().
 		char *strtol_endptr;
-		
+
 		// Get command line options.
-		static struct option long_options[] =
-		{
+		static struct option long_options[] = {
 			{"start",	1, NULL, 's'},
 			{"length",	1, NULL, 'l'},
 			{"rate",	1, NULL, 'r'},
@@ -386,45 +363,41 @@ int main(int argc, char *argv[])
 			{"version",	0, NULL, 'v'},
 			{NULL,		0, NULL, 0}
 		};
-		
+
 		c = getopt_long(argc, argv, "s:l:r:o:hv",
 				long_options, NULL);
 		if (c == -1)
 			break;
-		
+
 		// Determine which option was passed.
-		switch (c)
-		{
+		switch (c) {
 			// Parameters.
 			case 's':
 				// Starting position within the file.
 				start_pos = strtoll(optarg, &strtol_endptr, 0);
-				if (strtol_endptr == optarg || *strtol_endptr != 0)
-				{
+				if (strtol_endptr == optarg || *strtol_endptr != 0) {
 					fprintf(stderr, "%s: invalid starting position %s\n"
 							"Try `%s --help` for more information.\n",
 							argv[0], optarg, argv[0]);
 					return EXIT_FAILURE;
 				}
 				break;
-			
+
 			case 'l':
 				// Maximum length to decode.
 				max_length = (int)strtol(optarg, &strtol_endptr, 0);
-				if (strtol_endptr == optarg || *strtol_endptr != 0)
-				{
+				if (strtol_endptr == optarg || *strtol_endptr != 0) {
 					fprintf(stderr, "%s: invalid length %s\n"
 							"Try `%s --help` for more information.\n",
 							argv[0], optarg, argv[0]);
 					return EXIT_FAILURE;
 				}
 				break;
-			
+
 			case 'r':
 				// Sample rate.
 				sample_rate = (uint32_t)strtol(optarg, &strtol_endptr, 0);
-				if (strtol_endptr == optarg || *strtol_endptr != 0 || sample_rate <= 0)
-				{
+				if (strtol_endptr == optarg || *strtol_endptr != 0 || sample_rate <= 0) {
 					fprintf(stderr, "%s: invalid sample rate %s\n"
 							"Try `%s --help` for more information.\n",
 							argv[0], optarg, argv[0]);
@@ -434,31 +407,30 @@ int main(int argc, char *argv[])
 			
 			case 'o':
 				// Output filename.
-				if (!optarg || *optarg == 0)
-				{
+				if (!optarg || *optarg == 0) {
 					fprintf(stderr, "%s: no output filename specified.\n"
 							"Try `%s --help` for more information.\n",
 							argv[0], argv[0]);
 					return EXIT_FAILURE;
 				}
-				
+
 				// Copy the output filename.
 				if (out_filename)
 					free(out_filename);
 				out_filename = strdup(optarg);
 				break;
-			
+
 			// Program information.
 			case 'h':
 				print_help(argv[0]);
 				return EXIT_SUCCESS;
-			
+
 			case 'v':
 				print_prg_info();
 				fprintf(stderr, "\n");
 				print_gpl();
 				return EXIT_SUCCESS;
-			
+
 			default:
 				// Invalid option.
 				fprintf(stderr, "%s: unrecognized option '%s'\n"
@@ -467,69 +439,59 @@ int main(int argc, char *argv[])
 				return EXIT_FAILURE;
 		}
 	}
-	
-	// Check that a filename was specified.
-	if (optind >= argc)
-	{
+
+	// Make sure a filename was specified.
+	if (optind >= argc) {
 		fprintf(stderr, "%s: no filename specified\n"
 			"Try `%s --help` for more information.\n",
 			argv[0], argv[0]);
 		return EXIT_FAILURE;
 	}
-	
+
 	// Attempt to open the file.
 	const char *pcm_filename = argv[optind];
 	FILE *f_pcm = fopen(pcm_filename, "rb");
-	if (!f_pcm)
-	{
+	if (!f_pcm) {
 		fprintf(stderr, "%s: Error opening '%s': %s\n",
 			argv[0], pcm_filename, strerror(errno));
 		return EXIT_FAILURE;
 	}
-	
+
 	// Open the output file.
 	FILE *f_wav;
-	if (out_filename)
-	{
+	if (out_filename) {
 		// Output filename specified.
 		f_wav = fopen(out_filename, "wb");
-	}
-	else
-	{
+	} else {
 		// Output filename not specified.
 		// Create it by taking the source filename and changing its extension to ".wav".
 		const size_t pcm_filename_len = strlen(pcm_filename);
 		const size_t out_filename_len = pcm_filename_len + 16;
 		out_filename = (char*)malloc(out_filename_len);
-		
+
 		// Strip the source filename of any directories.
 		char *src_slash_pos = strrchr(pcm_filename, DIRSEP_CHR);
-		if (src_slash_pos)
+		if (src_slash_pos) {
 			strncpy(out_filename, (src_slash_pos + 1), out_filename_len);
-		else
+		} else {
 			strncpy(out_filename, pcm_filename, out_filename_len);
-		
+		}
+
 		// Search for a '.' in the filename, starting from the end.
 		char *dot_pos = strrchr(out_filename, '.');
-		if (!dot_pos)
-		{
+		if (!dot_pos) {
 			// No dot found. Append ".wav" to the filename.
 			// TODO: strlcat()?
 			strcat(out_filename, ".wav");
-		}
-		else
-		{
+		} else {
 			// Dot found. Search for a directory separator character.
 			char *slash_pos = strrchr(out_filename, DIRSEP_CHR);
-			if (slash_pos && (slash_pos > dot_pos))
-			{
+			if (slash_pos && (slash_pos > dot_pos)) {
 				// Slash found, but it's after the dot.
 				// Append ".wav" to the filename.
 				// TODO: strlcat()?
 				strcat(out_filename, ".wav");
-			}
-			else
-			{
+			} else {
 				// One of two possibilities:
 				// - Slash not found.
 				// - Slash found, and it's before the dot.
@@ -539,14 +501,13 @@ int main(int argc, char *argv[])
 				strcpy(dot_pos, ".wav");
 			}
 		}
-		
+
 		// Open the WAV file.
 		f_wav = fopen(out_filename, "wb");
 	}
-	
+
 	// Verify that the WAV file was opened.
-	if (!f_wav)
-	{
+	if (!f_wav) {
 		// WAV file could not be opened.
 		fprintf(stderr, "%s: Error opening '%s': %s\n",
 			argv[0], out_filename, strerror(errno));
@@ -554,40 +515,43 @@ int main(int argc, char *argv[])
 		free(out_filename);
 		return EXIT_FAILURE;
 	}
-	
+
 	// Process the file.
 	uint32_t samples_processed = 0;
 	int ret = process_pcm(f_pcm, f_wav, start_pos, max_length,
 			      sample_rate, &samples_processed);
-	
+
 	// Close the files.
 	fclose(f_wav);
 	fclose(f_pcm);
-	
+
 	// Print statistics.
 	const int mins = (samples_processed / sample_rate / 60);
 	const int secs = (samples_processed / sample_rate % 60);
 	const int csecs = ((samples_processed * 100) / sample_rate % 100);
-	
+
 	printf("%s: %s converted to WAV:\n"
 		"- Sample rate: %d Hz\n"
 		"- %d samples processed\n"
 		"- Duration: %01d:%02d.%02d\n",
 		argv[0], pcm_filename, sample_rate,
 		samples_processed, mins, secs, csecs);
-	switch (ret)
-	{
+
+	switch (ret) {
 		case 0:
 			printf("- End of PCM flag (0xFF) reached.\n");
 			break;
-		case -1:
+		case 1:
 			printf("- End of file reached.\n");
 			break;
-		case -2:
+		case 2:
 			printf("- Maximum length (%d bytes) reached.\n", max_length);
 			break;
 		default:
 			printf("- Unknown return code %d from process_pcm().\n", ret);
 			break;
 	}
+
+	// TODO: 1 is reserved for EXIT_FAILURE; use other values here?
+	return ret;
 }
