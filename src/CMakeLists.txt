@@ -8,14 +8,6 @@ INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}")
 # Include the extlib directory.
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../extlib/")
 
-# Check for C++ 2011 support.
-# If C++ 2011 isn't available, compatibility definitions will be enabled.
-# NOTE: CHECK_CXX11_COMPILER_FLAG() needs to be called here again.
-# It worked without this previously due to old config.h files in the build directory.
-INCLUDE(CheckCXXSourceCompiles)
-INCLUDE(CheckCXX11CompilerFlag)
-CHECK_CXX11_COMPILER_FLAG(GENS_CXX11_CXXFLAG)
-
 # C++11 compatibility header.
 # NOTE: This must be included regardless of C++11 support in the compiler.
 # gcc-4.6 supports some C++11, but is missing explicit virtual overrides.
@@ -27,11 +19,8 @@ ENDIF(MSVC)
 SET(GENS_CXXFLAG_CXX11_COMPAT ${GENS_CXX11_COMPAT_HEADER})
 
 # Add the C++11 compatibility header to CFLAGS/CXXFLAGS.
-# TODO: Move -DQT_NO_DEBUG to gens-qt4?
-SET(CMAKE_C_FLAGS_DEBUG		"${CMAKE_C_FLAGS_DEBUG} ${GENS_CXX11_COMPAT_HEADER}")
-SET(CMAKE_CXX_FLAGS_DEBUG	"${CMAKE_CXX_FLAGS_DEBUG} ${GENS_CXXFLAG_CXX11_COMPAT}")
-SET(CMAKE_C_FLAGS_RELEASE	"-DQT_NO_DEBUG ${CMAKE_C_FLAGS_RELEASE} ${GENS_CXX11_COMPAT_HEADER}")
-SET(CMAKE_CXX_FLAGS_RELEASE	"-DQT_NO_DEBUG ${CMAKE_CXX_FLAGS_RELEASE} ${GENS_CXXFLAG_CXX11_COMPAT}")
+SET(CMAKE_C_FLAGS	"${CMAKE_C_FLAGS} ${GENS_CXX11_COMPAT_HEADER}")
+SET(CMAKE_CXX_FLAGS	"${CMAKE_CXX_FLAGS} ${GENS_CXXFLAG_CXX11_COMPAT}")
 
 # Compatibility library. (Includes W32U Mini.)
 ADD_SUBDIRECTORY(libcompat)
