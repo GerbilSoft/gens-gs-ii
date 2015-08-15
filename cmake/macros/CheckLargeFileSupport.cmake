@@ -33,8 +33,7 @@ MACRO(CHECK_LARGE_FILE_SUPPORT)
 			# Check if _fseeki64() and _ftelli64() are available.
 			TRY_COMPILE(TMP_LFS_FOUND "${CMAKE_BINARY_DIR}"
 				"${LFS_SOURCE_PATH}/LargeFileSupport_fseeki64.c")
-			# FIXME: Use policy CMP0012 instead of STREQUAL?
-			IF("${TMP_LFS_FOUND}" STREQUAL "TRUE")
+			IF(TMP_LFS_FOUND)
 				# _fseeki64() and _ftelli64() are available.
 				MESSAGE(STATUS "Checking if Large File Support is available - yes, using MSVC non-standard functions")
 				SET(TMP_LFS_FOUND_FSEEKI64 1)
@@ -46,8 +45,7 @@ MACRO(CHECK_LARGE_FILE_SUPPORT)
 			# Check if the OS supports Large Files out of the box.
 			TRY_COMPILE(TMP_LFS_FOUND "${CMAKE_BINARY_DIR}"
 				"${LFS_SOURCE_PATH}/LargeFileSupport_fseeko.c")
-			# FIXME: Use policy CMP0012 instead of STREQUAL?
-			IF("${TMP_LFS_FOUND}" STREQUAL "TRUE")
+			IF(TMP_LFS_FOUND)
 				# Supported out of the box.
 				MESSAGE(STATUS "Checking if Large File Support is available - yes")
 				SET(TMP_LFS_DEFINITIONS "")
@@ -57,8 +55,7 @@ MACRO(CHECK_LARGE_FILE_SUPPORT)
 				TRY_COMPILE(TMP_LFS_FOUND "${CMAKE_BINARY_DIR}"
 					"${LFS_SOURCE_PATH}/LargeFileSupport_fseeko.c"
 					COMPILE_DEFINITIONS ${TMP_LFS_DEFINITIONS})
-				# FIXME: Use policy CMP0012 instead of STREQUAL?
-				IF("${TMP_LFS_FOUND}" STREQUAL "TRUE")
+				IF(TMP_LFS_FOUND)
 					# LFS macros work.
 					MESSAGE(STATUS "Checking if Large File Support is available - yes, using LFS macros")
 					SET(TMP_LFS_FOUND_FSEEKO 1)
