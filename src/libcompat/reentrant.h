@@ -31,7 +31,6 @@
 #define _POSIX_C_SOURCE 1
 
 // C includes.
-#include <string.h>
 #include <time.h>
 
 #ifdef __cplusplus
@@ -57,9 +56,10 @@ static __forceinline struct tm *__cdecl localtime_r(const time_t *_Time, struct 
 {
 	struct tm *ret = localtime(_Time);
 	if (ret && _Tm) {
-		memcpy(_Tm, ret, sizeof(struct tm));
+		*_Tm = *ret;
+		return _Tm;
 	}
-	return ret;
+	return NULL;
 }
 #endif /* _WIN32 */
 #endif /* !HAVE_LOCALTIME_R */
