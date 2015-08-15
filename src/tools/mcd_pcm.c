@@ -283,13 +283,14 @@ static int process_pcm(FILE *f_pcm, FILE *f_wav,
 	int ret;
 	int found_end_flag = 0;		// Set if the PCM end flag 0xFF is found.
 	int end_flag_code = -1;		// End flag error code.
-	uint32_t wav_length = 0;	// WAV data length.
+	int64_t wav_length = 0;		// WAV data length.
 	while (!feof(f_pcm) && !found_end_flag)
 	{
 		ret = fread(buf_pcm, 1, sizeof(buf_pcm), f_pcm);
-		if ((wav_length + ret) > max_length)
+		if ((wav_length + ret) > max_length || (wav_length + ret) < 0)
 		{
-			// Maximum length hit.
+			// Either we hit the maximum length,
+			// or overflow occurred.
 			ret = (max_length - wav_length);
 			found_end_flag = 1;
 			end_flag_code = -2;
