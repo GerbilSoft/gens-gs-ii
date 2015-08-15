@@ -56,7 +56,7 @@
 /** strtoll(), strtoull() **/
 
 /**
- * MSVC 2013 added proper support for strtoll() and strtoull().
+ * MSVC 2013 (12.0) added proper support for strtoll() and strtoull().
  * Older verisons don't have these functions, but they do have
  * the equivalent functions _strtoi64() and _strtoui64().
  */
