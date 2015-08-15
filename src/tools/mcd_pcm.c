@@ -20,10 +20,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
 #include <errno.h>
 #include <stdint.h>
 #include <limits.h>
+
+// libcompat provides getopt_long() on platforms that don't have it.
+#include "libcompat/compat_getopt.h"
 
 // strdup() requires __USE_BSD when compiling without GNU extensions.
 #define __USE_BSD 1
