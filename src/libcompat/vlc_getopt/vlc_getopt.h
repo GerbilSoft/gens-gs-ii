@@ -109,10 +109,15 @@ struct vlc_option
 #define required_argument 1
 #endif
 
+// Default vlc_getopt_state for getopt_long() compatibility.
+extern vlc_getopt_t vlc_getopt_state;
+
 #ifdef _MSC_VER
 // MSVC 2010 SP1 doesn't support restrict in C mode.
+#ifndef restrict
 #define restrict __restrict
-#endif
+#endif /* restrict */
+#endif /* _MSC_VER */
 
 extern int vlc_getopt_long(int argc, char *const *argv, const char *shortopts,
                            const struct vlc_option *restrict longopts, int *longind,

@@ -29,7 +29,6 @@
 #include "vlc_getopt.h"
 
 // Default vlc_getopt_state for getopt_long() compatibility.
-extern vlc_getopt_t vlc_getopt_state;
 vlc_getopt_t vlc_getopt_state;
 
 /* Exchange two adjacent subsequences of ARGV.

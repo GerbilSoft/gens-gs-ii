@@ -34,12 +34,26 @@
  * TODO: Port getopt() and getopt_long() from glibc or gnulib?
  */
 
+#ifndef HAVE_GETOPT
+#include "libcompat/vlc_getopt/vlc_getopt.h"
+static __inline int getopt(int argc, char *const argv[], const char *optstring)
+{
+	// Dummy long_options[].
+	static struct vlc_option long_options[] = {
+		{NULL, 0, NULL, 0}
+	};
+	return vlc_getopt_long(argc, argv, optstring, long_options, NULL, &vlc_getopt_state);
+}
+#endif
+
 #ifndef HAVE_GETOPT_LONG
 #include "libcompat/vlc_getopt/vlc_getopt.h"
 // Wrappers to make vlc_getopt_long() act like GNU getopt_long().
-extern vlc_getopt_t vlc_getopt_state;
 #define getopt_long(argc, argv, optstring, longopts, longindex) \
         vlc_getopt_long(argc, argv, optstring, longopts, longindex, &vlc_getopt_state)
+#endif
+
+#if !defined(HAVE_GETOPT) || !defined(HAVE_GETOPT_LONG)
 #define option vlc_option
 #define optarg vlc_getopt_state.arg
 #define optind vlc_getopt_state.ind
