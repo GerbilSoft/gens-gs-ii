@@ -29,7 +29,7 @@
 #include <cassert>
 
 // LibGens includes.
-#include "libgens/MD/SysVersion.hpp"
+#include "libgens/EmuContext/SysVersion.hpp"
 using LibGens::SysVersion;
 
 // Other windows.

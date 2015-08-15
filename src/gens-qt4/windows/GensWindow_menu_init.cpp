@@ -33,7 +33,7 @@
 
 // LibGens includes.
 #include "libgens/Util/MdFb.hpp"
-#include "libgens/MD/SysVersion.hpp"
+#include "libgens/EmuContext/SysVersion.hpp"
 using LibGens::MdFb;
 using LibGens::SysVersion;
 

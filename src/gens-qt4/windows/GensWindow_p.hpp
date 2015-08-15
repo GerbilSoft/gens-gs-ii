@@ -25,7 +25,7 @@
 #define __GENS_QT4_WINDOWS_GENSWINDOW_P_HPP__
 
 #include "gqt4_datatypes.h"
-#include "libgens/MD/SysVersion.hpp"
+#include "libgens/EmuContext/SysVersion.hpp"
 
 #include "ui_GensWindow.h"
 namespace GensQt4 {
