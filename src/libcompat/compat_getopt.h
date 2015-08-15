@@ -1,6 +1,6 @@
 /***************************************************************************
  * libcompat: Compatibility library.                                       *
- * config.libcompat.h.in: libcompat configuration. (source file)           *
+ * compat_getopt.h: getopt.h compatibility header.                         *
  *                                                                         *
  * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
@@ -19,31 +19,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBCOMPAT_CONFIG_LIBCOMPAT_H__
-#define __LIBCOMPAT_CONFIG_LIBCOMPAT_H__
+#ifndef __LIBCOMPAT_COMPAT_GETOPT_H__
+#define __LIBCOMPAT_COMPAT_GETOPT_H__
 
-/* Define to 1 if support for ANSI Windows should be enabled. */
-#cmakedefine ENABLE_ANSI_WINDOWS 1
+#include <libcompat/config.libcompat.h>
 
-/* Define to 1 if you have the `localtime_r` function. */
-#cmakedefine HAVE_LOCALTIME_R 1
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
-/* Define to 1 if you have the `getpwuid_r` function. */
-#cmakedefine HAVE_GETPWUID_R 1
+/**
+ * NOTE: vlc_getopt only has a replacement for vlc_getopt_long().
+ * It also doesn't support optional arguments.
+ * TODO: Port getopt() and getopt_long() from glibc or gnulib?
+ */
 
-/* Define to 1 if you have the `_fseeki64` function. */
-#cmakedefine HAVE_FSEEKI64 1
+#ifndef HAVE_GETOPT_LONG
+#include "libcompat/vlc_getopt/vlc_getopt.h"
+// Wrappers to make vlc_getopt_long() act like GNU getopt_long().
+extern vlc_getopt_t vlc_getopt_state;
+#define getopt_long(argc, argv, optstring, longopts, longindex) \
+        vlc_getopt_long(argc, argv, optstring, longopts, longindex, &vlc_getopt_state)
+#define option vlc_option
+#define optarg vlc_getopt_state.arg
+#define optind vlc_getopt_state.ind
+#endif
 
-/* Define to 1 if you have the `_ftelli64` function. */
-#cmakedefine HAVE_FTELLI64 1
-
-/* Define to 1 if you have the <getopt.h> header file. */
-#cmakedefine HAVE_GETOPT_H 1
-
-/* Define to 1 if you have the `getopt` function. */
-#cmakedefine HAVE_GETOPT 1
-
-/* Define to 1 if you have the `getopt_long` function. */
-#cmakedefine HAVE_GETOPT_LONG 1
-
-#endif /* __LIBCOMPAT_CONFIG_LIBCOMPAT_H__ */
+#endif /* __LIBCOMPAT_COMPAT_GETOPT_H__ */

@@ -51,6 +51,23 @@ CHECK_FUNCTION_EXISTS(getpwuid_r HAVE_GETPWUID_R)
 CHECK_FUNCTION_EXISTS(_fseeki64 HAVE_FSEEKI64)
 CHECK_FUNCTION_EXISTS(_ftelli64 HAVE_FTELLI64)
 
+# Check for getopt.h, getopt(), and getopt_long().
+INCLUDE(CheckIncludeFiles)
+INCLUDE(CheckSymbolExists)
+CHECK_INCLUDE_FILES(getopt.h HAVE_GETOPT_H)
+CHECK_SYMBOL_EXISTS(getopt "getopt.h" HAVE_GETOPT)
+CHECK_SYMBOL_EXISTS(getopt_long "getopt.h" HAVE_GETOPT_LONG)
+IF(HAVE_GETOPT_H AND HAVE_GETOPT AND HAVE_GETOPT_LONG)
+	# System has getopt.h, getopt(), and getopt_long().
+	UNSET(getopt_SRCS)
+	UNSET(getopt_H)
+ELSE()
+	# System is missing getopt.h, getopt(), and/or getopt_long().
+	# Use vlc_getopt() instead.
+	SET(getopt_SRCS vlc_getopt/getopt.c)
+	SET(getopt_H vlc_getopt/vlc_getopt.h)
+ENDIF()
+
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libcompat.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.libcompat.h")
 
@@ -86,7 +103,12 @@ ENDIF(WIN32)
 # Build the library. #
 ######################
 
-ADD_LIBRARY(compat STATIC ${libcompat_SRCS} ${libcompat_H})
+ADD_LIBRARY(compat STATIC
+	${libcompat_SRCS}
+	${libcompat_H}
+	${getopt_SRCS}
+	${getopt_H}
+	)
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(compat)
 
