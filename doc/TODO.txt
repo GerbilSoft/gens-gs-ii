@@ -1,0 +1,167 @@
+Gens/GS II TODO List
+
+Technical Preview 1:
+
+Infrastructure:
+- MSVC: Use /W3 or /W4; fix all warnings.
+  - Probably just /W3...
+  - cmake appears to set /W3 by default?
+- CMake: Add RelWithDebInfo, MinSizeRel configurations.
+- Check for clock_gettime() in libc directly, before checking
+  librt. glibc-2.17 moved this to libc.
+  - Verify other library checks, e.g. iconv().
+- MinGW: Add --tsaware option.
+- Use z_crc_t in all places where CRCs are used.
+  - Need to check zlib for z_crc_t; if not found, fall back.
+  - https://github.com/google/zopfli/issues/25
+- Enable large file support.
+  - 32-bit Linux: _LARGEFILE_SOURCE, _FILE_OFFSET_BITS=64
+    - https://github.com/Benjamin-Dobell/Heimdall/blob/master/cmake/LargeFiles.cmake
+    - http://stackoverflow.com/questions/14184031/what-is-the-difference-between-largefile-source-and-file-offset-bits-64
+  - 64-bit Linux, all OS X: Not needed.
+  - Windows: Required for 32-bit and 64-bit when using C stdio.
+    - Windows doesn't have an LFS equivalent, but it does have
+      e.g. _fseeki64() for fseek().
+    - https://msdn.microsoft.com/en-us/library/75yw9bf3%28v=vs.80%29.aspx
+    - Can add macros to W32U_mini...
+- Set up CPACK.
+- libcompat with implementations of localtime_r, etc. if the system
+  doesn't have it.
+  - #include "libcompat/localtime_r.h" instead of time.h?
+- Inhibit screensaver when not paused.
+  - SDL should inhibit screensaver by default, but we need to
+    disable this when paused.
+  - For Qt4: https://msdn.microsoft.com/en-us/library/windows/desktop/aa373208%28v=vs.85%29.aspx
+    - and check how SDL handles it.
+- SRAM quirk: Change "No SRAM" value to a bitfield enum, and use it for
+  more than just "No SRAM". (e.g. different/no checksum algorithms)
+- CMAKE: Set CMAKE_CREATE_CONSOLE_EXE, CMAKE_CREATE_WIN32_EXE in OS-specific cmake modules.
+  - Both are set in MSVC, but only Win32 is set in GNU.
+  - May eliminate the need to add subsystem manually.
+- CMAKE: Add this for Windows:
+  - https://github.com/sonicretro/sadx-mod-loader/blob/49cbca9ffecbcdc9541ac63ed2bc88ae52bfcfbf/cmake/macros/Win32ImageVersionLinkerFlags.cmake
+- localtime_r():
+  - Call tzset() before using this function. (manpage says it may be necessary)
+  - Non-Windows wrapper should return _Tm, not ret.
+
+Sega Pico:
+- Rom: Make pico_magic static.
+- Add pen support.
+
+libzomg:
+- Finish up metadata. (Sync with PNG metadata.)
+- Don't compress files smaller than a certain size. (<=32 bytes?)
+- Basic GSX loader, including Gens+ extras:
+  - gzipped save file
+  - minishot (stored *after* the gzip data)
+  - class Gsx : public ZomgBase;
+- Rename ZomgBase to SaveBase so it doesn't get confused with the Zomg class.
+
+Qt4 UI:
+- Enable build using CMake parameter: -DENABLE_QT4_UI=1
+  - For debugging only initially, since framedropping is still broken.
+
+OpenGL (gens-sdl):
+- Check for GL 1.2 instead of checking for GL_EXT_packed_pixels.
+  - GL 1.2 has GL_EXT_packed_pixels plus 565.
+  - GL_EXT_packed_pixels doesn't have 565.
+  - GL_APPLE_packed_pixels has 565, but is obsoleted by GL 1.2.
+  - GL_EXT_bgra is also built into GL 1.2.
+    - Still needed for GL 1.1, i.e. Windows GDI renderer.
+- Aspect ratio constraint: Use integers?
+- Onscreen display:
+  - Adjust for aspect ratio constraint.
+  - Show savestate preview image.
+- Add Fast Blur using SW and shaders. (hotkey F9)
+- Add Paused Tint using SW only.
+  - Shader is unnecessary because paused tint is done once and then
+    emulation is paused.
+  - Also, I can't chain shaders easily, so fast blur + paused ==
+    at least one software fallback anyway.
+
+Windows:
+- Set console code page to UTF-8.
+- Metadata: If OS version is >=6.2, use NetWkstaGetInfo().
+  - http://www.codeproject.com/Articles/678606/Part-Overcoming-Windows-s-deprecation-of-GetVe
+  - Also check CurrentBuild key.
+  - and CSDVersion for a service pack number
+- Win7 PC with NV: gens-sdl has a frame of whiteness on startup...
+  - XP VM: frame of garbage instead
+
+================================================================
+
+After Technical Preview 1:
+
+Infrastructure:
+- Check for dlopen() in libc, then libdl.
+- Switch from GLEW to libepoxy: https://github.com/anholt/libepoxy
+- Upgrade to cmake-3.2?
+  - cmake-3.1 adds language version checking.
+  - Also check for headers, reentrant functions, etc.
+- Remove all Decompressors in favor of using libarchive.
+  - Write a simple C++ wrapper around libarchive with a similar interface as Decompressor.
+
+System emulation:
+- Consolidate various options into hardware sets:
+  - MD1/MD2: Disable TAS on M68K memory, enable 2-column VScroll bug.
+  - Genesis 3: Enable TAS on M68K memory, disable 2-column VScroll bug.
+- Rework clocking to 3420 cycles per line.
+
+CPU emulation:
+- Switch to CZ80: (in progress, see switch-to-libz80 branch)
+  - http://notaz.gp2x.de/releases/PicoDrive/PicoDrive_135src.tar.bz2
+  - http://notaz.gp2x.de/pico.php
+- Lock up the CPU(s) if an invalid memory address is accessed.
+  - Show OSD message.
+  - Add configuration option to disable this.
+- 68000: Handle "open bus" reads. (Should show prefetch.)
+
+VDP emulation:
+- Rewrite the entire DMA infrastructure:
+  - DMA transfers should be done bits at a time, instead of
+    all at once and simulating CPU waits.
+- Verify behavior of VBL/HBL flags.
+- Start of frame was moved to visible line 0 to fix the
+  multitap I/O test ROM; however, genplus-gx moved start
+  of frame to physical line 0. The issue with Gens/GS II
+  was probably caused by timing inaccuracies elsewhere.
+- Sega 8-bit mode: Allow user to select VDP models.
+  - SG-1000: TMS9918A vs. SMS - different color palette.
+  - SMS1 vs. SMS2: Bugs with undocumented VDP register bits (required for JP Ys)
+  - SMS2/GG/MD: Fixes bugs; x224 and x240 modes.
+  - MD has some other differences.
+- Properly handle access to invalid VDP addresses from CPU.
+- Also handle access to invalid VDP codewords.
+  - Show an OSD message if this happens.
+- Add FIFO support.
+
+Sega Pico:
+- Add ADPCM support.
+
+Qt4 UI:
+- Backport gens-sdl framedropping code.
+- Add UI for configuring key shortcuts.
+  - Include options for "Kega Default" and "Regen Default".
+- Get rid of custom menu parsing. Use Qt Designer instead.
+  - Figure out how to do system-native icons afterwards.
+  - Raise minimum Qt version to 4.8?
+  - Rework keyboard shortcuts...
+- Sega CD Control Panel: Add animated icon overlay with region-specific
+  logo for Sega CD discs.
+
+Onscreen Display:
+- Rework to use a class with EmuContext and more comprehensive information.
+- Add message categories with different colors for each category.
+  - Categories: Error, Warning, Information
+
+Windows:
+- Add custom UTF-8 conversion for Win95? (or not)
+- GetCommandLineW() is implemented on Win9x, may not need to
+  implement argv conversion for ANSI.
+- Tech Preview 2: Investigate use of MS Layer for Unicode.
+  - https://msdn.microsoft.com/en-us/goglobal/bb688166.aspx
+  - MSVCRT doesn't use MSLU unless custom-compiled...
+    - https://groups.google.com/forum/#!topic/microsoft.public.platformsdk.mslayerforunicode/gonOpMysWEU
+- File associations:
+  - https://msdn.microsoft.com/en-us/library/windows/desktop/ee453695%28v=vs.85%29.aspx
+  - https://social.msdn.microsoft.com/Forums/vstudio/en-US/630ed1d9-73f1-4cc0-bc84-04f29cffc13b/what-registry-keys-are-responsible-for-file-extension-association?forum=netfxbcl
