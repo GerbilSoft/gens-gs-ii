@@ -49,9 +49,6 @@ OpenGL (gens-sdl):
   - GL_EXT_bgra is also built into GL 1.2.
     - Still needed for GL 1.1, i.e. Windows GDI renderer.
 - Aspect ratio constraint: Use integers?
-- Onscreen display:
-  - Adjust for aspect ratio constraint.
-  - Show savestate preview image.
 - Add Fast Blur using SW and shaders. (hotkey F9)
 - Add Paused Tint using SW only.
   - Shader is unnecessary because paused tint is done once and then
