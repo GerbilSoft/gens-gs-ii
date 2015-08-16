@@ -19,6 +19,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+// Reentrant functions.
+// MUST be included before everything else due to
+// _POSIX_SOURCE and _POSIX_C_SOURCE definitions.
+#include "libcompat/reentrant.h"
+
 #include "Config.hpp"
 
 // LibGens
