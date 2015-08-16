@@ -36,10 +36,6 @@ libzomg:
   - class Gsx : public ZomgBase;
 - Rename ZomgBase to SaveBase so it doesn't get confused with the Zomg class.
 
-Qt4 UI:
-- Enable build using CMake parameter: -DENABLE_QT4_UI=1
-  - For debugging only initially, since framedropping is still broken.
-
 OpenGL (gens-sdl):
 - Check for GL 1.2 instead of checking for GL_EXT_packed_pixels.
   - GL 1.2 has GL_EXT_packed_pixels plus 565.
