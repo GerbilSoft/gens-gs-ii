@@ -419,6 +419,35 @@ static void doFastBlur(void)
 	}
 }
 
+static void doStretchMode(void)
+{
+	// Change stretch mode parameters.
+	int stretchMode = (int)sdlHandler->vBackend()->stretchMode();
+	stretchMode++;
+	stretchMode &= 3;
+	sdlHandler->vBackend()->setStretchMode((VBackend::StretchMode_t)stretchMode);
+
+	// Show an OSD message.
+	const char *stretch;
+	switch (stretchMode) {
+		case VBackend::STRETCH_NONE:
+		default:
+			stretch = "None";
+			break;
+		case VBackend::STRETCH_H:
+			stretch = "Horizontal";
+			break;
+		case VBackend::STRETCH_V:
+			stretch = "Vertical";
+			break;
+		case VBackend::STRETCH_FULL:
+			stretch = "Full";
+			break;
+	}
+
+	vBackend->osd_printf(1500, "Stretch Mode set to %s.", stretch);
+}
+
 /**
  * Process an SDL event.
  * @param event SDL event.
@@ -480,12 +509,7 @@ static void processSdlEvent(const SDL_Event *event) {
 				case SDLK_F2:
 					if (event->key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
 						// Change stretch mode parameters.
-						// TODO: OSD message, but only if the backend supports it?
-						int stretchMode = (int)sdlHandler->vBackend()->stretchMode();
-						stretchMode++;
-						stretchMode &= 3;
-						sdlHandler->vBackend()->setStretchMode((VBackend::StretchMode_t)stretchMode);
-						// TODO: Update video if paused.
+						doStretchMode();
 					}
 					break;
 
