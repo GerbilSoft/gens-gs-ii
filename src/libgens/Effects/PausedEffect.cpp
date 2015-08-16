@@ -52,6 +52,12 @@ class PausedEffectPrivate
 		PausedEffectPrivate();
 		~PausedEffectPrivate();
 
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		PausedEffectPrivate(const PausedEffectPrivate &);
+		PausedEffectPrivate &operator=(const PausedEffectPrivate &);
+
 	public:
 		template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
 		static inline void T_DoPausedEffect(pixel* RESTRICT outScreen, const pixel* RESTRICT mdScreen);
