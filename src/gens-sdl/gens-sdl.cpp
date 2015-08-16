@@ -419,6 +419,9 @@ static void doFastBlur(void)
 	}
 }
 
+/**
+ * Change stretch mode parameters.
+ */
 static void doStretchMode(void)
 {
 	// Change stretch mode parameters.
@@ -446,6 +449,43 @@ static void doStretchMode(void)
 	}
 
 	vBackend->osd_printf(1500, "Stretch Mode set to %s.", stretch);
+}
+
+/**
+ * Pause/unpause emulation.
+ */
+static void doPause(void)
+{
+	paused = !paused;
+	vBackend->setPausedEffect(paused);
+
+	// Reset the clocks and counters.
+	clks.reset();
+	// Pause audio.
+	sdlHandler->pause_audio(paused);
+	// Autosave SRAM/EEPROM.
+	// (TODO: Only if paused == true?)
+	context->autoSaveData(-1);
+
+	// Update the window title.
+	if (paused) {
+		sdlHandler->set_window_title("Gens/GS II [SDL] [Paused]");
+	} else {
+		sdlHandler->set_window_title("Gens/GS II [SDL]");
+	}
+}
+
+/**
+ * Take a screenshot.
+ */
+static void doScreenShot(void)
+{
+	int ret = GensSdl::doScreenShot(context->m_vdp->MD_Screen, rom);
+	if (ret >= 0) {
+		vBackend->osd_printf(1500, "Screenshot %d saved.", ret);
+	} else {
+		vBackend->osd_printf(1500, "Error saving screenshot:\n* %s", strerror(-ret));
+	}
 }
 
 /**
@@ -477,32 +517,13 @@ static void processSdlEvent(const SDL_Event *event) {
 
 				case SDLK_ESCAPE:
 					// Pause emulation.
-					paused = !paused;
-					vBackend->setPausedEffect(paused);
-					// Reset the clocks and counters.
-					clks.reset();
-					// Pause audio.
-					sdlHandler->pause_audio(paused);
-					// Autosave SRAM/EEPROM.
-					context->autoSaveData(-1);
-					// TODO: Reset the audio ringbuffer?
-					// Update the window title.
-					if (paused) {
-						sdlHandler->set_window_title("Gens/GS II [SDL] [Paused]");
-					} else {
-						sdlHandler->set_window_title("Gens/GS II [SDL]");
-					}
+					doPause();
 					break;
 
 				case SDLK_BACKSPACE:
 					if (event->key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
 						// Take a screenshot.
-						int ret = GensSdl::doScreenShot(context->m_vdp->MD_Screen, rom);
-						if (ret >= 0) {
-							vBackend->osd_printf(1500, "Screenshot %d saved.", ret);
-						} else {
-							vBackend->osd_printf(1500, "Error saving screenshot:\n* %s", strerror(-ret));
-						}
+						doScreenShot();
 					}
 					break;
 
