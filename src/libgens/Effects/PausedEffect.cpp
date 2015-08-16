@@ -99,7 +99,8 @@ inline void PausedEffectPrivate::T_DoPausedEffect(pixel* RESTRICT outScreen, con
 			nRG = 0xFF;
 
 		// Left-shift the blue component to tint the image.
-		nB = nRG << 1;
+		// TODO: Keep the LSB? (bit 0 for 32-bit, 3 for 15-bit/16-bit)
+		nB = (nRG << 1);
 		if (nB > 0xFF)
 			nB = 0xFF;
 
@@ -124,7 +125,6 @@ inline void PausedEffectPrivate::T_DoPausedEffect(pixel* RESTRICT outScreen, con
 template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
 inline void PausedEffectPrivate::T_DoPausedEffect(pixel* RESTRICT outScreen)
 {
-	// TODO: Improve precision for 32-bit color.
 	uint8_t r, g, b;
 	unsigned int nRG, nB;
 	float monoPx;
@@ -147,7 +147,8 @@ inline void PausedEffectPrivate::T_DoPausedEffect(pixel* RESTRICT outScreen)
 			nRG = 0xFF;
 
 		// Left-shift the blue component to tint the image.
-		nB = nRG << 1;
+		// TODO: Keep the LSB? (bit 0 for 32-bit, 3 for 15-bit/16-bit)
+		nB = (nRG << 1);
 		if (nB > 0xFF)
 			nB = 0xFF;
 
