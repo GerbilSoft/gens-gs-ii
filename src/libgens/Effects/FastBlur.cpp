@@ -64,10 +64,10 @@ class FastBlurPrivate
 
 	public:
 		template<typename pixel, pixel mask>
-		static inline void T_DoFastBlur(pixel *mdScreen, const pixel *outScreen, unsigned int pxCount);
+		static inline void T_DoFastBlur(pixel *mdScreen, unsigned int pxCount);
 
 		template<typename pixel, pixel mask>
-		static inline void T_DoFastBlur(pixel *mdScreen, unsigned int pxCount);
+		static inline void T_DoFastBlur(pixel *mdScreen, const pixel *outScreen, unsigned int pxCount);
 
 #ifdef HAVE_MMX
 		static const uint32_t MASK_DIV2_15_MMX[2];
@@ -78,6 +78,30 @@ class FastBlurPrivate
 		static void DoFastBlur_32_MMX(uint32_t *mdScreen, unsigned int pxCount);
 #endif /* HAVE_MMX */
 };
+
+/**
+ * Apply a Fast Blur effect to the screen buffer.
+ * @param mask MSB mask for pixel data.
+ * @param outScreen Source and destination buffer.
+ * @param pxCount Pixel count.
+ */
+template<typename pixel, pixel mask>
+inline void FastBlurPrivate::T_DoFastBlur(pixel *outScreen, unsigned int pxCount)
+{
+	pixel px = 0, px_prev = 0;
+
+	// Process the framebuffer.
+	for (unsigned int i = pxCount; i != 0; i--) {
+		// NOTE: This may lose some precision in the Red LSB on LE architectures.
+		px = (*outScreen >> 1) & mask;	// Get pixel.
+		px_prev += px;			// Blur with previous pixel.
+		*(outScreen - 1) = px_prev;	// Write new pixel.
+		px_prev = px;			// Save pixel.
+
+		// Increment the screen pointer.
+		outScreen++;
+	}
+}
 
 /**
  * Apply a Fast Blur effect to the screen buffer.
@@ -102,30 +126,6 @@ inline void FastBlurPrivate::T_DoFastBlur(pixel *outScreen, const pixel *mdScree
 		// Increment the screen pointers.
 		outScreen++;
 		mdScreen++;
-	}
-}
-
-/**
- * Apply a Fast Blur effect to the screen buffer.
- * @param mask MSB mask for pixel data.
- * @param outScreen Source and destination buffer.
- * @param pxCount Pixel count.
- */
-template<typename pixel, pixel mask>
-inline void FastBlurPrivate::T_DoFastBlur(pixel *outScreen, unsigned int pxCount)
-{
-	pixel px = 0, px_prev = 0;
-
-	// Process the framebuffer.
-	for (unsigned int i = pxCount; i != 0; i--) {
-		// NOTE: This may lose some precision in the Red LSB on LE architectures.
-		px = (*outScreen >> 1) & mask;	// Get pixel.
-		px_prev += px;			// Blur with previous pixel.
-		*(outScreen - 1) = px_prev;	// Write new pixel.
-		px_prev = px;			// Save pixel.
-
-		// Increment the screen pointer.
-		outScreen++;
 	}
 }
 
