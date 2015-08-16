@@ -23,6 +23,11 @@
 
 #include <libzomg/config.libzomg.h>
 
+// Reentrant functions.
+// MUST be included before everything else due to
+// _POSIX_SOURCE and _POSIX_C_SOURCE definitions.
+#include "libcompat/reentrant.h"
+
 #include "Metadata_p.hpp"
 
 // System includes.
@@ -73,34 +78,30 @@ void MetadataPrivate::InitSystemMetadata(void)
 	// Username.
 	// Assuming OS X is compatible with the POSIX version.
 	// NOTE: Assuming UTF-8 encoding.
-	struct passwd *pwd;
-#ifdef HAVE_GETPWUID_R
 	char buf[2048];
-	struct passwd pwd_r;
+	struct passwd pwd;
+	struct passwd *pwd_result;
 	// TODO: Check for ENOMEM?
-	getpwuid_r(getuid(), &pwd_r, buf, sizeof(buf), &pwd);
-#else
-	pwd = getpwuid(getuid());
-#endif
-	if (pwd) {
+	ret = getpwuid_r(getuid(), &pwd, buf, sizeof(buf), &pwd_result);
+	if (!ret && pwd_result) {
 		// User information retrieved.
 		// Check for a display name.
-		if (pwd->pw_gecos && pwd->pw_gecos[0]) {
+		if (pwd.pw_gecos && pwd.pw_gecos[0]) {
 			// Find the first comma.
-			char *comma = strchr(pwd->pw_gecos, ',');
+			char *comma = strchr(pwd.pw_gecos, ',');
 			if (!comma) {
 				// No comma. Use the entire field.
-				sysInfo.username = string(pwd->pw_gecos);
+				sysInfo.username = string(pwd.pw_gecos);
 			} else {
 				// Found a comma.
-				sysInfo.username = string(pwd->pw_gecos, (comma - pwd->pw_gecos));
+				sysInfo.username = string(pwd.pw_gecos, (comma - pwd.pw_gecos));
 			}
 		} else {
 			// No display name.
 			// Check the username.
-			if (pwd->pw_name && pwd->pw_name[0]) {
+			if (pwd.pw_name && pwd.pw_name[0]) {
 				// Username is valid.
-				sysInfo.username = string(pwd->pw_name);
+				sysInfo.username = string(pwd.pw_name);
 			}
 		}
 	} else {
