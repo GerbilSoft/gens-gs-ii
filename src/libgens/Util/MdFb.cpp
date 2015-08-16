@@ -59,8 +59,11 @@ MdFb::~MdFb() {
  */
 void MdFb::reinitFb(void) {
 	// Free and reallocate the framebuffer.
+	// An extra 16 pixels are allocated to prevent overrunning
+	// the framebuffer if pxPitch is used at the first pixel.
+	// TODO: Maybe it should only be 8?
 	free(m_fb);
-	m_fb_sz = m_pxPitch * m_numLines * sizeof(uint32_t);
+	m_fb_sz = (m_pxPitch * m_numLines + 16) * sizeof(uint32_t);
 	m_fb = calloc(m_fb_sz, 1);
 
 	// Initialize the line number lookup table.
