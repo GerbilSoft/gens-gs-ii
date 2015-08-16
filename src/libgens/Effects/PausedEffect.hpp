@@ -26,6 +26,7 @@
 
 // RESTRICT keyword.
 // TODO: Move this to another file.
+#ifndef RESTRICT
 #if defined(__cplusplus) && defined(__GNUC__)
 #define RESTRICT __restrict__
 #elif defined(_MSC_VER)
@@ -35,6 +36,7 @@
 #else
 #define RESTRICT
 #endif
+#endif /* RESTRICT */
 
 namespace LibGens {
 
