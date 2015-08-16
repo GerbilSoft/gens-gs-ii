@@ -26,6 +26,8 @@
 
 // C includes.
 #include <stdint.h>
+// C includes. (C++ namespace)
+#include <cassert>
 // C++ includes.
 #include <string>
 
@@ -128,8 +130,9 @@ class SRam
 	private:
 		// SRam data.
 		uint8_t m_sram[64*1024];
-		bool m_on;	// Is SRam enabled?
-		bool m_write;	// Is SRam writable?
+		// These values should be 0 or 1.
+		uint8_t m_on;		// Is SRam enabled?
+		uint8_t m_write;	// Is SRam writable?
 		
 		uint32_t m_start;	// SRam starting address.
 		uint32_t m_end;		// SRam ending address.
@@ -142,14 +145,34 @@ class SRam
 /** Settings. **/
 
 inline bool SRam::isOn(void) const
-	{ return m_on; }
+{
+	assert(m_on <= 1);
+	return (bool)m_on;
+}
 inline void SRam::setOn(bool on)
-	{ m_on = on; }
+{
+	m_on = (uint8_t)on;
+	// NOTE: gcc complains if we use this
+	// assertion on 'on', since 'on' is
+	// declared as bool and thus should only
+	// ever be 0 or 1.
+	assert(m_on <= 1);
+}
 
 inline bool SRam::isWrite(void) const
-	{ return m_write; }
+{
+	assert(m_write <= 1);
+	return (bool)m_write;
+}
 inline void SRam::setWrite(bool write)
-	{ m_write = write; }
+{
+	m_write = (uint8_t)write;
+	// NOTE: gcc complains if we use this
+	// assertion on 'write', since 'write' is
+	// declared as bool and thus should only
+	// ever be 0 or 1.
+	assert(m_write <= 1);
+}
 
 // TODO: Mask off the high byte in addresses?
 inline uint32_t SRam::start(void) const
@@ -169,14 +192,20 @@ inline void SRam::setEnd(uint32_t end)
  * @return True if SRam is readable by the M68K; false if it can't.
  */
 inline bool SRam::canRead(void) const
-	{ return (m_on); }
+{
+	assert(m_on <= 1);
+	return (m_on != 0);
+}
 
 /**
  * Check if the M68K can write to SRam.
  * @return True if SRam is writable by the M68K; false if it can't.
  */
 inline bool SRam::canWrite(void) const
-	{ return (m_on && m_write); }
+{
+	assert(m_on <= 1 && m_write <= 1);
+	return (m_on != 0 && m_write != 0);
+}
 
 /**
  * Write the SRam control register. (0xA130F1)
@@ -196,7 +225,7 @@ inline void SRam::writeCtrl(uint8_t data)
  * TODO: Rename to dbg_readCtrl()?
  */
 inline uint8_t SRam::zomgReadCtrl(void) const
-	{ return (!!m_on | (!m_write << 1)); }
+	{ return (m_on | (!m_write << 1)); }
 
 /**
  * Check if a given address is in the SRam's range.
@@ -215,10 +244,16 @@ inline bool SRam::isDirty(void) const
 /** Inline protected functions. **/
 
 inline void SRam::setDirty(void)
-	{ m_dirty = true; m_framesElapsed = 0; }
+{
+	m_dirty = true;
+	m_framesElapsed = 0;
+}
 
 inline void SRam::clearDirty(void)
-	{ m_dirty = false; m_framesElapsed = 0; }
+{
+	m_dirty = false;
+	m_framesElapsed = 0;
+}
 
 }
 

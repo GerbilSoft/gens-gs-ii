@@ -285,10 +285,6 @@ int EmuPico::autoSaveData(int framesElapsed)
 template<EmuPico::LineType_t LineType, bool VDP>
 FORCE_INLINE void EmuPico::T_execLine(void)
 {
-	int writePos = SoundMgr::GetWritePos(m_vdp->VDP_Lines.currentLine);
-	int32_t *bufL = &SoundMgr::ms_SegBufL[writePos];
-	int32_t *bufR = &SoundMgr::ms_SegBufR[writePos];
-
 	// Update the sound chips.
 	int writeLen = SoundMgr::GetWriteLen(m_vdp->VDP_Lines.currentLine);
 	SoundMgr::ms_Psg.addWriteLen(writeLen);

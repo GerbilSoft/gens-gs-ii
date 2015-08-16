@@ -239,7 +239,7 @@ void OsdGLPrivate::reallocOsdTexture()
 		for (int y = 0; y < chrH; y++, pos += (pitch - chrW)) {
 			uint8_t chr_data = VGA_charset_ASCII[chr][y];
 			for (int x = chrW; x > 0; x--, chr_data <<= 1) {
-				*pos = (chr_data & 0x80 ? 0xFF : 0);
+				*pos = ((chr_data & 0x80) ? 0xFF : 0);
 				pos++;
 			}
 		}
