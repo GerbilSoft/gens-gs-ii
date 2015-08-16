@@ -7,9 +7,6 @@ Infrastructure:
   - Probably just /W3...
   - cmake appears to set /W3 by default?
 - CMake: Add RelWithDebInfo, MinSizeRel configurations.
-- Check for clock_gettime() in libc directly, before checking
-  librt. glibc-2.17 moved this to libc.
-  - Verify other library checks, e.g. iconv().
 - MinGW: Add --tsaware option.
 - Use z_crc_t in all places where CRCs are used.
   - Need to check zlib for z_crc_t; if not found, fall back.
