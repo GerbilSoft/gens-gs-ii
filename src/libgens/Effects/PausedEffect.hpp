@@ -46,15 +46,6 @@ class PausedEffect
 		static void DoPausedEffect(MdFb* RESTRICT outScreen);
 		static void DoPausedEffect(MdFb* RESTRICT outScreen, const MdFb* RESTRICT mdScreen);
 
-	protected:
-		template<typename pixel, pixel RMask, pixel GMask, pixel BMask,
-			 unsigned int RShift, unsigned int GShift, unsigned int BShift>
-		static inline void T_DoPausedEffect(pixel* RESTRICT outScreen, const pixel* RESTRICT mdScreen);
-		
-		template<typename pixel, pixel RMask, pixel GMask, pixel BMask,
-			 unsigned int RShift, unsigned int GShift, unsigned int BShift>
-		static inline void T_DoPausedEffect(pixel* RESTRICT outScreen);
-
 	private:
 		PausedEffect() { }
 		~PausedEffect() { }

@@ -46,6 +46,22 @@
 
 namespace LibGens {
 
+class PausedEffectPrivate
+{
+	private:
+		PausedEffectPrivate();
+		~PausedEffectPrivate();
+
+	public:
+		template<typename pixel, pixel RMask, pixel GMask, pixel BMask,
+			 unsigned int RShift, unsigned int GShift, unsigned int BShift>
+		static inline void T_DoPausedEffect(pixel* RESTRICT outScreen, const pixel* RESTRICT mdScreen);
+		
+		template<typename pixel, pixel RMask, pixel GMask, pixel BMask,
+			 unsigned int RShift, unsigned int GShift, unsigned int BShift>
+		static inline void T_DoPausedEffect(pixel* RESTRICT outScreen);
+};
+
 /**
  * Tint the screen a purple hue to indicate that emulation is paused.
  * @param pixel Type of pixel.
@@ -62,7 +78,7 @@ namespace LibGens {
  */
 template<typename pixel, pixel RMask, pixel GMask, pixel BMask,
 	 unsigned int RShift, unsigned int GShift, unsigned int BShift>
-inline void PausedEffect::T_DoPausedEffect(pixel* RESTRICT outScreen, const pixel* RESTRICT mdScreen)
+inline void PausedEffectPrivate::T_DoPausedEffect(pixel* RESTRICT outScreen, const pixel* RESTRICT mdScreen)
 {
 	// TODO: Improve precision for 32-bit color.
 	uint8_t r, g, b, nRG, nB;
@@ -109,7 +125,7 @@ inline void PausedEffect::T_DoPausedEffect(pixel* RESTRICT outScreen, const pixe
  */
 template<typename pixel, pixel RMask, pixel GMask, pixel BMask,
 	 unsigned int RShift, unsigned int GShift, unsigned int BShift>
-inline void PausedEffect::T_DoPausedEffect(pixel* RESTRICT outScreen)
+inline void PausedEffectPrivate::T_DoPausedEffect(pixel* RESTRICT outScreen)
 {
 	// TODO: Improve precision for 32-bit color.
 	uint8_t r, g, b, nRG, nB;
@@ -152,16 +168,16 @@ void PausedEffect::DoPausedEffect(MdFb *outScreen)
 	// Render to outScreen.
 	switch (outScreen->bpp()) {
 		case MdFb::BPP_15:
-			T_DoPausedEffect<uint16_t, 0x7C00, 0x03E0, 0x001F, 10, 5, 0>
+			PausedEffectPrivate::T_DoPausedEffect<uint16_t, 0x7C00, 0x03E0, 0x001F, 10, 5, 0>
 				(outScreen->fb16());
 			break;
 		case MdFb::BPP_16:
-			T_DoPausedEffect<uint16_t, 0xF800, 0x07C0, 0x001F, 11, 6, 0>
+			PausedEffectPrivate::T_DoPausedEffect<uint16_t, 0xF800, 0x07C0, 0x001F, 11, 6, 0>
 				(outScreen->fb16());
 			break;
 		case MdFb::BPP_32:
 		default:
-			T_DoPausedEffect<uint32_t, PAUSED_MASK32_R, PAUSED_MASK32_G, PAUSED_MASK32_B,
+			PausedEffectPrivate::T_DoPausedEffect<uint32_t, PAUSED_MASK32_R, PAUSED_MASK32_G, PAUSED_MASK32_B,
 					PAUSED_SHIFT32_R, PAUSED_SHIFT32_G, PAUSED_SHIFT32_B>
 				(outScreen->fb32());
 			break;
@@ -188,16 +204,16 @@ void PausedEffect::DoPausedEffect(MdFb* RESTRICT outScreen, const MdFb* RESTRICT
 	// Render to outScreen.
 	switch (outScreen->bpp()) {
 		case MdFb::BPP_15:
-			T_DoPausedEffect<uint16_t, 0x7C00, 0x03E0, 0x001F, 10, 5, 0>
+			PausedEffectPrivate::T_DoPausedEffect<uint16_t, 0x7C00, 0x03E0, 0x001F, 10, 5, 0>
 				(outScreen->fb16(), mdScreen->fb16());
 			break;
 		case MdFb::BPP_16:
-			T_DoPausedEffect<uint16_t, 0xF800, 0x07C0, 0x001F, 11, 6, 0>
+			PausedEffectPrivate::T_DoPausedEffect<uint16_t, 0xF800, 0x07C0, 0x001F, 11, 6, 0>
 				(outScreen->fb16(), mdScreen->fb16());
 			break;
 		case MdFb::BPP_32:
 		default:
-			T_DoPausedEffect<uint32_t, PAUSED_MASK32_R, PAUSED_MASK32_G, PAUSED_MASK32_B,
+			PausedEffectPrivate::T_DoPausedEffect<uint32_t, PAUSED_MASK32_R, PAUSED_MASK32_G, PAUSED_MASK32_B,
 					PAUSED_SHIFT32_R, PAUSED_SHIFT32_G, PAUSED_SHIFT32_B>
 				(outScreen->fb32(), mdScreen->fb32());
 			break;
