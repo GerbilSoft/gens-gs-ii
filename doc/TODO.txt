@@ -19,9 +19,6 @@ Infrastructure:
     - and check how SDL handles it.
 - SRAM quirk: Change "No SRAM" value to a bitfield enum, and use it for
   more than just "No SRAM". (e.g. different/no checksum algorithms)
-- CMAKE: Set CMAKE_CREATE_CONSOLE_EXE, CMAKE_CREATE_WIN32_EXE in OS-specific cmake modules.
-  - Both are set in MSVC, but only Win32 is set in GNU.
-  - May eliminate the need to add subsystem manually.
 - CMAKE: Add this for Windows:
   - https://github.com/sonicretro/sadx-mod-loader/blob/49cbca9ffecbcdc9541ac63ed2bc88ae52bfcfbf/cmake/macros/Win32ImageVersionLinkerFlags.cmake
 - localtime_r():
