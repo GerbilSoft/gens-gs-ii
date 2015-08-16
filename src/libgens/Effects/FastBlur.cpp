@@ -74,15 +74,20 @@ class FastBlurPrivate
 		static const uint32_t MASK_DIV2_16_MMX[2];
 		static const uint32_t MASK_DIV2_32_MMX[2];
 
-		static void DoFastBlur_16_MMX(uint16_t *mdScreen, unsigned int pxCount, const uint32_t *mask);
-		static void DoFastBlur_32_MMX(uint32_t *mdScreen, unsigned int pxCount);
+		static void DoFastBlur_16_MMX(uint16_t *outScreen, unsigned int pxCount, const uint32_t *mask);
+		static void DoFastBlur_16_MMX(uint16_t *outScreen, const uint16_t *mdScreen,
+					      unsigned int pxCount, const uint32_t *mask);
+
+		static void DoFastBlur_32_MMX(uint32_t *outScreen, unsigned int pxCount);
+		static void DoFastBlur_32_MMX(uint32_t *outScreen, const uint32_t *mdScreen,
+					      unsigned int pxCount);
 #endif /* HAVE_MMX */
 };
 
 /**
  * Apply a Fast Blur effect to the screen buffer.
  * @param mask MSB mask for pixel data.
- * @param outScreen Source and destination buffer.
+ * @param outScreen Source and destination screen.
  * @param pxCount Pixel count.
  */
 template<typename pixel, pixel mask>
@@ -106,8 +111,8 @@ inline void FastBlurPrivate::T_DoFastBlur(pixel *outScreen, unsigned int pxCount
 /**
  * Apply a Fast Blur effect to the screen buffer.
  * @param mask MSB mask for pixel data.
- * @param outScreen Destination screen buffer.
- * @param mdScreen Source screen buffer.
+ * @param outScreen Destination screen.
+ * @param mdScreen Source screen.
  * @param pxCount Pixel count.
  */
 template<typename pixel, pixel mask>
@@ -136,7 +141,7 @@ const uint32_t FastBlurPrivate::MASK_DIV2_32_MMX[2] = {0x007F7F7F, 0x007F7F7F};
 
 /**
  * 15/16-bit color Fast Blur, MMX-optimized.
- * @param outScreen Source and destination buffer.
+ * @param outScreen Source and destination screen.
  * @param pxCount Pixel count.
  * @param mask Division mask to use. (MASK_DIV2_15_MMX[] or MASK_DIV2_16_MMX[])
  */
@@ -150,6 +155,7 @@ void FastBlurPrivate::DoFastBlur_16_MMX(uint16_t *outScreen, unsigned int pxCoun
 		);
 
 	// Blur the pixels.
+	// TODO: Do more than 4px at a time?
 	assert(pxCount % 4 == 0);
 	for (unsigned int i = (pxCount / 4); i != 0; i--) {
 		__asm__ (
@@ -180,8 +186,57 @@ void FastBlurPrivate::DoFastBlur_16_MMX(uint16_t *outScreen, unsigned int pxCoun
 }
 
 /**
+ * 15/16-bit color Fast Blur, MMX-optimized.
+ * @param outScreen Destination screen.
+ * @param mdScreen Source screen.
+ * @param pxCount Pixel count.
+ * @param mask Division mask to use. (MASK_DIV2_15_MMX[] or MASK_DIV2_16_MMX[])
+ */
+void FastBlurPrivate::DoFastBlur_16_MMX(uint16_t *outScreen, const uint16_t *mdScreen,
+					unsigned int pxCount, const uint32_t *mask)
+{
+	// Load the 15/16-bit color mask.
+	__asm__ (
+		"movq %0, %%mm7"
+		:
+		: "m" (*mask)
+		);
+
+	// Blur the pixels.
+	// TODO: Do more than 4px at a time?
+	assert(pxCount % 4 == 0);
+	for (unsigned int i = (pxCount / 4); i != 0; i--) {
+		__asm__ (
+			// Get source pixels.
+			"movq	 (%1), %%mm0\n"
+			"movq	2(%1), %%mm1\n"
+
+			// Blur source pixels.
+			// NOTE: This may lose some precision in the Red LSB on LE architectures.
+			"psrld	$1, %%mm0\n"
+			"psrld	$1, %%mm1\n"
+			"pand	%%mm7, %%mm0\n"
+			"pand	%%mm7, %%mm1\n"
+			"paddw	%%mm1, %%mm0\n"
+
+			// Put destination pixels.
+			"movq	%%mm0, (%0)\n"
+			:
+			: "r" (outScreen), "r" (mdScreen)
+			);
+
+		// Next group of pixels.
+		outScreen += 4;
+		mdScreen += 4;
+	}
+
+	// Reset the FPU state.
+	__asm__ ("emms");
+}
+
+/**
  * 32-bit color Fast Blur, MMX-optimized.
- * @param outScreen Source and destination buffer.
+ * @param outScreen Source and destination screen.
  * @param pxCount Pixel count.
  */
 void FastBlurPrivate::DoFastBlur_32_MMX(uint32_t *outScreen, unsigned int pxCount)
@@ -194,6 +249,7 @@ void FastBlurPrivate::DoFastBlur_32_MMX(uint32_t *outScreen, unsigned int pxCoun
 		);
 
 	// Blur the pixels.
+	// TODO: Do more than 2px at a time?
 	assert(pxCount % 2 == 0);
 	for (unsigned int i = (pxCount / 2); i != 0; i--) {
 		__asm__ (
@@ -217,6 +273,53 @@ void FastBlurPrivate::DoFastBlur_32_MMX(uint32_t *outScreen, unsigned int pxCoun
 
 		// Next group of pixels.
 		outScreen += 2;
+	}
+
+	// Reset the FPU state.
+	__asm__ ("emms");
+}
+
+/**
+ * 32-bit color Fast Blur, MMX-optimized.
+ * @param outScreen Destination screen.
+ * @param mdScreen Source screen.
+ * @param pxCount Pixel count.
+ */
+void FastBlurPrivate::DoFastBlur_32_MMX(uint32_t *outScreen, const uint32_t *mdScreen, unsigned int pxCount)
+{
+	// Load the 32-bit color mask.
+	__asm__ (
+		"movq %0, %%mm7"
+		:
+		: "m" (MASK_DIV2_32_MMX[0])
+		);
+
+	// Blur the pixels.
+	// TODO: Do more than 2px at a time?
+	assert(pxCount % 2 == 0);
+	for (unsigned int i = (pxCount / 2); i != 0; i--) {
+		__asm__ (
+			// Get source pixels.
+			"movq	 (%1), %%mm0\n"
+			"movq	4(%1), %%mm1\n"
+
+			// Blur source pixels.
+			// NOTE: This may lose some precision in the Red LSB on LE architectures.
+			"psrld	$1, %%mm0\n"
+			"psrld	$1, %%mm1\n"
+			"pand	%%mm7, %%mm0\n"
+			"pand	%%mm7, %%mm1\n"
+			"paddd	%%mm1, %%mm0\n"
+
+			// Put destination pixels.
+			"movq	%%mm0, (%0)\n"
+			:
+			: "r" (outScreen), "r" (mdScreen)
+			);
+
+		// Next group of pixels.
+		outScreen += 2;
+		mdScreen += 2;
 	}
 
 	// Reset the FPU state.
@@ -295,19 +398,38 @@ void FastBlur::DoFastBlur(MdFb* RESTRICT outScreen, const MdFb* RESTRICT mdScree
 
 	switch (outScreen->bpp()) {
 		case MdFb::BPP_15:
-			FastBlurPrivate::T_DoFastBlur<uint16_t, MASK_DIV2_15>
-				(outScreen->fb16(), mdScreen->fb16(), pxCount);
+#ifdef HAVE_MMX
+			if (CPU_Flags & MDP_CPUFLAG_X86_MMX)
+				FastBlurPrivate::DoFastBlur_16_MMX(
+					outScreen->fb16(), mdScreen->fb16(), pxCount,
+					FastBlurPrivate::MASK_DIV2_15_MMX);
+			else
+#endif /* HAVE_MMX */
+				FastBlurPrivate::T_DoFastBlur<uint16_t, MASK_DIV2_15>
+					(outScreen->fb16(), mdScreen->fb16(), pxCount);
 			break;
 
 		case MdFb::BPP_16:
-			FastBlurPrivate::T_DoFastBlur<uint16_t, MASK_DIV2_16>
-				(outScreen->fb16(), mdScreen->fb16(), pxCount);
+#ifdef HAVE_MMX
+			if (CPU_Flags & MDP_CPUFLAG_X86_MMX)
+				FastBlurPrivate::DoFastBlur_16_MMX(
+					outScreen->fb16(), mdScreen->fb16(), pxCount,
+					FastBlurPrivate::MASK_DIV2_16_MMX);
+			else
+#endif /* HAVE_MMX */
+				FastBlurPrivate::T_DoFastBlur<uint16_t, MASK_DIV2_16>
+					(outScreen->fb16(), mdScreen->fb16(), pxCount);
 			break;
 
 		case MdFb::BPP_32:
 		default:
-			FastBlurPrivate::T_DoFastBlur<uint32_t, MASK_DIV2_32>
-				(outScreen->fb32(), mdScreen->fb32(), pxCount);
+#ifdef HAVE_MMX
+			if (CPU_Flags & MDP_CPUFLAG_X86_MMX)
+				FastBlurPrivate::DoFastBlur_32_MMX(outScreen->fb32(), mdScreen->fb32(), pxCount);
+			else
+#endif /* HAVE_MMX */
+				FastBlurPrivate::T_DoFastBlur<uint32_t, MASK_DIV2_32>
+					(outScreen->fb32(), mdScreen->fb32(), pxCount);
 			break;
 	}
 
