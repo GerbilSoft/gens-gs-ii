@@ -19,7 +19,7 @@ ENDIF(0)
 
 set(PNGLIB_MAJOR 1)
 set(PNGLIB_MINOR 6)
-set(PNGLIB_RELEASE 17)
+set(PNGLIB_RELEASE 18)
 set(PNGLIB_NAME libpng${PNGLIB_MAJOR}${PNGLIB_MINOR})
 set(PNGLIB_VERSION ${PNGLIB_MAJOR}.${PNGLIB_MINOR}.${PNGLIB_RELEASE})
 
@@ -36,7 +36,7 @@ if(NOT WIN32)
     PATHS /usr/lib /usr/local/lib
   )
   if(NOT M_LIBRARY)
-    message(STATUS "math lib 'libm' not found - floating point support disabled")
+    message(STATUS "math lib 'libm' not found; floating point support disabled")
   endif()
 else()
   # not needed on windows
@@ -46,16 +46,8 @@ endif()
 # gens-gs-ii: Disable libpng options.
 IF(0)
 # COMMAND LINE OPTIONS
-if(DEFINED PNG_SHARED)
-  option(PNG_SHARED "Build shared lib" ${PNG_SHARED})
-else()
-  option(PNG_SHARED "Build shared lib" ON)
-endif()
-if(DEFINED PNG_STATIC)
-  option(PNG_STATIC "Build static lib" ${PNG_STATIC})
-else()
-  option(PNG_STATIC "Build static lib" ON)
-endif()
+option(PNG_SHARED "Build shared lib" ON)
+option(PNG_STATIC "Build static lib" ON)
 ENDIF(0)
 
 # gens-gs-ii: Disable libpng options.
@@ -291,7 +283,7 @@ endif(NOT WIN32 OR CYGWIN OR MINGW)
 # SET UP LINKS
 if(PNG_SHARED)
   set_target_properties(${PNG_LIB_NAME} PROPERTIES
-#   VERSION 16.${PNGLIB_RELEASE}.1.6.17
+#   VERSION 16.${PNGLIB_RELEASE}.1.6.18
     VERSION 16.${PNGLIB_RELEASE}.0
     SOVERSION 16
     CLEAN_DIRECT_OUTPUT 1)
