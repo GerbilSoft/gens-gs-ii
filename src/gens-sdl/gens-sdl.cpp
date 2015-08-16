@@ -404,6 +404,22 @@ static void doSaveState(void)
 }
 
 /**
+ * Toggle Fast Blur.
+ */
+static void doFastBlur(void)
+{
+	bool fastBlur = !vBackend->fastBlur();
+	vBackend->setFastBlur(fastBlur);
+
+	// Show an OSD message.
+	if (fastBlur) {
+		vBackend->osd_printf(1500, "Fast Blur enabled.");
+	} else {
+		vBackend->osd_printf(1500, "Fast Blur disabled.");
+	}
+}
+
+/**
  * Process an SDL event.
  * @param event SDL event.
  */
@@ -518,6 +534,11 @@ static void processSdlEvent(const SDL_Event *event) {
 				case SDLK_F8:
 					// Load state.
 					doLoadState();
+					break;
+
+				case SDLK_F9:
+					// Fast Blur.
+					doFastBlur();
 					break;
 
 				case SDLK_F12:

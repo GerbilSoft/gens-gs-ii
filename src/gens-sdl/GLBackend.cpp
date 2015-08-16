@@ -25,7 +25,9 @@ using LibGens::MdFb;
 
 // Effects.
 #include "libgens/Effects/PausedEffect.hpp"
+#include "libgens/Effects/FastBlur.hpp"
 using LibGens::PausedEffect;
+using LibGens::FastBlur;
 
 // C includes. (C++ namespace)
 #include <cstdlib>
@@ -320,6 +322,22 @@ void GLBackend::update(bool fb_dirty)
 		MdFb *fb = m_fb;	// FB to use.
 		bool isIntFb = false;
 
+		if (m_fastBlur) {
+			// Make sure we have an internal framebuffer.
+			if (!m_int_fb) {
+				m_int_fb = new MdFb();
+			}
+			fb = m_int_fb;
+
+			// Apply the paused effect.
+			if (isIntFb) {
+				FastBlur::DoFastBlur(m_int_fb);
+			} else {
+				FastBlur::DoFastBlur(m_int_fb, m_fb);
+			}
+			isIntFb = true;
+		}
+
 		if (m_pausedEffect) {
 			// Make sure we have an internal framebuffer.
 			if (!m_int_fb) {
@@ -335,8 +353,6 @@ void GLBackend::update(bool fb_dirty)
 			}
 			isIntFb = true;
 		}
-
-		// TODO: Fast Blur effect.
 
 		// Get the screen buffer.
 		const GLvoid *screen;

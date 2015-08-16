@@ -125,6 +125,11 @@ class VBackend {
 		bool pausedEffect(void) const;
 		void setPausedEffect(bool pausedEffect);
 
+		// Fast Blur effect.
+		// TODO: Shader support.
+		bool fastBlur(void) const;
+		void setFastBlur(bool fastBlur);
+
 	public:
 		/** Onscreen Display functions. **/
 
@@ -198,6 +203,7 @@ class VBackend {
 		StretchMode_t m_stretchMode;
 		bool m_aspectRatioConstraint;
 		bool m_pausedEffect;
+		bool m_fastBlur;
 };
 
 /** Property accessors. **/
@@ -220,6 +226,8 @@ inline bool VBackend::aspectRatioConstraint(void) const
 	{ return m_aspectRatioConstraint; }
 inline bool VBackend::pausedEffect(void) const
 	{ return m_pausedEffect; }
+inline bool VBackend::fastBlur(void) const
+	{ return m_fastBlur; }
 
 }
 

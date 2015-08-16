@@ -75,6 +75,16 @@ void VBackend::setPausedEffect(bool pausedEffect)
 	setForceFbDirty();
 }
 
+void VBackend::setFastBlur(bool fastBlur)
+{
+	if (m_fastBlur == fastBlur)
+		return;
+	m_fastBlur = fastBlur;
+	// Framebuffer must be reuploaded.
+	// NOTE: If shaders are being used, this isn't true...
+	setForceFbDirty();
+}
+
 /** Onscreen Display functions. **/
 
 /**
