@@ -688,7 +688,7 @@ emit("jbe .already_done\n");
 	emit("mov eax,80000004h\n");
 	emit("ret\n");
 
-emit(".already_done\n");
+emit(".already_done:\n");
 
 	emit("mov eax,80000003h\n");
 	emit("ret\n");

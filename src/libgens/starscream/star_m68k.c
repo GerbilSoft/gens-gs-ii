@@ -693,7 +693,7 @@ emit("jbe .already_done\n");
 	emit("mov eax,80000004h\n");
 	emit("ret\n");
 
-emit(".already_done\n");
+emit(".already_done:\n");
 
 	emit("mov eax,80000003h\n");
 	emit("ret\n");
@@ -1011,7 +1011,7 @@ emit("js near execquit\n");
 	emit("cmp cl,ch\n");
 	emit("jae short .noint_1\n");
 
-	emit(".yesint_1\n");
+	emit(".yesint_1:\n");
 	emit("mov esi,[__pc]\n");
 	emit("xor ebp,ebp\n");
 	emit("xor edi,edi\n"); /* well, semi-live */
@@ -1019,7 +1019,7 @@ emit("js near execquit\n");
 	emit("sub [__odometer],edi\n"); /* edi will be <= 0 here */
 	emit("mov [__pc],esi\n"); /* PC guaranteed unbased */
 
-	emit(".noint_1\n");
+	emit(".noint_1:\n");
 	emit("popad\n");
 	emit(".noflush:\n");
 	emit("ret\n");
@@ -1319,7 +1319,7 @@ static void gen_flush_interrupts(void) {
 	emit("mov byte [__interrupts],al\n");	// set it
 	emit("pop eax\n");
 
-	emit(".noint\n");
+	emit(".noint:\n");
 	emit("ret\n");
 }
 
@@ -1639,7 +1639,7 @@ static void gen_readbw(int size)
 		emit("\tret\n");
 
 		emit("align 4\n");
-		emit(".Not_In_Ram\n");
+		emit(".Not_In_Ram:\n");
 		emit("\tpush eax\n");
 		emit("\tpush edx\n");
 		emit("\tmov [__io_cycle_counter], edi\n");
@@ -1705,7 +1705,7 @@ static void gen_readbw(int size)
 		emit("\tret\n");
 
 		emit("align 4\n");
-		emit(".Not_In_Ram\n");
+		emit(".Not_In_Ram:\n");
 		emit("\tpush eax\n");
 		emit("\tpush edx\n");
 		emit("\tmov [__io_cycle_counter], edi\n");
@@ -1766,7 +1766,7 @@ static void gen_readl(void)
 	emit("\tret\n");
 
 	emit("align 4\n");
-	emit(".Not_In_Ram\n");
+	emit(".Not_In_Ram:\n");
 	emit("\tpush eax\n");
 	emit("\tpush edx\n");
 	emit("\tmov [__io_cycle_counter], edi\n");
@@ -1830,7 +1830,7 @@ static void gen_readdecl(void)
 	emit("\tret\n");
 
 	emit("align 4\n");
-	emit(".Not_In_Ram\n");
+	emit(".Not_In_Ram:\n");
 	emit("\tadd edx, byte 2\n");
 	emit("\tpush eax\n");
 	emit("\tpush edx\n");
@@ -1909,7 +1909,7 @@ static void gen_writebw(int size)
 		emit("\tret\n");
 
 		emit("align 4\n");
-		emit(".Not_In_Ram\n");
+		emit(".Not_In_Ram:\n");
 		emit("\tpush eax\n");
 		emit("\tpush ecx\n");
 		emit("\tpush edx\n");
@@ -1962,7 +1962,7 @@ static void gen_writebw(int size)
 		emit("\tret\n");
 
 		emit("align 4\n");
-		emit(".Not_In_Ram\n");
+		emit(".Not_In_Ram:\n");
 		emit("\tpush eax\n");
 		emit("\tpush ecx\n");
 		emit("\tpush edx\n");
@@ -2021,7 +2021,7 @@ static void gen_writel(void)
 	emit("\tret\n");
 
 	emit("align 4\n");
-	emit(".Not_In_Ram\n");
+	emit(".Not_In_Ram:\n");
 	emit("\tpush eax\n");
 	emit("\tpush ecx\n");
 	emit("\tpush edx\n");
@@ -2083,7 +2083,7 @@ static void gen_writedecl(void)
 	emit("\tret\n");
 
 	emit("align 4\n");
-	emit(".Not_In_Ram\n");
+	emit(".Not_In_Ram:\n");
 	emit("\tadd edx, byte 2\n");
 	emit("\tpush eax\n");
 	emit("\tpush ecx\n");
