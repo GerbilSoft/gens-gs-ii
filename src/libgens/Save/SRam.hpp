@@ -196,7 +196,7 @@ inline void SRam::writeCtrl(uint8_t data)
  * TODO: Rename to dbg_readCtrl()?
  */
 inline uint8_t SRam::zomgReadCtrl(void) const
-	{ return (!!m_on | (!m_write << 2)); }
+	{ return (!!m_on | (!m_write << 1)); }
 
 /**
  * Check if a given address is in the SRam's range.
