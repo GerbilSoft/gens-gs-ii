@@ -21,7 +21,7 @@ IF(NOT WIN32)
 	CHECK_LIBRARY_EXISTS(c iconv "" HAVE_ICONV_C)	# libc: iconv()
 	IF(HAVE_ICONV_C)
 		# iconv() found in libc.
-		SET(ICONV_LIBRARY "-lc")
+		UNSET(ICONV_LIBRARY)
 		SET(HAVE_ICONV 1)
 	ELSE(HAVE_ICONV_C)
 		# iconv() not found in libc.
@@ -29,7 +29,7 @@ IF(NOT WIN32)
 		CHECK_LIBRARY_EXISTS(iconv iconv "" HAVE_ICONV_LIBICONV)	# libiconv: iconv()
 		IF(HAVE_ICONV_LIBICONV)
 			# iconv() found in libiconv.
-			SET(ICONV_LIBRARY "-liconv")
+			SET(ICONV_LIBRARY "iconv")
 			SET(HAVE_ICONV 1)
 		ENDIF(HAVE_ICONV_LIBICONV)
 	ENDIF(HAVE_ICONV_C)
@@ -61,5 +61,9 @@ SET(libgenstext_SRCS
 ######################
 
 ADD_LIBRARY(genstext STATIC ${libgenstext_SRCS})
+IF(ICONV_LIBRARY)
+	TARGET_LINK_LIBRARIES(genstext ${ICONV_LIBRARY})
+ENDIF(ICONV_LIBRARY)
+
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(genstext)
