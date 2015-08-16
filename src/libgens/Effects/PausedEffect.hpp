@@ -28,6 +28,8 @@
 // TODO: Move this to another file.
 #if defined(__cplusplus) && defined(__GNUC__)
 #define RESTRICT __restrict__
+#elif defined(_MSC_VER)
+#define RESTRICT __restrict
 #elif __STDC_VERSION__ >= 199901L
 #define RESTRICT restrict
 #else
