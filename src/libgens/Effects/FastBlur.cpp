@@ -26,7 +26,7 @@
  */
 
 #include "FastBlur.hpp"
-#include "Vdp/Vdp.hpp"
+#include "Util/MdFb.hpp"
 #include "Util/cpuflags.h"
 
 // C includes.
@@ -200,63 +200,89 @@ void FastBlurPrivate::DoFastBlur_32_MMX(uint32_t *mdScreen)
 #endif /* HAVE_MMX */
 
 /**
- * Apply a fast blur effect to the screen buffer.
- * @param outScreen Output screen.
- * @param fromMdScreen If true, uses Vdp::MD_Screen[] as the source buffer.
- * Otherwise, outScreen is used as both source and destination.
+ * Apply a Fast Blur effect to the screen buffer.
+ * @param outScreen Source and destination screen.
  */
-void FastBlur::DoFastBlur(MdFb *outScreen, bool fromMdScreen)
+void FastBlur::DoFastBlur(MdFb* RESTRICT outScreen)
 {
-	// TODO: Update to not use the VDP class.
-#if 0
-	if (fromMdScreen)
-	{
-		// Copy MD_Screen[] to outScreen.
-		switch(Vdp::m_palette.bpp())
-		{
-			case VdpPalette::BPP_15:
-			case VdpPalette::BPP_16:
-				memcpy(outScreen->fb16(), Vdp::MD_Screen.fb16(),
-				       (Vdp::MD_Screen.pxPitch() * Vdp::MD_Screen.numLines() * sizeof(uint16_t)));
-				break;
-			
-			case VdpPalette::BPP_32:
-			default:
-				memcpy(outScreen->fb32(), Vdp::MD_Screen.fb32(),
-				       (Vdp::MD_Screen.pxPitch() * Vdp::MD_Screen.numLines() * sizeof(uint32_t)));
-				break;
-		}
-	}
-	
-	switch (Vdp::m_palette.bpp())
-	{
-		case VdpPalette::BPP_15:
+	// Reference the framebuffer.
+	outScreen->ref();
+
+	switch (outScreen->bpp()) {
+		case MdFb::BPP_15:
 #ifdef HAVE_MMX
 			if (CPU_Flags & MDP_CPUFLAG_X86_MMX)
-				FastBlurPrivate::DoFastBlur_16_MMX(outScreen->fb16(), MASK_DIV2_15_MMX);
+				FastBlurPrivate::DoFastBlur_16_MMX(
+					outScreen->fb16(), FastBlurPrivate::MASK_DIV2_15_MMX);
 			else
 #endif /* HAVE_MMX */
-				FastBlurPrivate::T_DoFastBlur<uint16_t, MASK_DIV2_15>(outScreen->fb16());
+				FastBlurPrivate::T_DoFastBlur<uint16_t, MASK_DIV2_15>
+					(outScreen->fb16());
 			break;
-		case VdpPalette::BPP_16:
+
+		case MdFb::BPP_16:
 #ifdef HAVE_MMX
 			if (CPU_Flags & MDP_CPUFLAG_X86_MMX)
-				FastBlurPrivate::DoFastBlur_16_MMX(outScreen->fb16(), MASK_DIV2_16_MMX);
+				FastBlurPrivate::DoFastBlur_16_MMX(
+					outScreen->fb16(), FastBlurPrivate::MASK_DIV2_16_MMX);
 			else
 #endif /* HAVE_MMX */
-				FastBlurPrivate::T_DoFastBlur<uint16_t, MASK_DIV2_16>(outScreen->fb16());
+				FastBlurPrivate::T_DoFastBlur<uint16_t, MASK_DIV2_16>
+					(outScreen->fb16());
 			break;
-		case VdpPalette::BPP_32:
+
+		case MdFb::BPP_32:
 		default:
 #ifdef HAVE_MMX
 			if (CPU_Flags & MDP_CPUFLAG_X86_MMX)
 				FastBlurPrivate::DoFastBlur_32_MMX(outScreen->fb32());
 			else
 #endif /* HAVE_MMX */
-				FastBlurPrivate::T_DoFastBlur<uint32_t, MASK_DIV2_32>(outScreen->fb32());
+				FastBlurPrivate::T_DoFastBlur<uint32_t, MASK_DIV2_32>
+					(outScreen->fb32());
 			break;
 	}
-#endif
+
+	// Unreference the framebuffer.
+	outScreen->unref();
+}
+
+/**
+ * Apply a Fast Blur effect to the screen buffer.
+ * @param outScreen Destination screen.
+ * @param mdScreen Source screen.
+ */
+void FastBlur::DoFastBlur(MdFb* RESTRICT outScreen, const MdFb* RESTRICT mdScreen)
+{
+	// Reference the framebuffers.
+	outScreen->ref();
+	mdScreen->ref();
+
+	// Set outScreen's bpp to match mdScreen.
+	outScreen->setBpp(mdScreen->bpp());
+
+	// Copy mdScreen to outScreen.
+	// TODO: Implement a new Fast Blur that doesn't require memcpy().
+	switch (outScreen->bpp()) {
+		case MdFb::BPP_15:
+		case MdFb::BPP_16:
+			memcpy(outScreen->fb16(), mdScreen->fb16(),
+			       (mdScreen->pxPitch() * mdScreen->numLines() * sizeof(uint16_t)));
+			break;
+
+		case MdFb::BPP_32:
+		default:
+			memcpy(outScreen->fb32(), mdScreen->fb32(),
+			       (mdScreen->pxPitch() * mdScreen->numLines() * sizeof(uint32_t)));
+			break;
+	}
+
+	// Apply the Fast Blur effect to outScreen.
+	DoFastBlur(outScreen);
+
+	// Unreference the framebuffers.
+	outScreen->unref();
+	mdScreen->unref();
 }
 
 }

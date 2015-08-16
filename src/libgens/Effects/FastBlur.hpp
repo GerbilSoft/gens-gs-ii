@@ -47,11 +47,8 @@ class MdFb;
 class FastBlur
 {
 	public:
-		static void DoFastBlur(MdFb* RESTRICT outScreen, bool fromMdScreen = true);
-
-		// TODO
-		//static void DoFastBlur(MdFb* RESTRICT outScreen);
-		//static void DoFastBlur(MdFb* RESTRICT outScreen, const MdFb* RESTRICT mdScreen);
+		static void DoFastBlur(MdFb* RESTRICT outScreen);
+		static void DoFastBlur(MdFb* RESTRICT outScreen, const MdFb* RESTRICT mdScreen);
 	
 	private:
 		FastBlur() { }

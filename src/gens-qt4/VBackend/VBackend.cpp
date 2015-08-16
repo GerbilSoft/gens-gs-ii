@@ -365,7 +365,12 @@ void VBackend::updatePausedEffect(bool fromMdScreen)
 void VBackend::updateFastBlur(bool fromMdScreen)
 {
 	// Use LibGens' software paused effect function.
-	LibGens::FastBlur::DoFastBlur(m_intScreen, fromMdScreen);
+	// TODO: Eliminate fromMdScreen; use separate functions instead.
+	if (fromMdScreen) {
+		LibGens::FastBlur::DoFastBlur(m_intScreen, m_srcFb);
+	} else {
+		LibGens::FastBlur::DoFastBlur(m_intScreen);
+	}
 
 	// Mark the video backend as dirty.
 	setVbDirty();
