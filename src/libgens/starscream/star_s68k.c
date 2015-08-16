@@ -242,6 +242,16 @@ static void gen_banner(void) {
 	emit("\t%%define __OBJ_ELF\n");
 	emit("%%elifidn __OUTPUT_FORMAT__, elf64\n");
 	emit("\t%%define __OBJ_ELF\n");
+	emit("%%elifidn __OUTPUT_FORMAT__, win32\n");
+	emit("\t%%define __OBJ_WIN32\n");
+	emit("\t%%define __PLATFORM_WINDOWS\n");
+	emit("\t%%define .rodata .rdata\n");
+	emit("%%elifidn __OUTPUT_FORMAT__, win64\n");
+	emit("\t%%define __OBJ_WIN64\n");
+	emit("\t%%define __PLATFORM_WINDOWS\n");
+	emit("\t%%define .rodata .rdata\n");
+	emit("%%elifidn __OUTPUT_FORMAT__, macho\n");
+	emit("\t%%define __OBJ_MACHO\n");
 	emit("%%endif\n");
 	emit("\n");
 	
@@ -5252,7 +5262,7 @@ int main(int argc, char **argv) {
 	align(4);
 	emit("__jmptbl resb 262144\n");
 	if(cputype == 68010) emit("__looptbl resb 65536\n");
-	emit("section .data\n");
+	emit("section .rodata\n");
 	emit("bits 32\n");
 	align(4);
 	emit("__jmptblcomp:\n");
