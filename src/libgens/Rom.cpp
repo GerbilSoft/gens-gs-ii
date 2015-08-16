@@ -445,7 +445,7 @@ Rom::MDP_SYSTEM_ID RomPrivate::DetectSystem(const uint8_t *header, size_t header
 	}
 
 	// Check for Pico.
-	const char pico_magic[] = {'P', 'I', 'C', 'O'};
+	static const char pico_magic[] = {'P', 'I', 'C', 'O'};
 	if (header_size >= 0x200) {
 		if (!memcmp(&header[0x0105], pico_magic, sizeof(pico_magic))) {
 			// Pico ROM.

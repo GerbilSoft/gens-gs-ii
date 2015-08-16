@@ -26,7 +26,6 @@ Infrastructure:
   - Non-Windows wrapper should return _Tm, not ret.
 
 Sega Pico:
-- Rom: Make pico_magic static.
 - Add pen support.
 
 libzomg:
