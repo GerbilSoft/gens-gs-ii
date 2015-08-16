@@ -170,6 +170,7 @@ uint8_t SRam::readByte(uint32_t address) const
 
 	// Note: SRam is NOT byteswapped.
 	// TODO: SRAM enable check.
+	// NOTE: SRAM enable is currently handled in RomCartridgeMD.
 	address -= m_start;
 	return m_sram[address];
 }
@@ -182,6 +183,7 @@ uint16_t SRam::readWord(uint32_t address) const
 	// Note: SRam is NOT byteswapped.
 	// TODO: Proper byteswapping.
 	// TODO: SRAM enable check.
+	// NOTE: SRAM enable is currently handled in RomCartridgeMD.
 	address -= m_start;
 	return ((m_sram[address] << 8) | m_sram[address + 1]);
 }
@@ -193,6 +195,7 @@ void SRam::writeByte(uint32_t address, uint8_t data)
 
 	// Note: SRam is NOT byteswapped.
 	// TODO: Write protection, SRAM enable check.
+	// NOTE: Both of these are currently handled in RomCartridgeMD.
 	address -= m_start;
 	if (m_sram[address] != data) {
 		m_sram[address] = data;
@@ -209,6 +212,7 @@ void SRam::writeWord(uint32_t address, uint16_t data)
 	// Note: SRam is NOT byteswapped.
 	// TODO: Proper byteswapping.
 	// TODO: Write protection, SRAM enable check.
+	// NOTE: Both of these are currently handled in RomCartridgeMD.
 	address -= m_start;
 	const uint8_t hi = ((data >> 8) & 0xFF);
 	const uint8_t lo = (data & 0xFF);
