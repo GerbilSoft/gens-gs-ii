@@ -89,6 +89,26 @@ class GLBackendPrivate {
 		 * Recalculate the aspect ratio.
 		 */
 		void recalcAspectRatio(void);
+
+		/**
+		 * Start applying software-based framebuffer effects.
+		 *
+		 * If any effects require framebuffer manipulation,
+		 * m_int_fb will be allocated and returned.
+		 *
+		 * @return Framebuffer in use. (m_int_fb or m_fb)
+		 */
+		const MdFb *applySoftwareEffects(void);
+
+		/**
+		 * Start applying shader effects.
+		 */
+		void startShaderEffects(void);
+
+		/**
+		 * Stop applying shader effects.
+		 */
+		void stopShaderEffects(void);
 };
 
 /** GLBackendPrivate **/
@@ -260,6 +280,71 @@ void GLBackendPrivate::recalcAspectRatio(void)
 	glLoadIdentity();
 }
 
+/**
+ * Start applying software-based framebuffer effects.
+ *
+ * If any effects require framebuffer manipulation,
+ * m_int_fb will be allocated and returned.
+ *
+ * @return Framebuffer in use. (m_int_fb or m_fb)
+ */
+const MdFb *GLBackendPrivate::applySoftwareEffects(void)
+{
+	// TODO: Shader version of Fast Blur.
+	MdFb *fb = q->m_fb;	// FB to use.
+	bool isIntFb = false;
+
+	if (q->m_fastBlur) {
+		// Make sure we have an internal framebuffer.
+		if (!q->m_int_fb) {
+			q->m_int_fb = new MdFb();
+		}
+		fb = q->m_int_fb;
+
+		// Apply the paused effect.
+		if (isIntFb) {
+			FastBlur::DoFastBlur(q->m_int_fb);
+		} else {
+			FastBlur::DoFastBlur(q->m_int_fb, q->m_fb);
+		}
+		isIntFb = true;
+	}
+
+	if (q->m_pausedEffect) {
+		// Make sure we have an internal framebuffer.
+		if (!q->m_int_fb) {
+			q->m_int_fb = new MdFb();
+		}
+		fb = q->m_int_fb;
+
+		// Apply the paused effect.
+		if (isIntFb) {
+			PausedEffect::DoPausedEffect(q->m_int_fb);
+		} else {
+			PausedEffect::DoPausedEffect(q->m_int_fb, q->m_fb);
+		}
+		isIntFb = true;
+	}
+
+	return fb;
+}
+
+/**
+ * Start applying shader effects.
+ */
+void GLBackendPrivate::startShaderEffects(void)
+{
+	// TODO
+}
+
+/**
+ * Stop applying shader effects.
+ */
+void GLBackendPrivate::stopShaderEffects(void)
+{
+	// TODO
+}
+
 /** GLBackend **/
 
 GLBackend::GLBackend()
@@ -318,41 +403,8 @@ void GLBackend::update(bool fb_dirty)
 			d->reallocTexture();
 		}
 
-		// Apply effects.
-		MdFb *fb = m_fb;	// FB to use.
-		bool isIntFb = false;
-
-		if (m_fastBlur) {
-			// Make sure we have an internal framebuffer.
-			if (!m_int_fb) {
-				m_int_fb = new MdFb();
-			}
-			fb = m_int_fb;
-
-			// Apply the paused effect.
-			if (isIntFb) {
-				FastBlur::DoFastBlur(m_int_fb);
-			} else {
-				FastBlur::DoFastBlur(m_int_fb, m_fb);
-			}
-			isIntFb = true;
-		}
-
-		if (m_pausedEffect) {
-			// Make sure we have an internal framebuffer.
-			if (!m_int_fb) {
-				m_int_fb = new MdFb();
-			}
-			fb = m_int_fb;
-
-			// Apply the paused effect.
-			if (isIntFb) {
-				PausedEffect::DoPausedEffect(m_int_fb);
-			} else {
-				PausedEffect::DoPausedEffect(m_int_fb, m_fb);
-			}
-			isIntFb = true;
-		}
+		// Apply software framebuffer effects.
+		const MdFb *fb = d->applySoftwareEffects();
 
 		// Get the screen buffer.
 		const GLvoid *screen;
@@ -373,7 +425,8 @@ void GLBackend::update(bool fb_dirty)
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, d->tex.name);
 
-	// TODO: Enable shaders?
+	// Enable shader effects.
+	d->startShaderEffects();
 
 	// Clear the framebuffer first.
 	// TODO: Change to black once we're done debugging.
@@ -404,6 +457,9 @@ void GLBackend::update(bool fb_dirty)
 	glVertexPointer(2, GL_INT, 0, vtx);
 	glTexCoordPointer(2, GL_DOUBLE, 0, d->texRectF);
 	glDrawArrays(GL_QUADS, 0, 4);
+
+	// Disable shader effects.
+	d->stopShaderEffects();
 
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
