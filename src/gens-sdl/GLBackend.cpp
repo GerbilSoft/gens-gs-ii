@@ -23,6 +23,10 @@
 #include "libgens/Util/MdFb.hpp"
 using LibGens::MdFb;
 
+// Effects.
+#include "libgens/Effects/PausedEffect.hpp"
+using LibGens::PausedEffect;
+
 // C includes. (C++ namespace)
 #include <cstdlib>
 #include <climits>
@@ -303,7 +307,7 @@ void GLBackend::update(bool fb_dirty)
 	// TODO: makeCurrent()?
 
 	// Copy the MdFb to the texture.
-	if (m_fb && fb_dirty) {
+	if (m_fb && (fb_dirty || isForceFbDirty())) {
 		// Check if the bpp or texture size has changed.
 		// TODO: texVisSizeChanged?
 		if (m_fb->bpp() != d->lastBpp /*|| d->texVisSizeChanged*/) {
@@ -312,19 +316,39 @@ void GLBackend::update(bool fb_dirty)
 			d->reallocTexture();
 		}
 
-		// TODO: Apply effects.
+		// Apply effects.
+		MdFb *fb = m_fb;	// FB to use.
+		bool isIntFb = false;
+
+		if (m_pausedEffect) {
+			// Make sure we have an internal framebuffer.
+			if (!m_int_fb) {
+				m_int_fb = new MdFb();
+			}
+			fb = m_int_fb;
+
+			// Apply the paused effect.
+			if (isIntFb) {
+				PausedEffect::DoPausedEffect(m_int_fb);
+			} else {
+				PausedEffect::DoPausedEffect(m_int_fb, m_fb);
+			}
+			isIntFb = true;
+		}
+
+		// TODO: Fast Blur effect.
 
 		// Get the screen buffer.
 		const GLvoid *screen;
-		if (m_fb->bpp() != MdFb::BPP_32) {
-			screen = m_fb->fb16();
+		if (fb->bpp() != MdFb::BPP_32) {
+			screen = fb->fb16();
 		} else {
-			screen = m_fb->fb32();
+			screen = fb->fb32();
 		}
 
 		// (Re-)Upload the texture.
-		d->tex.subImage2D(m_fb->pxPerLine(), m_fb->numLines(),
-				m_fb->pxPitch(), screen);
+		d->tex.subImage2D(fb->pxPerLine(), fb->numLines(),
+				fb->pxPitch(), screen);
 	}
 
 	// Bind the texture.

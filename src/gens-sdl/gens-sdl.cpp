@@ -432,8 +432,8 @@ static void processSdlEvent(const SDL_Event *event) {
 
 				case SDLK_ESCAPE:
 					// Pause emulation.
-					// TODO: Apply the pause effect.
 					paused = !paused;
+					vBackend->setPausedEffect(paused);
 					// Reset the clocks and counters.
 					clks.reset();
 					// Pause audio.

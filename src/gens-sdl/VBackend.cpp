@@ -31,6 +31,7 @@ VBackend::VBackend()
 	: m_dirty(true)
 	, m_fullscreen(false)
 	, m_fb(nullptr)
+	, m_int_fb(nullptr)
 	, m_stretchMode(STRETCH_H)
 	, m_aspectRatioConstraint(true)
 { }
@@ -40,6 +41,11 @@ VBackend::~VBackend()
 	if (m_fb) {
 		m_fb->unref();
 		m_fb = nullptr;
+	}
+
+	if (m_int_fb) {
+		m_int_fb->unref();
+		m_int_fb = nullptr;
 	}
 }
 
@@ -57,6 +63,16 @@ void VBackend::setAspectRatioConstraint(bool aspectRatioConstraint)
 		return;
 	m_aspectRatioConstraint = aspectRatioConstraint;
 	setDirty();
+}
+
+void VBackend::setPausedEffect(bool pausedEffect)
+{
+	if (m_pausedEffect == pausedEffect)
+		return;
+	m_pausedEffect = pausedEffect;
+	// Framebuffer must be reuploaded.
+	// NOTE: If shaders are being used, this isn't true...
+	setForceFbDirty();
 }
 
 /** Onscreen Display functions. **/

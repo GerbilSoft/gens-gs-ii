@@ -118,6 +118,13 @@ class VBackend {
 		bool aspectRatioConstraint(void) const;
 		void setAspectRatioConstraint(bool aspectRatioConstraint);
 
+		// Paused effect.
+		// NOTE: VBackend doesn't maintain a "paused" state,
+		// so this should only be set if the user has enabled
+		// the paused effect *and* emulation is paused.
+		bool pausedEffect(void) const;
+		void setPausedEffect(bool pausedEffect);
+
 	public:
 		/** Onscreen Display functions. **/
 
@@ -161,7 +168,9 @@ class VBackend {
 
 	private:
 		// Dirty flag.
+		// TODO: Combine into a bitfield?
 		bool m_dirty;
+		bool m_forceFbDirty;
 
 	protected:
 		// Is fullscreen?
@@ -173,13 +182,22 @@ class VBackend {
 		// MdFb object.
 		LibGens::MdFb *m_fb;
 
+		// Internal MdFb for effects.
+		LibGens::MdFb *m_int_fb;
+
 		// Dirty flag functions.
 		void setDirty(void);
 		void clearDirty(void);
 
+		// Force FB dirty.
+		// Used if an effect setting is changed.
+		bool isForceFbDirty(void) const;
+		void setForceFbDirty(void);
+
 		// Properties.
 		StretchMode_t m_stretchMode;
 		bool m_aspectRatioConstraint;
+		bool m_pausedEffect;
 };
 
 /** Property accessors. **/
@@ -189,11 +207,19 @@ inline bool VBackend::isDirty(void) const
 inline void VBackend::setDirty(void)
 	{ m_dirty = true; }
 inline void VBackend::clearDirty(void)
-	{ m_dirty = false; }
+	{ m_dirty = false; m_forceFbDirty = false; }
+
+inline bool VBackend::isForceFbDirty(void) const
+	{ return m_forceFbDirty; }
+inline void VBackend::setForceFbDirty(void)
+	{ m_dirty = true; m_forceFbDirty = true; }
+
 inline VBackend::StretchMode_t VBackend::stretchMode(void) const
 	{ return m_stretchMode; }
 inline bool VBackend::aspectRatioConstraint(void) const
 	{ return m_aspectRatioConstraint; }
+inline bool VBackend::pausedEffect(void) const
+	{ return m_pausedEffect; }
 
 }
 
