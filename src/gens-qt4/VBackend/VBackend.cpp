@@ -347,7 +347,12 @@ void VBackend::pauseTint_changed_slot(const QVariant &newPauseTint)
 void VBackend::updatePausedEffect(bool fromMdScreen)
 {
 	// Use LibGens' software paused effect function.
-	LibGens::PausedEffect::DoPausedEffect(m_intScreen, fromMdScreen);
+	// TODO: Eliminate fromMdScreen; use separate functions instead.
+	if (fromMdScreen) {
+		LibGens::PausedEffect::DoPausedEffect(m_intScreen, m_srcFb);
+	} else {
+		LibGens::PausedEffect::DoPausedEffect(m_intScreen);
+	}
 
 	// Mark the video backend as dirty.
 	setVbDirty();

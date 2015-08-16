@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -34,25 +34,25 @@
 #define RESTRICT
 #endif
 
-namespace LibGens
-{
+namespace LibGens {
 
 class MdFb;
 
 class PausedEffect
 {
 	public:
-		static void DoPausedEffect(MdFb *outScreen, bool fromMdScreen = true);
-	
+		static void DoPausedEffect(MdFb* RESTRICT outScreen);
+		static void DoPausedEffect(MdFb* RESTRICT outScreen, const MdFb* RESTRICT mdScreen);
+
 	protected:
 		template<typename pixel, pixel RMask, pixel GMask, pixel BMask,
 			 unsigned int RShift, unsigned int GShift, unsigned int BShift>
-		static inline void T_DoPausedEffect(const pixel* RESTRICT mdScreen, pixel* RESTRICT outScreen);
+		static inline void T_DoPausedEffect(pixel* RESTRICT outScreen, const pixel* RESTRICT mdScreen);
 		
 		template<typename pixel, pixel RMask, pixel GMask, pixel BMask,
 			 unsigned int RShift, unsigned int GShift, unsigned int BShift>
 		static inline void T_DoPausedEffect(pixel* RESTRICT outScreen);
-	
+
 	private:
 		PausedEffect() { }
 		~PausedEffect() { }
