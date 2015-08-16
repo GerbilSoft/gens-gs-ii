@@ -86,7 +86,7 @@ class EmuMD : public EmuContext
 		 * @return 0 on success; non-zero on error.
 		 * TODO: Error code constants.
 		 */
-		virtual int zomgLoad(const utf8_str *filename) override;
+		virtual int zomgLoad(const char *filename) override;
 
 		/**
 		 * Save the current state to a ZOMG file.
@@ -94,7 +94,7 @@ class EmuMD : public EmuContext
 		 * @return 0 on success; non-zero on error.
 		 * TODO: Error code constants.
 		 */
-		virtual int zomgSave(const utf8_str *filename) const override;
+		virtual int zomgSave(const char *filename) const override;
 
 	protected:
 		/**

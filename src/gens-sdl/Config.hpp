@@ -22,8 +22,6 @@
 #ifndef __GENS_SDL_CONFIG_HPP__
 #define __GENS_SDL_CONFIG_HPP__
 
-#include "libgens/macros/common.h"
-
 // Directory separator character.
 #ifdef _WIN32
 #define DIR_SEP_CHR '\\'
@@ -46,7 +44,7 @@ namespace GensSdl {
  * @param subdir [in, opt] If not null, append a subdirectory.
  * @return Configuration directory, or empty string on error.
  */
-std::string getConfigDir(const utf8_str *subdir = nullptr);
+std::string getConfigDir(const char *subdir = nullptr);
 
 /**
  * Get a savestate filename.

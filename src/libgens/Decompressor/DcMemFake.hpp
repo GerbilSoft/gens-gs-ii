@@ -31,7 +31,7 @@ namespace LibGens {
 class DcMemFake : public Decompressor
 {
 	private:
-		DcMemFake(FILE *f, const utf8_str *filename);
+		DcMemFake(FILE *f, const char *filename);
 	public:
 		DcMemFake(const uint8_t *rom_data, unsigned int rom_size);
 		virtual ~DcMemFake();

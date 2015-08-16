@@ -84,7 +84,7 @@ string DcRar::ms_RarBinary = "unrar.dll";
  * @param f File pointer.
  * @param filename Filename.
  */
-DcRar::DcRar(FILE *f, const utf8_str *filename)
+DcRar::DcRar(FILE *f, const char *filename)
 	: Decompressor(f, filename)
 {
 	// MiniZip doesn't support opening files by fd.
@@ -508,7 +508,7 @@ int CALLBACK DcRar::rarCallback(UINT msg, LPARAM UserData, LPARAM P1, LPARAM P2)
  * - -7: Not RAR, UnRAR, or UnRAR.dll.
  * TODO: Use MDP error code constants.
  */
-uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
+uint32_t DcRar::CheckExtPrg(const char *extprg, ExtPrgInfo *prg_info)
 {
 	// Program information.
 	ExtPrgInfo my_prg_info;

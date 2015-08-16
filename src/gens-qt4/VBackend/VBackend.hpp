@@ -196,9 +196,9 @@ class VBackend : public QWidget
 		/** printf()-style functions. **/
 		// NOTE: Format string argument is 3 instead of 2.
 		// This is due to the implicit "this" parameter.
-		void osd_vprintf(const int duration, const utf8_str *msg, va_list ap)
+		void osd_vprintf(const int duration, const char *msg, va_list ap)
 			ATTR_FORMAT_PRINTF(3, 0);
-		void osd_printf(const int duration, const utf8_str *msg, ...)
+		void osd_printf(const int duration, const char *msg, ...)
 			ATTR_FORMAT_PRINTF(3, 4);
 		void osd_printqs(const int duration, const QString &msg, bool forceVbDirty);
 		void osd_printqs(const int duration, const QString &msg);

@@ -36,9 +36,6 @@ namespace LibGens {
 	class MdFb;
 }
 
-// utf8_str
-#include "libgens/macros/common.h"
-
 // TODO: Minimum gcc version, other compilers?
 // TODO: Move to libgens/macros/common.h?
 #ifdef __GNUC__

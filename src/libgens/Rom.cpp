@@ -64,7 +64,7 @@ namespace LibGens {
 class RomPrivate
 {
 	public:
-		RomPrivate(Rom *q, const utf8_str *filename,
+		RomPrivate(Rom *q, const char *filename,
 				Rom::MDP_SYSTEM_ID sysOverride = Rom::MDP_SYSTEM_UNKNOWN,
 				Rom::RomFormat fmtOverride = Rom::RFMT_UNKNOWN);
 		RomPrivate(Rom *q, const uint8_t *rom_data, unsigned int rom_size,
@@ -184,7 +184,7 @@ class RomPrivate
  * @param sysOverride System override.
  * @param fmtOverride ROM format override.
  */
-RomPrivate::RomPrivate(Rom *q, const utf8_str *filename,
+RomPrivate::RomPrivate(Rom *q, const char *filename,
 			Rom::MDP_SYSTEM_ID sysOverride,
 			Rom::RomFormat fmtOverride)
 	: q(q)
@@ -719,7 +719,7 @@ void RomPrivate::readHeaderMD(const uint8_t *header, size_t header_size)
  * @param sysOverride System override.
  * @param fmtOverride ROM format override.
  */
-Rom::Rom(const utf8_str *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
+Rom::Rom(const char *filename, MDP_SYSTEM_ID sysOverride, RomFormat fmtOverride)
 	: d(new RomPrivate(this, filename, sysOverride, fmtOverride))
 { }
 

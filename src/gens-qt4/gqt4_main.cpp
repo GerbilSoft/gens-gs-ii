@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -53,13 +53,12 @@
 // Gens window.
 static GensQt4::GensWindow *gens_window = nullptr;
 
-
 /**
  * LOG_MSG() critical error handler.
  * @param channel Debug channel. (ASCII)
  * @param msg Message. (Preformatted UTF-8)
  */
-void gqt4_log_msg_critical(const char *channel, const utf8_str *msg)
+void gqt4_log_msg_critical(const char *channel, const char *msg)
 {
 	QString title = QLatin1String("Gens Critical Error:") + QChar(L' ') +
 			QLatin1String(channel);
@@ -68,7 +67,6 @@ void gqt4_log_msg_critical(const char *channel, const utf8_str *msg)
 	dialog.setTextFormat(Qt::PlainText);
 	dialog.exec();
 }
-
 
 /**
  * LibGens OSD handler.
@@ -84,9 +82,7 @@ void gqt4_osd(OsdType osd_type, int param)
 	gens_window->osd(osd_type, param);
 }
 
-
-namespace GensQt4
-{
+namespace GensQt4 {
 
 // GensQApplication.
 GensQApplication *gqt4_app = nullptr;
@@ -99,7 +95,7 @@ EmuThread *gqt4_emuThread = nullptr;		// Thread.
 LibGens::EmuContext *gqt4_emuContext = nullptr;	// Context.
 
 /**
- * QuitGens(): Quit Gens.
+ * Quit Gens.
  */
 void QuitGens(void)
 {
@@ -125,7 +121,6 @@ void QuitGens(void)
 }
 
 }
-
 
 /**
  * Main entry point.

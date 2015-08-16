@@ -22,10 +22,6 @@
 #ifndef __LIBZOMG_ZOMG_P_HPP__
 #define __LIBZOMG_ZOMG_P_HPP__
 
-// utf8_str
-// TODO: Don't depend on LibGens.
-#include "../libgens/macros/common.h"
-
 // MiniZip
 #include "minizip/zip.h"
 #include "minizip/unzip.h"
@@ -57,8 +53,8 @@ class ZomgPrivate
 		// NOTE: Only used when saving ZOMG files.
 		zip_fileinfo zipfi;
 
-		int initZomgLoad(const utf8_str *filename);
-		int initZomgSave(const utf8_str *filename);
+		int initZomgLoad(const char *filename);
+		int initZomgSave(const char *filename);
 
 		/**
 		 * File type.
@@ -69,11 +65,11 @@ class ZomgPrivate
 			ZOMG_FILE_TEXT = 1,
 		};
 
-		int loadFromZomg(const utf8_str *filename, void *buf, int len);
-		int saveToZomg(const utf8_str *filename, const void *buf, int len,
+		int loadFromZomg(const char *filename, void *buf, int len);
+		int saveToZomg(const char *filename, const void *buf, int len,
 			       ZomgZipFileType_t fileType = ZOMG_FILE_BINARY);
 };
 
 }
 
-#endif /* __LIBGENS_MD_VDP_P_HPP__ */
+#endif /* __LIBZOMG_ZOMG_P_HPP__ */

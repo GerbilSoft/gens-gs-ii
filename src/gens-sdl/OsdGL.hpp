@@ -25,9 +25,6 @@
 // C includes.
 #include <stdint.h>
 
-// utf8_str
-#include "libgens/macros/common.h"
-
 // ZOMG image data.
 struct _Zomg_Img_Data_t;
 
@@ -99,7 +96,7 @@ class OsdGL {
 		 * @param duration Duration for the message to appear, in milliseconds.
 		 * @param msg Message. (UTF-8)
 		 */
-		void print(unsigned int duration, const utf8_str *msg);
+		void print(unsigned int duration, const char *msg);
 
 		// TODO: Implement this.
 		// strchr() isn't available for UTF-16...

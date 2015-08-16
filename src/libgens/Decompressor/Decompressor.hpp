@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -24,6 +24,7 @@
 #ifndef __LIBGENS_DECOMPRESSOR_DECOMPRESSOR_HPP__
 #define __LIBGENS_DECOMPRESSOR_DECOMPRESSOR_HPP__
 
+// PACKED macro.
 #include "../macros/common.h"
 
 // C includes.
@@ -35,9 +36,8 @@ extern "C" {
 #endif
 
 #pragma pack(1)
-typedef struct PACKED _mdp_z_entry_t
-{
-	utf8_str *filename;
+typedef struct PACKED _mdp_z_entry_t {
+	char *filename;
 	size_t filesize;
 	
 	struct _mdp_z_entry_t *next;
@@ -51,13 +51,12 @@ typedef struct PACKED _mdp_z_entry_t
 // C++ includes.
 #include <string>
 
-namespace LibGens
-{
+namespace LibGens {
 
 class Decompressor
 {
 	public:
-		Decompressor(FILE *f, const utf8_str *filename);
+		Decompressor(FILE *f, const char *filename);
 		virtual ~Decompressor();
 
 		/**

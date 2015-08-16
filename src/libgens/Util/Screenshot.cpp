@@ -174,7 +174,7 @@ void ScreenshotPrivate::toImgData(Zomg_Img_Data_t *img_data,
  * @param filename	[in] Filename for the screenshot.
  * @return 0 on success; negative errno on error.
  */
-int Screenshot::toFile(const MdFb *fb, const Rom *rom, const utf8_str *filename)
+int Screenshot::toFile(const MdFb *fb, const Rom *rom, const char *filename)
 {
 	if (!fb || !rom || !filename || !filename[0])
 		return -EINVAL;

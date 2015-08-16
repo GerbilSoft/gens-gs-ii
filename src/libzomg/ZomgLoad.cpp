@@ -62,7 +62,7 @@ namespace LibZomg {
  * @param len Length of the buffer.
  * @return Length of file loaded, or negative number on error.
  */
-int ZomgPrivate::loadFromZomg(const utf8_str *filename, void *buf, int len)
+int ZomgPrivate::loadFromZomg(const char *filename, void *buf, int len)
 {
 	if (q->m_mode != ZomgBase::ZOMG_LOAD || !this->unz)
 		return -EBADF;

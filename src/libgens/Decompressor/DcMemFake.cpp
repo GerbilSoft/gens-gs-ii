@@ -39,7 +39,7 @@ using std::string;
 
 namespace LibGens {
 
-DcMemFake::DcMemFake(FILE *f, const utf8_str *filename)
+DcMemFake::DcMemFake(FILE *f, const char *filename)
 	: Decompressor(f, filename)
 {
 	// This function should NOT be called.

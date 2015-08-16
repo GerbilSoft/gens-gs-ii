@@ -76,7 +76,7 @@ ZomgPrivate::~ZomgPrivate()
  * @param filename Zomg file to load.
  * @return 0 on success; non-zero on error.
  */
-int ZomgPrivate::initZomgLoad(const utf8_str *filename)
+int ZomgPrivate::initZomgLoad(const char *filename)
 {
 #ifdef _WIN32
 	zlib_filefunc64_def ffunc;
@@ -116,7 +116,7 @@ int ZomgPrivate::initZomgLoad(const utf8_str *filename)
  * @param filename Zomg file to save.
  * @return 0 on success; non-zero on error.
  */
-int ZomgPrivate::initZomgSave(const utf8_str *filename)
+int ZomgPrivate::initZomgSave(const char *filename)
 {
 #ifdef _WIN32
 	zlib_filefunc64_def ffunc;
@@ -160,7 +160,7 @@ int ZomgPrivate::initZomgSave(const utf8_str *filename)
  * @param filename ZOMG filename.
  * @param mode File mode.
  */
-Zomg::Zomg(const utf8_str *filename, ZomgFileMode mode)
+Zomg::Zomg(const char *filename, ZomgFileMode mode)
 	: ZomgBase(filename, mode)
 	, d(new ZomgPrivate(this))
 {
@@ -233,7 +233,7 @@ void Zomg::close(void)
  * @param filename Savestate filename.
  * @return True if the savestate is supported; false if not.
  */
-bool Zomg::DetectFormat(const utf8_str *filename)
+bool Zomg::DetectFormat(const char *filename)
 {
 	// TODO: This only checks if the file is a ZIP file.
 	// Check FORMAT.INI once it's implemented.

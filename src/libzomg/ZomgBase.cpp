@@ -24,7 +24,7 @@
 
 namespace LibZomg {
 
-ZomgBase::ZomgBase(const utf8_str *filename, ZomgFileMode mode)
+ZomgBase::ZomgBase(const char *filename, ZomgFileMode mode)
 	: m_mode(ZOMG_CLOSED)	// No file open initially.
 	, m_lastError(0)
 	, m_mtime(0)
@@ -48,7 +48,7 @@ ZomgBase::~ZomgBase()
  * @param filename Savestate filename.
  * @return True if the savestate is supported; false if not.
  */
-bool ZomgBase::DetectFormat(const utf8_str *filename)
+bool ZomgBase::DetectFormat(const char *filename)
 {
 	// TODO: Replace DetectFormat() with a factory class?
 	((void)filename);

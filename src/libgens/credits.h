@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -24,16 +24,14 @@
 #ifndef __LIBGENS_CREDITS_H__
 #define __LIBGENS_CREDITS_H__
 
-#include "macros/common.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct _GensGS_credits_t
 {
-	const utf8_str *credit_title;
-	const utf8_str *credit_name;
+	const char *credit_title;
+	const char *credit_name;
 } GensGS_credits_t;
 
 extern const GensGS_credits_t GensGS_credits[];

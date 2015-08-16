@@ -37,7 +37,7 @@ class ZomgPrivate;
 class Zomg : public ZomgBase
 {
 	public:
-		Zomg(const utf8_str *filename, ZomgFileMode mode);
+		Zomg(const char *filename, ZomgFileMode mode);
 		virtual ~Zomg(void);
 
 	protected:
@@ -57,7 +57,7 @@ class Zomg : public ZomgBase
 		 * @param filename Savestate filename.
 		 * @return True if the savestate is supported; false if not.
 		 */
-		static bool DetectFormat(const utf8_str *filename);
+		static bool DetectFormat(const char *filename);
 
 		/**
 		 * Load savestate functions.

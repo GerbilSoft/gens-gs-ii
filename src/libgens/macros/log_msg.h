@@ -23,8 +23,6 @@
 #ifndef __LIBGENS_LOG_MSG_H__
 #define __LIBGENS_LOG_MSG_H__
 
-#include "common.h"
-
 /**
  * Log levels:
  * LOG_MSG_LEVEL_CRITICAL	== critical error. A message box is shown.
@@ -103,7 +101,7 @@ extern "C" {
  * @param msg Message. (UTF-8)
  * @param ... Parameters.
  */
-void log_msg(const char *channel, int level, const char *fn, const utf8_str *msg, ...);
+void log_msg(const char *channel, int level, const char *fn, const char *msg, ...);
 
 /**
  * log_msg_critical_fn(): Function pointer for critical error handler.

@@ -28,9 +28,6 @@
 #error UnRAR_dll.cpp only works on Win32.
 #endif
 
-// utf8_str
-#include "../macros/common.h"
-
 #include <windows.h>
 #include "unrar.h"
 
@@ -44,7 +41,7 @@ class UnRAR_dll
 		UnRAR_dll(void);
 		~UnRAR_dll();
 		
-		bool load(const utf8_str *filename);
+		bool load(const char *filename);
 		void unload(void);
 		
 		inline bool isLoaded(void) const

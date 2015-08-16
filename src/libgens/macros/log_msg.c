@@ -38,7 +38,7 @@ static log_msg_critical_fn m_critical_fn = NULL;
  * @param msg Message. (UTF-8)
  * @param ... Parameters.
  */
-void log_msg(const char *channel, int level, const char *fn, const utf8_str *msg, ...)
+void log_msg(const char *channel, int level, const char *fn, const char *msg, ...)
 {
 	char out_msg[1024];
 	va_list ap;

@@ -95,7 +95,7 @@ static int mkdir_recursive(const char *dir) {
  * @param subdir [in, opt] If not null, append a subdirectory.
  * @return Configuration directory, or nullptr on error.
  */
-std::string getConfigDir(const utf8_str *subdir)
+std::string getConfigDir(const char *subdir)
 {
 	static string config_dir;
 	if (config_dir.empty()) {
@@ -201,8 +201,8 @@ int doScreenShot(const MdFb *fb, const Rom *rom)
 	romFilename += basename;
 
 	// Add the current directory, number, and .png extension.
-	const utf8_str scrFilenameSuffix[] = ".png";
-	utf8_str scrFilename[260];
+	const char scrFilenameSuffix[] = ".png";
+	char scrFilename[260];
 	int scrNumber = -1;
 	do {
 		// TODO: Figure out how to optimize this!

@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -27,33 +27,32 @@
 #include "Decompressor.hpp"
 #include "../../extlib/minizip/unzip.h"
 
-namespace LibGens
-{
+namespace LibGens {
 
 class DcZip : public Decompressor
 {
 	public:
-		DcZip(FILE *f, const utf8_str *filename);
+		DcZip(FILE *f, const char *filename);
 		virtual ~DcZip();
-		
+
 		/**
-		 * DetectFormat(): Detect if the file can be handled by this decompressor.
+		 * Detect if the file can be handled by this decompressor.
 		 * This function should be reimplemented by derived classes.
 		 * NOTE: Do NOT call this function like a virtual function!
 		 * @param f File pointer.
 		 * @return True if the file can be handled by this decompressor.
 		 */
 		static bool DetectFormat(FILE *f);
-		
+
 		/**
-		 * getFileInfo(): Get information about all files in the archive.
+		 * Get information about all files in the archive.
 		 * @param z_entry_out Pointer to mdp_z_entry_t*, which will contain an allocated mdp_z_entry_t.
 		 * @return MDP error code. [TODO]
 		 */
 		int getFileInfo(mdp_z_entry_t **z_entry_out);
-		
+
 		/**
-		 * getFile(): Get a file from the archive.
+		 * Get a file from the archive.
 		 * @param z_entry	[in]  Pointer to mdp_z_entry_t describing the file to extract.
 		 * @param buf		[out] Buffer to read the file into.
 		 * @param siz		[in]  Size of buf.
@@ -61,7 +60,7 @@ class DcZip : public Decompressor
 		 * @return MDP error code. [TODO]
 		 */
 		int getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *ret_siz);
-	
+
 	private:
 		unzFile m_unzFile;
 };

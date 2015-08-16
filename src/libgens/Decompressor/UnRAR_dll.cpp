@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -39,13 +39,12 @@ UnRAR_dll::UnRAR_dll(void)
 	m_loaded = false;
 }
 
-
 /**
  * Load UnRAR.dll.
  * @param filename Filename of UnRAR.dll.
  * @return true on success; false on failure.
  */
-bool UnRAR_dll::load(const utf8_str *filename)
+bool UnRAR_dll::load(const char *filename)
 {
 	if (m_loaded)
 		return true;
@@ -103,7 +102,6 @@ bool UnRAR_dll::load(const utf8_str *filename)
 	return true;
 }
 
-
 UnRAR_dll::~UnRAR_dll()
 {
 	if (!m_loaded)
@@ -112,7 +110,6 @@ UnRAR_dll::~UnRAR_dll()
 	// Unload the DLL.
 	unload();
 }
-
 
 void UnRAR_dll::unload(void)
 {

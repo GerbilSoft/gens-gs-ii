@@ -31,10 +31,6 @@
 // C++ includes.
 #include <string>
 
-// utf8_str
-// TODO: Don't depend on LibGens.
-#include "../libgens/macros/common.h"
-
 // ZOMG byteorder.
 #include "libzomg/zomg_byteorder.h"
 
@@ -69,7 +65,7 @@ class ZomgBase
 			ZOMG_SAVE
 		};
 
-		ZomgBase(const utf8_str *filename, ZomgFileMode mode);
+		ZomgBase(const char *filename, ZomgFileMode mode);
 		virtual ~ZomgBase();
 
 	private:
@@ -95,7 +91,7 @@ class ZomgBase
 		 * @param filename Savestate filename.
 		 * @return True if the savestate is supported; false if not.
 		 */
-		static bool DetectFormat(const utf8_str *filename);
+		static bool DetectFormat(const char *filename);
 
 		// TODO: Determine siz and is16bit from the system type?
 		// (once FORMAT.ini is implemented)

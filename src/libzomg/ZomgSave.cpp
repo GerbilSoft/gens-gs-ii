@@ -94,7 +94,7 @@ namespace LibZomg {
  * @param fileType     [in] File type, e.g. binary or text.
  * @return 0 on success; non-zero on error.
  */
-int ZomgPrivate::saveToZomg(const utf8_str *filename, const void *buf, int len,
+int ZomgPrivate::saveToZomg(const char *filename, const void *buf, int len,
 			    ZomgZipFileType_t fileType)
 {
 	if (q->m_mode != ZomgBase::ZOMG_SAVE || !this->zip)

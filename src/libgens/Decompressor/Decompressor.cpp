@@ -58,7 +58,7 @@ namespace LibGens {
  * @param f File pointer.
  * @param filename Filename.
  */
-Decompressor::Decompressor(FILE *f, const utf8_str *filename)
+Decompressor::Decompressor(FILE *f, const char *filename)
 	: m_file(f)
 	, m_filename(filename)
 { }

@@ -28,9 +28,6 @@
 // C includes. (C++ namespace)
 #include <cstdarg>
 
-// utf8_str
-#include "libgens/macros/common.h"
-
 // TODO: Minimum gcc version, other compilers?
 // TODO: Move to libgens/macros/common.h?
 #ifdef __GNUC__
@@ -143,7 +140,7 @@ class VBackend {
 		 * @param msg Message. (printf-formatted; UTF-8)
 		 * @param ap Format arguments.
 		 */
-		virtual void osd_vprintf(int duration, const utf8_str *msg, va_list ap)
+		virtual void osd_vprintf(int duration, const char *msg, va_list ap)
 			ATTR_FORMAT_PRINTF(3, 0);
 
 		/**
@@ -152,7 +149,7 @@ class VBackend {
 		 * @param msg Message. (printf-formatted; UTF-8)
 		 * @params ... Format arguments.
 		 */
-		void osd_printf(int duration, const utf8_str *msg, ...)
+		void osd_printf(int duration, const char *msg, ...)
 			ATTR_FORMAT_PRINTF(3, 4);
 
 		/**

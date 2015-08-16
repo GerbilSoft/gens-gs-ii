@@ -22,8 +22,6 @@
 #ifndef __LIBGENS_UTIL_SCREENSHOT_HPP__
 #define __LIBGENS_UTIL_SCREENSHOT_HPP__
 
-#include "../macros/common.h"
-
 namespace LibZomg {
 	class ZomgBase;
 }
@@ -56,7 +54,7 @@ class Screenshot
 		 * @param filename	[in] Filename for the screenshot.
 		 * @return 0 on success; negative errno on error.
 		 */
-		static int toFile(const MdFb *fb, const Rom *rom, const utf8_str *filename);
+		static int toFile(const MdFb *fb, const Rom *rom, const char *filename);
 
 		/**
 		 * Save a screenshot to a ZOMG savestate.

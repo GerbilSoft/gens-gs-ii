@@ -133,7 +133,7 @@ Rom *VdpFIFOTesting::m_rom = nullptr;
 void VdpFIFOTesting::SetUp(void)
 {
 	// Initialize the emulation context.
-	static const utf8_str filename[] = "VDPFIFOTesting.bin";
+	static const char filename[] = "VDPFIFOTesting.bin";
 
 	// TODO: Add debug functions to RomCartridgeMD.
 	if (!m_context) {

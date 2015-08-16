@@ -35,7 +35,7 @@ namespace GensQt4
  * @param msg Message to write. (printf-formatted)
  * @param ap Format arguments.
  */
-void VBackend::osd_vprintf(const int duration, const utf8_str *msg, va_list ap)
+void VBackend::osd_vprintf(const int duration, const char *msg, va_list ap)
 {
 	assert(m_osdLockCnt >= 0);
 	if (duration <= 0 ||		// Invalid duration.
@@ -60,7 +60,7 @@ void VBackend::osd_vprintf(const int duration, const utf8_str *msg, va_list ap)
  * @param msg Message to write. (printf-formatted)
  * @param ... Format arguments.
  */
-void VBackend::osd_printf(const int duration, const utf8_str *msg, ...)
+void VBackend::osd_printf(const int duration, const char *msg, ...)
 {
 	va_list ap;
 	va_start(ap, msg);

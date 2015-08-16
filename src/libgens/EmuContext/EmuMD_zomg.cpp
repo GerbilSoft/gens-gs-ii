@@ -86,7 +86,7 @@ namespace LibGens {
  * @param filename	[in] ZOMG file.
  * @return 0 on success; negative errno on error.
  */
-int EmuMD::zomgLoad(const utf8_str *filename)
+int EmuMD::zomgLoad(const char *filename)
 {
 	// Make sure the file exists.
 	if (access(filename, F_OK))
@@ -213,7 +213,7 @@ int EmuMD::zomgLoad(const utf8_str *filename)
  * @param filename	[in] ZOMG file.
  * @return 0 on success; negative errno on error.
  */
-int EmuMD::zomgSave(const utf8_str *filename) const
+int EmuMD::zomgSave(const char *filename) const
 {
 	// TODO: More comprehensive error reporting.
 	LibZomg::Zomg zomg(filename, LibZomg::Zomg::ZOMG_SAVE);

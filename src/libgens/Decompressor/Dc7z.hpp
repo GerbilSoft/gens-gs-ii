@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -33,13 +33,12 @@
 #include "lzma/7z/7z.h"
 #include "lzma/7z/7zFile.h"
 
-namespace LibGens
-{
+namespace LibGens {
 
 class Dc7z : public Decompressor
 {
 	public:
-		Dc7z(FILE *f, const utf8_str *filename);
+		Dc7z(FILE *f, const char *filename);
 		virtual ~Dc7z();
 
 		/**

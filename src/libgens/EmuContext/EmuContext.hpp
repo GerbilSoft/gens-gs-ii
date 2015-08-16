@@ -132,14 +132,14 @@ class EmuContext
 		 * @param filename	[in] ZOMG file.
 		 * @return 0 on success; negative errno on error.
 		 */
-		virtual int zomgLoad(const utf8_str *filename) = 0;
+		virtual int zomgLoad(const char *filename) = 0;
 
 		/**
 		 * Save the current state to a ZOMG file.
 		 * @param filename	[in] ZOMG file.
 		 * @return 0 on success; negative errno on error.
 		 */
-		virtual int zomgSave(const utf8_str *filename) const = 0;
+		virtual int zomgSave(const char *filename) const = 0;
 
 		/**
 		 * Global settings.

@@ -480,7 +480,7 @@ bool GLBackend::process_osd_messages(void)
  * @param msg Message. (printf-formatted; UTF-8)
  * @param ap Format arguments.
  */
-void GLBackend::osd_vprintf(int duration, const utf8_str *msg, va_list ap)
+void GLBackend::osd_vprintf(int duration, const char *msg, va_list ap)
 {
 	// TODO: printf() it here or in OsdGL?
 	char buf[2048];

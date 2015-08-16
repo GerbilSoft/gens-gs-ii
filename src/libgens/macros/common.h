@@ -61,12 +61,6 @@
 
 /** Typedefs. **/
 
-/**
- * utf8_str: UTF-8 C-string typedef.
- * Usage is similar to char.
- */
-typedef char utf8_str;
-
 /** Miscellaneous. **/
 
 #ifdef _WIN32

@@ -51,7 +51,7 @@ namespace LibGens {
  * @param f File pointer.
  * @param filename Filename.
  */
-DcZip::DcZip(FILE *f, const utf8_str *filename)
+DcZip::DcZip(FILE *f, const char *filename)
 	: Decompressor(f, filename)
 {
 	// MiniZip doesn't support opening files by fd.
@@ -89,7 +89,6 @@ DcZip::~DcZip()
 		unzClose(m_unzFile);
 }
 
-
 /**
  * Detect if the file can be handled by this decompressor.
  * This function should be reimplemented by derived classes.
@@ -115,7 +114,6 @@ bool DcZip::DetectFormat(FILE *f)
 	// Check the "magic number" and return true if it matches.
 	return (!memcmp(header, zip_magic, sizeof(header)));
 }
-
 
 /**
  * Get information about all files in the archive.
@@ -187,7 +185,6 @@ int DcZip::getFileInfo(mdp_z_entry_t **z_entry_out)
 	*z_entry_out = z_entry_head;
 	return 0; // TODO: return MDP_ERR_OK;
 }
-
 
 /**
  * Get a file from the archive.

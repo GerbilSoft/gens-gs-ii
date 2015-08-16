@@ -45,8 +45,7 @@
 using std::string;
 using std::ostringstream;
 
-namespace LibGens
-{
+namespace LibGens {
 
 /** Static class variable initialization. **/
 
@@ -57,13 +56,12 @@ namespace LibGens
  */
 string DcRar::ms_RarBinary = "/usr/bin/unrar";
 
-
 /**
  * Create a new DcRar object.
  * @param f File pointer.
  * @param filename Filename.
  */
-DcRar::DcRar(FILE *f, const utf8_str *filename)
+DcRar::DcRar(FILE *f, const char *filename)
 	: Decompressor(f, filename)
 {
 	// MiniZip doesn't support opening files by fd.
@@ -78,13 +76,12 @@ DcRar::DcRar(FILE *f, const utf8_str *filename)
 }
 
 /**
- * ~DcRar(): Delete the RAR Decompressor object.
+ * Delete the RAR Decompressor object.
  */
 DcRar::~DcRar()
 {
 	// TODO
 }
-
 
 /**
  * Detect if the file can be handled by this decompressor.
@@ -111,7 +108,6 @@ bool DcRar::DetectFormat(FILE *f)
 	// Check the "magic number" and return true if it matches.
 	return (!memcmp(header, rar_magic, sizeof(header)));
 }
-
 
 /**
  * Get information about all files in the archive.
@@ -258,9 +254,8 @@ int DcRar::getFileInfo(mdp_z_entry_t **z_entry_out)
 	return 0; // TODO: return MDP_ERR_OK;
 }
 
-
 /**
- * getFile(): Get a file from the archive.
+ * Get a file from the archive.
  * @param z_entry	[in]  Pointer to mdp_z_entry_t describing the file to extract. [TODO]
  * @param buf		[out] Buffer to read the file into.
  * @param siz		[in]  Size of buf.
@@ -336,7 +331,6 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
 	return 0; // TODO: return MDP_ERR_OK;
 }
 
-
 /**
  * Check if the specified external RAR program is usable.
  * @param extprg	[in] External RAR program filename.
@@ -352,7 +346,7 @@ int DcRar::getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *
  * - -7: Not RAR, UnRAR, or UnRAR.dll.
  * TODO: Use MDP error code constants.
  */
-uint32_t DcRar::CheckExtPrg(const utf8_str *extprg, ExtPrgInfo *prg_info)
+uint32_t DcRar::CheckExtPrg(const char *extprg, ExtPrgInfo *prg_info)
 {
 	// Program information.
 	// Clear out fields not used by the Unix version.

@@ -107,7 +107,7 @@ class OsdGLPrivate {
 		 * @param len Length of str.
 		 * @return String using the internal character set.
 		 */
-		static string utf8ToInternal(const utf8_str *str, size_t len);
+		static string utf8ToInternal(const char *str, size_t len);
 
 		/**
 		 * Convert a UTF-16 string to the internal character set.
@@ -302,7 +302,7 @@ void OsdGLPrivate::printLine(int x, int y, const std::string &msg)
  * @param len Length of str.
  * @return String using the internal character set.
  */
-string OsdGLPrivate::utf8ToInternal(const utf8_str *str, size_t len)
+string OsdGLPrivate::utf8ToInternal(const char *str, size_t len)
 {
 	// TODO: Move to after utf16ToInternal()?
 
@@ -739,7 +739,7 @@ bool OsdGL::processMessages(void)
  * @param msg Message. (UTF-8)
  * TODO: printf() function.
  */
-void OsdGL::print(unsigned int duration, const utf8_str *msg)
+void OsdGL::print(unsigned int duration, const char *msg)
 {
 	// If the OSD is currently idle, reset the timer.
 	// TODO: FPS.
@@ -753,9 +753,9 @@ void OsdGL::print(unsigned int duration, const utf8_str *msg)
 	const uint64_t endTime = d->timer.getTime() + (duration * 1000);
 
 	// Check for newlines.
-	const utf8_str *start = msg;
+	const char *start = msg;
 	while (start != nullptr) {
-		const utf8_str *delim = strchr(start, '\n');
+		const char *delim = strchr(start, '\n');
 		
 		OsdGLPrivate::OsdMessage *osdMsg = new OsdGLPrivate::OsdMessage();
 

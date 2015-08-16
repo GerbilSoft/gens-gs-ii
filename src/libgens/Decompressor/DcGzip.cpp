@@ -58,7 +58,7 @@ namespace LibGens {
  * @param f File pointer.
  * @param filename Filename.
  */
-DcGzip::DcGzip(FILE *f, const utf8_str *filename)
+DcGzip::DcGzip(FILE *f, const char *filename)
 	: Decompressor(f, filename)
 	, m_gzFile(nullptr)
 {
@@ -97,7 +97,6 @@ DcGzip::~DcGzip()
 		gzclose_r(m_gzFile);
 }
 
-
 /**
  * Detect if the file can be handled by this decompressor.
  * This function should be reimplemented by derived classes.
@@ -121,7 +120,6 @@ bool DcGzip::DetectFormat(FILE *f)
 	// "Magic number" should be 1F 8B.
 	return (header[0] == 0x1F && header[1] == 0x8B);
 }
-
 
 /**
  * Get information about all files in the archive.
@@ -162,7 +160,6 @@ int DcGzip::getFileInfo(mdp_z_entry_t **z_entry_out)
 	*z_entry_out = z_entry;
 	return 0; // TODO: return MDP_ERR_OK;
 }
-
 
 /**
  * Get a file from the archive.
