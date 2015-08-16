@@ -64,6 +64,9 @@ class FastBlurPrivate
 
 	public:
 		template<typename pixel, pixel mask>
+		static inline void T_DoFastBlur(pixel *mdScreen, const pixel *outScreen, unsigned int pxCount);
+
+		template<typename pixel, pixel mask>
 		static inline void T_DoFastBlur(pixel *mdScreen, unsigned int pxCount);
 
 #ifdef HAVE_MMX
@@ -79,11 +82,12 @@ class FastBlurPrivate
 /**
  * Apply a Fast Blur effect to the screen buffer.
  * @param mask MSB mask for pixel data.
- * @param mdScreen Screen buffer.
+ * @param outScreen Destination screen buffer.
+ * @param mdScreen Source screen buffer.
  * @param pxCount Pixel count.
  */
 template<typename pixel, pixel mask>
-inline void FastBlurPrivate::T_DoFastBlur(pixel *mdScreen, unsigned int pxCount)
+inline void FastBlurPrivate::T_DoFastBlur(pixel *outScreen, const pixel *mdScreen, unsigned int pxCount)
 {
 	pixel px = 0, px_prev = 0;
 
@@ -92,11 +96,36 @@ inline void FastBlurPrivate::T_DoFastBlur(pixel *mdScreen, unsigned int pxCount)
 		// NOTE: This may lose some precision in the Red LSB on LE architectures.
 		px = (*mdScreen >> 1) & mask;	// Get pixel.
 		px_prev += px;			// Blur with previous pixel.
-		*(mdScreen - 1) = px_prev;	// Write new pixel.
+		*(outScreen - 1) = px_prev;	// Write new pixel.
 		px_prev = px;			// Save pixel.
 
-		// Increment the MD screen pointer.
+		// Increment the screen pointers.
+		outScreen++;
 		mdScreen++;
+	}
+}
+
+/**
+ * Apply a Fast Blur effect to the screen buffer.
+ * @param mask MSB mask for pixel data.
+ * @param outScreen Source and destination buffer.
+ * @param pxCount Pixel count.
+ */
+template<typename pixel, pixel mask>
+inline void FastBlurPrivate::T_DoFastBlur(pixel *outScreen, unsigned int pxCount)
+{
+	pixel px = 0, px_prev = 0;
+
+	// Process the framebuffer.
+	for (unsigned int i = pxCount; i != 0; i--) {
+		// NOTE: This may lose some precision in the Red LSB on LE architectures.
+		px = (*outScreen >> 1) & mask;	// Get pixel.
+		px_prev += px;			// Blur with previous pixel.
+		*(outScreen - 1) = px_prev;	// Write new pixel.
+		px_prev = px;			// Save pixel.
+
+		// Increment the screen pointer.
+		outScreen++;
 	}
 }
 
@@ -107,11 +136,11 @@ const uint32_t FastBlurPrivate::MASK_DIV2_32_MMX[2] = {0x007F7F7F, 0x007F7F7F};
 
 /**
  * 15/16-bit color Fast Blur, MMX-optimized.
- * @param mdScreen MD screen buffer. (MUST BE 336x240!)
+ * @param outScreen Source and destination buffer.
  * @param pxCount Pixel count.
  * @param mask Division mask to use. (MASK_DIV2_15_MMX[] or MASK_DIV2_16_MMX[])
  */
-void FastBlurPrivate::DoFastBlur_16_MMX(uint16_t *mdScreen, unsigned int pxCount, const uint32_t *mask)
+void FastBlurPrivate::DoFastBlur_16_MMX(uint16_t *outScreen, unsigned int pxCount, const uint32_t *mask)
 {
 	// Load the 15/16-bit color mask.
 	__asm__ (
@@ -139,11 +168,11 @@ void FastBlurPrivate::DoFastBlur_16_MMX(uint16_t *mdScreen, unsigned int pxCount
 			// Put destination pixels.
 			"movq	%%mm0, (%0)\n"
 			:
-			: "r" (mdScreen)
+			: "r" (outScreen)
 			);
 
 		// Next group of pixels.
-		mdScreen += 4;
+		outScreen += 4;
 	}
 
 	// Reset the FPU state.
@@ -152,10 +181,10 @@ void FastBlurPrivate::DoFastBlur_16_MMX(uint16_t *mdScreen, unsigned int pxCount
 
 /**
  * 32-bit color Fast Blur, MMX-optimized.
- * @param mdScreen MD screen buffer. (MUST BE 336x240!)
+ * @param outScreen Source and destination buffer.
  * @param pxCount Pixel count.
  */
-void FastBlurPrivate::DoFastBlur_32_MMX(uint32_t *mdScreen, unsigned int pxCount)
+void FastBlurPrivate::DoFastBlur_32_MMX(uint32_t *outScreen, unsigned int pxCount)
 {
 	// Load the 32-bit color mask.
 	__asm__ (
@@ -183,11 +212,11 @@ void FastBlurPrivate::DoFastBlur_32_MMX(uint32_t *mdScreen, unsigned int pxCount
 			// Put destination pixels.
 			"movq	%%mm0, (%0)\n"
 			:
-			: "r" (mdScreen)
+			: "r" (outScreen)
 			);
 
 		// Next group of pixels.
-		mdScreen += 2;
+		outScreen += 2;
 	}
 
 	// Reset the FPU state.
@@ -259,26 +288,28 @@ void FastBlur::DoFastBlur(MdFb* RESTRICT outScreen, const MdFb* RESTRICT mdScree
 
 	// Set outScreen's bpp to match mdScreen.
 	outScreen->setBpp(mdScreen->bpp());
-	const unsigned int pxCount = (mdScreen->pxPitch() * mdScreen->numLines());
 
-	// Copy mdScreen to outScreen.
-	// TODO: Implement a new Fast Blur that doesn't require memcpy().
+	// Pixel count.
+	// TODO: Verify that both framebuffers are the same.
+	const unsigned int pxCount = (outScreen->pxPitch() * outScreen->numLines());
+
 	switch (outScreen->bpp()) {
 		case MdFb::BPP_15:
+			FastBlurPrivate::T_DoFastBlur<uint16_t, MASK_DIV2_15>
+				(outScreen->fb16(), mdScreen->fb16(), pxCount);
+			break;
+
 		case MdFb::BPP_16:
-			memcpy(outScreen->fb16(), mdScreen->fb16(),
-			       (pxCount * sizeof(uint16_t)));
+			FastBlurPrivate::T_DoFastBlur<uint16_t, MASK_DIV2_16>
+				(outScreen->fb16(), mdScreen->fb16(), pxCount);
 			break;
 
 		case MdFb::BPP_32:
 		default:
-			memcpy(outScreen->fb32(), mdScreen->fb32(),
-			       (pxCount * sizeof(uint32_t)));
+			FastBlurPrivate::T_DoFastBlur<uint32_t, MASK_DIV2_32>
+				(outScreen->fb32(), mdScreen->fb32(), pxCount);
 			break;
 	}
-
-	// Apply the Fast Blur effect to outScreen.
-	DoFastBlur(outScreen);
 
 	// Unreference the framebuffers.
 	outScreen->unref();
