@@ -58,10 +58,6 @@ OpenGL (gens-sdl):
 
 Windows:
 - Set console code page to UTF-8.
-- Metadata: If OS version is >=6.2, use NetWkstaGetInfo().
-  - http://www.codeproject.com/Articles/678606/Part-Overcoming-Windows-s-deprecation-of-GetVe
-  - Also check CurrentBuild key.
-  - and CSDVersion for a service pack number
 - Win7 PC with NV: gens-sdl has a frame of whiteness on startup...
   - XP VM: frame of garbage instead
 
