@@ -7,7 +7,6 @@ Infrastructure:
   - Probably just /W3...
   - cmake appears to set /W3 by default?
 - CMake: Add RelWithDebInfo, MinSizeRel configurations.
-- MinGW: Add --tsaware option.
 - Use z_crc_t in all places where CRCs are used.
   - Need to check zlib for z_crc_t; if not found, fall back.
   - https://github.com/google/zopfli/issues/25
