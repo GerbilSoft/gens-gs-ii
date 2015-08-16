@@ -613,6 +613,9 @@ PFNGLBLENDFUNCIPROC __glewBlendFunci = NULL;
 PFNGLMINSAMPLESHADINGPROC __glewMinSampleShading = NULL;
 
 PFNGLGETGRAPHICSRESETSTATUSPROC __glewGetGraphicsResetStatus = NULL;
+PFNGLGETNCOMPRESSEDTEXIMAGEPROC __glewGetnCompressedTexImage = NULL;
+PFNGLGETNTEXIMAGEPROC __glewGetnTexImage = NULL;
+PFNGLGETNUNIFORMDVPROC __glewGetnUniformdv = NULL;
 
 PFNGLACTIVETEXTUREARBPROC __glewActiveTextureARB = NULL;
 PFNGLCLIENTACTIVETEXTUREARBPROC __glewClientActiveTextureARB = NULL;
@@ -869,10 +872,6 @@ static GLboolean _glewInit_GL_VERSION_1_2 (GLEW_CONTEXT_ARG_DEF_INIT)
 }
 
 #endif /* GL_VERSION_1_2 */
-
-#ifdef GL_VERSION_1_2_1
-
-#endif /* GL_VERSION_1_2_1 */
 
 #ifdef GL_VERSION_1_3
 
@@ -1273,22 +1272,6 @@ static GLboolean _glewInit_GL_VERSION_4_0 (GLEW_CONTEXT_ARG_DEF_INIT)
 
 #endif /* GL_VERSION_4_0 */
 
-#ifdef GL_VERSION_4_1
-
-#endif /* GL_VERSION_4_1 */
-
-#ifdef GL_VERSION_4_2
-
-#endif /* GL_VERSION_4_2 */
-
-#ifdef GL_VERSION_4_3
-
-#endif /* GL_VERSION_4_3 */
-
-#ifdef GL_VERSION_4_4
-
-#endif /* GL_VERSION_4_4 */
-
 #ifdef GL_VERSION_4_5
 
 static GLboolean _glewInit_GL_VERSION_4_5 (GLEW_CONTEXT_ARG_DEF_INIT)
@@ -1296,19 +1279,14 @@ static GLboolean _glewInit_GL_VERSION_4_5 (GLEW_CONTEXT_ARG_DEF_INIT)
   GLboolean r = GL_FALSE;
 
   r = ((glGetGraphicsResetStatus = (PFNGLGETGRAPHICSRESETSTATUSPROC)glewGetProcAddress((const GLubyte*)"glGetGraphicsResetStatus")) == NULL) || r;
+  r = ((glGetnCompressedTexImage = (PFNGLGETNCOMPRESSEDTEXIMAGEPROC)glewGetProcAddress((const GLubyte*)"glGetnCompressedTexImage")) == NULL) || r;
+  r = ((glGetnTexImage = (PFNGLGETNTEXIMAGEPROC)glewGetProcAddress((const GLubyte*)"glGetnTexImage")) == NULL) || r;
+  r = ((glGetnUniformdv = (PFNGLGETNUNIFORMDVPROC)glewGetProcAddress((const GLubyte*)"glGetnUniformdv")) == NULL) || r;
 
   return r;
 }
 
 #endif /* GL_VERSION_4_5 */
-
-#ifdef GL_ARB_fragment_program
-
-#endif /* GL_ARB_fragment_program */
-
-#ifdef GL_ARB_fragment_shader
-
-#endif /* GL_ARB_fragment_shader */
 
 #ifdef GL_ARB_multitexture
 
@@ -1406,14 +1384,6 @@ static GLboolean _glewInit_GL_ARB_shader_objects (GLEW_CONTEXT_ARG_DEF_INIT)
 }
 
 #endif /* GL_ARB_shader_objects */
-
-#ifdef GL_ARB_shading_language_100
-
-#endif /* GL_ARB_shading_language_100 */
-
-#ifdef GL_ARB_texture_rectangle
-
-#endif /* GL_ARB_texture_rectangle */
 
 #ifdef GL_ARB_vertex_program
 
@@ -1530,22 +1500,6 @@ static GLboolean _glewInit_GL_ATI_fragment_shader (GLEW_CONTEXT_ARG_DEF_INIT)
 
 #endif /* GL_ATI_fragment_shader */
 
-#ifdef GL_ATI_text_fragment_shader
-
-#endif /* GL_ATI_text_fragment_shader */
-
-#ifdef GL_EXT_bgra
-
-#endif /* GL_EXT_bgra */
-
-#ifdef GL_EXT_packed_pixels
-
-#endif /* GL_EXT_packed_pixels */
-
-#ifdef GL_EXT_texture_rectangle
-
-#endif /* GL_EXT_texture_rectangle */
-
 #ifdef GL_EXT_vertex_shader
 
 static GLboolean _glewInit_GL_EXT_vertex_shader (GLEW_CONTEXT_ARG_DEF_INIT)
@@ -1599,10 +1553,6 @@ static GLboolean _glewInit_GL_EXT_vertex_shader (GLEW_CONTEXT_ARG_DEF_INIT)
 }
 
 #endif /* GL_EXT_vertex_shader */
-
-#ifdef GL_NV_texture_rectangle
-
-#endif /* GL_NV_texture_rectangle */
 
 /* ------------------------------------------------------------------------- */
 
@@ -1823,10 +1773,6 @@ static GLboolean _glewInit_WGL_ARB_extensions_string (WGLEW_CONTEXT_ARG_DEF_INIT
 
 #endif /* WGL_ARB_extensions_string */
 
-#ifdef WGL_ARB_multisample
-
-#endif /* WGL_ARB_multisample */
-
 #ifdef WGL_ARB_pbuffer
 
 static GLboolean _glewInit_WGL_ARB_pbuffer (WGLEW_CONTEXT_ARG_DEF_INIT)
@@ -1859,10 +1805,6 @@ static GLboolean _glewInit_WGL_ARB_pixel_format (WGLEW_CONTEXT_ARG_DEF_INIT)
 
 #endif /* WGL_ARB_pixel_format */
 
-#ifdef WGL_ATI_pixel_format_float
-
-#endif /* WGL_ATI_pixel_format_float */
-
 #ifdef WGL_EXT_extensions_string
 
 static GLboolean _glewInit_WGL_EXT_extensions_string (WGLEW_CONTEXT_ARG_DEF_INIT)
@@ -1890,10 +1832,6 @@ static GLboolean _glewInit_WGL_EXT_swap_control (WGLEW_CONTEXT_ARG_DEF_INIT)
 
 #endif /* WGL_EXT_swap_control */
 
-#ifdef WGL_NV_float_buffer
-
-#endif /* WGL_NV_float_buffer */
-
 /* ------------------------------------------------------------------------- */
 
 static PFNWGLGETEXTENSIONSSTRINGARBPROC _wglewGetExtensionsStringARB = NULL;
@@ -1916,7 +1854,11 @@ GLboolean GLEWAPIENTRY wglewGetExtension (const char* name)
   return _glewSearchExtension(name, start, end);
 }
 
+#ifdef GLEW_MX
 GLenum GLEWAPIENTRY wglewContextInit (WGLEW_CONTEXT_ARG_DEF_LIST)
+#else
+GLenum GLEWAPIENTRY wglewInit (WGLEW_CONTEXT_ARG_DEF_LIST)
+#endif
 {
   GLboolean crippled;
   const GLubyte* extStart;
@@ -2057,14 +1999,6 @@ static GLboolean _glewInit_GLX_VERSION_1_3 (GLXEW_CONTEXT_ARG_DEF_INIT)
 
 #endif /* GLX_VERSION_1_3 */
 
-#ifdef GLX_VERSION_1_4
-
-#endif /* GLX_VERSION_1_4 */
-
-#ifdef GLX_ARB_get_proc_address
-
-#endif /* GLX_ARB_get_proc_address */
-
 #ifdef GLX_EXT_swap_control
 
 static GLboolean _glewInit_GLX_EXT_swap_control (GLXEW_CONTEXT_ARG_DEF_INIT)
@@ -2133,7 +2067,11 @@ GLboolean glxewGetExtension (const char* name)
   return _glewSearchExtension(name, start, end);
 }
 
+#ifdef GLEW_MX
 GLenum glxewContextInit (GLXEW_CONTEXT_ARG_DEF_LIST)
+#else
+GLenum glxewInit (GLXEW_CONTEXT_ARG_DEF_LIST)
+#endif
 {
   int major, minor;
   const GLubyte* extStart;
@@ -2221,9 +2159,9 @@ const GLubyte * GLEWAPIENTRY glewGetString (GLenum name)
   static const GLubyte* _glewString[] =
   {
     (const GLubyte*)NULL,
-    (const GLubyte*)"1.12.0",
+    (const GLubyte*)"1.13.0",
     (const GLubyte*)"1",
-    (const GLubyte*)"12",
+    (const GLubyte*)"13",
     (const GLubyte*)"0"
   };
   const size_t max_string = sizeof(_glewString)/sizeof(*_glewString) - 1;
@@ -2236,21 +2174,15 @@ GLboolean glewExperimental = GL_FALSE;
 
 #if !defined(GLEW_MX)
 
-#if defined(_WIN32)
-extern GLenum GLEWAPIENTRY wglewContextInit (void);
-#elif !defined(__ANDROID__) && !defined(__native_client__) && !defined(__HAIKU__) && (!defined(__APPLE__) || defined(GLEW_APPLE_GLX))
-extern GLenum GLEWAPIENTRY glxewContextInit (void);
-#endif /* _WIN32 */
-
 GLenum GLEWAPIENTRY glewInit (void)
 {
   GLenum r;
   r = glewContextInit();
   if ( r != 0 ) return r;
 #if defined(_WIN32)
-  return wglewContextInit();
+  return wglewInit();
 #elif !defined(__ANDROID__) && !defined(__native_client__) && !defined(__HAIKU__) && (!defined(__APPLE__) || defined(GLEW_APPLE_GLX)) /* _UNIX */
-  return glxewContextInit();
+  return glxewInit();
 #else
   return r;
 #endif /* _WIN32 */
