@@ -122,7 +122,7 @@ static __inline int is_cpuid_supported(void)
 		"andl $0x200000, %%eax"
 		: "=a" (__eax)	// Output
 		:		// Input
-		: "edx"		// Clobber
+		: "edx", "cc"	// Clobber
 		);
 
 	return __eax;
