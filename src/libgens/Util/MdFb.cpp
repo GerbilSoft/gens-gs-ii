@@ -23,13 +23,17 @@
 
 #include "MdFb.hpp"
 
-#include <cstdlib>
+// C includes.
+#include <stdlib.h>
 
+// C++ includes.
 #include <vector>
 using std::vector;
 
-namespace LibGens
-{
+// aligned_malloc()
+#include "libcompat/aligned_malloc.h"
+
+namespace LibGens {
 
 MdFb::MdFb()
 	: m_refcnt(1)
@@ -51,7 +55,7 @@ MdFb::MdFb()
 }
 
 MdFb::~MdFb() {
-	free(m_fb);
+	aligned_free(m_fb);
 }
 
 /**
@@ -62,14 +66,24 @@ void MdFb::reinitFb(void) {
 	// An extra 16 pixels are allocated to prevent overrunning
 	// the framebuffer if pxPitch is used at the first pixel.
 	// TODO: Maybe it should only be 8?
-	free(m_fb);
+	aligned_free(m_fb);
 	m_fb_sz = (m_pxPitch * m_numLines + 16) * sizeof(uint32_t);
-	m_fb = calloc(m_fb_sz, 1);
+	m_fb = aligned_malloc(16, m_fb_sz);
+	if (!m_fb) {
+		// Error allocating the framebuffer.
+		// TODO: What do we do here?
+		m_fb_sz = 0;
+		return;
+	}
+
+	// Zero the framebuffer.
+	memset(m_fb, 0, m_fb_sz);
 
 	// Initialize the line number lookup table.
 	m_lineNumTable.resize(m_numLines);
-	for (int y = 0, px = 0; y < m_numLines; y++, px += m_pxPitch)
+	for (int y = 0, px = 0; y < m_numLines; y++, px += m_pxPitch) {
 		m_lineNumTable[y] = px;
+	}
 }
 
 }
