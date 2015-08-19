@@ -52,29 +52,11 @@ uint32_t LibGens_GetCPUFlags(void)
 	uint8_t can_FXSAVE = 0;
 	uint8_t can_XSAVE = 0;
 
-#if defined(__i386__)
-	__asm__ (
-		"pushfl\n"
-		"popl %%eax\n"
-		"movl %%eax, %%edx\n"
-		"xorl $0x200000, %%eax\n"
-		"pushl %%eax\n"
-		"popfl\n"
-		"pushfl\n"
-		"popl %%eax\n"
-		"xorl %%edx, %%eax\n"
-		"andl $0x200000, %%eax"
-		: "=a" (__eax)	// Output
-		:		// Input
-		: "edx"		// Clobber
-		);
-
-	if (!__eax) {
+	if (!is_cpuid_supported()) {
 		// CPUID is not supported.
 		// This CPU must be an early 486 or older.
 		return 0;
 	}
-#endif
 
 	// CPUID is supported.
 	// Check if the CPUID Features function (Function 1) is supported.

@@ -101,6 +101,37 @@
 	} while (0)
 #endif
 
+/**
+ * Check if CPUID is supported on this CPU.
+ * @return 0 if not supported; non-zero if supported.
+ */
+static __inline int is_cpuid_supported(void)
+{
+	int __eax;
+#if defined(__i386__)
+	__asm__ (
+		"pushfl\n"
+		"popl %%eax\n"
+		"movl %%eax, %%edx\n"
+		"xorl $0x200000, %%eax\n"
+		"pushl %%eax\n"
+		"popfl\n"
+		"pushfl\n"
+		"popl %%eax\n"
+		"xorl %%edx, %%eax\n"
+		"andl $0x200000, %%eax"
+		: "=a" (__eax)	// Output
+		:		// Input
+		: "edx"		// Clobber
+		);
+
+	return __eax;
+#else
+	// AMD64. CPUID is always supported.
+	return 1;
+#endif	
+}
+
 #endif /* defined(__i386__) || defined(__amd64__) */
 
 #endif /* __LIBGENS_UTIL_CPUFLAGS_X86_H__ */
