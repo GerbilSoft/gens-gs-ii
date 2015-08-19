@@ -24,6 +24,8 @@
 #ifndef __LIBGENS_UTIL_CPUFLAGS_X86_H__
 #define __LIBGENS_UTIL_CPUFLAGS_X86_H__
 
+#include "../macros/common.h"
+
 #if defined(__i386__) || defined(__amd64__) || \
     defined(_M_IX86) || defined(_M_X64)
 // IA32 CPU flags
@@ -124,7 +126,7 @@
  * Check if CPUID is supported on this CPU.
  * @return 0 if not supported; non-zero if supported.
  */
-static __inline int is_cpuid_supported(void)
+static FORCE_INLINE_DEBUG int is_cpuid_supported(void)
 {
 	int __eax;
 #if defined(__GNUC__) && defined(__i386__)

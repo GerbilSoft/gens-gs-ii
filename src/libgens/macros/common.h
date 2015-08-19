@@ -41,7 +41,10 @@
  * FORCE_INLINE_DEBUG: Debug and release builds.
  */
 #if defined(__GNUC__) && (__GNUC__ >= 4)
-#define FORCE_INLINE_DEBUG __attribute__ ((always_inline))
+// FIXME: gcc complains that these functions
+// might not be inlinable.
+//#define FORCE_INLINE_DEBUG __attribute__ ((always_inline))
+#define FORCE_INLINE_DEBUG __inline
 #elif defined(_MSC_VER)
 #define FORCE_INLINE_DEBUG __forceinline
 #else
