@@ -1,7 +1,6 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * cpuflags.h: CPU Flag definitions and functions.                         *
- *                                                                         *
+ * cpuflags.h: CPU flag definitions and functions.                         *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
