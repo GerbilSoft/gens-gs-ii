@@ -65,6 +65,15 @@
 
 #include <errno.h>
 
+// Alignment for statically-allocated data.
+#if defined(_MSC_VER)
+#define ALIGN(x) __declspec(align(x))
+#elif defined(__GNUC__)
+#define ALIGN(x) __attribute__ ((aligned (x)))
+#else
+#error Missing ALIGN() implementation for this compiler.
+#endif
+
 #if defined(HAVE_MSVC_ALIGNED_MALLOC)
 
 // MSVC _aligned_malloc()
