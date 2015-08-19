@@ -64,7 +64,9 @@ uint32_t LibGens_GetCPUFlags(void)
 		"popl %%eax\n"
 		"xorl %%edx, %%eax\n"
 		"andl $0x200000, %%eax"
-		:	"=a" (__eax)	// Output
+		: "=a" (__eax)	// Output
+		:		// Input
+		: "edx"		// Clobber
 		);
 
 	if (!__eax) {
