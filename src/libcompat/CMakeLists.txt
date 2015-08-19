@@ -68,6 +68,15 @@ ELSE()
 	SET(getopt_H vlc_getopt/vlc_getopt.h)
 ENDIF()
 
+# aligned_malloc.h
+# NOTE: MinGW-w64 only has _aligned_malloc().
+# It doesn't even have inline function wrappers
+# for the other functions.
+CHECK_FUNCTION_EXISTS(_aligned_malloc HAVE_MSVC_ALIGNED_MALLOC)
+CHECK_FUNCTION_EXISTS(aligned_alloc HAVE_ALIGNED_ALLOC)
+CHECK_FUNCTION_EXISTS(posix_memalign HAVE_POSIX_MEMALIGN)
+CHECK_FUNCTION_EXISTS(memalign HAVE_MEMALIGN)
+
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libcompat.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.libcompat.h")
 
@@ -77,6 +86,11 @@ CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libcompat.h.in" "${CMAKE_CURR
 IF(NOT WIN32)
 SET(libcompat_SRCS dummy.c)
 ENDIF(NOT WIN32)
+
+SET(libcompat_H
+	reentrant.h
+	aligned_malloc.h
+	)
 
 IF(WIN32)
 # W32U sources.
