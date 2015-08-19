@@ -36,6 +36,9 @@
 #include "libzomg/zomg_psg.h"
 #include "libzomg/zomg_ym2612.h"
 
+// ALIGN()
+#include "libcompat/aligned_malloc.h"
+
 namespace LibGens {
 
 // Static variable initialization.
@@ -49,8 +52,9 @@ unsigned int SoundMgr::ms_Extrapol[312+8][2];
 // Stores up to 882 32-bit stereo samples.
 // (32-bit instead of 16-bit to handle oversaturation properly.)
 // TODO: Convert to interleaved stereo.
-int32_t SoundMgr::ms_SegBufL[MAX_SEGMENT_SIZE];
-int32_t SoundMgr::ms_SegBufR[MAX_SEGMENT_SIZE];
+// TODO: Make SoundMgr non-static and allocate this using aligned_malloc().
+int32_t ALIGN(16) SoundMgr::ms_SegBufL[MAX_SEGMENT_SIZE];
+int32_t ALIGN(16) SoundMgr::ms_SegBufR[MAX_SEGMENT_SIZE];
 
 // Audio ICs.
 Psg SoundMgr::ms_Psg;
