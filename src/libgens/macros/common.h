@@ -36,19 +36,23 @@
 #endif /* PURE */
 
 /**
- * FUNC_FORCE_INLINE: Force a function to be marked as inline.
+ * Force a function to be marked as inline.
+ * FORCE_INLINE: Release builds only.
+ * FORCE_INLINE_DEBUG: Debug and release builds.
  */
-#if defined(NDEBUG)
 #if defined(__GNUC__) && (__GNUC__ >= 4)
-#define FORCE_INLINE __attribute__ ((always_inline))
+#define FORCE_INLINE_DEBUG __attribute__ ((always_inline))
 #elif defined(_MSC_VER)
-#define FORCE_INLINE __forceinline
+#define FORCE_INLINE_DEBUG __forceinline
 #else
-#define FORCE_INLINE __inline__
+#define FORCE_INLINE_DEBUG __inline__
 #endif
-#else /* !defined(NDEBUG) */
+
+#ifdef NDEBUG
+#define FORCE_INLINE FORCE_INLINE_DEBUG
+#else /* !NDEBUG */
 #define FORCE_INLINE
-#endif /* defined(NDEBUG) */
+#endif /* NDEBUG */
 
 /** Variable attributes. **/
 #if !defined(PACKED)
