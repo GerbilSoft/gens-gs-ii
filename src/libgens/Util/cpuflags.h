@@ -5,7 +5,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -49,6 +49,15 @@ extern "C" {
 #define MDP_CPUFLAG_X86_SSE42		((uint32_t)(1 << 9))
 #define MDP_CPUFLAG_X86_SSE4A		((uint32_t)(1 << 10))
 /*! END: MDP v1.0 CPU flags. !*/
+/*! BEGIN: MDP v1.x CPU flags. (TODO: Add to MDP.) */
+#define MDP_CPUFLAG_X86_AVX		((uint32_t)(1 << 11))
+#define MDP_CPUFLAG_X86_F16C		((uint32_t)(1 << 12))	/* AMD only */
+#define MDP_CPUFLAG_X86_XOP		((uint32_t)(1 << 13))	/* AMD only */
+#define MDP_CPUFLAG_X86_FMA4		((uint32_t)(1 << 14))	/* AMD only */
+#define MDP_CPUFLAG_X86_FMA3		((uint32_t)(1 << 15))
+#define MDP_CPUFLAG_X86_AVX2		((uint32_t)(1 << 16))
+// TODO: Bit manipulation instructions?
+/*! END: MDP v1.x CPU flags. !*/
 
 #endif /* defined(__i386__) || defined(__amd64__) */
 
