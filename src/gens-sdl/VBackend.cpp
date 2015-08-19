@@ -34,6 +34,8 @@ VBackend::VBackend()
 	, m_int_fb(nullptr)
 	, m_stretchMode(STRETCH_H)
 	, m_aspectRatioConstraint(true)
+	, m_pausedEffect(false)
+	, m_fastBlur(false)
 { }
 
 VBackend::~VBackend()
