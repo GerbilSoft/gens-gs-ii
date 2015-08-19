@@ -24,7 +24,8 @@
 #ifndef __LIBGENS_UTIL_CPUFLAGS_X86_H__
 #define __LIBGENS_UTIL_CPUFLAGS_X86_H__
 
-#if defined(__i386__) || defined(__amd64__)
+#if defined(__i386__) || defined(__amd64__) || \
+    defined(_M_IX86) || defined(_M_X64)
 // IA32 CPU flags
 // References:
 // - Intel: http://download.intel.com/design/processor/applnots/24161832.pdf
@@ -79,10 +80,15 @@
 #define CPUID_MAX_EXT_FUNCTIONS			((uint32_t)(0x80000000))
 #define CPUID_EXT_PROC_INFO_FEATURE_BITS	((uint32_t)(0x80000001))
 
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
+
+#if defined(__GNUC__)
 // CPUID macro with PIC support.
 // See http://gcc.gnu.org/ml/gcc-patches/2007-09/msg00324.html
 #if defined(__i386__) && defined(__PIC__)
-#define __cpuid(level, a, b, c, d) do {				\
+#define CPUID(level, a, b, c, d) do {				\
 	__asm__ (						\
 		"xchgl	%%ebx, %1\n"				\
 		"cpuid\n"					\
@@ -92,13 +98,26 @@
 		);						\
 	} while (0)
 #else
-#define __cpuid(level, a, b, c, d) do {				\
+#define CPUID(level, a, b, c, d) do {				\
 	__asm__ (						\
 		"cpuid\n"					\
 		: "=a" (a), "=b" (b), "=c" (c), "=d" (d)	\
 		: "0" (level)					\
 		);						\
 	} while (0)
+#endif
+#elif defined(_MSC_VER)
+// CPUID macro for MSVC.
+#define CPUID(level, a, b, c, d) do {				\
+	int cpuInfo[4];						\
+	__cpuid(cpuInfo, (level));				\
+	(a) = cpuInfo[0];					\
+	(b) = cpuInfo[1];					\
+	(c) = cpuInfo[2];					\
+	(d) = cpuInfo[3];					\
+} while (0)
+#else
+#error Missing 'cpuid' asm implementation for this compiler.
 #endif
 
 /**
@@ -108,7 +127,8 @@
 static __inline int is_cpuid_supported(void)
 {
 	int __eax;
-#if defined(__i386__)
+#if defined(__GNUC__) && defined(__i386__)
+	// gcc, i386
 	__asm__ (
 		"pushfl\n"
 		"popl %%eax\n"
@@ -126,6 +146,25 @@ static __inline int is_cpuid_supported(void)
 		);
 
 	return __eax;
+#elif defined(_MSC_VER) && defined(_M_IX86)
+	// MSVC, i386
+	__asm {
+		pushfd
+		pop	eax
+		mov	__eax, eax
+		xor	eax, 0x200000
+		push	eax
+		popfd
+		pushfd
+		pop	eax
+		xor	eax, __eax
+		and	eax, 0x200000
+		mov	__eax, eax
+	}
+
+	return __eax;
+#elif !defined(__GNUC__) && !defined(_MSC_VER)
+#error Missing is_cpuid_supported() asm implementation for this compiler.
 #else
 	// AMD64. CPUID is always supported.
 	return 1;

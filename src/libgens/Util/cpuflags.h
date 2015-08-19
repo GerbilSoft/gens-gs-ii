@@ -33,7 +33,8 @@ extern "C" {
 // TODO: Use MDP's mdp_cpuflags.h instead of this copypasta!
 
 /* CPU flags (IA32/x86_64) */
-#if defined(__i386__) || defined(__amd64__)
+#if defined(__i386__) || defined(__amd64__) || \
+    defined(_M_IX86) || defined(_M_X64)
 
 /*! BEGIN: MDP v1.0 CPU flags. !*/
 #define MDP_CPUFLAG_X86_MMX		((uint32_t)(1 << 0))

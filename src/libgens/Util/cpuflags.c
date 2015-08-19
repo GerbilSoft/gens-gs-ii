@@ -25,6 +25,7 @@
 
 // C includes.
 #include <stdint.h>
+#include <stdio.h>
 
 // CPU flags.
 uint32_t CPU_Flags = 0;
@@ -44,11 +45,13 @@ uint32_t CPU_Flags = 0;
  */
 uint32_t LibGens_GetCPUFlags(void)
 {
-#if defined(__i386__) || defined(__amd64__)
+#if defined(__i386__) || defined(__amd64__) || \
+    defined(_M_IX86) || defined(_M_X64)
 	// IA32/x86_64.
 
 	// Check if cpuid is supported.
 	unsigned int __eax, __ebx, __ecx, __edx;
+	unsigned int maxFunc;
 	uint8_t can_FXSAVE = 0;
 	uint8_t can_XSAVE = 0;
 
@@ -60,16 +63,14 @@ uint32_t LibGens_GetCPUFlags(void)
 
 	// CPUID is supported.
 	// Check if the CPUID Features function (Function 1) is supported.
-	unsigned int maxFunc;
-	__cpuid(CPUID_MAX_FUNCTIONS, maxFunc, __ebx, __ecx, __edx);
-
+	CPUID(CPUID_MAX_FUNCTIONS, maxFunc, __ebx, __ecx, __edx);
 	if (!maxFunc) {
 		// No CPUID functions are supported.
 		return 0;
 	}
 
 	// Get the CPU feature flags.
-	__cpuid(CPUID_PROC_INFO_FEATURE_BITS, __eax, __ebx, __ecx, __edx);
+	CPUID(CPUID_PROC_INFO_FEATURE_BITS, __eax, __ebx, __ecx, __edx);
 
 	// Check the feature flags.
 	CPU_Flags = 0;
@@ -90,14 +91,26 @@ uint32_t LibGens_GetCPUFlags(void)
 
 #ifdef _WIN32
 			// Windows 95 does not support SSE.
-			// Windows NT 4.0 supports SSE with the appropriate driver.
+			// Windows NT 4.0 supports SSE if the
+			// appropriate driver is installed.
+
 			// Check if CR0.EM == 0.
-			unsigned int smsw;
+			unsigned int __smsw;
+#if defined(__GNUC__)
 			__asm__ (
 				"smsw	%0"
-				: "=r" (smsw)
+				: "=r" (__smsw)
 				);
-			if (!(smsw & IA32_CR0_EM)) {
+#elif defined(_MSC_VER)
+			// TODO: Optimize the MSVC version to
+			// not use the stack?
+			__asm {
+				smsw	__smsw
+			}
+#else
+#error Missing 'smsw' asm implementation for this compiler.
+#endif
+			if (!(__smsw & IA32_CR0_EM)) {
 				// FPU emulation is disabled.
 				// SSE is enabled by the OS.
 				can_FXSAVE = 1;
@@ -166,7 +179,7 @@ uint32_t LibGens_GetCPUFlags(void)
 	// Check if the CPUID Extended Features function (0x00000007) is supported.
 	if (maxFunc >= CPUID_EXT_FEATURES) {
 		// CPUID Extended Features are supported.
-		__cpuid(CPUID_EXT_FEATURES, __eax, __ebx, __ecx, __edx);
+		CPUID(CPUID_EXT_FEATURES, __eax, __ebx, __ecx, __edx);
 
 		// Check the extended features.
 		if (can_XSAVE) {
@@ -176,13 +189,13 @@ uint32_t LibGens_GetCPUFlags(void)
 	}
 
 	// Get the highest extended function supported by the CPU.
-	__cpuid(CPUID_MAX_EXT_FUNCTIONS, maxFunc, __ebx, __ecx, __edx);
+	CPUID(CPUID_MAX_EXT_FUNCTIONS, maxFunc, __ebx, __ecx, __edx);
 
 	// Check if the CPUID Extended Processor Info and Feature Bits function
 	// (0x80000001) is supported.
 	if (maxFunc >= CPUID_EXT_PROC_INFO_FEATURE_BITS) {
 		// CPUID Extended Processor Info and Feature Bits are supported.
-		__cpuid(CPUID_EXT_PROC_INFO_FEATURE_BITS, __eax, __ebx, __ecx, __edx);
+		CPUID(CPUID_EXT_PROC_INFO_FEATURE_BITS, __eax, __ebx, __ecx, __edx);
 
 		// Check the extended processor info and feature bits.
 #if defined(__i386__) || defined(_M_IX86)
@@ -218,6 +231,7 @@ uint32_t LibGens_GetCPUFlags(void)
 
 #else
 	// No flags for this CPU.
+	CPU_Flags = 0;
 	return 0;
 #endif
 }
