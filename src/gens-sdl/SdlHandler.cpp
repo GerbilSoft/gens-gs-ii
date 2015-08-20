@@ -201,7 +201,7 @@ int SdlHandler::init_audio(void)
 	// Number of samples to buffer.
 	// FIXME: Should be segment size, rounded up to pow2.
 	wanted_spec.freq	= 44100;
-	wanted_spec.format	= AUDIO_S16LSB;
+	wanted_spec.format	= AUDIO_S16SYS;
 	wanted_spec.channels	= 2;
 	wanted_spec.samples	= 1024;
 	wanted_spec.callback	= sdl_audio_callback;
