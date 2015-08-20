@@ -26,6 +26,7 @@
 // C includes.
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 // CPU flags.
 uint32_t CPU_Flags = 0;
@@ -51,6 +52,8 @@ uint32_t LibGens_GetCPUFlags(void)
 
 	// Check if cpuid is supported.
 	unsigned int __eax, __ebx, __ecx, __edx;
+	int family = 0, model = 0;
+	union { uint32_t i[3]; char c[12]; } vendor;
 	unsigned int maxFunc;
 	uint8_t can_FXSAVE = 0;
 	uint8_t can_XSAVE = 0;
@@ -60,10 +63,10 @@ uint32_t LibGens_GetCPUFlags(void)
 		// This CPU must be an early 486 or older.
 		return 0;
 	}
-
 	// CPUID is supported.
 	// Check if the CPUID Features function (Function 1) is supported.
-	CPUID(CPUID_MAX_FUNCTIONS, maxFunc, __ebx, __ecx, __edx);
+	// This also retrieves the CPU vendor string.
+	CPUID(CPUID_MAX_FUNCTIONS, maxFunc, vendor.i[0], vendor.i[2], vendor.i[1]);
 	if (!maxFunc) {
 		// No CPUID functions are supported.
 		return 0;
@@ -71,6 +74,16 @@ uint32_t LibGens_GetCPUFlags(void)
 
 	// Get the CPU feature flags.
 	CPUID(CPUID_PROC_INFO_FEATURE_BITS, __eax, __ebx, __ecx, __edx);
+
+	// Get the CPU family and model.
+	family = (__eax >> 8) & 0xF;
+	if (family == 15) {
+		family += ((__eax >> 20) & 0xFF);
+	}
+	model = (__eax >> 4) & 0xF;
+	if (family == 6 || family == 15) {
+		model += ((__eax >> 12) & 0xF0);
+	}
 
 	// Check the feature flags.
 	CPU_Flags = 0;
@@ -223,6 +236,53 @@ uint32_t LibGens_GetCPUFlags(void)
 		if (can_XSAVE) {
 			if (__ecx & CPUFLAG_IA32_EXT_ECX_FMA4)
 				CPU_Flags |= MDP_CPUFLAG_X86_FMA4;
+		}
+	}
+
+	// Check for SSE2SLOW, SSE3SLOW, and AVXSLOW.
+	// These require vendor-specific checks.
+	// Based on ffmpeg's libavutil/x86/cpu.c:
+	// - https://github.com/FFmpeg/FFmpeg/blob/7206b94fb893c63b187bcdfe26422b4e026a3ea0/libavutil/x86/cpu.c
+	if (!strncmp(vendor.c, "AuthenticAMD", 12)) {
+		// AMD CPUs that support SSE2 but don't support SSE4a
+		// typically perform faster using MMX, SSE, or 3DNow!
+		// instructions than SSE2. This includes Athlon 64,
+		// some Opteron, and some Sempron processors.
+		// Note that SSE2 *can* be fast on these CPUs in some
+		// cases. Benchmarks are required to determine this.
+		if ((CPU_Flags & MDP_CPUFLAG_X86_SSE2) &&
+		    !(CPU_Flags & MDP_CPUFLAG_X86_SSE4A))
+		{
+			CPU_Flags |= MDP_CPUFLAG_X86_SSE2SLOW;
+		}
+
+		// Similarly, AMD's Bulldozer CPUs support AVX, but they
+		// don't have 256-bit execution units, so 128-bit SSE
+		// instructions are usually faster.
+		if (family == 0x15 && (CPU_Flags & MDP_CPUFLAG_X86_AVX)) {
+			CPU_Flags |= MDP_CPUFLAG_X86_AVXSLOW;
+		}
+	} else if (!strncmp(vendor.c, "GenuineIntel", 12)) {
+		if (family == 6 && (model == 9 || model == 13 || model == 14)) {
+			// Pentium M and Core 1 CPUs support SSE2, but it's almost
+			// always slower than MMX. As such, we're going to disable
+			// the SSE2 flag while marking SSE2 as "slow". This is what
+			// FFmpeg does. Note that for the AMD cases above, SSE2 is
+			// left enabled, since SSE2 can be fast in some cases.
+			// Same for SSE3 on Core 1.
+			// https://ffmpeg.org/pipermail/ffmpeg-devel/2011-February/102911.html
+			// https://github.com/FFmpeg/FFmpeg/blob/440fa7758b687bbb0007f85497eed8bb9aec96bd/libavutil/cpu.h
+			// https://github.com/FFmpeg/FFmpeg/blob/7206b94fb893c63b187bcdfe26422b4e026a3ea0/libavutil/x86/cpu.c
+			if (CPU_Flags & MDP_CPUFLAG_X86_SSE2)
+				CPU_Flags ^= (MDP_CPUFLAG_X86_SSE2 | MDP_CPUFLAG_X86_SSE2SLOW);
+			if (CPU_Flags & MDP_CPUFLAG_X86_SSE3)
+				CPU_Flags ^= (MDP_CPUFLAG_X86_SSE3 | MDP_CPUFLAG_X86_SSE3SLOW);
+		}
+
+		if (family == 6 && model == 28) {
+			// Intel Atom supports SSSE3, but it's usually slower than
+			// the equivalent SSE2 code.
+			CPU_Flags |= MDP_CPUFLAG_X86_ATOM;
 		}
 	}
 

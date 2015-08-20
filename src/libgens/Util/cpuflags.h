@@ -57,6 +57,17 @@ extern "C" {
 #define MDP_CPUFLAG_X86_FMA3		((uint32_t)(1 << 15))
 #define MDP_CPUFLAG_X86_AVX2		((uint32_t)(1 << 16))
 // TODO: Bit manipulation instructions?
+// NOTE: Some implementations of certain instruction sets
+// may be slower on older CPUs, e.g. SSE2 on Core 1.
+// - If SSE2 is set but SSE2SLOW is not set, SSE2 is fast.
+// - If SSE2 is set and SSE2SLOW is set, SSE2 is usually okay,
+//   but may be slow in certain cases. (Benchmarking is needed.)
+// - If SSE2 is not set and SSE2SLOW is set, SSE2 is almost
+//   always slower and should not be used.
+#define MDP_CPUFLAG_X86_SSE2SLOW	((uint32_t)(1 << 31))
+#define MDP_CPUFLAG_X86_SSE3SLOW	((uint32_t)(1 << 30))
+#define MDP_CPUFLAG_X86_ATOM		((uint32_t)(1 << 29))	/* slow SSSE3 */
+#define MDP_CPUFLAG_X86_AVXSLOW		((uint32_t)(1 << 28))
 /*! END: MDP v1.x CPU flags. !*/
 
 #endif /* defined(__i386__) || defined(__amd64__) */
