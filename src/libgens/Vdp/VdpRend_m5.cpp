@@ -919,8 +919,11 @@ FORCE_INLINE void VdpPrivate::Update_Sprite_Line_Cache_m5(int line)
  * @return VdpStatus::VDP_STATUS_SOVR if sprite limit is exceeded; otherwise, 0.
  */
 template<bool interlaced>
-FORCE_INLINE unsigned int VdpPrivate::T_Update_Sprite_Line_Cache_m5(int line)
+unsigned int VdpPrivate::T_Update_Sprite_Line_Cache_m5(int line)
 {
+	// FIXME: FORCE_INLINE cannot be used here because this function
+	// is used in Vdp.cpp. gcc-5.1 fails in release builds due to
+	// the function definition not being available there.
 	unsigned int ret = 0;
 	uint8_t link = 0;
 
