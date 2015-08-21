@@ -378,24 +378,71 @@ QString AboutDialogPrivate::GetDebugInfo(void)
 	// TODO: Move the array of CPU flag names to LibGens.
 	//: CPU flags are extra features found in a CPU, such as SSE.
 	sDebugInfo += AboutDialog::tr("CPU flags:") + QChar(L' ');
-#if defined(__i386__) || defined(__amd64__)
-	static const char *const CpuFlagNames[11] = {
-		"MMX", "MMXEXT", "3DNow!", "3DNow! EXT",
-		"SSE", "SSE2", "SSE3", "SSSE3",
-		"SSE4.1", "SSE4.2", "SSE4a"
+	// TODO: Tooltips for sometimesSlowFlag and alwaysSlowFlag?
+	const QString sometimesSlowFlag =
+		QLatin1String("<span style='color: gray; font-weight: bold'>%1</span>");
+	const QString alwaysSlowFlag =
+		QLatin1String("<span style='color: red; font-weight: bold'>%1</span>");
+
+#if defined(__i386__) || defined(__amd64__) || \
+    defined(_M_IX86) || defined(_M_X64)
+	struct CpuFlagInfo {
+		const char name[12];
+		uint32_t slow_flag;
+	};
+	static const CpuFlagInfo flags_x86[18] = {
+		{"MMX", 0}, {"MMXEXT", 0}, {"3DNow!", 0}, {"3DNow! EXT", 0},
+		{"SSE", 0}, {"SSE2", MDP_CPUFLAG_X86_SSE2SLOW},
+		{"SSE3", MDP_CPUFLAG_X86_SSE3SLOW},
+		{"SSSE3", MDP_CPUFLAG_X86_ATOM},
+		{"SSE4.1", 0}, {"SSE4.2", 0}, {"SSE4a", 0},
+		{"AVX", MDP_CPUFLAG_X86_AVXSLOW},
+		{"F16C", 0}, {"XOP", 0}, {"FMA4", 0}, {"FMA3", 0},
+		{"AVX2", 0},
+
+		{"", 0}
 	};
 
 	if (CPU_Flags == 0) {
 		//: Used to indicate no special CPU features were found.
 		sDebugInfo += AboutDialog::tr("(none)");
 	} else {
-		int cnt = 0;
-		for (int i = 0; i < ARRAY_SIZE(CpuFlagNames); i++) {
+		bool isFirstFlag = true;
+		int i = 0;
+		for (const CpuFlagInfo *flagInfo = &flags_x86[0];
+		     flagInfo->name[0] != 0; flagInfo++, i++)
+		{
+			// TODO: Tooltips for slow flags?
 			if (CPU_Flags & (1 << i)) {
-				if (cnt != 0)
+				if (!isFirstFlag) {
 					sDebugInfo += QLatin1String(", ");
-				sDebugInfo += QLatin1String(CpuFlagNames[i]);
-				cnt++;
+				}
+				const QString flagName = QLatin1String(flagInfo->name);
+				// Check if this flag may be "slow".
+				// In cases where e.g. SSE2 and SSE2SLOW is set,
+				// SSE2 may be ok in some situations, and slow in others.
+				if (flagInfo->slow_flag != 0 && (CPU_Flags & flagInfo->slow_flag)) {
+					sDebugInfo += sometimesSlowFlag.arg(flagName);
+				} else {
+					sDebugInfo += flagName;
+				}
+
+				// At least one flag has been printed.
+				isFirstFlag = false;
+			} else {
+				// Check if this flag is definitely slow.
+				// In cases where e.g. SSE2 is not set and SSE2SLOW is set,
+				// SSE2 is supported, but is almost always slower than
+				// other methods, e.g. MMX.
+				if (flagInfo->slow_flag != 0 && (CPU_Flags & flagInfo->slow_flag)) {
+					if (!isFirstFlag) {
+						sDebugInfo += QLatin1String(", ");
+					}
+					const QString flagName = QLatin1String(flagInfo->name);
+					sDebugInfo += alwaysSlowFlag.arg(flagName);
+					// At least one flag has been printed.
+					isFirstFlag = false;
+				}
 			}
 		}
 	}
