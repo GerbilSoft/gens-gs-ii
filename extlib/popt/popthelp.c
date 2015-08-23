@@ -35,6 +35,17 @@
 #endif
 #include "poptint.h"
 
+/** Gens/GS II: Use inttypes.h for printing long long. **/
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#else
+/** These macros should work on most platforms... **/
+#define PRId64 "lld"
+#define PRIu64 "llu"
+#define PRIx64 "llx"
+#define PRIX64 "llX"
+#endif
+
 /*@access poptContext@*/
 
 /**
@@ -268,7 +279,7 @@ singleOptionDefaultValue(size_t lineLength,
 	le += sprintf(le, "%ld", arg.longp[0]);
 	break;
     case POPT_ARG_LONGLONG:
-	le += sprintf(le, "%lld", arg.longlongp[0]);
+	le += sprintf(le, "%" PRId64, arg.longlongp[0]);
 	break;
     case POPT_ARG_FLOAT:
     {	double aDouble = (double) arg.floatp[0];
