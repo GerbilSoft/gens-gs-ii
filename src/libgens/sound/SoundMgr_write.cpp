@@ -161,11 +161,12 @@ void SoundMgrPrivate::writeMono_SSE2(int16_t *dest, int samples)
 			);
 	}
 
-	// If the buffer size isn't a multiple of four samples,
+	// If the buffer size isn't a multiple of 8 samples,
 	// write the remaining samples normally.
         for (; i > 0; i--, srcL++, srcR++, dest += 2) {
-                *(dest+0) = clamp(*srcL);
-                *(dest+1) = clamp(*srcR);
+		// Combine the L and R samples into one sample.
+		const int32_t out = ((*srcL + *srcR) >> 1);
+		*dest = clamp(out);
         }
 }
 #endif /* SOUNDMGR_HAS_MMX */
@@ -213,7 +214,7 @@ void SoundMgrPrivate::writeStereo_MMX(int16_t *dest, int samples)
 	// Reset the FPU state.
 	__asm__ ("emms");
 
-	// If the buffer size isn't a multiple of four samples,
+	// If the buffer size isn't a multiple of 4 samples,
 	// write the remaining samples normally.
         for (; i > 0; i--, srcL++, srcR++, dest += 2) {
                 *(dest+0) = clamp(*srcL);
@@ -266,7 +267,7 @@ void SoundMgrPrivate::writeMono_MMX(int16_t *dest, int samples)
 	// Reset the FPU state.
 	__asm__ ("emms");
 
-	// If the buffer size isn't a multiple of four samples,
+	// If the buffer size isn't a multiple of 4 samples,
 	// write the remaining samples normally.
         for (; i > 0; i--, srcL++, srcR++, dest += 2) {
 		// Combine the L and R samples into one sample.
