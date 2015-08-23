@@ -31,41 +31,48 @@
 
 // LibGens Sound Manager.
 #include "libgens/sound/SoundMgr.hpp"
+using LibGens::SoundMgr;
 
-// CPU flags.
-#include "libgens/Util/cpuflags.h"
+// aligned_malloc()
+#include "libcompat/aligned_malloc.h"
 
 // Qt includes.
 #include <QtCore/QMutexLocker>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 GensPortAudio::GensPortAudio()
 {
 	// Clear internal variables.
 	m_bufferPos = 0;
 	m_sampleSize = 0;
-}
 
+	// FIXME: SoundMgr::writeStereo() requires a 16-byte
+	// aligned destination buffer for SSE2.
+	// GensPortAudio will be removed later, so I'm using
+	// a bounce buffer as a workaround.
+	m_tmpWriteBuf = (int16_t*)aligned_malloc(16, SoundMgr::MAX_SEGMENT_SIZE * 4);
+}
 
 GensPortAudio::~GensPortAudio()
 {
 	// NOTE: close() can't be called from ABackend::~ABackend();
 	close();
+
+	// Free the bounce buffer.
+	aligned_free(m_tmpWriteBuf);
 };
 
-
 /**
- * open(): Open the audio stream.
+ * Open the audio stream.
  */
 void GensPortAudio::open(void)
 {
 	if (m_open)
 		return;
-	
+
 	// TODO: Make sure the LibGens Sound Manager is initialized.
-	
+
 	// Initialize the buffer before initializing PortAudio.
 	// This prevents a race condition.
 	m_mtxBuffer.lock();
@@ -73,43 +80,40 @@ void GensPortAudio::open(void)
 	m_bufferPos = 0;
 	m_sampleSize = (sizeof(int16_t) * (m_stereo ? 2 : 1));
 	m_mtxBuffer.unlock();
-	
+
 	// Initialize PortAudio.
 	int err = Pa_Initialize();
-	if (err != paNoError)
-	{
+	if (err != paNoError) {
 		// Error initializing PortAudio!
 		LOG_MSG(audio, LOG_MSG_LEVEL_ERROR,
 			"Pa_Initialize() error: %s", Pa_GetErrorText(err));
 		return;
 	}
-	
+
 	// Get the default device information.
 	PaDeviceIndex defaultDevIndex = Pa_GetDefaultOutputDevice();
-	if (defaultDevIndex == paNoDevice)
-	{
+	if (defaultDevIndex == paNoDevice) {
 		LOG_MSG(audio, LOG_MSG_LEVEL_ERROR,
 			"Pa_GetDefaultOutputDevice() returned paNoDevice.");
 		Pa_Terminate();
 		return;
 	}
-	
+
 	const PaDeviceInfo *dev = Pa_GetDeviceInfo(defaultDevIndex);
-	if (!dev)
-	{
+	if (!dev) {
 		LOG_MSG(audio, LOG_MSG_LEVEL_ERROR,
 			"Pa_GetDeviceInfo(%d) returned NULL.", defaultDevIndex);
 		Pa_Terminate();
 		return;
 	}
-	
+
 	PaStreamParameters stream_params;
 	stream_params.channelCount = (m_stereo ? 2 : 1);
 	stream_params.device = defaultDevIndex;
 	stream_params.hostApiSpecificStreamInfo = NULL;
 	stream_params.sampleFormat = paInt16;
 	stream_params.suggestedLatency = dev->defaultLowOutputLatency;
-	
+
 	// Open an audio stream.
 	err = Pa_OpenStream(&m_stream,
 				NULL,			// no input channels
@@ -119,134 +123,118 @@ void GensPortAudio::open(void)
 				0,			// Stream flags. (TODO)
 				GensPaCallback,		// Callback function
 				this);			// Pointer to this object
-	
-	if (err != paNoError)
-	{
+
+	if (err != paNoError) {
 		// Error initializing the PortAudio stream.
 		LOG_MSG(audio, LOG_MSG_LEVEL_ERROR,
 			"Pa_OpenDefaultStream() error: %s", Pa_GetErrorText(err));
 		Pa_Terminate();
 	}
-	
+
 	// Start the PortAudio stream.
 	err = Pa_StartStream(m_stream);
-	if (err != paNoError)
-	{
+	if (err != paNoError) {
 		// Error starting the PortAudio stream.
 		LOG_MSG(audio, LOG_MSG_LEVEL_ERROR,
 			"Pa_StartStream() error: %s", Pa_GetErrorText(err));
 	}
-	
+
 	// PortAudio stream is open.
 	m_open = true;
 }
 
-
 /**
- * close(): Close the audio stream.
+ * Close the audio stream.
  */
 void GensPortAudio::close(void)
 {
 	if (!m_open)
 		return;
-	
+
 	int err;
-	
+
 	// Stop the PortAudio stream.
 	err = Pa_StopStream(m_stream);
-	if (err != paNoError)
-	{
+	if (err != paNoError) {
 		// Error stopping the PortAudio stream.
 		LOG_MSG(audio, LOG_MSG_LEVEL_ERROR,
 			"Pa_StopStream() error: %s", Pa_GetErrorText(err));
 	}
-	
+
 	// Close the PortAudio stream.
 	err = Pa_CloseStream(m_stream);
-	if (err != paNoError)
-	{
+	if (err != paNoError) {
 		// Error shutting down PortAudio.
 		LOG_MSG(audio, LOG_MSG_LEVEL_ERROR,
 			"Pa_CloseStream() error: %s", Pa_GetErrorText(err));
 	}
 	m_stream = NULL;
-	
+
 	// Shut down PortAudio.
 	err = Pa_Terminate();
-	if (err != paNoError)
-	{
+	if (err != paNoError) {
 		// Error shutting down PortAudio.
 		LOG_MSG(audio, LOG_MSG_LEVEL_ERROR,
 			"Pa_Terminate(): %s", Pa_GetErrorText(err));
 	}
-	
+
 	// PortAudio is shut down.
 	m_open = false;
 	m_sampleSize = 0;
 }
 
-
 /**
- * setRate(): Set the sampling rate.
+ * Set the sampling rate.
  * @param newRate New sampling rate.
  */
 void GensPortAudio::setRate(int newRate)
 {
 	if (m_rate == newRate)
 		return;
-	
-	if (newRate > LibGens::SoundMgr::MAX_SAMPLING_RATE)
-	{
+
+	if (newRate > SoundMgr::MAX_SAMPLING_RATE) {
 		// Sampling rate is too high for LibGens.
 		return;
 	}
-	
-	if (m_open)
-	{
+
+	if (m_open) {
 		// Close and reopen the PortAudio stream.
 		// Make sure PSG/YM state is saved when we do this.
 		// TODO: Insert a pause between close() and open() to prevent stuttering?
 		close();
 		m_rate = newRate;
-		LibGens::SoundMgr::SetRate(newRate, true);
+		SoundMgr::SetRate(newRate, true);
 		open();
-	}
-	else
-	{
+	} else {
 		// Audio isn't open. Save the new audio rate.
 		// PSG/YM state doesn't need to be saved.
 		m_rate = newRate;
-		LibGens::SoundMgr::SetRate(newRate, false);
+		SoundMgr::SetRate(newRate, false);
 	}
 }
 
-
 /**
- * setStereo(): Set stereo or mono.
+ * Set stereo or mono.
  * @param newStereo True for stereo; false for mono.
  */
 void GensPortAudio::setStereo(bool newStereo)
 {
 	if (m_stereo == newStereo)
 		return;
-	
-	if (m_open)
-	{
+
+	if (m_open) {
 		// Close and reopen the PortAudio stream.
 		// TODO: Insert a pause between close() and open() to prevent stuttering?
 		close();
 		m_stereo = newStereo;
 		open();
-	}
-	else
-	{
+	} else {
 		m_stereo = newStereo;
 	}
 }
 
-
 /**
- * gensPaCallback(): PortAudio callback function.
+ * PortAudio callback function.
  * @return ???
  */
 int GensPortAudio::gensPaCallback(const void *inputBuffer, void *outputBuffer,
@@ -254,90 +242,83 @@ int GensPortAudio::gensPaCallback(const void *inputBuffer, void *outputBuffer,
 				  const PaStreamCallbackTimeInfo *timeInfo,
 				  PaStreamCallbackFlags statusFlags)
 {
+	((void)inputBuffer);
+	((void)timeInfo);
+	((void)statusFlags);
+
 	QMutexLocker locker(&m_mtxBuffer);
-	
+
 	// NOTE: Sample size is 16-bit, but we're using 8-bit here
 	// for convenience, since everything's measured in bytes.
 	uint8_t *out = (uint8_t*)outputBuffer;
-	
+
 	// Get the data from the buffer.
 	framesPerBuffer *= m_sampleSize;
-	
-	if (m_bufferPos < framesPerBuffer)
-	{
+
+	if (m_bufferPos < framesPerBuffer) {
 		// Not enough data in the buffer.
 		// Copy whatever's left.
 		memcpy(out, m_buffer, m_bufferPos);
 		memset(&out[m_bufferPos], 0x00, (framesPerBuffer - m_bufferPos));
 		m_bufferPos = 0;
-	}
-	else
-	{
+	} else {
 		// Enough data is available in the buffer.
 		memcpy(out, m_buffer, framesPerBuffer);
-		
+
 		// Shift the rest of the buffer over.
 		unsigned long diff = (m_bufferPos - framesPerBuffer);
-		if (diff == 0)
+		if (diff == 0) {
 			m_bufferPos = 0;
-		else
-		{
+		} else {
 			memmove(m_buffer, &m_buffer[framesPerBuffer>>1], diff);
 			m_bufferPos = diff;
 		}
 	}
-	
+
 	return 0;
 }
 
-
 /**
- * write(): Write the current segment to the audio buffer.
+ * Write the current segment to the audio buffer.
  * @return 0 on success; non-zero on error.
  */
 int GensPortAudio::write(void)
 {
 	QMutexLocker locker(&m_mtxBuffer);
-	
+
 	if (!m_open)
 		return 1;
-	
+
 	// TODO: Lock the buffer for writing.
 	// TODO: Use the segment size.
-	int segLength = (LibGens::SoundMgr::GetSegLength() * m_sampleSize);
-	if ((m_bufferPos + segLength) > sizeof(m_buffer))
-	{
+	const int segLength = SoundMgr::GetSegLength();
+	const int cbSegSize = segLength * m_sampleSize;
+	if ((m_bufferPos + cbSegSize) > sizeof(m_buffer)) {
 		fprintf(stderr, "GensPortAudio::%s(): Internal buffer overflow.\n", __func__);
 		return 1;
 	}
-	
-	int16_t *buf = &m_buffer[m_bufferPos>>1];
-	
-	// TODO: MMX versions.
-	int ret;
-#ifdef HAVE_MMX
-	if (CPU_Flags & MDP_CPUFLAG_X86_MMX)
-	{
-		// MMX is supported.
-		if (m_stereo)
-			ret = WriteStereoMMX(buf);
-		else
-			ret = WriteMonoMMX(buf);
+
+	int written;	// Number of samples written.
+	if (m_stereo) {
+		written = SoundMgr::writeStereo(m_tmpWriteBuf, segLength);
+	} else {
+		written = SoundMgr::writeMono(m_tmpWriteBuf, segLength);
 	}
-	else
-#endif /* HAVE_MMX */
-	if (m_stereo)
-		ret = WriteStereo(buf);
-	else
-		ret = WriteMono(buf);
-	
+
+	// Copy from the bounce buffer to the ring buffer.
+	int16_t *buf = &m_buffer[m_bufferPos>>1];
+	memcpy(buf, m_tmpWriteBuf, written * m_sampleSize);
+
 	// Increment the buffer position.
-	m_bufferPos += segLength;
-	
+	m_bufferPos += written;
+
 	// Unlock the ring buffer.
 	// TODO
 	//m_buffer.writeUnlock();
-	return ret;
+
+	// Return 0 if all requested data was written.
+	// Otherwise, return 1.
+	return (written == segLength ? 0 : 1);
 }
 
 }
