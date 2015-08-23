@@ -77,6 +77,7 @@ SET(libgens_SRCS
 	credits.c
 	lg_osd.c
 	sound/SoundMgr.cpp
+	sound/SoundMgr_write.cpp
 	Data/32X/fw_32x.c
 	Cartridge/RomCartridgeMD.cpp
 	Save/EEPRomI2C.cpp

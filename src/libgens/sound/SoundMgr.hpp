@@ -90,6 +90,24 @@ class SoundMgr
 			ms_Ym2612.specialUpdate();
 		}
 
+		/**
+		 * Write stereo audio to a buffer.
+		 * This clears the internal audio buffer.
+		 * @param buf Destination buffer.
+		 * @param samples Number of samples in the buffer. (1 sample == 4 bytes)
+		 * @return Number of samples written.
+		 */
+		static int writeStereo(int16_t *buf, int samples);
+
+		/**
+		 * Write monaural audio to a buffer.
+		 * This clears the internal audio buffer.
+		 * @param buf Destination buffer.
+		 * @param samples Number of samples in the buffer. (1 sample == 2 bytes)
+		 * @return Number of samples written.
+		 */
+		static int writeMono(int16_t *buf, int samples);
+
 	protected:
 		// TODO: Move these into the private class.
 
