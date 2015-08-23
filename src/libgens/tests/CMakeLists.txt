@@ -72,15 +72,6 @@ ENDIF(GENS_ENABLE_EMULATION)
 
 ADD_SUBDIRECTORY(EEPRomI2CTest)
 
-# PSG Register Test.
-INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
-ADD_EXECUTABLE(PsgRegisterTest
-	PsgRegisterTest.cpp
-	)
-TARGET_LINK_LIBRARIES(PsgRegisterTest gens ${GTEST_LIBRARY})
-ADD_TEST(NAME PsgRegisterTest
-	COMMAND PsgRegisterTest)
-
 # VDP FIFO Testing
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 ADD_EXECUTABLE(VdpFIFOTesting
@@ -92,3 +83,6 @@ TARGET_LINK_LIBRARIES(VdpFIFOTesting gens ${GTEST_LIBRARY})
 # to not check tests that are known to fail.
 #ADD_TEST(NAME VdpFIFOTesting
 #	COMMAND VdpFIFOTesting)
+
+# Sound tests.
+ADD_SUBDIRECTORY(sound)
