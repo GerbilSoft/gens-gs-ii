@@ -62,6 +62,16 @@ extern __const __int32_t *__ctype_toupper;
 /* MSVC doesn't have ssize_t. */
 /* FIXME: Large file support on MSVC? */
 typedef long ssize_t;
+
+/**
+ * MSVC 2013 (12.0) added proper support for strtoll() and strtoull().
+ * Older verisons don't have these functions, but they do have
+ * the equivalent functions _strtoi64() and _strtoui64().
+ */
+#if _MSC_VER < 1800
+#define strtoll(nptr, endptr, base)  _strtoi64(nptr, endptr, base)
+#define strtoull(nptr, endptr, base) _strtoui64(nptr, endptr, base)
+#endif /* _MSC_VER < 1800 */
 #endif /* _MSC_VER */
 
 #if defined(HAVE_UNISTD_H) && !defined(__LCLINT__)
