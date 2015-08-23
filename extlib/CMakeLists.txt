@@ -69,6 +69,8 @@ IF(BUILD_TESTING)
 	ADD_SUBDIRECTORY(gtest)
 ENDIF(BUILD_TESTING)
 
+ADD_SUBDIRECTORY(popt)
+
 # FIXME: Probably unnecessary, since these variables
 # only apply to the extlib/ subdirectory.
 SET(BUILD_SHARED_LIBS ${OLD_BUILD_SHARED_LIBS})
