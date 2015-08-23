@@ -180,31 +180,20 @@ static void print_gpl(void)
 		"\n");
 }
 
-static void print_help(char *argv0)
+static void print_help(const poptContext con)
 {
 	print_prg_info();
+	fputc('\n', stderr);
+	// NOTE: poptPrintHelp() only prints the filename portion of argv[0].
+	poptPrintHelp(con, stderr, 0);
 
 	fprintf(stderr,
 		"\n"
-		"Usage: %s [OPTION] pcm_file.bin\n"
-		"Converts Sega CD PCM audio from pcm_file.bin to pcm_file.wav.\n"
+		"Starting and ending positions may be specified in hexadecimal if\n"
+		"prefixed with \"0x\".\n"
 		"\n"
-		"Parameters:\n"
-		"  -s, --start=pos		Starting position in pcm_file.bin, in bytes. (default = 0)\n"
-		"  -l, --length=len		Maximum length to dump, in bytes. (default = entire file)\n"
-		"  -r, --rate=rate		Sample rate. (default = %d Hz)\n"
-		"  -o, --output=filename		Output filename. (default = pcm_file.wav)\n"
-		"\n"
-		"  Starting and ending positions may be specified in hexadecimal if\n"
-		"  prefixed with \"0x\".\n"
-		"\n"
-		"  Common sample rates include 16276, 24414, and 32552 (Sega CD max).\n"
-		"\n"
-		"Program information:\n"
-		"  -h, --help			Display this help screen.\n"
-		"  -V, --version			Display version information.\n"
-		"\n",
-		argv0, def_sample_rate);
+		"Common sample rates include 16276, 24414, and 32552 (Sega CD max).\n"
+		"\n");
 }
 
 /**
@@ -352,7 +341,15 @@ int main(int argc, char *argv[])
 	int ret = -1;
 	int mins = 0, secs = 0, csecs = 0;
 
-	// popt options table.
+	// popt: help options table.
+	struct poptOption helpOptionsTable[] = {
+		{"help", '?', POPT_ARG_NONE, NULL, '?', "Show this help message", NULL},
+		{"usage", 0, POPT_ARG_NONE, NULL, 'u', "Display brief usage message", NULL},
+		{"version", 'V', POPT_ARG_NONE, NULL, 'V', "Display version information", NULL},
+		POPT_TABLEEND
+	};
+
+	// popt: main options table.
 	struct poptOption optionsTable[] = {
 		{"start",  's', POPT_ARG_LONGLONG, &start_pos, 0,
 			"Starting position in pcm_file.bin, in bytes. (default = 0)", "POS"},
@@ -362,10 +359,9 @@ int main(int argc, char *argv[])
 			"Sample rate. (default = 32552 Hz)", "RATE"},
 		{"output", 'o', POPT_ARG_STRING, out_filename, 0,
 			"Output filename. (default = pcm_file.wav)", "FILENAME"},
-		{"version", 'V', POPT_ARG_NONE, NULL, 'V', NULL, NULL},
-
-		POPT_AUTOHELP
-		{NULL, 0, 0, NULL, 0, NULL, NULL}
+		{NULL, 0, POPT_ARG_INCLUDE_TABLE, helpOptionsTable, 0,
+			"Help options:", NULL},
+		POPT_TABLEEND
 	};
 	poptContext optCon;
 	int c;
@@ -390,8 +386,16 @@ int main(int argc, char *argv[])
 		switch (c) {
 			case 'V':
 				print_prg_info();
-				fprintf(stderr, "\n");
+				fputc('\n', stderr);
 				print_gpl();
+				return EXIT_SUCCESS;
+
+			case '?':
+				print_help(optCon);
+				return EXIT_SUCCESS;
+
+			case 'u':
+				poptPrintUsage(optCon, stderr, 0);
 				return EXIT_SUCCESS;
 
 			default:
