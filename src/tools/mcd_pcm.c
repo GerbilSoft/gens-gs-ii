@@ -24,8 +24,8 @@
 #include <stdint.h>
 #include <limits.h>
 
-// libcompat provides getopt_long() on platforms that don't have it.
-#include "libcompat/compat_getopt.h"
+// popt
+#include <popt.h>
 
 #ifdef _WIN32
 // Win32 Unicode Translation Layer.
@@ -334,7 +334,6 @@ static int process_pcm(FILE *f_pcm, FILE *f_wav,
 	return end_flag_code;
 }
 
-
 int main(int argc, char *argv[])
 {
 	// Options.
@@ -353,6 +352,23 @@ int main(int argc, char *argv[])
 	int ret = -1;
 	int mins = 0, secs = 0, csecs = 0;
 
+	// popt options table.
+	struct poptOption optionsTable[] = {
+		{"start",  's', POPT_ARG_LONGLONG, &start_pos, 0,
+			"Starting position in pcm_file.bin, in bytes. (default = 0)", "POS"},
+		{"length", 'l', POPT_ARG_INT, &max_length, 0,
+			"Maximum length to dump, in bytes. (default = entire file)", "LEN"},
+		{"rate",   'r', POPT_ARG_INT, (int*)&sample_rate, 0,
+			"Sample rate. (default = 32552 Hz)", "RATE"},
+		{"output", 'o', POPT_ARG_STRING, out_filename, 0,
+			"Output filename. (default = pcm_file.wav)", "FILENAME"},
+
+		POPT_AUTOHELP
+		{NULL, 0, 0, NULL, 0, NULL, NULL}
+	};
+	poptContext optCon;
+	int c;
+
 #ifdef _WIN32
         // Convert command line parameters to UTF-8.
         if (W32U_GetArgvU(&argc, &argv, nullptr) != 0) {
@@ -361,115 +377,54 @@ int main(int argc, char *argv[])
         }
 #endif /* _WIN32 */
 
-#ifndef NO_OPTERR
-	// Prevent getopt() from handling errors itself.
-	opterr = 0;
-#endif
-	
-	while (1) {
-		int c;
-
-		// Temporary end pointer for strtol() and strtoll().
-		char *strtol_endptr;
-
-		// Get command line options.
-		static struct option long_options[] = {
-			{"start",	1, NULL, 's'},
-			{"length",	1, NULL, 'l'},
-			{"rate",	1, NULL, 'r'},
-			{"output",	1, NULL, 'o'},
-			
-			{"help",	0, NULL, 'h'},
-			{"version",	0, NULL, 'v'},
-			{NULL,		0, NULL, 0}
-		};
-
-		c = getopt_long(argc, argv, "s:l:r:o:hv",
-				long_options, NULL);
-		if (c == -1)
-			break;
-
-		// Determine which option was passed.
-		switch (c) {
-			// Parameters.
-			case 's':
-				// Starting position within the file.
-				start_pos = strtoll(optarg, &strtol_endptr, 0);
-				if (strtol_endptr == optarg || *strtol_endptr != 0) {
-					fprintf(stderr, "%s: invalid starting position %s\n"
-							"Try `%s --help` for more information.\n",
-							argv[0], optarg, argv[0]);
-					return EXIT_FAILURE;
-				}
-				break;
-
-			case 'l':
-				// Maximum length to decode.
-				max_length = (int)strtol(optarg, &strtol_endptr, 0);
-				if (strtol_endptr == optarg || *strtol_endptr != 0) {
-					fprintf(stderr, "%s: invalid length %s\n"
-							"Try `%s --help` for more information.\n",
-							argv[0], optarg, argv[0]);
-					return EXIT_FAILURE;
-				}
-				break;
-
-			case 'r':
-				// Sample rate.
-				sample_rate = (uint32_t)strtol(optarg, &strtol_endptr, 0);
-				if (strtol_endptr == optarg || *strtol_endptr != 0 || sample_rate <= 0) {
-					fprintf(stderr, "%s: invalid sample rate %s\n"
-							"Try `%s --help` for more information.\n",
-							argv[0], optarg, argv[0]);
-					return EXIT_FAILURE;
-				}
-				break;
-			
-			case 'o':
-				// Output filename.
-				if (!optarg || *optarg == 0) {
-					fprintf(stderr, "%s: no output filename specified.\n"
-							"Try `%s --help` for more information.\n",
-							argv[0], argv[0]);
-					return EXIT_FAILURE;
-				}
-
-				// Copy the output filename.
-				if (out_filename)
-					free(out_filename);
-				out_filename = strdup(optarg);
-				break;
-
-			// Program information.
-			case 'h':
-				print_help(argv[0]);
-				return EXIT_SUCCESS;
-
-			case 'v':
-				print_prg_info();
-				fprintf(stderr, "\n");
-				print_gpl();
-				return EXIT_SUCCESS;
-
-			default:
-				// Invalid option.
-				fprintf(stderr, "%s: unrecognized option '%s'\n"
-						"Try `%s --help` for more information.\n",
-						argv[0], argv[optind-1], argv[0]);
-				return EXIT_FAILURE;
-		}
+	optCon = poptGetContext(NULL, argc, (const char**)argv, optionsTable, 0);
+	poptSetOtherOptionHelp(optCon, "<pcm_file>");
+	if (argc < 2) {
+		poptPrintUsage(optCon, stderr, 0);
+		return EXIT_FAILURE;
 	}
 
-	// Make sure a filename was specified.
-	if (optind >= argc) {
+	// Process options.
+	while ((c = poptGetNextOpt(optCon)) > 0) {
+		// No manual options to process, so if anything
+		// happens here, it's an error.
+	}
+
+	if (c < -1) {
+		// An error occurred during option processing.
+		switch (c) {
+			case POPT_ERROR_BADOPT:
+				// Unrecognized option.
+				fprintf(stderr, "%s: unrecognized option '%s'\n"
+					"Try `%s --help` for more information.\n",
+					argv[0], poptBadOption(optCon, POPT_BADOPTION_NOALIAS), argv[0]);
+				break;
+			default:
+				// Other error.
+				fprintf(stderr, "%s: '%s': %s\n"
+					"Try `%s --help` for more information.\n",
+					argv[0], poptBadOption(optCon, POPT_BADOPTION_NOALIAS),
+					poptStrerror(c), argv[0]);
+				break;
+		}
+		return EXIT_FAILURE;
+	}
+
+	// Get the input filename.
+	pcm_filename = poptGetArg(optCon);
+	if (pcm_filename == NULL || poptPeekArg(optCon) != NULL) {
+		// Either the input filename wasn't specified,
+		// or too many filenames were specified.
 		fprintf(stderr, "%s: no filename specified\n"
 			"Try `%s --help` for more information.\n",
 			argv[0], argv[0]);
 		return EXIT_FAILURE;
 	}
 
+	// Done parsing arguments.
+	poptFreeContext(optCon);
+
 	// Attempt to open the file.
-	pcm_filename = argv[optind];
 	f_pcm = fopen(pcm_filename, "rb");
 	if (!f_pcm) {
 		fprintf(stderr, "%s: Error opening '%s': %s\n",
