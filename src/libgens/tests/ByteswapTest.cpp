@@ -35,7 +35,8 @@ namespace LibGens { namespace Tests {
 class ByteswapTest : public ::testing::Test
 {
 	protected:
-		ByteswapTest() { }
+		ByteswapTest()
+			: ::testing::Test() { }
 		virtual ~ByteswapTest() { }
 
 		virtual void SetUp(void) { }

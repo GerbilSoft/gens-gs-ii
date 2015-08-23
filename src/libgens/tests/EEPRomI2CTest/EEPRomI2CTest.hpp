@@ -43,7 +43,8 @@ class EEPRomI2CTest : public ::testing::TestWithParam<unsigned int>
 {
 	protected:
 		EEPRomI2CTest()
-			: m_eeprom(nullptr) { }
+			: ::testing::TestWithParam<unsigned int>()
+			, m_eeprom(nullptr) { }
 		virtual ~EEPRomI2CTest() { }
 
 		virtual void SetUp(void) override;

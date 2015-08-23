@@ -81,7 +81,8 @@ class VdpSpriteMaskingTest : public ::testing::TestWithParam<VdpSpriteMaskingTes
 {
 	protected:
 		VdpSpriteMaskingTest()
-			: m_vdp(nullptr) { }
+			: ::testing::TestWithParam<VdpSpriteMaskingTest_mode>()
+			, m_vdp(nullptr) { }
 		virtual ~VdpSpriteMaskingTest() { }
 
 		virtual void SetUp(void);
