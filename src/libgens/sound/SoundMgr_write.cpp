@@ -76,9 +76,10 @@ void SoundMgrPrivate::writeStereo_SSE2(int16_t *dest, int samples)
 		__asm__ (
 			"movdqa		(%[srcL]), %%xmm0\n"	// %xmm0 = [L4h | L4l | L3h | L3l | L2h | L2l | L1h | L1l]
 			"movdqa		(%[srcR]), %%xmm1\n"	// %xmm1 = [R4h | R4l | R3h | R3l | R2h | R2l | R1h | R1l]
-			// TODO: Benchmark punpcklwd vs. pshufd.
-			// http://www.agner.org/optimize/instruction_tables.pdf says pshufd is slow,
-			// so the punpcklwd version might be better.
+			// NOTE: On my ThinkPad T60p with Core 2 Duo T7200, the
+			// pshufd version is faster than the punpcklwd version, even though
+			// agner.org's optimization documents say otherwise.
+			// Reference: http://www.agner.org/optimize/instruction_tables.pdf
 			// punpcklwd version:
 			#if 0
 			"packssdw	%%xmm0, %%xmm0\n"	// %xmm0 = [L4  | L3  | L2  | L1  | L4  | L3  | L2  | L1 ]
@@ -86,12 +87,10 @@ void SoundMgrPrivate::writeStereo_SSE2(int16_t *dest, int samples)
 			"punpcklwd	%%xmm1, %%xmm0\n"	// %xmm0 = [R4  | L4  | R3  | L3  | R2  | L2  | R1  | L1 ]
 			#endif
 			// pshufd version:
-			//#if 0
 			"packssdw	%%xmm1, %%xmm0\n"		// %xmm0 = [R4  | R3  | R2  | R1  | L4  | L3  | L2  | L1 ]
 			"pshufd		$0xD8, %%xmm0, %%xmm0\n"	// %xmm0 = [R4  | R3  | L4  | L3  | R2  | R1  | L2  | L1 ]
 			"pshuflw	$0xD8, %%xmm0, %%xmm0\n"	// %xmm0 = [R4  | R3  | L4  | L3  | R2  | L2  | R1  | L1 ]
 			"pshufhw	$0xD8, %%xmm0, %%xmm0\n"	// %xmm0 = [R4  | L4  | R3  | L3  | R2  | L2  | R1  | L1 ]
-			//#endif
 			"movdqa		%%xmm0, (%[dest])\n"
 			:
 			: [srcL] "r" (srcL), [srcR] "r" (srcR), [dest] "r" (dest)
