@@ -56,7 +56,7 @@ class AudioWriteTest : public ::testing::Test
 };
 
 /**
- * Set up the Vdp for testing.
+ * Set up the SoundMgr for testing.
  */
 void AudioWriteTest::SetUp(void)
 {
