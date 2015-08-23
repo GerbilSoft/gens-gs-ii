@@ -23,6 +23,7 @@ ADD_TEST(NAME PsgRegisterTest
 ADD_EXECUTABLE(AudioWriteTest
         AudioWriteTest_data.c
         AudioWriteTest.cpp
+        AudioWriteTest_benchmark.cpp
         )
 TARGET_LINK_LIBRARIES(AudioWriteTest gens ${GTEST_LIBRARY})
 ADD_TEST(NAME AudioWriteTest
