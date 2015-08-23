@@ -104,17 +104,27 @@
 #define UtoW_filename(str) do { \
 	int cchWcs = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0); \
 	if (cchWcs > 0) { \
+		wchar_t *slash; \
 		/* Check if the path is absolute. */ \
 		if (isalpha(str[0]) && str[1] == ':' && \
 		    (str[2] == '\\' || str[2] == '/')) { \
 			/* Path is absolute. */ \
 			str##W = alloca((cchWcs+4) * sizeof(*str##W)); \
-			MultiByteToWideChar(CP_UTF8, 0, str, -1, str##W+4, cchWcs); \
+			slash = str##W + 4; \
+			MultiByteToWideChar(CP_UTF8, 0, str, -1, slash, cchWcs); \
 			memcpy(str##W, L"\\\\?\\", 4*sizeof(*str##W)); \
 		} else { \
 			/* Path is not absolute. */ \
 			str##W = alloca(cchWcs * sizeof(*str##W)); \
+			slash = str##W; \
 			MultiByteToWideChar(CP_UTF8, 0, str, -1, str##W, cchWcs); \
+		} \
+		/* Replace all slashes with backslashes. */ \
+		/* CreateFileW() doesn't like long paths with slashes. */ \
+		/* NOTE: We're doing this even for relative paths, since */ \
+		/* Windows prefers backslashes regardless. */ \
+		while ((slash = wcschr(slash, '/')) != NULL) { \
+			*slash = '\\'; \
 		} \
 	} else { \
 		str##W = NULL; \
