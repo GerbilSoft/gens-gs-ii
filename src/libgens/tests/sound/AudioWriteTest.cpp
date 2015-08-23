@@ -69,7 +69,7 @@ void AudioWriteTest::SetUp(void)
 }
 
 /**
- * Test SoundMgr::writeStereo();
+ * Test SoundMgr::writeStereo().
  */
 TEST_F(AudioWriteTest, writeStereo)
 {
@@ -90,7 +90,7 @@ TEST_F(AudioWriteTest, writeStereo)
 }
 
 /**
- * Test SoundMgr::writeMono();
+ * Test SoundMgr::writeMono().
  */
 TEST_F(AudioWriteTest, writeMono)
 {
