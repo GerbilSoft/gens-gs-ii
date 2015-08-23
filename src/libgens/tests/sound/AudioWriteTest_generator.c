@@ -28,6 +28,15 @@
 
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
+// Some compilers don't support 'inline' in C.
+#if defined(_MSC_VER)
+#define INLINE __inline
+#elif defined(__GNUC__)
+#define INLINE __inline__
+#else
+#define INLINE
+#endif
+
 static void createRandomSamples(int32_t *buf, int size)
 {
 	int i;
@@ -61,7 +70,7 @@ static void createRandomSamples(int32_t *buf, int size)
 	}
 }
 
-static inline int16_t clamp(int32_t sample)
+static INLINE int16_t clamp(int32_t sample)
 {
 	if (sample < -0x8000)
 		return -0x8000;
@@ -70,7 +79,7 @@ static inline int16_t clamp(int32_t sample)
 	return (int16_t)sample;
 }
 
-static inline int16_t clamp64(int64_t sample)
+static INLINE int16_t clamp64(int64_t sample)
 {
 	if (sample < -0x8000)
 		return -0x8000;
@@ -141,9 +150,6 @@ static void writeBuffer_i16(FILE *f, const char *name, const int16_t *buf, int s
 
 int main(void)
 {
-	// Seed the RNG.
-	srand((unsigned int)time(NULL));
-
 	// Create 800-sample Left and Right buffers.
 	// (48,000 Hz @ 60 Hz)
 	int32_t bufL[800];
@@ -152,6 +158,13 @@ int main(void)
 	int16_t destStereo[800*2];	// Stereo
 	int16_t destMono_fast[800];	// Mono (fast)
 	int16_t destMono_accurate[800];	// Mono (accurate for edge cases)
+
+	// Miscellaneous variables.
+	FILE *f_data;
+	int i;
+
+	// Seed the RNG.
+	srand((unsigned int)time(NULL));
 
 	// Start with edge cases.
 	bufL[ 0] = 0;		//  0x0000
@@ -199,8 +212,10 @@ int main(void)
 	createRandomSamples(&bufR[32], 800-32);
 
 	// Clamp the stereo buffers and calculate the monaural buffer.
-	int i;
 	for (i = 0; i < 800; i++) {
+		int32_t mono_fast;
+		int64_t mono_accurate;
+
 		destStereo[i*2] = clamp(bufL[i]);
 		destStereo[i*2+1] = clamp(bufR[i]);
 
@@ -208,14 +223,14 @@ int main(void)
 		// NOTE: We're probably always going to use the fast algorithm,
 		// since values >= 2^31 are highly unlikely. Also, we're probably
 		// rendering in Stereo in most cases anyway.
-		int32_t mono_fast = (bufL[i] + bufR[i]) >> 1;
+		mono_fast = (bufL[i] + bufR[i]) >> 1;
 		destMono_fast[i] = clamp(mono_fast);
 
 		// Higher accuracy for edge cases.
 		/* NOTE: This doesn't work when the samples are negative...
 		int32_t mono_accurate = (bufL[i] >> 1) + (bufR[i] >> 1);
 		mono_accurate |= ((bufL[i] & 1) | (bufR[i] & 1));
-		destM_accurate[i] = clamp(mono_accurate);
+		destMono_accurate[i] = clamp(mono_accurate);
 		*/
 
 		// Higher accuracy for edge cases.
@@ -224,7 +239,7 @@ int main(void)
 		// instead, we'll use either the "fast" algorithm, which
 		// won't overflow because we'll never hit >= 2^31, or
 		// MMX/SSE2, which supports saturated addition.
-		int64_t mono_accurate = ((int64_t)bufL[i] + (int64_t)bufR[i]) >> 1;
+		mono_accurate = ((int64_t)bufL[i] + (int64_t)bufR[i]) >> 1;
 		destMono_accurate[i] = clamp64(mono_accurate);
 
 		if (mono_fast != mono_accurate) {
@@ -236,8 +251,8 @@ int main(void)
 	// TODO: Edge cases for test data that isn't a multiple of 8 or 16 bytes?
 
 	// Write the buffers.
-	FILE *f = fopen("AudioWriteTest_data.c", "w");
-	fprintf(f,
+	f_data = fopen("AudioWriteTest_data.c", "w");
+	fprintf(f_data,
 		"/***************************************************************************\n"
 		" * libgens/tests: Gens Emulation Library. (Test Suite)                     *\n"
 		" * AudioWriteTest_data.c: SoundMgr audio write test data.                  *\n"
@@ -264,13 +279,15 @@ int main(void)
 		"\n");
 
 	// NOTE: Manually adding linebreaks between structs.
-	writeBuffer_i32(f, "AudioWriteTest_Input_L", bufL, ARRAY_SIZE(bufL));
-	fprintf(f, "\n");
-	writeBuffer_i32(f, "AudioWriteTest_Input_R", bufR, ARRAY_SIZE(bufR));
-	fprintf(f, "\n");
-	writeBuffer_i16(f, "AudioWriteTest_Output_Stereo", destStereo, ARRAY_SIZE(destStereo));
-	fprintf(f, "\n");
-	writeBuffer_i16(f, "AudioWriteTest_Output_Mono_fast", destMono_fast, ARRAY_SIZE(destMono_fast));
-	fprintf(f, "\n");
-	writeBuffer_i16(f, "AudioWriteTest_Output_Mono_accurate", destMono_accurate, ARRAY_SIZE(destMono_accurate));
+	writeBuffer_i32(f_data, "AudioWriteTest_Input_L", bufL, ARRAY_SIZE(bufL));
+	fprintf(f_data, "\n");
+	writeBuffer_i32(f_data, "AudioWriteTest_Input_R", bufR, ARRAY_SIZE(bufR));
+	fprintf(f_data, "\n");
+	writeBuffer_i16(f_data, "AudioWriteTest_Output_Stereo", destStereo, ARRAY_SIZE(destStereo));
+	fprintf(f_data, "\n");
+	writeBuffer_i16(f_data, "AudioWriteTest_Output_Mono_fast", destMono_fast, ARRAY_SIZE(destMono_fast));
+	fprintf(f_data, "\n");
+	writeBuffer_i16(f_data, "AudioWriteTest_Output_Mono_accurate", destMono_accurate, ARRAY_SIZE(destMono_accurate));
+
+	fclose(f_data);
 }
