@@ -176,8 +176,7 @@ static void print_gpl(void)
 		"\n"
 		"You should have received a copy of the GNU General Public License along\n"
 		"with this program; if not, write to the Free Software Foundation, Inc.,\n"
-		"51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.\n"
-		"\n");
+		"51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.\n");
 }
 
 static void print_help(const poptContext con)
@@ -192,8 +191,7 @@ static void print_help(const poptContext con)
 		"Starting and ending positions may be specified in hexadecimal if\n"
 		"prefixed with \"0x\".\n"
 		"\n"
-		"Common sample rates include 16276, 24414, and 32552 (Sega CD max).\n"
-		"\n");
+		"Common sample rates include 16276, 24414, and 32552 (Sega CD max).\n");
 }
 
 /**
