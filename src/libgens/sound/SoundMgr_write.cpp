@@ -27,6 +27,7 @@
 
 // C includes. (C++ namespace)
 #include <cstring>
+#include <cassert>
 
 // C++ includes.
 #include <algorithm>
@@ -49,6 +50,111 @@ static inline int16_t clamp(int32_t sample)
 	}
 	return (int16_t)sample;
 }
+
+/** SoundMgrPrivate: SSE-optimized functions. **/
+
+#ifdef SOUNDMGR_HAS_MMX
+/**
+ * Write stereo audio to a buffer. (SSE2-optimized)
+ * @param dest Destination buffer.
+ * @param samples Number of samples in the buffer. (1 sample == 4 bytes)
+ */
+void SoundMgrPrivate::writeStereo_SSE2(int16_t *dest, int samples)
+{
+	// samples is clamped to std::min(samples, ms_SegLength)
+	// by writeStereo().
+
+	// Source buffer pointers.
+	const int32_t *srcL = &SoundMgr::ms_SegBufL[0];
+	const int32_t *srcR = &SoundMgr::ms_SegBufR[0];
+
+	// Write 4 samples at once using SSE2.
+	// TODO: Do 8 samples at once?
+	assert((uintptr_t)dest % 16 == 0);
+	int i = samples;
+	for (; i > 3; i -= 4, srcL += 4, srcR += 4, dest += 8) {
+		__asm__ (
+			"movdqa		(%[srcL]), %%xmm0\n"	// %xmm0 = [L4h | L4l | L3h | L3l | L2h | L2l | L1h | L1l]
+			"movdqa		(%[srcR]), %%xmm1\n"	// %xmm1 = [R4h | R4l | R3h | R3l | R2h | R2l | R1h | R1l]
+			// TODO: Benchmark punpcklwd vs. pshufd.
+			// http://www.agner.org/optimize/instruction_tables.pdf says pshufd is slow,
+			// so the punpcklwd version might be better.
+			// punpcklwd version:
+			#if 0
+			"packssdw	%%xmm0, %%xmm0\n"	// %xmm0 = [L4  | L3  | L2  | L1  | L4  | L3  | L2  | L1 ]
+			"packssdw	%%xmm1, %%xmm1\n"	// %xmm1 = [R4  | R3  | R2  | R1  | R4  | R3  | R2  | R1 ]
+			"punpcklwd	%%xmm1, %%xmm0\n"	// %xmm0 = [R4  | L4  | R3  | L3  | R2  | L2  | R1  | L1 ]
+			#endif
+			// pshufd version:
+			//#if 0
+			"packssdw	%%xmm1, %%xmm0\n"		// %xmm0 = [R4  | R3  | R2  | R1  | L4  | L3  | L2  | L1 ]
+			"pshufd		$0xD8, %%xmm0, %%xmm0\n"	// %xmm0 = [R4  | R3  | L4  | L3  | R2  | R1  | L2  | L1 ]
+			"pshuflw	$0xD8, %%xmm0, %%xmm0\n"	// %xmm0 = [R4  | R3  | L4  | L3  | R2  | L2  | R1  | L1 ]
+			"pshufhw	$0xD8, %%xmm0, %%xmm0\n"	// %xmm0 = [R4  | L4  | R3  | L3  | R2  | L2  | R1  | L1 ]
+			//#endif
+			"movdqa		%%xmm0, (%[dest])\n"
+			:
+			: [srcL] "r" (srcL), [srcR] "r" (srcR), [dest] "r" (dest)
+			// FIXME: gcc complains xmm? registers are unknown.
+			// May need to compile with -msse...
+			//: "xmm0", "xmm1"
+			);
+	}
+
+	// If the buffer size isn't a multiple of four samples,
+	// write the remaining samples normally.
+        for (; i > 0; i--, srcL++, srcR++, dest += 2) {
+                *(dest+0) = clamp(*srcL);
+                *(dest+1) = clamp(*srcR);
+        }
+}
+
+/**
+ * Write monaural audio to a buffer. (SSE2-optimized)
+ * @param dest Destination buffer.
+ * @param samples Number of samples in the buffer. (1 sample == 2 bytes)
+ */
+void SoundMgrPrivate::writeMono_SSE2(int16_t *dest, int samples)
+{
+	// samples is clamped to std::min(samples, ms_SegLength)
+	// by writeStereo().
+
+	// Source buffer pointers.
+	const int32_t *srcL = &SoundMgr::ms_SegBufL[0];
+	const int32_t *srcR = &SoundMgr::ms_SegBufR[0];
+
+	// Write 4 samples at once using SSE2.
+	// TODO: Do 8 samples at once?
+	assert((uintptr_t)dest % 16 == 0);
+	int i = samples;
+	for (; i > 3; i -= 4, srcL += 4, srcR += 4, dest += 4) {
+		__asm__ (
+			"movdqa		(%[srcL]), %%xmm0\n"	// %xmm0 = [L4h | L4l | L3h | L3l | L2h | L2l | L1h | L1l]
+			"movdqa		(%[srcR]), %%xmm1\n"	// %xmm1 = [R4h | R4l | R3h | R3l | R2h | R2l | R1h | R1l]
+			// NOTE: This may overflow if samples are >= 2^30,
+			// but that shouldn't happen except in unit tests.
+			// TODO: Use pavgw after packing? (Unsigned, thoguh...)
+			"paddd		%%xmm1, %%xmm0\n"
+			// TODO: Add 1 to match SSE2 'pavgw'?
+			"psrad		$1, %%xmm0\n"		// %xmm0 = [M4h | M4l | M3h | M3l | M2h | M2l | M1h | M1l]
+			"packssdw	%%xmm0, %%xmm0\n"	// %xmm0 = [M4  | M3  | M2  | M1  | M4  | M3  | M2  | M1 ]
+			"movq		%%xmm0, (%[dest])\n"
+			:
+			: [srcL] "r" (srcL), [srcR] "r" (srcR), [dest] "r" (dest)
+			// FIXME: gcc complains xmm? registers are unknown.
+			// May need to compile with -msse...
+			//: "xmm0", "xmm1"
+			);
+	}
+
+	// If the buffer size isn't a multiple of four samples,
+	// write the remaining samples normally.
+        for (; i > 0; i--, srcL++, srcR++, dest += 2) {
+                *(dest+0) = clamp(*srcL);
+                *(dest+1) = clamp(*srcR);
+        }
+}
+#endif /* SOUNDMGR_HAS_MMX */
 
 /** SoundMgrPrivate: MMX-optimized functions. **/
 
@@ -93,7 +199,7 @@ void SoundMgrPrivate::writeStereo_MMX(int16_t *dest, int samples)
 	// Reset the FPU state.
 	__asm__ ("emms");
 
-	// If the buffer size isn't a multiple of two samples,
+	// If the buffer size isn't a multiple of four samples,
 	// write the remaining samples normally.
         for (; i > 0; i--, srcL++, srcR++, dest += 2) {
                 *(dest+0) = clamp(*srcL);
@@ -146,7 +252,7 @@ void SoundMgrPrivate::writeMono_MMX(int16_t *dest, int samples)
 	// Reset the FPU state.
 	__asm__ ("emms");
 
-	// If the buffer size isn't a multiple of two samples,
+	// If the buffer size isn't a multiple of four samples,
 	// write the remaining samples normally.
         for (; i > 0; i--, srcL++, srcR++, dest += 2) {
 		// Combine the L and R samples into one sample.
@@ -220,8 +326,9 @@ int SoundMgr::writeStereo(int16_t *dest, int samples)
 {
 	samples = std::min(samples, ms_SegLength);
 #ifdef SOUNDMGR_HAS_MMX
-	// TODO: SSE2
-	if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
+	if (CPU_Flags & MDP_CPUFLAG_X86_SSE2) {
+		SoundMgrPrivate::writeStereo_SSE2(dest, samples);
+	} else if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
 		SoundMgrPrivate::writeStereo_MMX(dest, samples);
 	} else
 #endif /* SOUNDMGR_HAS_MMX */
@@ -249,8 +356,9 @@ int SoundMgr::writeMono(int16_t *dest, int samples)
 {
 	samples = std::min(samples, ms_SegLength);
 #ifdef SOUNDMGR_HAS_MMX
-	// TODO: SSE2
-	if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
+	if (CPU_Flags & MDP_CPUFLAG_X86_SSE2) {
+		SoundMgrPrivate::writeMono_SSE2(dest, samples);
+	} else if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
 		SoundMgrPrivate::writeMono_MMX(dest, samples);
 	} else
 #endif /* SOUNDMGR_HAS_MMX */

@@ -55,6 +55,20 @@ class SoundMgrPrivate
 	public:
 #ifdef SOUNDMGR_HAS_MMX
 		/**
+		 * Write stereo audio to a buffer. (SSE2-optimized)
+		 * @param dest Destination buffer.
+		 * @param samples Number of samples in the buffer. (1 sample == 4 bytes)
+		 */
+		static void writeStereo_SSE2(int16_t *dest, int samples);
+
+		/**
+		 * Write monaural audio to a buffer. (SSE2-optimized)
+		 * @param dest Destination buffer.
+		 * @param samples Number of samples in the buffer. (1 sample == 2 bytes)
+		 */
+		static void writeMono_SSE2(int16_t *dest, int samples);
+
+		/**
 		 * Write stereo audio to a buffer. (MMX-optimized)
 		 * @param dest Destination buffer.
 		 * @param samples Number of samples in the buffer. (1 sample == 4 bytes)
