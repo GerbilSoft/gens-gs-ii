@@ -127,18 +127,21 @@ void SoundMgrPrivate::writeMono_MMX(int16_t *dest, int samples)
 	int i = samples;
 	for (; i > 1; i -= 2, srcL += 2, srcR += 2, dest += 2) {
 		__asm__ (
-			/* Get source data. */
-			"movq		 (%0), %%mm0\n"		// %mm0 = [R2, R1]
-			"movq		 (%1), %%mm1\n"		// %mm1 = [L2, L1]
-			"packssdw	%%mm0, %%mm0\n"		// %mm0 = [0, 0, R2, R1]
-			"packssdw	%%mm1, %%mm1\n"		// %mm0 = [0, 0, L2, L1]
-			"psraw		   $1, %%mm0\n"		// NOTE: Slight loss of precision...
-			"psraw		   $1, %%mm1\n"		// NOTE: Slight loss of precision...
-			"paddw		%%mm1, %%mm0\n"		// %mm0 = [0, 0, L2+R2, L1+R1]
-			"movd		%%mm0, (%2)\n"
-			: // output (dest is a ptr; it's not written to!)
-			: "r" (srcR), "r" (srcL), "r" (dest)	// input
-			);
+			"movq		(%[srcL]), %%mm0\n"	// %mm0 = [L2h | L2l | L1h | L1l]
+			"movq		(%[srcR]), %%mm1\n"	// %mm1 = [R2h | R2l | R1h | R1l]
+			// NOTE: This may overflow if samples are >= 2^30,
+			// but that shouldn't happen except in unit tests.
+			"paddd		%%mm1, %%mm0\n"
+			// TODO: Add 1 to match SSE2 'pavgw'?
+			"psrad		$1, %%mm0\n"		// %mm0 = [M2h | M2l | M1h | M1l]
+			"packssdw	%%mm0, %%mm0\n"		// %mm0 = [M2  | M1  | M2  | M1 ]
+			"movd		%%mm0, (%[dest])\n"
+			:
+			: [srcL] "r" (srcL), [srcR] "r" (srcR), [dest] "r" (dest)
+			// FIXME: gcc complains mm0/mm1 are unknown.
+			// May need to compile with -mmmx...
+			//: "mm0", "mm1"
+		);
 	}
 
 	// Reset the FPU state.
