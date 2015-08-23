@@ -200,7 +200,8 @@ const char *POPT_next_char (/*@returned@*/ const char *str)
 
 #endif
 
-#if defined(ENABLE_NLS) && defined(HAVE_LIBINTL_H)
+/** Gens/GS II: libintl.h is required even if ENABLE_NLS is disabled. **/
+#if /*defined(ENABLE_NLS) &&*/ defined(HAVE_LIBINTL_H)
 #include <libintl.h>
 #endif
 
