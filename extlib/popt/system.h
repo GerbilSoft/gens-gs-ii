@@ -48,6 +48,15 @@ extern __const __int32_t *__ctype_toupper;
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _MSC_VER
+/* Gens/GS II: MSVC complains about const casts. */
+/* Also, include wchar.h here to prevent redefinitions. */
+#include <wchar.h>
+#define free(ptr) free((void*)(ptr))
+#define realloc(ptr, size) realloc((void*)(ptr), (size))
+#define memcpy(dest, src, n) memcpy((void*)(dest), (src), (n))
+#endif /* _MSC_VER */
+
 #if defined(HAVE_UNISTD_H) && !defined(__LCLINT__)
 #include <unistd.h>
 #endif
