@@ -45,13 +45,43 @@ ENDIF(CMAKE_BUILD_TYPE MATCHES ^release)
 # NOTE: Technically, --tsaware is only valid for EXEs, not DLLs,
 # but we should mark DLLs anyway.
 # TODO: Make static linkage a CMake option: --static-libgcc, --static-libstdc++
-FOREACH(FLAG_TEST "-Wl,--large-address-aware" "-Wl,--nxcompat" "-Wl,--dynamicbase" "-Wl,--tsaware")
+FOREACH(FLAG_TEST "-Wl,--large-address-aware" "-Wl,--nxcompat" "-Wl,--tsaware")
+	# CMake doesn't like "+" characters in variable names.
+	STRING(REPLACE "+" "_" FLAG_TEST_VARNAME "${FLAG_TEST}")
+
+	IF(LDFLAG_${FLAG_TEST_VARNAME})
+		SET(GENS_EXE_LINKER_FLAGS_WIN32 "${GENS_EXE_LINKER_FLAGS_WIN32} ${FLAG_TEST}")
+	ENDIF(LDFLAG_${FLAG_TEST_VARNAME})
+	UNSET(LDFLAG_${FLAG_TEST_VARNAME})
+	UNSET(FLAG_TEST_VARNAME)
+ENDFOREACH()
+SET(GENS_SHARED_LINKER_FLAGS_WIN32 "${GENS_EXE_LINKER_FLAGS_WIN32}")
+
+# Test for dynamicbase (ASLR) support.
+# Simply enabling --dynamicbase won't work; we also need to
+# tell `ld` to generate the .reloc section. Also, there's
+# a bug in `ld` where if it generates the .reloc section,
+# it conveniently forgets the entry point.
+# Reference: https://lists.libav.org/pipermail/libav-devel/2014-October/063871.html
+INCLUDE(CheckSystemX8632)
+CHECK_SYSTEM_X86_32(MINGW_IS_CPU_X86_32)
+# TODO: Does ARM Windows have a leading underscore?
+IF(MINGW_IS_CPU_X86_32)
+	SET(ENTRY_POINT "_mainCRTStartup")
+ELSE(MINGW_IS_CPU_X86_32)
+	SET(ENTRY_POINT "mainCRTStartup")
+ENDIF(MINGW_IS_CPU_X86_32)
+
+FOREACH(FLAG_TEST "-Wl,--dynamicbase,--pic-executable")
 	# CMake doesn't like "+" characters in variable names.
 	STRING(REPLACE "+" "_" FLAG_TEST_VARNAME "${FLAG_TEST}")
 
 	CHECK_C_COMPILER_FLAG("${FLAG_TEST}" LDFLAG_${FLAG_TEST_VARNAME})
 	IF(LDFLAG_${FLAG_TEST_VARNAME})
-		SET(GENS_EXE_LINKER_FLAGS_WIN32 "${GENS_EXE_LINKER_FLAGS_WIN32} ${FLAG_TEST}")
+		# Entry point is only set for EXEs.
+		# GNU `ld` always has the -e option.
+		SET(GENS_EXE_LINKER_FLAGS_WIN32 "${GENS_EXE_LINKER_FLAGS_WIN32} ${FLAG_TEST} -Wl,-e,${ENTRY_POINT}")
+		SET(GENS_SHARED_LINKER_FLAGS_WIN32 "${GENS_EXE_LINKER_FLAGS_WIN32} ${FLAG_TEST}")
 	ENDIF(LDFLAG_${FLAG_TEST_VARNAME})
 	UNSET(LDFLAG_${FLAG_TEST_VARNAME})
 	UNSET(FLAG_TEST_VARNAME)
@@ -72,7 +102,7 @@ SET(CMAKE_RC_COMPILE_OBJECT
 SET(GENS_C_FLAGS_COMMON			"${GENS_C_FLAGS_COMMON} ${GENS_C_FLAGS_WIN32}")
 SET(GENS_CXX_FLAGS_COMMON		"${GENS_CXX_FLAGS_COMMON} ${GENS_C_FLAGS_WIN32}")
 SET(GENS_EXE_LINKER_FLAGS_COMMON	"${GENS_EXE_LINKER_FLAGS_COMMON} ${GENS_EXE_LINKER_FLAGS_WIN32}")
-SET(GENS_SHARED_LINKER_FLAGS_COMMON	"${GENS_SHARED_LINKER_FLAGS_COMMON} ${GENS_EXE_LINKER_FLAGS_WIN32}")
+SET(GENS_SHARED_LINKER_FLAGS_COMMON	"${GENS_SHARED_LINKER_FLAGS_COMMON} ${GENS_SHARED_LINKER_FLAGS_WIN32}")
 
 # Unset temporary variables.
 UNSET(GENS_C_FLAGS_WIN32)
