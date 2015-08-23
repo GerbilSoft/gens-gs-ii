@@ -15,6 +15,11 @@ extern __const __int32_t *__ctype_toupper;
 /*@=declundef@*/
 #endif
 
+#ifdef HAVE_SECURE_GETENV
+/* secure_getenv() requires _GNU_SOURCE. */
+#define _GNU_SOURCE 1
+#endif
+
 #include <ctype.h>
 
 /* XXX isspace(3) has i18n encoding signednesss issues on Solaris. */
