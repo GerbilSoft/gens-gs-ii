@@ -110,6 +110,7 @@ SET(libcompat_H
 	W32U/W32U_argv.h
 	W32U/W32U_shlobj.h
 	W32U/is_unicode.h
+	W32U/W32U_alloca.h
 	)
 ENDIF(WIN32)
 
