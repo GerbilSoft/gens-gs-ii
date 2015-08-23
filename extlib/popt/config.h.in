@@ -94,6 +94,9 @@
 /* Define to 1 if you have the `vasprintf' function. */
 #cmakedefine HAVE_VASPRINTF
 
+/* Define to 1 if you have the `secure_getenv' function. */
+#cmakedefine HAVE_SECURE_GETENV
+
 /* Define to 1 if you have the `__secure_getenv' function. */
 #cmakedefine HAVE___SECURE_GETENV
 
