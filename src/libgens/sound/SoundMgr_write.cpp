@@ -76,22 +76,27 @@ void SoundMgrPrivate::writeStereo_MMX(int16_t *dest, int samples)
 		: "eax" // clobber
 		);
 
-	// Write two samples at once using MMX.
-	// TODO: Do 4 samples at once?
+	// Write 4 samples at once using MMX.
 	int i = samples;
-	for (; i > 1; i -= 2, srcL += 2, srcR += 2, dest += 4) {
+	for (; i > 1; i -= 4, srcL += 4, srcR += 4, dest += 8) {
 		__asm__ (
+			// TODO: Read both srcL blocks, then both srcR blocks?
 			"movq		(%[srcL]), %%mm0\n"	// %mm0 = [L2h | L2l | L1h | L1l]
-			"movq           (%[srcR]), %%mm1\n"     // %mm1 = [R2h | R2l | R1h | R1l]
+			"movq           (%[srcR]), %%mm1\n"	// %mm1 = [R2h | R2l | R1h | R1l]
+			"movq           8(%[srcL]), %%mm2\n"	// %mm2 = [L4h | L4l | L3h | L3l]
 			"packssdw	%%mm1, %%mm0\n"		// %mm0 = [R2  | R1  | L2  | L1 ]
+			"movq           8(%[srcR]), %%mm3\n"	// %mm3 = [R4h | R4l | R3h | R3l]
+			"packssdw	%%mm3, %%mm2\n"		// %mm0 = [R4  | R3  | L4  | L3 ]
 			// TODO: Is it faster to use a separate %mm2 for dest here?
 			"pshufw		$0xD8, %%mm0, %%mm0\n"	// %mm0 = [R2  | L2  | R1  | L1 ]
+			"pshufw		$0xD8, %%mm2, %%mm2\n"	// %mm0 = [R4  | L4  | R3  | L3 ]
 			"movq           %%mm0, (%[dest])\n"
+			"movq           %%mm2, 8(%[dest])\n"
 			:
 			: [srcL] "r" (srcL), [srcR] "r" (srcR), [dest] "r" (dest)
-			// FIXME: gcc complains mm0/mm1 are unknown.
+			// FIXME: gcc complains mm? registers are unknown.
 			// May need to compile with -mmmx...
-			//: "mm0", "mm1"
+			//: "mm0", "mm1", "mm2", "mm3"
 			);
 	}
 
@@ -120,25 +125,32 @@ void SoundMgrPrivate::writeMono_MMX(int16_t *dest, int samples)
 	const int32_t *srcL = &SoundMgr::ms_SegBufL[0];
 	const int32_t *srcR = &SoundMgr::ms_SegBufR[0];
 
-	// Write two samples at once using MMX.
-	// TODO: Do 4 samples at once?
+	// Write 4 samples at once using MMX.
 	int i = samples;
-	for (; i > 1; i -= 2, srcL += 2, srcR += 2, dest += 2) {
+	for (; i > 3; i -= 4, srcL += 4, srcR += 4, dest += 4) {
 		__asm__ (
+			// NOTE: Add/shift may overflow if samples are >= 2^30,
+			// but that shouldn't happen except in unit tests.
+			// TODO: Add 1 before shifting to match SSE2 'pavgw'?
+			// TODO: Read both srcL blocks, then both srcR blocks?
 			"movq		(%[srcL]), %%mm0\n"	// %mm0 = [L2h | L2l | L1h | L1l]
 			"movq		(%[srcR]), %%mm1\n"	// %mm1 = [R2h | R2l | R1h | R1l]
-			// NOTE: This may overflow if samples are >= 2^30,
-			// but that shouldn't happen except in unit tests.
+			"movq		8(%[srcL]), %%mm2\n"	// %mm2 = [L4h | L3l | L2h | L2l]
 			"paddd		%%mm1, %%mm0\n"
-			// TODO: Add 1 to match SSE2 'pavgw'?
+			"movq		8(%[srcR]), %%mm3\n"	// %mm3 = [R4h | R4l | R3h | R3l]
 			"psrad		$1, %%mm0\n"		// %mm0 = [M2h | M2l | M1h | M1l]
+			"paddd		%%mm3, %%mm2\n"
 			"packssdw	%%mm0, %%mm0\n"		// %mm0 = [M2  | M1  | M2  | M1 ]
+			"psrad		$1, %%mm2\n"		// %mm2 = [M4h | M4l | M3h | M3l]
 			"movd		%%mm0, (%[dest])\n"
+			"packssdw	%%mm2, %%mm2\n"		// %mm2 = [M4  | M3  | M4  | M3 ]
+			// TODO: Combine %%mm0 and %%mm2 so we only have to do one movq?
+			"movd		%%mm2, 4(%[dest])\n"
 			:
 			: [srcL] "r" (srcL), [srcR] "r" (srcR), [dest] "r" (dest)
-			// FIXME: gcc complains mm0/mm1 are unknown.
+			// FIXME: gcc complains mm? registers are unknown.
 			// May need to compile with -mmmx...
-			//: "mm0", "mm1"
+			//: "mm0", "mm1", "mm2", "mm3"
 		);
 	}
 
