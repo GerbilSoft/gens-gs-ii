@@ -67,7 +67,6 @@ FILE *W32U_fopen(const char *filename, const char *mode)
 	// Convert the arguments from UTF-8 to UTF-16.
 	UtoW_filename(filename);
 	UtoW(mode);
-	printf("fopen():\n- filename  == %s\n- filenameW == %ls\n", filename, filenameW);
 	if (!filenameW || !modeW) {
 		errno = EINVAL;
 		return nullptr;
@@ -77,7 +76,6 @@ FILE *W32U_fopen(const char *filename, const char *mode)
 	if (W32U_IsUnicode()) {
 		// Unicode version.
 		fRet = _wfopen(filenameW, modeW);
-		printf("fRet == %08X\n", fRet);
 		errno_ret = errno;
 	} else {
 #ifdef ENABLE_ANSI_WINDOWS
