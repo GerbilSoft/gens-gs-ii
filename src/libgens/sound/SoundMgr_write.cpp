@@ -33,6 +33,22 @@
 namespace LibGens {
 
 /**
+ * Clamp a 32-bit sample to 16-bit.
+ * @param sample 32-bit sample.
+ * @return Clamped 16-bit sample.
+ */
+static inline int16_t clamp(int32_t sample)
+{
+	// TODO: Is there a faster way to clamp to 16-bit?
+	if (sample < -0x8000) {
+		return -0x8000;
+	} else if (sample > 0x7FFF) {
+		return 0x7FFF;
+	}
+	return (int16_t)sample;
+}
+
+/**
  * Write stereo audio to a buffer.
  * This clears the internal audio buffer.
  * @param buf Destination buffer.
@@ -51,21 +67,8 @@ int SoundMgr::writeStereo(int16_t *buf, int samples)
 	for (int i = samples; i > 0;
 	     i--, srcL++, srcR++, buf += 2)
 	{
-		if (*srcL < -0x8000) {
-			*buf = -0x8000;
-		} else if (*srcL > 0x7FFF) {
-			*buf = 0x7FFF;
-		} else {
-			*buf = (int16_t)(*srcL);
-		}
-
-		if (*srcR < -0x8000) {
-			*(buf+1) = -0x8000;
-		} else if (*srcR > 0x7FFF) {
-			*(buf+1) = 0x7FFF;
-		} else {
-			*(buf+1) = (int16_t)(*srcR);
-		}
+		*(buf+0) = clamp(*srcL);
+		*(buf+1) = clamp(*srcR);
 	}
 
 	// Clear the segment buffers.
@@ -102,14 +105,7 @@ int SoundMgr::writeMono(int16_t *buf, int samples)
 		// maximum of 4 (PSG, FM, PCM, PWM) audio chips,
 		// which means a worst-case maximum of 0x8000 * 4.
 		const int32_t out = ((*srcL + *srcR) >> 1);
-
-		if (out < -0x8000) {
-			*buf = -0x8000;
-		} else if (out > 0x7FFF) {
-			*buf = 0x7FFF;
-		} else {
-			*buf = (int16_t)out;
-		}
+		*buf = clamp(out);
 	}
 
 	// Clear the segment buffers.
