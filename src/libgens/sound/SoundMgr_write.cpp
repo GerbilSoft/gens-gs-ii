@@ -163,7 +163,7 @@ void SoundMgrPrivate::writeMono_SSE2(int16_t *dest, int samples)
 
 	// If the buffer size isn't a multiple of 8 samples,
 	// write the remaining samples normally.
-        for (; i > 0; i--, srcL++, srcR++, dest += 2) {
+        for (; i > 0; i--, srcL++, srcR++, dest++) {
 		// Combine the L and R samples into one sample.
 		const int32_t out = ((*srcL + *srcR) >> 1);
 		*dest = clamp(out);
@@ -269,7 +269,7 @@ void SoundMgrPrivate::writeMono_MMX(int16_t *dest, int samples)
 
 	// If the buffer size isn't a multiple of 4 samples,
 	// write the remaining samples normally.
-        for (; i > 0; i--, srcL++, srcR++, dest += 2) {
+        for (; i > 0; i--, srcL++, srcR++, dest++) {
 		// Combine the L and R samples into one sample.
 		const int32_t out = ((*srcL + *srcR) >> 1);
 		*dest = clamp(out);
