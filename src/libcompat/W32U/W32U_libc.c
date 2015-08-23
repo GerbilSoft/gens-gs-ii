@@ -33,6 +33,9 @@
 // Win32 includes.
 #include <io.h>
 
+// W32U alloca() helper.
+#include "W32U_alloca.h"
+
 // direct.h calls some "deprecated" functions directly.
 #ifdef mkdir
 #undef mkdir
@@ -61,17 +64,10 @@ FILE *W32U_fopen(const char *filename, const char *mode)
 	FILE *fRet;
 	int errno_ret = 0;
 
-	// Convert the filename from UTF-8 to UTF-16.
-	filenameW = W32U_mbs_to_UTF16(filename, CP_UTF8);
-	if (!filenameW) {
-		errno = EINVAL;
-		return nullptr;
-	}
-
-	// Convert the mode from UTF-8 to UTF-16.
-	modeW = W32U_mbs_to_UTF16(mode, CP_UTF8);
-	if (!modeW) {
-		free(filenameW);
+	// Convert the arguments from UTF-8 to UTF-16.
+	UtoW(filename);
+	UtoW(mode);
+	if (!filenameW || !modeW) {
 		errno = EINVAL;
 		return nullptr;
 	}
@@ -84,30 +80,17 @@ FILE *W32U_fopen(const char *filename, const char *mode)
 	} else {
 #ifdef ENABLE_ANSI_WINDOWS
 		// ANSI version.
-		char *filenameA;
-		char *modeA;
-
-		// Convert the filename from UTF-16 to ANSI.
-		filenameA = W32U_UTF16_to_mbs(filenameW, CP_ACP);
-		if (!filenameA) {
+		// Convert the arguments from UTF-16 to ANSI.
+		char *filenameA, *modeA;
+		WtoA(filename);
+		WtoA(mode);
+		if (!filenameA || !modeA) {
 			errno_ret = EINVAL;
-			goto fail;
-		}
-
-		// Convert the mode from UTF-16 to ANSI.
-		modeA = W32U_UTF16_to_mbs(modeW, CP_ACP);
-		if (!modeA) {
-			free(filenameA);
 			goto fail;
 		}
 
 		// Open the file.
 		fRet = fopen(filenameA, modeA);
-		// NOTE: Saving errno here in case free() resets it.
-		// It shouldn't, but POSIX is a bit vague...
-		errno_ret = errno;
-		free(filenameA);
-		free(modeA);
 #else /* !ENABLE_ANSI_WINDOWS */
 		// ANSI is not supported in this build.
 		// TODO: Fail earlier to avoid an alloc()?
@@ -118,8 +101,6 @@ FILE *W32U_fopen(const char *filename, const char *mode)
 	}
 
 fail:
-	free(filenameW);
-	free(modeW);
 	errno = errno_ret;
 	return fRet;
 }
@@ -147,8 +128,8 @@ int W32U_access(const char *path, int mode)
 	// if mode contains X_OK.
 	mode &= ~X_OK;
 
-	// Convert the path from UTF-8 to UTF-16.
-	pathW = W32U_mbs_to_UTF16(path, CP_UTF8);
+	// Convert the arguments from UTF-8 to UTF-16.
+	UtoW(path);
 	if (!pathW) {
 		errno = EINVAL;
 		return -1;
@@ -161,10 +142,9 @@ int W32U_access(const char *path, int mode)
 	} else {
 #ifdef ENABLE_ANSI_WINDOWS
 		// ANSI version.
+		// Convert the arguments from UTF-16 to ANSI.
 		char *pathA;
-
-		// Convert the filename from UTF-16 to ANSI.
-		pathA = W32U_UTF16_to_mbs(pathW, CP_ACP);
+		WtoA(path);
 		if (!pathA) {
 			errno_ret = EINVAL;
 			goto fail;
@@ -172,10 +152,6 @@ int W32U_access(const char *path, int mode)
 
 		// Check the access.
 		ret = _access(pathA, mode);
-		// NOTE: Saving errno here in case free() resets it.
-		// It shouldn't, but POSIX is a bit vague...
-		errno_ret = errno;
-		free(pathA);
 #else /* !ENABLE_ANSI_WINDOWS */
 		// ANSI is not supported in this build.
 		// TODO: Fail earlier to avoid an alloc()?
@@ -186,7 +162,6 @@ int W32U_access(const char *path, int mode)
 	}
 
 fail:
-	free(pathW);
 	errno = errno_ret;
 	return ret;
 }
@@ -209,7 +184,8 @@ int W32U_mkdir(const char *path)
 	int ret = -1;
 	int errno_ret = 0;
 
-	pathW = W32U_mbs_to_UTF16(path, CP_UTF8);
+	// Convert the arguments from UTF-8 to UTF-16.
+	UtoW(path);
 	if (!pathW) {
 		errno = EINVAL;
 		return -1;
@@ -222,10 +198,9 @@ int W32U_mkdir(const char *path)
 	} else {
 #ifdef ENABLE_ANSI_WINDOWS
 		// ANSI version.
+		// Convert the arguments from UTF-16 to ANSI.
 		char *pathA;
-
-		// Convert the filename from UTF-16 to ANSI.
-		pathA = W32U_UTF16_to_mbs(pathW, CP_ACP);
+		WtoA(path);
 		if (!pathA) {
 			errno_ret = EINVAL;
 			goto fail;
@@ -233,10 +208,6 @@ int W32U_mkdir(const char *path)
 
 		// Create the directory.
 		ret = _mkdir(pathA);
-		// NOTE: Saving errno here in case free() resets it.
-		// It shouldn't, but POSIX is a bit vague...
-		errno_ret = errno;
-		free(pathA);
 #else /* !ENABLE_ANSI_WINDOWS */
 		// ANSI is not supported in this build.
 		// TODO: Fail earlier to avoid an alloc()?
@@ -247,7 +218,6 @@ int W32U_mkdir(const char *path)
 	}
 
 fail:
-	free(pathW);
 	errno = errno_ret;
 	return ret;
 }
@@ -264,7 +234,8 @@ int W32U_stat64(const char *pathname, struct _stat64 *buf)
 	int ret = -1;
 	int errno_ret = 0;
 
-	pathnameW = W32U_mbs_to_UTF16(pathname, CP_UTF8);
+	// Convert the arguments from UTF-8 to UTF-16.
+	UtoW(pathname);
 	if (!pathnameW) {
 		errno = EINVAL;
 		return -1;
@@ -277,10 +248,9 @@ int W32U_stat64(const char *pathname, struct _stat64 *buf)
 	} else {
 #ifdef ENABLE_ANSI_WINDOWS
 		// ANSI version.
+		// Convert the arguments from UTF-16 to ANSI.
 		char *pathnameA;
-
-		// Convert the filename from UTF-16 to ANSI.
-		pathnameA = W32U_UTF16_to_mbs(pathnameW, CP_ACP);
+		WtoA(pathname);
 		if (!pathnameA) {
 			errno_ret = EINVAL;
 			goto fail;
@@ -288,10 +258,6 @@ int W32U_stat64(const char *pathname, struct _stat64 *buf)
 
 		// Get the file status.
 		ret = _stat64(pathnameA, buf);
-		// NOTE: Saving errno here in case free() resets it.
-		// It shouldn't, but POSIX is a bit vague...
-		errno_ret = errno;
-		free(pathnameA);
 #else /* !ENABLE_ANSI_WINDOWS */
 		// ANSI is not supported in this build.
 		// TODO: Fail earlier to avoid an alloc()?
@@ -302,7 +268,6 @@ int W32U_stat64(const char *pathname, struct _stat64 *buf)
 	}
 
 fail:
-	free(pathnameW);
 	errno = errno_ret;
 	return ret;
 }
