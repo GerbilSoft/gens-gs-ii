@@ -69,7 +69,7 @@ void SoundMgrPrivate::writeStereo_MMX(int16_t *dest, int samples)
 
 	// Write 4 samples at once using MMX.
 	int i = samples;
-	for (; i > 1; i -= 4, srcL += 4, srcR += 4, dest += 8) {
+	for (; i > 3; i -= 4, srcL += 4, srcR += 4, dest += 8) {
 		__asm__ (
 			"movq		(%[srcL]), %%mm0\n"	// %mm0 = [L2h | L2l | L1h | L1l]
 			"movq           (%[srcR]), %%mm1\n"	// %mm1 = [R2h | R2l | R1h | R1l]
