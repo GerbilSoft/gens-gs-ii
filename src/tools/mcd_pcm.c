@@ -381,6 +381,13 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
+	// popt: Alias '-h' to '-?'.
+	{
+		const char *help_argv[2] = {"-?", NULL};
+		struct poptAlias help_alias = {NULL, 'h', 1, help_argv};
+		poptAddAlias(optCon, help_alias, 0);
+	}
+
 	// Process options.
 	while ((c = poptGetNextOpt(optCon)) >= 0) {
 		switch (c) {
