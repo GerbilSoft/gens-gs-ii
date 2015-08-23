@@ -470,7 +470,7 @@ const char * findProgramPath(/*@null@*/ const char * argv0)
 #ifdef _WIN32
 	/* NOTE: Win32 doesn't use an executable flag, *
 	 * and newer MSVCRT rejects X_OK.              */
-	if (!access(t, 4 /*R_OK*/))
+	if (!_access(t, 4 /*R_OK*/))
 		break;
 #else /* !_WIN32 */
 	if (!access(t, X_OK))

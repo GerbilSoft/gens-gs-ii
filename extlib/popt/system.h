@@ -55,6 +55,13 @@ extern __const __int32_t *__ctype_toupper;
 #define free(ptr) free((void*)(ptr))
 #define realloc(ptr, size) realloc((void*)(ptr), (size))
 #define memcpy(dest, src, n) memcpy((void*)(dest), (src), (n))
+
+/*  Needed for open(), lseek(), _access(), etc. */
+#include <io.h>
+
+/* MSVC doesn't have ssize_t. */
+/* FIXME: Large file support on MSVC? */
+typedef long ssize_t;
 #endif /* _MSC_VER */
 
 #if defined(HAVE_UNISTD_H) && !defined(__LCLINT__)

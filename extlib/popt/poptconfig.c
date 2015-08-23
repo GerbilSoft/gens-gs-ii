@@ -16,14 +16,6 @@
 #error Non-Windows system is missing getuid().
 #endif
 
-#ifdef _MSC_VER
-/* Gens/GS II: Needed for open(), lseek(), etc. */
-#include <io.h>
-/* MSVC doesn't have ssize_t. */
-/* FIXME: Large file support on MSVC? */
-typedef long ssize_t;
-#endif
-
 #if defined(HAVE_FNMATCH_H)
 #include <fnmatch.h>
 
