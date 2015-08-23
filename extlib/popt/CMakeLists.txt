@@ -11,6 +11,7 @@ SET(VERSION "1.16")
 INCLUDE(CheckFunctionExists)
 INCLUDE(CheckIncludeFile)
 INCLUDE(CheckLibraryExists)
+INCLUDE(CheckSymbolExists)
 
 # Disable NLS.
 # We're not including the .po files.
