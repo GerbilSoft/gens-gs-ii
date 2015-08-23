@@ -81,19 +81,17 @@ void SoundMgrPrivate::writeStereo_MMX(int16_t *dest, int samples)
 	int i = samples;
 	for (; i > 1; i -= 2, srcL += 2, srcR += 2, dest += 4) {
 		__asm__ (
-			/* Get source data. */
-			"movd		 (%0), %%mm0\n"		// %mm0 = [ 0, R1]
-			"movd		4(%0), %%mm1\n"		// %mm1 = [ 0, R2]
-			"psllq		%%mm5, %%mm0\n"		// %mm0 = [R1,  0]
-			"movd		 (%1), %%mm2\n"		// %mm2 = [ 0, L1]
-			"psllq		%%mm5, %%mm1\n"		// %mm1 = [R2,  0]
-			"movd		4(%1), %%mm3\n"		// %mm3 = [ 0, L2]
-			"por		%%mm2, %%mm0\n"		// %mm0 = [R1, L1]
-			"por		%%mm3, %%mm1\n"		// %mm1 = [R2, L2]
-			"packssdw	%%mm1, %%mm0\n"		// %mm0 = [R2, L2, R1, L1]
-			"movq		%%mm0, (%2)\n"
-			: // output (dest is a ptr; it's not written to!)
-			: "r" (srcR), "r" (srcL), "r" (dest)	// input
+			"movq		(%[srcL]), %%mm0\n"	// %mm0 = [L2h | L2l | L1h | L1l]
+			"movq           (%[srcR]), %%mm1\n"     // %mm1 = [R2h | R2l | R1h | R1l]
+			"packssdw	%%mm1, %%mm0\n"		// %mm0 = [R2  | R1  | L2  | L1 ]
+			// TODO: Is it faster to use a separate %mm2 for dest here?
+			"pshufw		$0xD8, %%mm0, %%mm0\n"	// %mm0 = [R2  | L2  | R1  | L1 ]
+			"movq           %%mm0, (%[dest])\n"
+			:
+			: [srcL] "r" (srcL), [srcR] "r" (srcR), [dest] "r" (dest)
+			// FIXME: gcc complains mm0/mm1 are unknown.
+			// May need to compile with -mmmx...
+			//: "mm0", "mm1"
 			);
 	}
 
