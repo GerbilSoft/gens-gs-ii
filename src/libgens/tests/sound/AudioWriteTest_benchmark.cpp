@@ -19,11 +19,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include "AudioWriteTest.hpp"
+
 // Google Test
 #include "gtest/gtest.h"
 
 // LibGens.
 #include "lg_main.hpp"
+#include "Util/cpuflags.h"
 
 // C includes. (C++ namespace)
 #include <cstdio>
@@ -48,11 +51,11 @@
 
 namespace LibGens { namespace Tests {
 
-class AudioWriteTest_benchmark : public ::testing::Test
+class AudioWriteTest_benchmark : public ::testing::TestWithParam<AudioWriteTest_flags>
 {
 	protected:
 		AudioWriteTest_benchmark()
-			: ::testing::Test()
+			: ::testing::TestWithParam<AudioWriteTest_flags>()
 			, buf(nullptr) { }
 		virtual ~AudioWriteTest_benchmark() { }
 
@@ -65,6 +68,9 @@ class AudioWriteTest_benchmark : public ::testing::Test
 
 		// Aligned destination buffer.
 		int16_t *buf;
+
+		// Previous CPU flags.
+		uint32_t cpuFlags_old;
 };
 
 const int AudioWriteTest_benchmark::rate = 48000;
@@ -75,6 +81,29 @@ const int AudioWriteTest_benchmark::samples = 800;
  */
 void AudioWriteTest_benchmark::SetUp(void)
 {
+	// Verify CPU flags.
+	AudioWriteTest_flags flags = GetParam();
+	uint32_t totalFlags = (flags.cpuFlags | flags.cpuFlags_slow);
+	if (flags.cpuFlags != 0) {
+		ASSERT_NE(0U, CPU_Flags & totalFlags) <<
+			"CPU does not support the required flags for this test.";
+	}
+
+	// Check if the CPU flag is slow.
+	if (CPU_Flags & flags.cpuFlags_slow) {
+		if ((CPU_Flags & totalFlags) == flags.cpuFlags_slow) {
+			// CPU is always slow.
+			printf("WARNING: CPU is known to be slow with this flag.\n"
+			       "Don't rely on the benchmark results.\n");
+		} else if ((CPU_Flags & totalFlags) == totalFlags) {
+			// CPU may be slow.
+			printf("WARNING: CPU may be slow with some instructions provided by this flag.\n");
+		}
+	}
+
+	cpuFlags_old = CPU_Flags;
+	CPU_Flags = flags.cpuFlags;
+
 	// Initialize SoundMgr.
 	SoundMgr::ReInit(rate, false);
 
@@ -87,13 +116,14 @@ void AudioWriteTest_benchmark::SetUp(void)
  */
 void AudioWriteTest_benchmark::TearDown(void)
 {
+	CPU_Flags = cpuFlags_old;
 	aligned_free(buf);
 }
 
 /**
  * Benchmark SoundMgr::writeStereo().
  */
-TEST_F(AudioWriteTest_benchmark, writeStereo)
+TEST_P(AudioWriteTest_benchmark, writeStereo)
 {
 	// Run this test 1,000,000 times.
 	for (int i = 1000000; i > 0; i--) {
@@ -111,7 +141,7 @@ TEST_F(AudioWriteTest_benchmark, writeStereo)
 /**
  * Benchmark SoundMgr::writeMono().
  */
-TEST_F(AudioWriteTest_benchmark, writeMono)
+TEST_P(AudioWriteTest_benchmark, writeMono)
 {
 	// Run this test 1,000,000 times.
 	for (int i = 1000000; i > 0; i--) {
@@ -125,5 +155,19 @@ TEST_F(AudioWriteTest_benchmark, writeMono)
 		ASSERT_EQ(samples, ret);
 	}
 }
+
+INSTANTIATE_TEST_CASE_P(AudioWriteTest_benchmark_NoFlags, AudioWriteTest_benchmark,
+	::testing::Values(AudioWriteTest_flags(0, 0)
+));
+
+// NOTE: SoundMgr only implements MMX/SSE2 using GNU assembler.
+#if defined(__i386__) || defined(__amd64__)
+INSTANTIATE_TEST_CASE_P(AudioWriteTest_benchmark_MMX, AudioWriteTest_benchmark,
+	::testing::Values(AudioWriteTest_flags(MDP_CPUFLAG_X86_MMX, 0)
+));
+INSTANTIATE_TEST_CASE_P(AudioWriteTest_benchmark_SSE2, AudioWriteTest_benchmark,
+	::testing::Values(AudioWriteTest_flags(MDP_CPUFLAG_X86_SSE2, MDP_CPUFLAG_X86_SSE2SLOW)
+));
+#endif
 
 } }

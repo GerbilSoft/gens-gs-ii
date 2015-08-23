@@ -19,11 +19,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include "AudioWriteTest.hpp"
+
 // Google Test
 #include "gtest/gtest.h"
 
 // LibGens.
 #include "lg_main.hpp"
+#include "Util/cpuflags.h"
 
 // Sound Manager
 #include "sound/SoundMgr.hpp"
@@ -48,11 +51,11 @@
 
 namespace LibGens { namespace Tests {
 
-class AudioWriteTest : public ::testing::Test
+class AudioWriteTest : public ::testing::TestWithParam<AudioWriteTest_flags>
 {
 	protected:
 		AudioWriteTest()
-			: ::testing::Test()
+			: ::testing::TestWithParam<AudioWriteTest_flags>()
 			, buf(nullptr) { }
 		virtual ~AudioWriteTest() { }
 
@@ -65,6 +68,9 @@ class AudioWriteTest : public ::testing::Test
 
 		// Aligned destination buffer.
 		int16_t *buf;
+
+		// Previous CPU flags.
+		uint32_t cpuFlags_old;
 };
 
 const int AudioWriteTest::rate = 48000;
@@ -75,6 +81,18 @@ const int AudioWriteTest::samples = 800;
  */
 void AudioWriteTest::SetUp(void)
 {
+	// Verify CPU flags.
+	AudioWriteTest_flags flags = GetParam();
+	uint32_t totalFlags = (flags.cpuFlags | flags.cpuFlags_slow);
+	if (flags.cpuFlags != 0) {
+		ASSERT_NE(0U, CPU_Flags & totalFlags) <<
+			"CPU does not support the required flags for this test.";
+	}
+	// NOTE: We're not going to show a slow CPU warning,
+	// since this isn't a benchmark test.
+	cpuFlags_old = CPU_Flags;
+	CPU_Flags = flags.cpuFlags;
+
 	// Initialize SoundMgr.
 	SoundMgr::ReInit(rate, false);
 
@@ -91,13 +109,14 @@ void AudioWriteTest::SetUp(void)
  */
 void AudioWriteTest::TearDown(void)
 {
+	CPU_Flags = cpuFlags_old;
 	aligned_free(buf);
 }
 
 /**
  * Test SoundMgr::writeStereo().
  */
-TEST_F(AudioWriteTest, writeStereo)
+TEST_P(AudioWriteTest, writeStereo)
 {
 	int ret = SoundMgr::writeStereo(buf, samples);
 	ASSERT_EQ(samples, ret);
@@ -116,7 +135,7 @@ TEST_F(AudioWriteTest, writeStereo)
 /**
  * Test SoundMgr::writeMono().
  */
-TEST_F(AudioWriteTest, writeMono)
+TEST_P(AudioWriteTest, writeMono)
 {
 	int ret = SoundMgr::writeMono(buf, samples);
 	ASSERT_EQ(samples, ret);
@@ -131,6 +150,22 @@ TEST_F(AudioWriteTest, writeMono)
 			expected[i] << ", but was " << buf[i];
 	}
 }
+
+// Test cases.
+
+INSTANTIATE_TEST_CASE_P(AudioWriteTest_NoFlags, AudioWriteTest,
+	::testing::Values(AudioWriteTest_flags(0, 0)
+));
+
+// NOTE: SoundMgr only implements MMX/SSE2 using GNU assembler.
+#if defined(__i386__) || defined(__amd64__)
+INSTANTIATE_TEST_CASE_P(AudioWriteTest_MMX, AudioWriteTest,
+	::testing::Values(AudioWriteTest_flags(MDP_CPUFLAG_X86_MMX, 0)
+));
+INSTANTIATE_TEST_CASE_P(AudioWriteTest_SSE2, AudioWriteTest,
+	::testing::Values(AudioWriteTest_flags(MDP_CPUFLAG_X86_SSE2, MDP_CPUFLAG_X86_SSE2SLOW)
+));
+#endif
 
 } }
 
