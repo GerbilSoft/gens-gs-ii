@@ -42,28 +42,10 @@
 // ALIGN()
 #include "libcompat/aligned_malloc.h"
 
+#include "SoundMgr_p.hpp"
 namespace LibGens {
 
-// SoundMgrPrivate
-class SoundMgrPrivate
-{
-	private:
-		SoundMgrPrivate() { }
-		~SoundMgrPrivate() { }
-
-	private:
-		// Q_DISABLE_COPY() equivalent.
-		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
-		SoundMgrPrivate(const SoundMgrPrivate &);
-		SoundMgrPrivate &operator=(const SoundMgrPrivate &);
-
-	public:
-		// Segment length.
-		static int CalcSegLength(int rate, bool isPal);
-
-		static int rate;
-		static bool isPal;
-};
+/** SoundManagerPrivate **/
 
 // Audio settings.
 int SoundMgrPrivate::rate = 44100;
