@@ -68,14 +68,15 @@ void SoundMgrPrivate::writeStereo_SSE2(int16_t *dest, int samples)
 	const int32_t *srcL = &SoundMgr::ms_SegBufL[0];
 	const int32_t *srcR = &SoundMgr::ms_SegBufR[0];
 
-	// Write 4 samples at once using SSE2.
-	// TODO: Do 8 samples at once?
+	// Write 8 samples at once using SSE2.
 	assert((uintptr_t)dest % 16 == 0);
 	int i = samples;
-	for (; i > 3; i -= 4, srcL += 4, srcR += 4, dest += 8) {
+	for (; i > 7; i -= 8, srcL += 8, srcR += 8, dest += 16) {
 		__asm__ (
 			"movdqa		(%[srcL]), %%xmm0\n"	// %xmm0 = [L4h | L4l | L3h | L3l | L2h | L2l | L1h | L1l]
 			"movdqa		(%[srcR]), %%xmm1\n"	// %xmm1 = [R4h | R4l | R3h | R3l | R2h | R2l | R1h | R1l]
+			"movdqa		16(%[srcL]), %%xmm2\n"	// %xmm2 = [L8h | L8l | L7h | L7l | L6h | L6l | L5h | L5l]
+			"movdqa		16(%[srcR]), %%xmm3\n"	// %xmm3 = [R8h | R8l | R7h | R7l | R6h | R6l | R5h | R5l]
 			// NOTE: On my ThinkPad T60p with Core 2 Duo T7200, the
 			// pshufd version is faster than the punpcklwd version, even though
 			// agner.org's optimization documents say otherwise.
@@ -84,23 +85,31 @@ void SoundMgrPrivate::writeStereo_SSE2(int16_t *dest, int samples)
 			#if 0
 			"packssdw	%%xmm0, %%xmm0\n"	// %xmm0 = [L4  | L3  | L2  | L1  | L4  | L3  | L2  | L1 ]
 			"packssdw	%%xmm1, %%xmm1\n"	// %xmm1 = [R4  | R3  | R2  | R1  | R4  | R3  | R2  | R1 ]
+			"packssdw	%%xmm2, %%xmm2\n"	// %xmm2 = [L8  | L7  | L6  | L5  | L8  | L7  | L6  | L5 ]
+			"packssdw	%%xmm3, %%xmm3\n"	// %xmm3 = [R8  | R7  | R6  | R5  | R8  | R7  | R6  | R5 ]
 			"punpcklwd	%%xmm1, %%xmm0\n"	// %xmm0 = [R4  | L4  | R3  | L3  | R2  | L2  | R1  | L1 ]
+			"punpcklwd	%%xmm3, %%xmm2\n"	// %xmm2 = [R8  | L8  | R7  | L7  | R6  | L6  | R5  | L5 ]
 			#endif
 			// pshufd version:
 			"packssdw	%%xmm1, %%xmm0\n"		// %xmm0 = [R4  | R3  | R2  | R1  | L4  | L3  | L2  | L1 ]
+			"packssdw	%%xmm3, %%xmm2\n"		// %xmm2 = [R8  | R7  | R6  | R5  | L8  | L7  | L6  | L5 ]
 			"pshufd		$0xD8, %%xmm0, %%xmm0\n"	// %xmm0 = [R4  | R3  | L4  | L3  | R2  | R1  | L2  | L1 ]
 			"pshuflw	$0xD8, %%xmm0, %%xmm0\n"	// %xmm0 = [R4  | R3  | L4  | L3  | R2  | L2  | R1  | L1 ]
 			"pshufhw	$0xD8, %%xmm0, %%xmm0\n"	// %xmm0 = [R4  | L4  | R3  | L3  | R2  | L2  | R1  | L1 ]
+			"pshufd		$0xD8, %%xmm2, %%xmm2\n"	// %xmm0 = [R8  | R7  | L8  | L7  | R6  | R5  | L6  | L5 ]
+			"pshuflw	$0xD8, %%xmm2, %%xmm2\n"	// %xmm0 = [R8  | R7  | L8  | L7  | R6  | L6  | R5  | L5 ]
+			"pshufhw	$0xD8, %%xmm2, %%xmm2\n"	// %xmm0 = [R8  | L8  | R7  | L7  | R6  | L6  | R5  | L5 ]
 			"movdqa		%%xmm0, (%[dest])\n"
+			"movdqa		%%xmm2, 16(%[dest])\n"
 			:
 			: [srcL] "r" (srcL), [srcR] "r" (srcR), [dest] "r" (dest)
 			// FIXME: gcc complains xmm? registers are unknown.
 			// May need to compile with -msse...
-			//: "xmm0", "xmm1"
+			//: "xmm0", "xmm1", "xmm2", "xmm3"
 			);
 	}
 
-	// If the buffer size isn't a multiple of four samples,
+	// If the buffer size isn't a multiple of 8 samples,
 	// write the remaining samples normally.
         for (; i > 0; i--, srcL++, srcR++, dest += 2) {
                 *(dest+0) = clamp(*srcL);
@@ -122,27 +131,33 @@ void SoundMgrPrivate::writeMono_SSE2(int16_t *dest, int samples)
 	const int32_t *srcL = &SoundMgr::ms_SegBufL[0];
 	const int32_t *srcR = &SoundMgr::ms_SegBufR[0];
 
-	// Write 4 samples at once using SSE2.
-	// TODO: Do 8 samples at once?
+	// Write 8 samples at once using SSE2.
 	assert((uintptr_t)dest % 16 == 0);
 	int i = samples;
-	for (; i > 3; i -= 4, srcL += 4, srcR += 4, dest += 4) {
+	for (; i > 7; i -= 8, srcL += 8, srcR += 8, dest += 8) {
 		__asm__ (
 			"movdqa		(%[srcL]), %%xmm0\n"	// %xmm0 = [L4h | L4l | L3h | L3l | L2h | L2l | L1h | L1l]
 			"movdqa		(%[srcR]), %%xmm1\n"	// %xmm1 = [R4h | R4l | R3h | R3l | R2h | R2l | R1h | R1l]
+			"movdqa		16(%[srcL]), %%xmm2\n"	// %xmm2 = [L8h | L8l | L7h | L7l | L6h | L6l | L5h | L5l]
+			"movdqa		16(%[srcR]), %%xmm3\n"	// %xmm3 = [R8h | R8l | R7h | R7l | R6h | R6l | R5h | R5l]
 			// NOTE: This may overflow if samples are >= 2^30,
 			// but that shouldn't happen except in unit tests.
 			// TODO: Use pavgw after packing? (Unsigned, thoguh...)
 			"paddd		%%xmm1, %%xmm0\n"
+			"paddd		%%xmm3, %%xmm2\n"
 			// TODO: Add 1 to match SSE2 'pavgw'?
 			"psrad		$1, %%xmm0\n"		// %xmm0 = [M4h | M4l | M3h | M3l | M2h | M2l | M1h | M1l]
+			"psrad		$1, %%xmm2\n"		// %xmm2 = [M8h | M8l | M7h | M7l | M6h | M6l | M5h | M5l]
 			"packssdw	%%xmm0, %%xmm0\n"	// %xmm0 = [M4  | M3  | M2  | M1  | M4  | M3  | M2  | M1 ]
+			"packssdw	%%xmm2, %%xmm2\n"	// %xmm2 = [M8  | M7  | M6  | M5  | M8  | M7  | M6  | M5 ]
+			// TODO: Combine %%xmm0 and %%xmm1 into a single register before writing?
 			"movq		%%xmm0, (%[dest])\n"
+			"movq		%%xmm2, 8(%[dest])\n"
 			:
 			: [srcL] "r" (srcL), [srcR] "r" (srcR), [dest] "r" (dest)
 			// FIXME: gcc complains xmm? registers are unknown.
 			// May need to compile with -msse...
-			//: "xmm0", "xmm1"
+			//: "xmm0", "xmm1", "xmm2", "xmm3"
 			);
 	}
 
