@@ -80,7 +80,6 @@ void SoundMgrPrivate::writeStereo_MMX(int16_t *dest, int samples)
 	int i = samples;
 	for (; i > 1; i -= 4, srcL += 4, srcR += 4, dest += 8) {
 		__asm__ (
-			// TODO: Read both srcL blocks, then both srcR blocks?
 			"movq		(%[srcL]), %%mm0\n"	// %mm0 = [L2h | L2l | L1h | L1l]
 			"movq           (%[srcR]), %%mm1\n"	// %mm1 = [R2h | R2l | R1h | R1l]
 			"movq           8(%[srcL]), %%mm2\n"	// %mm2 = [L4h | L4l | L3h | L3l]
@@ -132,7 +131,6 @@ void SoundMgrPrivate::writeMono_MMX(int16_t *dest, int samples)
 			// NOTE: Add/shift may overflow if samples are >= 2^30,
 			// but that shouldn't happen except in unit tests.
 			// TODO: Add 1 before shifting to match SSE2 'pavgw'?
-			// TODO: Read both srcL blocks, then both srcR blocks?
 			"movq		(%[srcL]), %%mm0\n"	// %mm0 = [L2h | L2l | L1h | L1l]
 			"movq		(%[srcR]), %%mm1\n"	// %mm1 = [R2h | R2l | R1h | R1l]
 			"movq		8(%[srcL]), %%mm2\n"	// %mm2 = [L4h | L3l | L2h | L2l]
