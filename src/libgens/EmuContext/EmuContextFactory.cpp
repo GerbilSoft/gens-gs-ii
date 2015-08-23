@@ -91,7 +91,7 @@ EmuContext *EmuContextFactory::createContext(Rom *rom)
 	}
 
 	// System is not supported.
-	return false;
+	return nullptr;
 }
 
 }
