@@ -52,7 +52,8 @@ class AudioWriteTest : public ::testing::Test
 {
 	protected:
 		AudioWriteTest()
-			: ::testing::Test() { }
+			: ::testing::Test()
+			, buf(nullptr) { }
 		virtual ~AudioWriteTest() { }
 
 		virtual void SetUp(void) override;

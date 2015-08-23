@@ -52,7 +52,8 @@ class AudioWriteTest_benchmark : public ::testing::Test
 {
 	protected:
 		AudioWriteTest_benchmark()
-			: ::testing::Test() { }
+			: ::testing::Test()
+			, buf(nullptr) { }
 		virtual ~AudioWriteTest_benchmark() { }
 
 		virtual void SetUp(void) override;
