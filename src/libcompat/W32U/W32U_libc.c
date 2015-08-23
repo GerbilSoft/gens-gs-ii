@@ -65,8 +65,9 @@ FILE *W32U_fopen(const char *filename, const char *mode)
 	int errno_ret = 0;
 
 	// Convert the arguments from UTF-8 to UTF-16.
-	UtoW(filename);
+	UtoW_filename(filename);
 	UtoW(mode);
+	printf("fopen():\n- filename  == %s\n- filenameW == %ls\n", filename, filenameW);
 	if (!filenameW || !modeW) {
 		errno = EINVAL;
 		return nullptr;
@@ -76,13 +77,14 @@ FILE *W32U_fopen(const char *filename, const char *mode)
 	if (W32U_IsUnicode()) {
 		// Unicode version.
 		fRet = _wfopen(filenameW, modeW);
+		printf("fRet == %08X\n", fRet);
 		errno_ret = errno;
 	} else {
 #ifdef ENABLE_ANSI_WINDOWS
 		// ANSI version.
 		// Convert the arguments from UTF-16 to ANSI.
 		char *filenameA, *modeA;
-		WtoA(filename);
+		WtoA_filename(filename);
 		WtoA(mode);
 		if (!filenameA || !modeA) {
 			errno_ret = EINVAL;
@@ -129,7 +131,7 @@ int W32U_access(const char *path, int mode)
 	mode &= ~X_OK;
 
 	// Convert the arguments from UTF-8 to UTF-16.
-	UtoW(path);
+	UtoW_filename(path);
 	if (!pathW) {
 		errno = EINVAL;
 		return -1;
@@ -144,7 +146,7 @@ int W32U_access(const char *path, int mode)
 		// ANSI version.
 		// Convert the arguments from UTF-16 to ANSI.
 		char *pathA;
-		WtoA(path);
+		WtoA_filename(path);
 		if (!pathA) {
 			errno_ret = EINVAL;
 			goto fail;
@@ -185,7 +187,7 @@ int W32U_mkdir(const char *path)
 	int errno_ret = 0;
 
 	// Convert the arguments from UTF-8 to UTF-16.
-	UtoW(path);
+	UtoW_filename(path);
 	if (!pathW) {
 		errno = EINVAL;
 		return -1;
@@ -200,7 +202,7 @@ int W32U_mkdir(const char *path)
 		// ANSI version.
 		// Convert the arguments from UTF-16 to ANSI.
 		char *pathA;
-		WtoA(path);
+		WtoA_filename(path);
 		if (!pathA) {
 			errno_ret = EINVAL;
 			goto fail;
@@ -235,7 +237,7 @@ int W32U_stat64(const char *pathname, struct _stat64 *buf)
 	int errno_ret = 0;
 
 	// Convert the arguments from UTF-8 to UTF-16.
-	UtoW(pathname);
+	UtoW_filename(pathname);
 	if (!pathnameW) {
 		errno = EINVAL;
 		return -1;
@@ -250,7 +252,7 @@ int W32U_stat64(const char *pathname, struct _stat64 *buf)
 		// ANSI version.
 		// Convert the arguments from UTF-16 to ANSI.
 		char *pathnameA;
-		WtoA(pathname);
+		WtoA_filename(pathname);
 		if (!pathnameA) {
 			errno_ret = EINVAL;
 			goto fail;

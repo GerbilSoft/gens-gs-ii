@@ -33,6 +33,7 @@
 
 // C includes.
 #include <string.h>
+#include <ctype.h>
 
 #ifdef _MSC_VER
 // MSVC: _alloca() is in malloc.h.
@@ -83,6 +84,68 @@
 	if (cbMbs > 0) { \
 		str##A = alloca(cbMbs * sizeof(*str##A)); \
 		WideCharToMultiByte(CP_ACP, 0, str##W, -1, str##A, cbMbs, NULL, NULL); \
+	} else { \
+		str##A = NULL; \
+	} \
+} while (0)
+
+/**
+ * Convert a filename from UTF-8 to UTF-16.
+ * @param str UTF-8 string variable.
+ * Variable "wchar_t *str##AW must have been previously declared,
+ * and it will contain:
+ * - NULL on error
+ * - UTF-16 string in an alloca()'d buffer on success.
+ * If the string contains an absolute path that starts wtih
+ * ?:\, where ? is a letter, "\\\\?\\" will be prepended.
+ * This allows for paths up to 32,767 characters in length.
+ * Reference: https://msdn.microsoft.com/en-us/library/windows/desktop/aa363858%28v=vs.85%29.aspx
+ */
+#define UtoW_filename(str) do { \
+	int cchWcs = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0); \
+	if (cchWcs > 0) { \
+		/* Check if the path is absolute. */ \
+		if (isalpha(str[0]) && str[1] == ':' && \
+		    (str[2] == '\\' || str[2] == '/')) { \
+			/* Path is absolute. */ \
+			str##W = alloca((cchWcs+4) * sizeof(*str##W)); \
+			MultiByteToWideChar(CP_UTF8, 0, str, -1, str##W+4, cchWcs); \
+			memcpy(str##W, L"\\\\?\\", 4*sizeof(*str##W)); \
+		} else { \
+			/* Path is not absolute. */ \
+			str##W = alloca(cchWcs * sizeof(*str##W)); \
+			MultiByteToWideChar(CP_UTF8, 0, str, -1, str##W, cchWcs); \
+		} \
+	} else { \
+		str##W = NULL; \
+	} \
+} while (0)
+
+/**
+ * Convert a filename from UTF-16 to ANSI.
+ * @param str UTF-16 string variable without the trailing W.
+ * Variable "char *str##A" must have been previously declared,
+ * and it will contain:
+ * - NULL on error
+ * - ANSI string in an alloca()'d buffer on success.
+ * If the string contains an absolute path that starts wtih
+ * "\\\\?\\", which was added by UtoW_filename(), this will be
+ * removed, since the ANSI functions don't support it.
+ * As a consequence, filenames will be limited to MAX_PATH (260).
+ * Reference: https://msdn.microsoft.com/en-us/library/windows/desktop/aa363858%28v=vs.85%29.aspx
+ */
+#define WtoA_filename(str) do { \
+	const wchar_t *WtoA_src = str##W; \
+	/* Check if the path is absolute. */ \
+	/* NOTE: Only checking for backslashes here. */ \
+	if (!memcmp(str##W, L"\\\\?\\", 4*sizeof(*str##W))) { \
+		/* Path is absolute. */ \
+		WtoA_src += 4; \
+	} \
+	int cbMbs = WideCharToMultiByte(CP_ACP, 0, WtoA_src, -1, NULL, 0, NULL, NULL); \
+	if (cbMbs > 0) { \
+		str##A = alloca(cbMbs * sizeof(*str##A)); \
+		WideCharToMultiByte(CP_ACP, 0, WtoA_src, -1, str##A, cbMbs, NULL, NULL); \
 	} else { \
 		str##A = NULL; \
 	} \
