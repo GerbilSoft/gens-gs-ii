@@ -11,7 +11,7 @@ ENDIF(POPT_LIBRARY)
 IF(NOT POPT_FOUND)
 	# System popt was not found.
 	# Use the included copy of popt.
-	SET(POPT_LIBRARY zlibstatic)
+	SET(POPT_LIBRARY popt)
 	SET(POPT_FOUND 1)
 	SET(HAVE_POPT 1)
 	SET(POPT_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extlib/popt/")
