@@ -578,6 +578,7 @@ if (_popt_debug)
     }
 #endif
 
+    /* Gens/GS II: FIXME: Does this work on Windows? */
 /*@-nullstate@*/
     rc = execvp(argv[0], (char *const *)argv);
 /*@=nullstate@*/

@@ -72,6 +72,10 @@ typedef long ssize_t;
 #define strtoll(nptr, endptr, base)  _strtoi64(nptr, endptr, base)
 #define strtoull(nptr, endptr, base) _strtoui64(nptr, endptr, base)
 #endif /* _MSC_VER < 1800 */
+
+// _execvp() is defined in process.h.
+#include <process.h>
+#define execvp(file, argv) _execvp(file, argv)
 #endif /* _MSC_VER */
 
 #if defined(HAVE_UNISTD_H) && !defined(__LCLINT__)
