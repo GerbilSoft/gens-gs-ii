@@ -362,6 +362,7 @@ int main(int argc, char *argv[])
 			"Sample rate. (default = 32552 Hz)", "RATE"},
 		{"output", 'o', POPT_ARG_STRING, out_filename, 0,
 			"Output filename. (default = pcm_file.wav)", "FILENAME"},
+		{"version", 'V', POPT_ARG_NONE, NULL, 'V', NULL, NULL},
 
 		POPT_AUTOHELP
 		{NULL, 0, 0, NULL, 0, NULL, NULL}
@@ -385,9 +386,17 @@ int main(int argc, char *argv[])
 	}
 
 	// Process options.
-	while ((c = poptGetNextOpt(optCon)) > 0) {
-		// No manual options to process, so if anything
-		// happens here, it's an error.
+	while ((c = poptGetNextOpt(optCon)) >= 0) {
+		switch (c) {
+			case 'V':
+				print_prg_info();
+				fprintf(stderr, "\n");
+				print_gpl();
+				return EXIT_SUCCESS;
+
+			default:
+				break;
+		}
 	}
 
 	if (c < -1) {
