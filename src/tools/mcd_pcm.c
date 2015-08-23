@@ -374,6 +374,7 @@ int main(int argc, char *argv[])
         }
 #endif /* _WIN32 */
 
+	// TODO: Add a popt alias context?
 	optCon = poptGetContext(NULL, argc, (const char**)argv, optionsTable, 0);
 	poptSetOtherOptionHelp(optCon, "<pcm_file>");
 	if (argc < 2) {
