@@ -51,11 +51,11 @@ static inline int16_t clamp(int32_t sample)
 /**
  * Write stereo audio to a buffer.
  * This clears the internal audio buffer.
- * @param buf Destination buffer.
+ * @param dest Destination buffer.
  * @param samples Number of samples in the buffer. (1 sample == 4 bytes)
  * @return Number of samples written.
  */
-int SoundMgr::writeStereo(int16_t *buf, int samples)
+int SoundMgr::writeStereo(int16_t *dest, int samples)
 {
 	// TODO: MMX/SSE2.
 	samples = std::min(samples, ms_SegLength);
@@ -65,10 +65,10 @@ int SoundMgr::writeStereo(int16_t *buf, int samples)
 	const int32_t *srcR = &ms_SegBufR[0];
 
 	for (int i = samples; i > 0;
-	     i--, srcL++, srcR++, buf += 2)
+	     i--, srcL++, srcR++, dest += 2)
 	{
-		*(buf+0) = clamp(*srcL);
-		*(buf+1) = clamp(*srcR);
+		*(dest+0) = clamp(*srcL);
+		*(dest+1) = clamp(*srcR);
 	}
 
 	// Clear the segment buffers.
@@ -83,11 +83,11 @@ int SoundMgr::writeStereo(int16_t *buf, int samples)
 /**
  * Write monaural audio to a buffer.
  * This clears the internal audio buffer.
- * @param buf Destination buffer.
+ * @param dest Destination buffer.
  * @param samples Number of samples in the buffer. (1 sample == 2 bytes)
  * @return Number of samples written.
  */
-int SoundMgr::writeMono(int16_t *buf, int samples)
+int SoundMgr::writeMono(int16_t *dest, int samples)
 {
 	// TODO: MMX/SSE2.
 	samples = std::min(samples, ms_SegLength);
@@ -97,7 +97,7 @@ int SoundMgr::writeMono(int16_t *buf, int samples)
 	const int32_t *srcR = &ms_SegBufR[0];
 
 	for (int i = samples; i > 0;
-	     i--, srcL++, srcR++, buf++)
+	     i--, srcL++, srcR++, dest++)
 	{
 		// NOTE: This will be incorrect if
 		// (*srcL + *srcR) >= 2^31.
@@ -105,7 +105,7 @@ int SoundMgr::writeMono(int16_t *buf, int samples)
 		// maximum of 4 (PSG, FM, PCM, PWM) audio chips,
 		// which means a worst-case maximum of 0x8000 * 4.
 		const int32_t out = ((*srcL + *srcR) >> 1);
-		*buf = clamp(out);
+		*dest = clamp(out);
 	}
 
 	// Clear the segment buffers.
