@@ -31,6 +31,9 @@
 // Test data.
 #include "AudioWriteTest_data.h"
 
+// aligned_malloc()
+#include "libcompat/aligned_malloc.h"
+
 // C includes. (C++ namespace)
 #include <cstdio>
 #include <cstdlib>
@@ -53,7 +56,18 @@ class AudioWriteTest : public ::testing::Test
 		virtual ~AudioWriteTest() { }
 
 		virtual void SetUp(void) override;
+		virtual void TearDown(void) override;
+
+	protected:
+		static const int rate;
+		static const int samples;
+
+		// Aligned destination buffer.
+		int16_t *buf;
 };
+
+const int AudioWriteTest::rate = 48000;
+const int AudioWriteTest::samples = 800;
 
 /**
  * Set up the SoundMgr for testing.
@@ -61,7 +75,10 @@ class AudioWriteTest : public ::testing::Test
 void AudioWriteTest::SetUp(void)
 {
 	// Initialize SoundMgr.
-	SoundMgr::ReInit(48000, false);
+	SoundMgr::ReInit(rate, false);
+
+	// Allocate an aligned destination buffer.
+	buf = (int16_t*)aligned_malloc(16, samples * 2 * sizeof(*buf));
 
 	// Copy the test data into SoundMgr.
 	memcpy(SoundMgr::ms_SegBufL, AudioWriteTest_Input_L, sizeof(AudioWriteTest_Input_L));
@@ -69,12 +86,18 @@ void AudioWriteTest::SetUp(void)
 }
 
 /**
+ * Tear down the test.
+ */
+void AudioWriteTest::TearDown(void)
+{
+	aligned_free(buf);
+}
+
+/**
  * Test SoundMgr::writeStereo().
  */
 TEST_F(AudioWriteTest, writeStereo)
 {
-	static const int samples = 800;
-	int16_t buf[samples*2];
 	int ret = SoundMgr::writeStereo(buf, samples);
 	ASSERT_EQ(samples, ret);
 
@@ -94,8 +117,6 @@ TEST_F(AudioWriteTest, writeStereo)
  */
 TEST_F(AudioWriteTest, writeMono)
 {
-	static const int samples = 800;
-	int16_t buf[samples];
 	int ret = SoundMgr::writeMono(buf, samples);
 	ASSERT_EQ(samples, ret);
 

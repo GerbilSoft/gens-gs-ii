@@ -25,16 +25,19 @@
 // LibGens.
 #include "lg_main.hpp"
 
+// C includes. (C++ namespace)
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
 // Sound Manager
 #include "sound/SoundMgr.hpp"
 
 // Test data.
 #include "AudioWriteTest_data.h"
 
-// C includes. (C++ namespace)
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+// aligned_malloc()
+#include "libcompat/aligned_malloc.h"
 
 // TODO: More sample data:
 // 48,000 Hz @ 50 Hz (960 samples)
@@ -53,7 +56,18 @@ class AudioWriteTest_benchmark : public ::testing::Test
 		virtual ~AudioWriteTest_benchmark() { }
 
 		virtual void SetUp(void) override;
+		virtual void TearDown(void) override;
+
+	protected:
+		static const int rate;
+		static const int samples;
+
+		// Aligned destination buffer.
+		int16_t *buf;
 };
+
+const int AudioWriteTest_benchmark::rate = 48000;
+const int AudioWriteTest_benchmark::samples = 800;
 
 /**
  * Set up the SoundMgr for testing.
@@ -61,7 +75,18 @@ class AudioWriteTest_benchmark : public ::testing::Test
 void AudioWriteTest_benchmark::SetUp(void)
 {
 	// Initialize SoundMgr.
-	SoundMgr::ReInit(48000, false);
+	SoundMgr::ReInit(rate, false);
+
+	// Allocate an aligned destination buffer.
+	buf = (int16_t*)aligned_malloc(16, samples * 2 * sizeof(*buf));
+}
+
+/**
+ * Tear down the test.
+ */
+void AudioWriteTest_benchmark::TearDown(void)
+{
+	aligned_free(buf);
 }
 
 /**
@@ -77,8 +102,6 @@ TEST_F(AudioWriteTest_benchmark, writeStereo)
 		memcpy(SoundMgr::ms_SegBufL, AudioWriteTest_Input_L, sizeof(AudioWriteTest_Input_L));
 		memcpy(SoundMgr::ms_SegBufR, AudioWriteTest_Input_R, sizeof(AudioWriteTest_Input_R));
 
-		static const int samples = 800;
-		int16_t buf[samples*2];
 		int ret = SoundMgr::writeStereo(buf, samples);
 		ASSERT_EQ(samples, ret);
 	}
@@ -97,8 +120,6 @@ TEST_F(AudioWriteTest_benchmark, writeMono)
 		memcpy(SoundMgr::ms_SegBufL, AudioWriteTest_Input_L, sizeof(AudioWriteTest_Input_L));
 		memcpy(SoundMgr::ms_SegBufR, AudioWriteTest_Input_R, sizeof(AudioWriteTest_Input_R));
 
-		static const int samples = 800;
-		int16_t buf[samples];
 		int ret = SoundMgr::writeMono(buf, samples);
 		ASSERT_EQ(samples, ret);
 	}

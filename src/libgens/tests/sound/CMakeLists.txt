@@ -25,6 +25,6 @@ ADD_EXECUTABLE(AudioWriteTest
         AudioWriteTest.cpp
         AudioWriteTest_benchmark.cpp
         )
-TARGET_LINK_LIBRARIES(AudioWriteTest gens ${GTEST_LIBRARY})
+TARGET_LINK_LIBRARIES(AudioWriteTest compat gens ${GTEST_LIBRARY})
 ADD_TEST(NAME AudioWriteTest
         COMMAND AudioWriteTest)
