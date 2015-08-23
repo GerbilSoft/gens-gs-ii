@@ -10,10 +10,23 @@
 
 #include "system.h"
 
+/* Gens/GS II: TIOCGWINSZ isn't available on Windows. */
+#if defined(HAVE_SYS_IOCTL_H) && defined(HAVE_TIOCGWINSZ)
 #define        POPT_USE_TIOCGWINSZ
+#endif
 #ifdef POPT_USE_TIOCGWINSZ
 #include <sys/ioctl.h>
 #endif
+
+/** Gens/GS II: MSVC compatibility. **/
+#ifdef _MSC_VER
+#define INIT_POPTARG(name, value) \
+	poptArg name; \
+	name.ptr = (value)
+#else /* !_MSC_VER */
+#define INIT_POPTARG(name, value) \
+	poptArg name = { .ptr = (value) }
+#endif /* _MSC_VER */
 
 #define	POPT_WCHAR_HACK
 #ifdef 	POPT_WCHAR_HACK
@@ -242,7 +255,7 @@ singleOptionDefaultValue(size_t lineLength,
     *le++ = ':';
     *le++ = ' ';
   if (opt->arg) {	/* XXX programmer error */
-    poptArg arg = { .ptr = opt->arg };
+    INIT_POPTARG(arg, opt->arg);
     switch (poptArgType(opt)) {
     case POPT_ARG_VAL:
     case POPT_ARG_INT:

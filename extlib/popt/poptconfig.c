@@ -10,6 +10,20 @@
 #include "poptint.h"
 #include <sys/stat.h>
 
+/* Gens/GS II: Sanity check.                 *
+ * Non-Windows systems *must* have getuid(). */
+#if !defined(_WIN32) && !defined(HAVE_GETUID)
+#error Non-Windows system is missing getuid().
+#endif
+
+#ifdef _MSC_VER
+/* Gens/GS II: Needed for open(), lseek(), etc. */
+#include <io.h>
+/* MSVC doesn't have ssize_t. */
+/* FIXME: Large file support on MSVC? */
+typedef long ssize_t;
+#endif
+
 #if defined(HAVE_FNMATCH_H)
 #include <fnmatch.h>
 
@@ -141,17 +155,26 @@ static int poptGlob(/*@unused@*/ UNUSED(poptContext con), const char * pattern,
 int poptSaneFile(const char * fn)
 {
     struct stat sb;
+#if defined(HAVE_GETUID)
+    /* Gens/GS II: Win32 doesn't have getuid(). */
     uid_t uid = getuid();
+#endif
 
     if (stat(fn, &sb) == -1)
 	return 1;
+#if defined(HAVE_GETUID)
+    /* Gens/GS II: Win32 doesn't have getuid(). */
     if ((uid_t)sb.st_uid != uid)
 	return 0;
+#endif
     if (!S_ISREG(sb.st_mode))
 	return 0;
+#ifndef _WIN32
+    /* Gens/GS II: Win32 doesn't use Unix-style permissions. */
 /*@-bitwisesigned@*/
     if (sb.st_mode & (S_IWGRP|S_IWOTH))
 	return 0;
+#endif
 /*@=bitwisesigned@*/
     return 1;
 }
@@ -540,6 +563,7 @@ int poptReadDefaultConfig(poptContext con, /*@unused@*/ UNUSED(int useEnv))
     if (rc) goto exit;
 #endif
 
+    /* Gens/GS II: TODO: Add Windows support. */
     if ((home = getenv("HOME"))) {
 	char * fn = malloc(strlen(home) + 20);
 	if (fn != NULL) {

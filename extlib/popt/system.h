@@ -6,6 +6,15 @@
 #include "config.h"
 #endif
 
+#ifdef _MSC_VER
+/* Gens/GS II: MSVC doesn't support 'inline' in C mode. */
+/* It's also missing some sys/stat.h macros. */
+#define inline __inline
+#ifndef S_ISREG
+#define S_ISREG(m) (((m) & _S_IFMT) == _S_IFREG)
+#endif
+#endif /* _MSC_VER */
+
 #if defined (__GLIBC__) && defined(__LCLINT__)
 /*@-declundef@*/
 /*@unchecked@*/
@@ -15,10 +24,12 @@ extern __const __int32_t *__ctype_toupper;
 /*@=declundef@*/
 #endif
 
-#ifdef HAVE_SECURE_GETENV
-/* secure_getenv() requires _GNU_SOURCE. */
+/**
+ * Define _GNU_SOURCE:
+ * - glibc-2.17: Required for secure_getenv().
+ * - MinGW-w64: Required for vasprintf().
+ */
 #define _GNU_SOURCE 1
-#endif
 
 #include <ctype.h>
 

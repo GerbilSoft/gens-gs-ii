@@ -30,6 +30,16 @@ extern long long int strtoll(const char *nptr, /*@null@*/ char **endptr,
 int _popt_debug = 0;
 #endif
 
+/** Gens/GS II: MSVC compatibility. **/
+#ifdef _MSC_VER
+#define INIT_POPTARG(name, value) \
+	poptArg name; \
+	name.ptr = (value)
+#else /* !_MSC_VER */
+#define INIT_POPTARG(name, value) \
+	poptArg name = { .ptr = (value) }
+#endif /* _MSC_VER */
+
 /*@unchecked@*/
 unsigned int _poptArgMask = POPT_ARG_MASK;
 /*@unchecked@*/
@@ -77,7 +87,7 @@ static void invokeCallbacksPRE(poptContext con, const struct poptOption * opt)
 {
     if (opt != NULL)
     for (; opt->longName || opt->shortName || opt->arg; opt++) {
-	poptArg arg = { .ptr = opt->arg };
+	INIT_POPTARG(arg, opt->arg);
 	if (arg.ptr)
 	switch (poptArgType(opt)) {
 	case POPT_ARG_INCLUDE_TABLE:	/* Recurse on included sub-tables. */
@@ -101,7 +111,7 @@ static void invokeCallbacksPOST(poptContext con, const struct poptOption * opt)
 {
     if (opt != NULL)
     for (; opt->longName || opt->shortName || opt->arg; opt++) {
-	poptArg arg = { .ptr = opt->arg };
+	INIT_POPTARG(arg, opt->arg);
 	if (arg.ptr)
 	switch (poptArgType(opt)) {
 	case POPT_ARG_INCLUDE_TABLE:	/* Recurse on included sub-tables. */
@@ -127,11 +137,11 @@ static void invokeCallbacksOPTION(poptContext con,
 	/*@modifies internalState@*/
 {
     const struct poptOption * cbopt = NULL;
-    poptArg cbarg = { .ptr = NULL };
+    INIT_POPTARG(cbarg, NULL);
 
     if (opt != NULL)
     for (; opt->longName || opt->shortName || opt->arg; opt++) {
-	poptArg arg = { .ptr = opt->arg };
+	INIT_POPTARG(arg, opt->arg);
 	switch (poptArgType(opt)) {
 	case POPT_ARG_INCLUDE_TABLE:	/* Recurse on included sub-tables. */
 	    poptSubstituteHelpI18N(arg.opt);	/* XXX side effects */
@@ -457,8 +467,15 @@ const char * findProgramPath(/*@null@*/ const char * argv0)
 	(void) stpcpy(stpcpy(stpcpy(t, s), "/"), argv0);
 
 	/* If file is executable, bingo! */
+#ifdef _WIN32
+	/* NOTE: Win32 doesn't use an executable flag, *
+	 * and newer MSVCRT rejects X_OK.              */
+	if (!access(t, 4 /*R_OK*/))
+		break;
+#else /* !_WIN32 */
 	if (!access(t, X_OK))
 	    break;
+#endif /* _WIN32 */
     }
 
     /* If no executable was found in PATH, return NULL. */
@@ -585,14 +602,14 @@ findOption(const struct poptOption * opt,
 	/*@modifies *callback, *callbackData */
 {
     const struct poptOption * cb = NULL;
-    poptArg cbarg = { .ptr = NULL };
+    INIT_POPTARG(cbarg, NULL);
 
     /* This happens when a single - is given */
     if (LF_ISSET(ONEDASH) && !shortName && (longName && *longName == '\0'))
 	shortName = '-';
 
     for (; opt->longName || opt->shortName || opt->arg; opt++) {
-	poptArg arg = { .ptr = opt->arg };
+	INIT_POPTARG(arg, opt->arg);
 
 	switch (poptArgType(opt)) {
 	case POPT_ARG_INCLUDE_TABLE:	/* Recurse on included sub-tables. */
@@ -1186,8 +1203,8 @@ static int poptSaveArg(poptContext con, const struct poptOption * opt)
 	/*@globals fileSystem, internalState @*/
 	/*@modifies con, fileSystem, internalState @*/
 {
-    poptArg arg = { .ptr = opt->arg };
     int rc = 0;		/* assume success */
+    INIT_POPTARG(arg, opt->arg);
 
     switch (poptArgType(opt)) {
     case POPT_ARG_BITSET:
