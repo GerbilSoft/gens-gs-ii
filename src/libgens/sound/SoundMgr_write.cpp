@@ -67,15 +67,6 @@ void SoundMgrPrivate::writeStereo_MMX(int16_t *dest, int samples)
 	const int32_t *srcL = &SoundMgr::ms_SegBufL[0];
 	const int32_t *srcR = &SoundMgr::ms_SegBufR[0];
 
-	// Load the shift value.
-	__asm__ (
-		"movl	$32, %%eax\n"
-		"movd	%%eax, %%mm5\n"
-		: // output
-		: // input
-		: "eax" // clobber
-		);
-
 	// Write 4 samples at once using MMX.
 	int i = samples;
 	for (; i > 1; i -= 4, srcL += 4, srcR += 4, dest += 8) {
