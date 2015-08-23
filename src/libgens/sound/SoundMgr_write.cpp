@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 #include "SoundMgr.hpp"
+#include "Util/cpuflags.h"
 
 // C includes. (C++ namespace)
 #include <cstring>
@@ -30,6 +31,7 @@
 // C++ includes.
 #include <algorithm>
 
+#include "SoundMgr_p.hpp"
 namespace LibGens {
 
 /**
@@ -48,6 +50,163 @@ static inline int16_t clamp(int32_t sample)
 	return (int16_t)sample;
 }
 
+/** SoundMgrPrivate: MMX-optimized functions. **/
+
+#ifdef SOUNDMGR_HAS_MMX
+/**
+ * Write stereo audio to a buffer. (MMX-optimized)
+ * @param dest Destination buffer.
+ * @param samples Number of samples in the buffer. (1 sample == 4 bytes)
+ */
+void SoundMgrPrivate::writeStereo_MMX(int16_t *dest, int samples)
+{
+	// samples is clamped to std::min(samples, ms_SegLength)
+	// by writeStereo().
+
+	// Source buffer pointers.
+	const int32_t *srcL = &SoundMgr::ms_SegBufL[0];
+	const int32_t *srcR = &SoundMgr::ms_SegBufR[0];
+
+	// Load the shift value.
+	__asm__ (
+		"movl	$32, %%eax\n"
+		"movd	%%eax, %%mm5\n"
+		: // output
+		: // input
+		: "eax" // clobber
+		);
+
+	// Write two samples at once using MMX.
+	// TODO: Do 4 samples at once?
+	int i = samples;
+	for (; i > 1; i -= 2, srcL += 2, srcR += 2, dest += 4) {
+		__asm__ (
+			/* Get source data. */
+			"movd		 (%0), %%mm0\n"		// %mm0 = [ 0, R1]
+			"movd		4(%0), %%mm1\n"		// %mm1 = [ 0, R2]
+			"psllq		%%mm5, %%mm0\n"		// %mm0 = [R1,  0]
+			"movd		 (%1), %%mm2\n"		// %mm2 = [ 0, L1]
+			"psllq		%%mm5, %%mm1\n"		// %mm1 = [R2,  0]
+			"movd		4(%1), %%mm3\n"		// %mm3 = [ 0, L2]
+			"por		%%mm2, %%mm0\n"		// %mm0 = [R1, L1]
+			"por		%%mm3, %%mm1\n"		// %mm1 = [R2, L2]
+			"packssdw	%%mm1, %%mm0\n"		// %mm0 = [R2, L2, R1, L1]
+			"movq		%%mm0, (%2)\n"
+			: // output (dest is a ptr; it's not written to!)
+			: "r" (srcR), "r" (srcL), "r" (dest)	// input
+			);
+	}
+
+	// Reset the FPU state.
+	__asm__ ("emms");
+
+	// If the buffer size isn't a multiple of two samples,
+	// write the remaining samples normally.
+        for (; i > 0; i--, srcL++, srcR++, dest += 2) {
+                *(dest+0) = clamp(*srcL);
+                *(dest+1) = clamp(*srcR);
+        }
+}
+
+/**
+ * Write monaural audio to a buffer. (MMX-optimized)
+ * @param dest Destination buffer.
+ * @param samples Number of samples in the buffer. (1 sample == 2 bytes)
+ */
+void SoundMgrPrivate::writeMono_MMX(int16_t *dest, int samples)
+{
+	// samples is clamped to std::min(samples, ms_SegLength)
+	// by writeMono().
+
+	// Source buffer pointers.
+	const int32_t *srcL = &SoundMgr::ms_SegBufL[0];
+	const int32_t *srcR = &SoundMgr::ms_SegBufR[0];
+
+	// Write two samples at once using MMX.
+	// TODO: Do 4 samples at once?
+	int i = samples;
+	for (; i > 1; i -= 2, srcL += 2, srcR += 2, dest += 2) {
+		__asm__ (
+			/* Get source data. */
+			"movq		 (%0), %%mm0\n"		// %mm0 = [R2, R1]
+			"movq		 (%1), %%mm1\n"		// %mm1 = [L2, L1]
+			"packssdw	%%mm0, %%mm0\n"		// %mm0 = [0, 0, R2, R1]
+			"packssdw	%%mm1, %%mm1\n"		// %mm0 = [0, 0, L2, L1]
+			"psraw		   $1, %%mm0\n"		// NOTE: Slight loss of precision...
+			"psraw		   $1, %%mm1\n"		// NOTE: Slight loss of precision...
+			"paddw		%%mm1, %%mm0\n"		// %mm0 = [0, 0, L2+R2, L1+R1]
+			"movd		%%mm0, (%2)\n"
+			: // output (dest is a ptr; it's not written to!)
+			: "r" (srcR), "r" (srcL), "r" (dest)	// input
+			);
+	}
+
+	// Reset the FPU state.
+	__asm__ ("emms");
+
+	// If the buffer size isn't a multiple of two samples,
+	// write the remaining samples normally.
+        for (; i > 0; i--, srcL++, srcR++, dest += 2) {
+		// Combine the L and R samples into one sample.
+		const int32_t out = ((*srcL + *srcR) >> 1);
+		*dest = clamp(out);
+        }
+}
+#endif /* SOUNDMGR_HAS_MMX */
+
+/** SoundMgrPrivate: Non-optimized functions. **/
+
+/**
+ * Write stereo audio to a buffer.
+ * @param dest Destination buffer.
+ * @param samples Number of samples in the buffer. (1 sample == 4 bytes)
+ */
+void SoundMgrPrivate::writeStereo_noasm(int16_t *dest, int samples)
+{
+	// samples is clamped to std::min(samples, ms_SegLength)
+	// by writeStereo().
+
+	// Source buffer pointers.
+	const int32_t *srcL = &SoundMgr::ms_SegBufL[0];
+	const int32_t *srcR = &SoundMgr::ms_SegBufR[0];
+
+	for (int i = samples; i > 0;
+	     i--, srcL++, srcR++, dest += 2)
+	{
+		*(dest+0) = clamp(*srcL);
+		*(dest+1) = clamp(*srcR);
+	}
+}
+
+/**
+ * Write monaural audio to a buffer.
+ * @param dest Destination buffer.
+ * @param samples Number of samples in the buffer. (1 sample == 2 bytes)
+ */
+void SoundMgrPrivate::writeMono_noasm(int16_t *dest, int samples)
+{
+	// samples is clamped to std::min(samples, ms_SegLength)
+	// by writeMono().
+
+	// Source buffer pointers.
+	const int32_t *srcL = &SoundMgr::ms_SegBufL[0];
+	const int32_t *srcR = &SoundMgr::ms_SegBufR[0];
+
+	for (int i = samples; i > 0;
+	     i--, srcL++, srcR++, dest++)
+	{
+		// NOTE: This will be incorrect if
+		// (*srcL + *srcR) >= 2^31.
+		// This is highly unlikely, since there's a
+		// maximum of 4 (PSG, FM, PCM, PWM) audio chips,
+		// which means a worst-case maximum of 0x8000 * 4.
+		const int32_t out = ((*srcL + *srcR) >> 1);
+		*dest = clamp(out);
+	}
+}
+
+/** SoundMgr **/
+
 /**
  * Write stereo audio to a buffer.
  * This clears the internal audio buffer.
@@ -57,18 +216,15 @@ static inline int16_t clamp(int32_t sample)
  */
 int SoundMgr::writeStereo(int16_t *dest, int samples)
 {
-	// TODO: MMX/SSE2.
 	samples = std::min(samples, ms_SegLength);
-
-	// Source buffer pointers.
-	const int32_t *srcL = &ms_SegBufL[0];
-	const int32_t *srcR = &ms_SegBufR[0];
-
-	for (int i = samples; i > 0;
-	     i--, srcL++, srcR++, dest += 2)
+#ifdef SOUNDMGR_HAS_MMX
+	// TODO: SSE2
+	if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
+		SoundMgrPrivate::writeStereo_MMX(dest, samples);
+	} else
+#endif /* SOUNDMGR_HAS_MMX */
 	{
-		*(dest+0) = clamp(*srcL);
-		*(dest+1) = clamp(*srcR);
+		SoundMgrPrivate::writeStereo_noasm(dest, samples);
 	}
 
 	// Clear the segment buffers.
@@ -89,23 +245,15 @@ int SoundMgr::writeStereo(int16_t *dest, int samples)
  */
 int SoundMgr::writeMono(int16_t *dest, int samples)
 {
-	// TODO: MMX/SSE2.
 	samples = std::min(samples, ms_SegLength);
-
-	// Source buffer pointers.
-	const int32_t *srcL = &ms_SegBufL[0];
-	const int32_t *srcR = &ms_SegBufR[0];
-
-	for (int i = samples; i > 0;
-	     i--, srcL++, srcR++, dest++)
+#ifdef SOUNDMGR_HAS_MMX
+	// TODO: SSE2
+	if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
+		SoundMgrPrivate::writeMono_MMX(dest, samples);
+	} else
+#endif /* SOUNDMGR_HAS_MMX */
 	{
-		// NOTE: This will be incorrect if
-		// (*srcL + *srcR) >= 2^31.
-		// This is highly unlikely, since there's a
-		// maximum of 4 (PSG, FM, PCM, PWM) audio chips,
-		// which means a worst-case maximum of 0x8000 * 4.
-		const int32_t out = ((*srcL + *srcR) >> 1);
-		*dest = clamp(out);
+		SoundMgrPrivate::writeMono_noasm(dest, samples);
 	}
 
 	// Clear the segment buffers.

@@ -24,6 +24,12 @@
 #ifndef LIBGENS_SOUND_SOUNDMGR_P_HPP__
 #define LIBGENS_SOUND_SOUNDMGR_P_HPP__
 
+// NOTE: We're implementing the MMX and SSE2 code
+// using GNU inline assembler *only*.
+#if defined(__i386__) || defined(__amd64__)
+#define SOUNDMGR_HAS_MMX 1
+#endif
+
 namespace LibGens {
 
 // SoundMgrPrivate
@@ -45,6 +51,37 @@ class SoundMgrPrivate
 
 		static int rate;
 		static bool isPal;
+
+	public:
+#ifdef SOUNDMGR_HAS_MMX
+		/**
+		 * Write stereo audio to a buffer. (MMX-optimized)
+		 * @param dest Destination buffer.
+		 * @param samples Number of samples in the buffer. (1 sample == 4 bytes)
+		 */
+		static void writeStereo_MMX(int16_t *dest, int samples);
+
+		/**
+		 * Write monaural audio to a buffer. (MMX-optimized)
+		 * @param dest Destination buffer.
+		 * @param samples Number of samples in the buffer. (1 sample == 2 bytes)
+		 */
+		static void writeMono_MMX(int16_t *dest, int samples);
+#endif /* SOUNDMGR_HAS_MMX */
+
+		/**
+		 * Write stereo audio to a buffer.
+		 * @param dest Destination buffer.
+		 * @param samples Number of samples in the buffer. (1 sample == 4 bytes)
+		 */
+		static void writeStereo_noasm(int16_t *dest, int samples);
+
+		/**
+		 * Write monaural audio to a buffer.
+		 * @param dest Destination buffer.
+		 * @param samples Number of samples in the buffer. (1 sample == 2 bytes)
+		 */
+		static void writeMono_noasm(int16_t *dest, int samples);
 };
 
 }
