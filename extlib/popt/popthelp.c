@@ -11,7 +11,10 @@
 #include "system.h"
 
 /* Gens/GS II: TIOCGWINSZ isn't available on Windows. */
-#if defined(HAVE_SYS_IOCTL_H) && defined(HAVE_TIOCGWINSZ)
+#if defined(_WIN32)
+#include <windows.h>
+#define        POPT_USE_WIN32_CONSOLE
+#elif defined(HAVE_SYS_IOCTL_H) && defined(HAVE_TIOCGWINSZ)
 #define        POPT_USE_TIOCGWINSZ
 #endif
 #ifdef POPT_USE_TIOCGWINSZ
@@ -137,7 +140,15 @@ static size_t maxColumnWidth(FILE *fp)
 	/*@*/
 {   
     size_t maxcols = _POPTHELP_MAXLINE;
-#if defined(TIOCGWINSZ)
+#if defined(POPT_USE_WIN32_CONSOLE)
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    int columns;
+    if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi) != 0) {
+        columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+        if (columns > maxcols && columns < 256)
+            maxcols = (size_t)(columns - 1);
+    }
+#elif defined(TIOCGWINSZ)
     struct winsize ws;
     int fdno = fileno(fp ? fp : stdout);
 
