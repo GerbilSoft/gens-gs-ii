@@ -37,15 +37,6 @@
 /* Define to 1 if you have the `_ftelli64` function. */
 #cmakedefine HAVE_FTELLI64 1
 
-/* Define to 1 if you have the <getopt.h> header file. */
-#cmakedefine HAVE_GETOPT_H 1
-
-/* Define to 1 if you have the `getopt` function. */
-#cmakedefine HAVE_GETOPT 1
-
-/* Define to 1 if you have the `getopt_long` function. */
-#cmakedefine HAVE_GETOPT_LONG 1
-
 /* Define to 1 if you have the MSVC-specific `_aligned_malloc` function. */
 #cmakedefine HAVE_MSVC_ALIGNED_MALLOC 1
 
