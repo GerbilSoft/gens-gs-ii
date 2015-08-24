@@ -195,6 +195,7 @@ void SoundMgrPrivate::writeStereo_MMX(int16_t *dest, int samples)
 			// NOTE: pshufw is NOT an MMX instruction.
 			// We have to use movd and shift to get the words into place.
 			// FIXME: Optimize it using movq somehow.
+			// (Attempted a movq optimization, and it ended up being slower...)
 			"movd		(%[srcL]), %%mm0\n"	// %mm0 = [ 0  |  0  | L1h | L1l]
 			"movd		(%[srcR]), %%mm1\n"	// %mm1 = [ 0  |  0  | R1h | R1l]
 			"psllq		$32, %%mm1\n"		// %mm1 = [R1h | R1l |  0  |  0 ]
