@@ -192,22 +192,42 @@ void SoundMgrPrivate::writeStereo_MMX(int16_t *dest, int samples)
 	int i = samples;
 	for (; i > 3; i -= 4, srcL += 4, srcR += 4, dest += 8) {
 		__asm__ (
-			"movq		(%[srcL]), %%mm0\n"	// %mm0 = [L2h | L2l | L1h | L1l]
-			"movq           (%[srcR]), %%mm1\n"	// %mm1 = [R2h | R2l | R1h | R1l]
-			"movq           8(%[srcL]), %%mm2\n"	// %mm2 = [L4h | L4l | L3h | L3l]
-			"packssdw	%%mm1, %%mm0\n"		// %mm0 = [R2  | R1  | L2  | L1 ]
-			"movq           8(%[srcR]), %%mm3\n"	// %mm3 = [R4h | R4l | R3h | R3l]
-			"packssdw	%%mm3, %%mm2\n"		// %mm0 = [R4  | R3  | L4  | L3 ]
-			// TODO: Is it faster to use a separate %mm2 for dest here?
-			"pshufw		$0xD8, %%mm0, %%mm0\n"	// %mm0 = [R2  | L2  | R1  | L1 ]
-			"pshufw		$0xD8, %%mm2, %%mm2\n"	// %mm0 = [R4  | L4  | R3  | L3 ]
-			"movq           %%mm0, (%[dest])\n"
-			"movq           %%mm2, 8(%[dest])\n"
+			// NOTE: pshufw is NOT an MMX instruction.
+			// We have to use movd and shift to get the words into place.
+			// FIXME: Optimize it using movq somehow.
+			"movd		(%[srcL]), %%mm0\n"	// %mm0 = [ 0  |  0  | L1h | L1l]
+			"movd		(%[srcR]), %%mm1\n"	// %mm1 = [ 0  |  0  | R1h | R1l]
+			"psllq		$32, %%mm1\n"		// %mm1 = [R1h | R1l |  0  |  0 ]
+			"por		%%mm1, %%mm0\n"		// %mm0 = [R1h | R1l | L1h | L1l]
+			"packssdw	%%mm0, %%mm0\n"		// %mm0 = [R1  | L1  | R1  | L1 ]
+
+			"movd		4(%[srcL]), %%mm2\n"	// %mm2 = [ 0  |  0  | L2h | L2l]
+			"movd		4(%[srcR]), %%mm3\n"	// %mm3 = [ 0  |  0  | R2h | R2l]
+			"psllq		$32, %%mm3\n"		// %mm3 = [R2h | R2l |  0  |  0 ]
+			"por		%%mm3, %%mm2\n"		// %mm2 = [R2h | R2l | L2h | L2l]
+			"packssdw	%%mm2, %%mm2\n"		// %mm2 = [R2  | L2  | R2  | L2 ]
+
+			"movd		8(%[srcL]), %%mm4\n"	// %mm4 = [ 0  |  0  | L3h | L3l]
+			"movd		8(%[srcR]), %%mm5\n"	// %mm5 = [ 0  |  0  | R3h | R3l]
+			"psllq		$32, %%mm5\n"		// %mm5 = [R3h | R3l |  0  |  0 ]
+			"por		%%mm5, %%mm4\n"		// %mm4 = [R3h | R3l | L3h | L3l]
+			"packssdw	%%mm4, %%mm4\n"		// %mm4 = [R3  | L3  | R3  | L3 ]
+
+			"movd		12(%[srcL]), %%mm6\n"	// %mm6 = [ 0  |  0  | L4h | L4l]
+			"movd		12(%[srcR]), %%mm7\n"	// %mm7 = [ 0  |  0  | R4h | R4l]
+			"psllq		$32, %%mm7\n"		// %mm7 = [R4h | R4l |  0  |  0 ]
+			"por		%%mm7, %%mm6\n"		// %mm6 = [R4h | R4l | L4h | L4l]
+			"packssdw	%%mm6, %%mm6\n"		// %mm6 = [R4  | L4  | R4  | L4 ]
+
+			"movd		%%mm0, (%[dest])\n"
+			"movd		%%mm2, 4(%[dest])\n"
+			"movd		%%mm4, 8(%[dest])\n"
+			"movd		%%mm6, 12(%[dest])\n"
 			:
 			: [srcL] "r" (srcL), [srcR] "r" (srcR), [dest] "r" (dest)
 			// FIXME: gcc complains mm? registers are unknown.
 			// May need to compile with -mmmx...
-			//: "mm0", "mm1", "mm2", "mm3"
+			//: "mm0", "mm1", "mm2", "mm3", "mm4", "mm5", "mm6", "mm7"
 			);
 	}
 
