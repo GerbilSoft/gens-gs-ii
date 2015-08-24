@@ -33,6 +33,10 @@ ELSE(NOT WIN32)
 	SET(USE_INTERNAL_GLEW 1)
 ENDIF(NOT WIN32)
 
+# Internal popt.
+# Default is to use external popt if available.
+OPTION(USE_INTERNAL_POPT "Always use the internal copy of popt." 0)
+
 # Frontends.
 OPTION(ENABLE_GENS_QT4 "Enable the Qt4 UI. (EXPERIMENTAL; has frame dropping issues)" 0)
 OPTION(ENABLE_GENS_SDL "Enable the SDL2 UI. (Technical Preview)" 1)

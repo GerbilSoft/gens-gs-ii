@@ -85,6 +85,7 @@ INCLUDE(CheckZLIB)
 INCLUDE(CheckPNG)
 INCLUDE(CheckLZMA)
 INCLUDE(CheckOpenGL)
+INCLUDE(CheckPopt)
 
 # Project subdirectories.
 ADD_SUBDIRECTORY(extlib)

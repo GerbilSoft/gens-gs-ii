@@ -1,0 +1,9 @@
+This copy of popt-1.16 is a modified version of the original.
+
+The following changes have been made to the original:
+
+- Non-CMake build infratsructure has been removed.
+
+- config.h.in has been rewritten to work with cmake.
+
+To obtain the original popt-1.16, visit http://rpm5.org/files/popt

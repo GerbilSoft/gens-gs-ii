@@ -62,6 +62,12 @@ IF(USE_INTERNAL_GLEW)
 	ADD_SUBDIRECTORY(glew)
 ENDIF(USE_INTERNAL_GLEW)
 
+# popt
+IF(USE_INTERNAL_POPT)
+	# Use the internal copy of popt.
+	ADD_SUBDIRECTORY(popt)
+ENDIF(USE_INTERNAL_POPT)
+
 # Google Test
 IF(BUILD_TESTING)
 	# Reference: http://stackoverflow.com/questions/12540970/how-to-make-gtest-build-mdd-instead-of-mtd-by-default-using-cmake
