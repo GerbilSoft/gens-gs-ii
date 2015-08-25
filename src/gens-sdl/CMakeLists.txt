@@ -25,6 +25,9 @@ INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 # TODO: FIND_PACKAGE(OpenGL) here even though it's in the root CMakeLists.txt?
 INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
 
+# Write the config.h file.
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.gens-sdl.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.gens-sdl.h")
+
 # Sources.
 SET(gens-sdl_SRCS
 	gens-sdl.cpp

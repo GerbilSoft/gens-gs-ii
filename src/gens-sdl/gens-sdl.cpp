@@ -24,6 +24,8 @@
 // _POSIX_SOURCE and _POSIX_C_SOURCE definitions.
 #include "libcompat/reentrant.h"
 
+#include <config.gens-sdl.h>
+
 #include "SdlHandler.hpp"
 #include "Config.hpp"
 #include "VBackend.hpp"
@@ -128,6 +130,11 @@ struct OsdStartup {
 	int param;
 };
 static vector<OsdStartup> startup_queue;
+
+// Last time the F1 message was displayed.
+// This is here to prevent the user from spamming
+// the display with the message.
+static uint64_t lastF1time = 0;
 
 /**
  * Onscreen Display handler.
@@ -489,6 +496,43 @@ static void doScreenShot(void)
 }
 
 /**
+ * Show the "About" message.
+ */
+static void doAboutMessage(void)
+{
+       // TODO: OSD Gens logo as preview image, but with drop shadow disabled?
+       const uint64_t curTime = timing.getTime();
+       if (lastF1time > 0 && (lastF1time + 5000000 > curTime)) {
+               // Timer hasn't expired.
+               // Don't show the message.
+               return;
+       }
+
+       // Version string.
+       string ver_str;
+       ver_str.reserve(512);
+       ver_str = "Gens/GS II - SDL2 frontend\n";
+       ver_str += "Version " + string(LibGens::version);
+       if (LibGens::version_vcs) {
+               ver_str += " (" + string(LibGens::version_vcs) + ')';
+       }
+       ver_str += '\n';
+       if (LibGens::version_desc) {
+               ver_str += string(LibGens::version_desc) + '\n';
+       }
+#if !defined(GENS_ENABLE_EMULATION)
+	ver_str += "[NO-EMULATION BUILD]\n";
+#endif
+       ver_str += "(c) 2008-2015 by David Korth.";
+
+       // Show a new message.
+       vBackend->osd_print(5000, ver_str.c_str());
+
+       // Save the current time.
+       lastF1time = curTime;
+}
+
+/**
  * Process an SDL event.
  * @param event SDL event.
  */
@@ -555,6 +599,11 @@ static void processSdlEvent(const SDL_Event *event) {
 				case SDLK_8: case SDLK_9:
 					// Save slot selection.
 					doSaveSlot(event->key.keysym.sym - SDLK_0);
+					break;
+
+				case SDLK_F1:
+					// Show the "About" message.
+					doAboutMessage();
 					break;
 
 				case SDLK_F5:
