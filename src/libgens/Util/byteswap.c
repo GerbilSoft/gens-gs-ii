@@ -63,9 +63,9 @@ void __byte_swap_16_array(void *ptr, unsigned int n)
 				"movdqa	%%xmm1, (%[cptr])\n"
 				:
 				: [cptr] "r" (cptr)
-				// FIXME: gcc complains mm? registers are unknown.
-				// May need to compile with -mmmx...
-				//: "mm0", "mm1"
+				// FIXME: gcc complains xmm? registers are unknown.
+				// May need to compile with -msse...
+				//: "xmm0", "xmm1"
 			);
 		}
 
