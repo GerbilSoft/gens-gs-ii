@@ -59,6 +59,9 @@ void __byte_swap_16_array(void *ptr, unsigned int n)
 			);
 		}
 
+		// Reset the FPU state.
+		__asm__ ("emms");
+
 		// If the block isn't a multiple of 8 bytes,
 		// the C implementation will handle the rest.
 	} else {
