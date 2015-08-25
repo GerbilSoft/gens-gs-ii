@@ -47,6 +47,7 @@ ENDIF(NOT MSVC)
 ADD_EXECUTABLE(ByteswapTest
 	ByteswapTest.cpp
 	ByteswapTest_data.c
+	ByteswapTest_benchmark.cpp
 	)
 TARGET_LINK_LIBRARIES(ByteswapTest gens ${GTEST_LIBRARY})
 ADD_TEST(NAME ByteswapTest
