@@ -38,6 +38,9 @@
 #include "libzomg/Zomg.hpp"
 #include "libzomg/zomg_md_time_reg.h"
 
+// aligned_malloc()
+#include "libcompat/aligned_malloc.h"
+
 // C includes. (C++ namespace)
 #include <cstdlib>
 
@@ -341,7 +344,7 @@ RomCartridgeMD::RomCartridgeMD(Rom *rom)
 RomCartridgeMD::~RomCartridgeMD()
 {
 	delete d;
-	free(m_romData);
+	aligned_free(m_romData);
 }
 
 /**
@@ -411,7 +414,8 @@ int RomCartridgeMD::loadRom(void)
 		default:
 			break;
 	}
-	m_romData = malloc(rnd_512k);
+	// Align to 16 bytes for potential SSE2 optimizations.
+	m_romData = aligned_malloc(16, rnd_512k);
 
 	// Load the ROM image.
 	// NOTE: Passing the size of the entire ROM buffer,
@@ -420,7 +424,7 @@ int RomCartridgeMD::loadRom(void)
 	if (ret != (int)m_romData_size) {
 		// Error loading the ROM.
 		// TODO: Set an error number somewhere.
-		free(m_romData);
+		aligned_free(m_romData);
 		m_romData = nullptr;
 		m_romData_size = 0;
 		return -4;
