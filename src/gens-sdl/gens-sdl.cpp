@@ -366,12 +366,12 @@ static void doLoadState(void)
 	int ret = context->zomgLoad(filename.c_str());
 	if (ret == 0) {
 		// State loaded.
-		vBackend->osd_printf(1500, "Save %d loaded.", saveSlot_selected);
+		vBackend->osd_printf(1500, "Slot %d loaded.", saveSlot_selected);
 	} else {
 		// Error loading state.
 		if (ret == -ENOENT) {
 			// File not found.
-			vBackend->osd_printf(1500, "Save %d is empty.", saveSlot_selected);
+			vBackend->osd_printf(1500, "Slot %d is empty.", saveSlot_selected);
 		} else {
 			// Other error.
 			vBackend->osd_printf(1500,
