@@ -75,6 +75,7 @@ Version=0.1
 System=MD
 Creator=Genesis Emulator
 CreatorVersion=2.12.194
+CreatorVersionDesc=Special Release
 CreatorVcsVersion=git: master/12345678
 OS=Linux 4.1.2
 CPU=Some CPU
@@ -94,6 +95,7 @@ Fields: ('*' indicates required; '-' indicates optional.)
 * System: Systems used for the savestate, comma-separated.
 - Creator: Program that created the savestate.
 - CreatorVersion: Version of Creator.
+- CreatorVersionDesc: Version description.
 - CreatorVcsVersion: Version control identifier of Creator.
 - CreationTime: Creation time. (TODO: Time format is not final.)
 - OS: Name and version of the host system's OS.
