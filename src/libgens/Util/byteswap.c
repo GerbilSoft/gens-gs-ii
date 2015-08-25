@@ -39,6 +39,9 @@ void __byte_swap_16_array(void *ptr, unsigned int n)
 	assert((n & 1) == 0);
 	n &= ~1;
 
+	// TODO: Don't bother with MMX or SSE2
+	// if n is below a certain size?
+
 #if defined(__GNUC__) && \
     (defined(__i386__) || defined(__amd64__))
 	if (CPU_Flags & MDP_CPUFLAG_X86_SSE2) {
