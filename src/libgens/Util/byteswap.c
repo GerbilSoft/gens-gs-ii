@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens: Gens Emulation Library.                                        *
- * byteswap.h: Byteswapping functions.                                     *
+ * byteswap.c: Byteswapping functions.                                     *
  *                                                                         *
  * Copyright (c) 2008-2015 by David Korth                                  *
  *                                                                         *
