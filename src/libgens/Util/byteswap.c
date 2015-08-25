@@ -42,15 +42,25 @@ void __byte_swap_16_array(void *ptr, unsigned int n)
 #if defined(__GNUC__) && \
     (defined(__i386__) || defined(__amd64__))
 	if (CPU_Flags & MDP_CPUFLAG_X86_SSE2) {
+		// If cptr isn't 16-byte aligned, swap words
+		// manually until we get to 16-byte alignment.
+		for (; ((uintptr_t)cptr % 16 != 0) && n > 0;
+		     n -= 2, cptr += 2)
+		{
+			x = *cptr;
+			*cptr = *(cptr+1);
+			*(cptr+1) = x;
+		}
+
 		// SSE2: Swap 16 bytes (8 words) at a time.
 		for (; n > 16; n -= 16, cptr += 16) {
 			__asm__ (
-				"movdqu	(%[cptr]), %%xmm0\n"
+				"movdqa	(%[cptr]), %%xmm0\n"
 				"movdqa	%%xmm0, %%xmm1\n"
 				"psllw	$8, %%xmm0\n"
 				"psrlw	$8, %%xmm1\n"
 				"por	%%xmm0, %%xmm1\n"
-				"movdqu	%%xmm1, (%[cptr])\n"
+				"movdqa	%%xmm1, (%[cptr])\n"
 				:
 				: [cptr] "r" (cptr)
 				// FIXME: gcc complains mm? registers are unknown.
