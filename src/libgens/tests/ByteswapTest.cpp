@@ -191,10 +191,6 @@ TEST_F(ByteswapTest, checkByteSwap32Array)
 	uint8_t data[516];
 	memcpy(data, ByteswapTest_data_orig, sizeof(data));
 	__byte_swap_32_array(data, sizeof(data));
-	for (int i = 0; i < 516; i++) {
-		printf("i == %d, data[i] == %02X, ByteswapTest_data_swap32[i] == %02X, ByteswapTest_data_orig[i] == %02X\n",
-		       i, data[i], ByteswapTest_data_swap32[i], ByteswapTest_data_orig[i]);
-	}
 	ASSERT_EQ(0, memcmp(data, ByteswapTest_data_swap32, sizeof(data)));
 }
 
