@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -35,8 +35,7 @@
 #include "libgens/lg_main.hpp"
 #include "libgens/macros/common.h"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class GensQApplicationPrivate
 {
@@ -93,13 +92,7 @@ void GensQApplicationPrivate::gqaInit(void)
 	QCoreApplication::setApplicationName(QLatin1String("Gens/GS II"));
 
 	// Version number.
-	// TODO: Use MDP version macros.
-	// NOTE: gens-qt4's version is currently tied to LibGens.
-	const QString sVersion = QString::fromLatin1("%1.%2.%3")
-					.arg((LibGens::version >> 24) & 0xFF)
-					.arg((LibGens::version >> 16) & 0xFF)
-					.arg(LibGens::version & 0xFFFF);
-	QCoreApplication::setApplicationVersion(sVersion);
+	QCoreApplication::setApplicationVersion(QLatin1String(LibGens::version));
 
 	// Set the application icon.
 	QIcon iconApp = GensQApplication::IconFromProgram(QLatin1String("gensgs"));

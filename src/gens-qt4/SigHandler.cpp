@@ -309,22 +309,19 @@ void SigHandler::SignalHandler(int signum)
 			"- Platform: " GENS_PLATFORM "\n"
 			);
 
-	// TODO: Use MDP version number macros.
-	sMsg += QLatin1String("- Version: ") +
-			QString::number((LibGens::version >> 24) & 0xFF) + QChar(L'.') +
-			QString::number((LibGens::version >> 16) & 0xFF) + QChar(L'.') +
-			QString::number(LibGens::version & 0xFFFF);
-
-	if (LibGens::version_desc) {
+	// Version.
+	sMsg += QLatin1String("- Version: ") + QLatin1String(LibGens::version);
+	if (LibGens::version_vcs) {
 		sMsg += QLatin1String(" (") +
-				QLatin1String(LibGens::version_desc) + QChar(L')');
+			QLatin1String(LibGens::version_vcs) +
+			QChar(L')');
 	}
 	sMsg += QChar(L'\n');
 
-	// VCS revision.
-	if (LibGens::version_vcs) {
-		sMsg += QLatin1String("- ") +
-				QLatin1String(LibGens::version_vcs) + QChar(L'\n');
+	if (LibGens::version_desc) {
+		sMsg += QLatin1String("  - ") +
+			QLatin1String(LibGens::version_desc) +
+			QChar(L'\n');
 	}
 
 	sMsg += QLatin1String("\n"
