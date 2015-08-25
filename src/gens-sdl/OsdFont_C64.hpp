@@ -8,12 +8,11 @@
 #ifndef __GENS_SDL_OSDFONT_C64_HPP__
 #define __GENS_SDL_OSDFONT_C64_HPP__
 
-#include <stdint.h>
+#include "OsdFont.h"
 
 namespace GensSdl {
 
-// TODO: Standard base class with width and height info.
-extern const uint8_t C64_charset_ASCII[256][8];
+extern const OsdFont C64_font;
 
 }
 

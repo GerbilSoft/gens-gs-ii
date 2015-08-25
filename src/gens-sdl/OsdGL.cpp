@@ -83,9 +83,8 @@ class OsdGLPrivate {
 		// Timer.
 		LibGens::Timing timer;
 
-		// TODO: Get this from the OSD font.
-		static const int chrW = 8;	// must be pow2
-		static const int chrH = 16;	// must be pow2
+		// OSD font.
+		const OsdFont *font;
 
 		// OSD queue.
 		// NOTE: Manually allocating objects.
@@ -183,7 +182,8 @@ const double OsdGLPrivate::ortho_default[4] = {0.0, 320.0, 240.0, 0.0};
 /** OsdGLPrivate **/
 
 OsdGLPrivate::OsdGLPrivate()
-	: displayList(0)
+	: font(&VGA_font)
+	, displayList(0)
 	, dirty(true)
 	, fpsEnabled(false)
 	, msgEnabled(true)
@@ -228,6 +228,10 @@ void OsdGLPrivate::reallocOsdTexture()
 	// Create the GL image.
 	// Using GL_ALPHA.
 	// TODO: Optimize this?
+	const uint8_t chrW = font->w;
+	const uint8_t chrH = font->h;
+	const uint8_t *fontData = font->data;
+
 	uint8_t *glImage = (uint8_t*)malloc(256 * chrW * chrH);
 	// Converting 1bpp characters to 8bpp.
 	// pitch = 8 pixels per character; 16 per line.
@@ -237,8 +241,10 @@ void OsdGLPrivate::reallocOsdTexture()
 		const int x_pos = (chr & 15) * chrW;
 
 		uint8_t *pos = &glImage[(y_pos * pitch) + x_pos];
-		for (int y = 0; y < chrH; y++, pos += (pitch - chrW)) {
-			uint8_t chr_data = VGA_charset_ASCII[chr][y];
+		// TODO: Support chrW != 8.
+		const uint8_t *p_chr_data = &fontData[chr * chrH];
+		for (int y = 0; y < chrH; y++, pos += (pitch - chrW), p_chr_data++) {
+			uint8_t chr_data = *p_chr_data;
 			for (int x = chrW; x > 0; x--, chr_data <<= 1) {
 				*pos = ((chr_data & 0x80) ? 0xFF : 0);
 				pos++;
@@ -265,6 +271,8 @@ void OsdGLPrivate::reallocOsdTexture()
 void OsdGLPrivate::printLine(int x, int y, const std::string &msg)
 {
 	// TODO: Wordwrapping.
+	const int chrW = font->w;
+	const int chrH = font->h;
 
 	// TODO: Precalculate vertices?
 	const int len = (int)msg.size();
@@ -627,8 +635,11 @@ void OsdGL::draw(void)
 
 	// Bind the OSD texture.
 	glBindTexture(GL_TEXTURE_2D, d->texOsd.name);
+
 	// TODO: Adjust for visible texture size.
-	int y = (240 - d->chrH);
+	const uint8_t chrW = d->font->w;
+	const uint8_t chrH = d->font->h;
+	int y = (240 - chrH);
 
 	// Print from top to bottom to avoid collisions
 	// with the drop shadow. (C64 font)
@@ -650,7 +661,7 @@ void OsdGL::draw(void)
 		}
 
 		// Process this message.
-		y -= d->chrH;
+		y -= chrH;
 		firstIdx = i;
 	}
 
@@ -676,12 +687,12 @@ void OsdGL::draw(void)
 		}
 		// TODO: Make the drop shadow optional.
 		glColor4f(0.0f, 0.0f, 0.0f, alpha);
-		d->printLine(d->chrW+1, y+1, osdMsg->msg);
+		d->printLine(chrW+1, y+1, osdMsg->msg);
 		d->setGLColor(d->msgColor, alpha);
-		d->printLine(d->chrW, y, osdMsg->msg);
+		d->printLine(chrW, y, osdMsg->msg);
 
 		// Next line.
-		y += d->chrH;
+		y += chrH;
 	}
 
 	// Done with vertex and texture coordinate arrays.

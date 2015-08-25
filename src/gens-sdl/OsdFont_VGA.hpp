@@ -8,11 +8,11 @@
 #ifndef __GENS_SDL_OSDFONT_VGA_HPP__
 #define __GENS_SDL_OSDFONT_VGA_HPP__
 
-#include <stdint.h>
+#include "OsdFont.h"
 
 namespace GensSdl {
 
-extern const uint8_t VGA_charset_ASCII[256][16];
+extern const OsdFont VGA_font;
 
 }
 
