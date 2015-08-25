@@ -44,8 +44,9 @@ using std::vector;
 // GL Texture wrapper.
 #include "GLTex.hpp"
 
-// OSD font.
+// OSD fonts.
 #include "OsdFont_VGA.hpp"
+#include "OsdFont_C64.hpp"
 
 // ZOMG image data.
 #include "libzomg/img_data.h"
@@ -84,7 +85,7 @@ class OsdGLPrivate {
 
 		// TODO: Get this from the OSD font.
 		static const int chrW = 8;	// must be pow2
-		static const int chrH = 16;	// must be pow2
+		static const int chrH = 8;	// must be pow2
 
 		// OSD queue.
 		// NOTE: Manually allocating objects.
@@ -227,17 +228,17 @@ void OsdGLPrivate::reallocOsdTexture()
 	// Create the GL image.
 	// Using GL_ALPHA.
 	// TODO: Optimize this?
-	uint8_t *glImage = (uint8_t*)malloc(256 * 16 * 8);
+	uint8_t *glImage = (uint8_t*)malloc(256 * chrW * chrH);
 	// Converting 1bpp characters to 8bpp.
 	// pitch = 8 pixels per character; 16 per line.
 	const int pitch = chrW * 16;
 	for (int chr = 0; chr < 256; chr++) {
-		const int y_pos = (chr & ~(chrH - 1));
-		const int x_pos = (chr & (chrH - 1)) * chrW;
+		const int y_pos = (chr / 16) * chrH;
+		const int x_pos = (chr & 15) * chrW;
 
 		uint8_t *pos = &glImage[(y_pos * pitch) + x_pos];
 		for (int y = 0; y < chrH; y++, pos += (pitch - chrW)) {
-			uint8_t chr_data = VGA_charset_ASCII[chr][y];
+			uint8_t chr_data = C64_charset_ASCII[chr][y];
 			for (int x = chrW; x > 0; x--, chr_data <<= 1) {
 				*pos = ((chr_data & 0x80) ? 0xFF : 0);
 				pos++;
@@ -247,8 +248,8 @@ void OsdGLPrivate::reallocOsdTexture()
 
 	// Allocate the texture.
 	// TODO: Texture data parameter?
-	texOsd.alloc(GLTex::FMT_ALPHA8, 128, 256);
-	texOsd.subImage2D(128, 256, 128, glImage);
+	texOsd.alloc(GLTex::FMT_ALPHA8, chrW*16, chrH*16);
+	texOsd.subImage2D(chrW*16, chrH*16, chrW*16, glImage);
 	free(glImage);
 
 	// OSD is dirty.
@@ -263,10 +264,6 @@ void OsdGLPrivate::reallocOsdTexture()
  */
 void OsdGLPrivate::printLine(int x, int y, const std::string &msg)
 {
-	// TODO: Font information.
-	const int chrW = 8;
-	const int chrH = 16;
-
 	// TODO: Wordwrapping.
 
 	// TODO: Precalculate vertices?

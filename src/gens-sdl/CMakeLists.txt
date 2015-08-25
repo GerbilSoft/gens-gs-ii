@@ -40,8 +40,6 @@ SET(gens-sdl_SRCS
 	SdlGLBackend.cpp
 	GLBackend.cpp
 	str_lookup.cpp
-	OsdGL.cpp
-	OsdFont_VGA.cpp
 	GLTex.cpp
 	)
 
@@ -56,15 +54,29 @@ SET(gens-sdl_H
 	SdlGLBackend.hpp
 	GLBackend.hpp
 	str_lookup.hpp
+	GLTex.hpp
+	)
+
+# OSD sources.
+SET(gens-sdl_OSD_SRCS
+	OsdGL.cpp
+	OsdFont_VGA.cpp
+	OsdFont_C64.cpp
+	)
+
+# OSD headers.
+SET(gens-sdl_OSD_H
 	OsdGL.hpp
 	OsdFont_VGA.hpp
-	GLTex.hpp
+	OsdFont_C64.hpp
 	)
 
 # Main target.
 ADD_EXECUTABLE(gens-sdl
 	${gens-sdl_SRCS}
 	${gens-sdl_H}
+	${gens-sdl_OSD_SRCS}
+	${gens-sdl_OSD_H}
 	)
 TARGET_LINK_LIBRARIES(gens-sdl compat gens genskeys zomg)
 
