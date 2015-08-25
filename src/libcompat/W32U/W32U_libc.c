@@ -32,6 +32,8 @@
 
 // Win32 includes.
 #include <io.h>
+#include <fcntl.h>
+#include <share.h>
 
 // W32U alloca() helper.
 #include "W32U_alloca.h"
@@ -223,6 +225,37 @@ fail:
 }
 
 /**
+ * Internal implementation of _wstat64().
+ * MSVCRT's _wstat64() fails if the filename contains '?' or '*',
+ * which breaks long filename support, e.g. \\?\.
+ * @param pathname Pathname.
+ * @param buf Stat buffer.
+ * @return 0 on success; -1 on error.
+ */
+static int W32U_wstat64(const wchar_t *pathname, struct _stat64 *buffer)
+{
+	int fd, ret;
+
+	if (!pathname || !buffer) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	// _fstati64() can obtain all the information.
+	// We just need to open the file first.
+	// FIXME: Use FindFirstFileW() instead to avoid having to open the file?
+	fd = _wopen(pathname, _O_RDONLY, 0);
+	if (fd < 0) {
+		// Error opening the file.
+		return fd;
+	}
+
+	ret = _fstati64(fd, buffer);
+	_close(fd);
+	return ret;
+}
+
+/**
  * Get file status.
  * @param pathname Pathname.
  * @param buf Stat buffer.
@@ -243,7 +276,10 @@ int W32U_stat64(const char *pathname, struct _stat64 *buf)
 
 	if (W32U_IsUnicode()) {
 		// Unicode version.
-		ret = _wstat64(pathnameW, buf);
+		// NOTE: MSVCRT's _wstat64() fails if the filename
+		// contains '?' or '*', which breaks long filename
+		// support, e.g. \\?\.
+		ret = W32U_wstat64(pathnameW, buf);
 		errno_ret = errno;
 	} else {
 #ifdef ENABLE_ANSI_WINDOWS
