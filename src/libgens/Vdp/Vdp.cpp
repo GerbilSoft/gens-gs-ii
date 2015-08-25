@@ -426,9 +426,11 @@ void Vdp::zomgSaveMD(LibZomg::Zomg *zomg) const
 	uint16_t vdp_sat[160];	// Only store the first two words of each sprite entry.
 	const uint16_t *sat_cache = &d->SprAttrTbl_m5.w[0];
 	uint16_t *sat_zomg = &vdp_sat[0];
-	for (; sat_cache < &d->SprAttrTbl_m5.w[80*2]; sat_cache += 8, sat_zomg += 4) {
+	for (; sat_cache < &d->SprAttrTbl_m5.w[80*4]; sat_cache += 8, sat_zomg += 4) {
+		// First sprite: Y, sz, link
 		sat_zomg[0] = sat_cache[0];
 		sat_zomg[1] = sat_cache[1];
+		// Second sprite: Y, sz, link
 		sat_zomg[2] = sat_cache[4];
 		sat_zomg[3] = sat_cache[5];
 	}
@@ -512,9 +514,11 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 		// Expand it in memory.
 		uint16_t *sat_cache = &d->SprAttrTbl_m5.w[0];
 		const uint16_t *sat_zomg = &vdp_sat[0];
-		for (; sat_cache < &d->SprAttrTbl_m5.w[80*2]; sat_cache += 8, sat_zomg += 4) {
+		for (; sat_cache < &d->SprAttrTbl_m5.w[80*4]; sat_cache += 8, sat_zomg += 4) {
+			// First sprite: Y, sz, link
 			sat_cache[0] = sat_zomg[0];
 			sat_cache[1] = sat_zomg[1];
+			// Second sprite: Y, sz, link
 			sat_cache[4] = sat_zomg[2];
 			sat_cache[5] = sat_zomg[3];
 		}
