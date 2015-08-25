@@ -152,7 +152,7 @@ class VBackend {
 		 * @param msg Message. (printf-formatted; UTF-8)
 		 * @param ap Format arguments.
 		 */
-		virtual void osd_vprintf(int duration, const char *msg, va_list ap)
+		void osd_vprintf(int duration, const char *msg, va_list ap)
 			ATTR_FORMAT_PRINTF(3, 0);
 
 		/**
@@ -163,6 +163,13 @@ class VBackend {
 		 */
 		void osd_printf(int duration, const char *msg, ...)
 			ATTR_FORMAT_PRINTF(3, 4);
+
+		/**
+		 * Print a message to the Onscreen Display.
+		 * @param duration Duration for the message to appear, in milliseconds.
+		 * @param msg Message. (printf-formatted; UTF-8)
+		 */
+		virtual void osd_print(int duration, const char *msg);
 
 		/**
 		 * Display a preview image on the Onscreen Display.

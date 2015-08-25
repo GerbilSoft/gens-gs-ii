@@ -118,11 +118,10 @@ bool VBackend::process_osd_messages(void)
  */
 void VBackend::osd_vprintf(int duration, const char *msg, va_list ap)
 {
-	// Default version prints to the console.
-	// TODO: Convert to local codepage on Windows?
-	((void)duration);
-	vprintf(msg, ap);
-	putchar('\n');
+	// TODO: Use vasprintf() or something similar?
+	char buf[2048];
+	vsnprintf(buf, sizeof(buf), msg, ap);
+	osd_print(duration, buf);
 }
 
 /**
@@ -137,6 +136,19 @@ void VBackend::osd_printf(int duration, const char *msg, ...)
 	va_start(ap, msg);
 	osd_vprintf(duration, msg, ap);
 	va_end(ap);
+}
+
+/**
+ * Print a message to the Onscreen Display.
+ * @param duration Duration for the message to appear, in milliseconds.
+ * @param msg Message. (printf-formatted; UTF-8)
+ */
+void VBackend::osd_print(int duration, const char *msg)
+{
+	// Default version prints to the console.
+	// TODO: Convert to local codepage on Windows?
+	((void)duration);
+	puts(msg);
 }
 
 /**

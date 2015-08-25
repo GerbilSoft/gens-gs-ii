@@ -574,15 +574,11 @@ bool GLBackend::process_osd_messages(void)
  * Print a message to the Onscreen Display.
  * @param duration Duration for the message to appear, in milliseconds.
  * @param msg Message. (printf-formatted; UTF-8)
- * @param ap Format arguments.
  */
-void GLBackend::osd_vprintf(int duration, const char *msg, va_list ap)
+void GLBackend::osd_print(int duration, const char *msg)
 {
-	// TODO: printf() it here or in OsdGL?
-	char buf[2048];
-	vsnprintf(buf, sizeof(buf), msg, ap);
-	d->osd->print(duration, buf);
-
+	// Print the message to the OSD.
+	d->osd->print(duration, msg);
 	// VBackend is dirty.
 	setDirty();
 }

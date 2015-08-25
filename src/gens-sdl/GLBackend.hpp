@@ -94,10 +94,8 @@ class GLBackend : public VBackend {
 		 * Print a message to the Onscreen Display.
 		 * @param duration Duration for the message to appear, in milliseconds.
 		 * @param msg Message. (printf-formatted; UTF-8)
-		 * @param ap Format arguments.
 		 */
-		virtual void osd_vprintf(int duration, const char *msg, va_list ap) final
-			ATTR_FORMAT_PRINTF(3, 0);
+		virtual void osd_print(int duration, const char *msg) final;
 
 		/**
 		 * Display a preview image on the Onscreen Display.
