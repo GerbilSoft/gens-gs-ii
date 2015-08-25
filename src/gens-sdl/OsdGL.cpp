@@ -85,7 +85,7 @@ class OsdGLPrivate {
 
 		// TODO: Get this from the OSD font.
 		static const int chrW = 8;	// must be pow2
-		static const int chrH = 8;	// must be pow2
+		static const int chrH = 16;	// must be pow2
 
 		// OSD queue.
 		// NOTE: Manually allocating objects.
@@ -238,7 +238,7 @@ void OsdGLPrivate::reallocOsdTexture()
 
 		uint8_t *pos = &glImage[(y_pos * pitch) + x_pos];
 		for (int y = 0; y < chrH; y++, pos += (pitch - chrW)) {
-			uint8_t chr_data = C64_charset_ASCII[chr][y];
+			uint8_t chr_data = VGA_charset_ASCII[chr][y];
 			for (int x = chrW; x > 0; x--, chr_data <<= 1) {
 				*pos = ((chr_data & 0x80) ? 0xFF : 0);
 				pos++;
