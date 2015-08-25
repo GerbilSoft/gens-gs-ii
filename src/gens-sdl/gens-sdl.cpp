@@ -413,9 +413,9 @@ static void doFastBlur(void)
 
 	// Show an OSD message.
 	if (fastBlur) {
-		vBackend->osd_printf(1500, "Fast Blur enabled.");
+		vBackend->osd_print(1500, "Fast Blur enabled.");
 	} else {
-		vBackend->osd_printf(1500, "Fast Blur disabled.");
+		vBackend->osd_print(1500, "Fast Blur disabled.");
 	}
 }
 
@@ -507,11 +507,11 @@ static void processSdlEvent(const SDL_Event *event) {
 					if (event->key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
 						// Hard Reset.
 						context->hardReset();
-						vBackend->osd_printf(1500, "Hard Reset.");
+						vBackend->osd_print(1500, "Hard Reset.");
 					} else {
 						// Soft Reset.
 						context->softReset();
-						vBackend->osd_printf(1500, "Soft Reset.");
+						vBackend->osd_print(1500, "Soft Reset.");
 					}
 					break;
 
