@@ -137,6 +137,9 @@ INSTANTIATE_TEST_CASE_P(ByteswapTest_benchmark_NoFlags, ByteswapTest_benchmark,
 INSTANTIATE_TEST_CASE_P(ByteswapTest_benchmark_MMX, ByteswapTest_benchmark,
 	::testing::Values(ByteswapTest_flags(MDP_CPUFLAG_X86_MMX, 0)
 ));
+INSTANTIATE_TEST_CASE_P(ByteswapTest_benchmark_SSE2, ByteswapTest_benchmark,
+	::testing::Values(ByteswapTest_flags(MDP_CPUFLAG_X86_SSE2, MDP_CPUFLAG_X86_SSE2SLOW)
+));
 #endif
 
 } }

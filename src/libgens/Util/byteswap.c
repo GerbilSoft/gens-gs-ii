@@ -41,7 +41,27 @@ void __byte_swap_16_array(void *ptr, unsigned int n)
 
 #if defined(__GNUC__) && \
     (defined(__i386__) || defined(__amd64__))
-	if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
+	if (CPU_Flags & MDP_CPUFLAG_X86_SSE2) {
+		// SSE2: Swap 16 bytes (8 words) at a time.
+		for (; n > 16; n -= 16, cptr += 16) {
+			__asm__ (
+				"movdqu	(%[cptr]), %%xmm0\n"
+				"movdqa	%%xmm0, %%xmm1\n"
+				"psllw	$8, %%xmm0\n"
+				"psrlw	$8, %%xmm1\n"
+				"por	%%xmm0, %%xmm1\n"
+				"movdqu	%%xmm1, (%[cptr])\n"
+				:
+				: [cptr] "r" (cptr)
+				// FIXME: gcc complains mm? registers are unknown.
+				// May need to compile with -mmmx...
+				//: "mm0", "mm1"
+			);
+		}
+
+		// If the block isn't a multiple of 8 bytes,
+		// the C implementation will handle the rest.
+	} else if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
 		// MMX: Swap 8 bytes (4 words) at a time.
 		for (; n > 8; n -= 8, cptr += 8) {
 			__asm__ (
