@@ -81,6 +81,7 @@ class MetadataPrivate
 		struct CreatorInfo_t {
 			std::string creator;
 			std::string creatorVersion;
+			std::string creatorVersionDesc;
 			std::string creatorVcsVersion;
 		};
 		static CreatorInfo_t creatorInfo;

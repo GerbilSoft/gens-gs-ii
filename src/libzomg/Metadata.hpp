@@ -67,10 +67,12 @@ class Metadata
 		 *
 		 * @param creator		[in, opt] Emulator name.
 		 * @param creatorVersion	[in, opt] Emulator version.
+		 * @param creatorVersionDesc	[in, opt] Emulator version description, e.g. a special release.
 		 * @param creatorVcsVersion	[in, opt] Emulator's version control version, e.g. git tag.
 		 */
 		static void InitProgramMetadata(const char *creator,
 						const char *creatorVersion,
+						const char *creatorVersionDesc,
 						const char *creatorVcsVersion);
 
 		/**

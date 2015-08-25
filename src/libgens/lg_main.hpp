@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -24,8 +24,7 @@
 #ifndef __LIBGENS_LG_MAIN_HPP__
 #define __LIBGENS_LG_MAIN_HPP__
 
-namespace LibGens
-{
+namespace LibGens {
 
 bool IsRunning(void);
 
@@ -33,7 +32,8 @@ int Init(void);
 int End(void);
 
 // libgens version. (TODO: Use MDP version macros.)
-extern const unsigned int version;	// Version number.
+extern const unsigned int version_mdp;	// Version number.
+extern const char *const version;	// Version string. (ASCII)
 extern const char *const version_desc;	// Version description. (ASCII) (May be nullptr.)
 extern const char *const version_vcs;	// Version Control System revision. (ASCII) (May be nullptr.)
 

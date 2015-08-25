@@ -53,9 +53,8 @@ static bool ms_IsInit = false;
 
 // libgens version.
 // TODO: Use MDP version macros.
-// TODO: Use version info from CMake.
-// TODO: Stringified version with "+" if it's a dev version.
-const unsigned int version = 0x00000000U;
+const unsigned int version_mdp = (VERSION_MAJOR << 24) | (VERSION_MINOR << 16) | (VERSION_PATCH);
+const char *const version = VERSION_STRING;            // ASCII
 const char *const version_desc = "Development Build";	// ASCII
 
 // Version Control System revision. (ASCII) (May be NULL.)
@@ -85,20 +84,20 @@ int Init(void)
 		return 0;
 
 	// Print the Gens/GS startup message.
-	fprintf(stderr, "Gens/GS II");
-	if (version_desc) {
-		fprintf(stderr, " (%s)", version_desc);
+	fprintf(stderr, "Gens/GS II %s", version);
+	if (version_vcs) {
+		fprintf(stderr, " (%s)", version_vcs);
 	}
 	fputc('\n', stderr);
+
+	// Version description.
+	if (version_desc) {
+		fprintf(stderr, "%s\n", version_desc);
+	}
 
 #if !defined(GENS_ENABLE_EMULATION)
 	fprintf(stderr, "[NO-EMULATION BUILD; CPU emulation disabled.]\n");
 #endif
-
-	// VCS version.
-	if (version_vcs) {
-		fprintf(stderr, "(%s)\n", version_vcs);
-	}
 
 	fprintf(stderr, "\n"
 		"Copyright (c) 1999-2002 by Stéphane Dallongeville.\n"
@@ -139,16 +138,9 @@ int Init(void)
 
 	SoundMgr::Init();
 
-	// LibGens version.
-	// TODO: Add easy "MDP version to string" function.
-	// TODO: Use version string from CMake?
-	char lg_version_str[16];
-	snprintf(lg_version_str, sizeof(lg_version_str), "%d.%d.%d",
-		(LibGens::version >> 24),
-		((LibGens::version >> 16) & 0xFF),
-		(LibGens::version & 0xFF));
 	// Initialize LibZomg metadata.
-	LibZomg::Metadata::InitProgramMetadata("Gens/GS II", lg_version_str, version_vcs);
+	LibZomg::Metadata::InitProgramMetadata("Gens/GS II",
+		version, version_desc, version_vcs);
 
 	fflush(nullptr);	
 	ms_IsInit = true;

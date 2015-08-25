@@ -39,4 +39,11 @@
 /* Define to 1 if CPU emulation code should be enabled. */
 #cmakedefine GENS_ENABLE_EMULATION 1
 
+/* CMake version macros. */
+#define VERSION_MAJOR @VERSION_MAJOR@
+#define VERSION_MINOR @VERSION_MINOR@
+#define VERSION_PATCH @VERSION_PATCH@
+#define VERSION_DEVEL @VERSION_DEVEL@
+#define VERSION_STRING "@VERSION_STRING@"
+
 #endif /* __LIBGENS_CONFIG_H__ */

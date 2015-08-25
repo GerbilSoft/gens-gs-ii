@@ -161,10 +161,12 @@ void Metadata::clear(void)
  *
  * @param creator              	[in, opt] Emulator name.
  * @param creatorVersion       	[in, opt] Emulator version.
+ * @param creatorVersionDesc	[in, opt] Emulator version description, e.g. a special release.
  * @param creatorVcsVersion    	[in, opt] Emulator's version control version, e.g. git tag.
  */
 void Metadata::InitProgramMetadata(const char *creator,
 				const char *creatorVersion,
+				const char *creatorVersionDesc,
 				const char *creatorVcsVersion)
 {
 	// Save creator information.
@@ -172,6 +174,8 @@ void Metadata::InitProgramMetadata(const char *creator,
 		(creator ? string(creator) : string());
 	MetadataPrivate::creatorInfo.creatorVersion =
 		(creatorVersion ? string(creatorVersion) : string());
+	MetadataPrivate::creatorInfo.creatorVersionDesc =
+		(creatorVersionDesc ? string(creatorVersionDesc) : string());
 	MetadataPrivate::creatorInfo.creatorVcsVersion =
 		(creatorVcsVersion ? string(creatorVcsVersion) : string());
 
@@ -207,6 +211,7 @@ std::string Metadata::toZomgIni(int metaFlags) const
 	if (metaFlags & MF_Emulator) {
 		d->WriteValue(oss, "Creator", d->creatorInfo.creator);
 		d->WriteValue(oss, "CreatorVersion", d->creatorInfo.creatorVersion);
+		d->WriteValue(oss, "CreatorVersionDesc", d->creatorInfo.creatorVersionDesc);
 		d->WriteValue(oss, "CreatorVcsVersion", d->creatorInfo.creatorVcsVersion);
 	}
 	if (metaFlags & MF_CreationTime) {
@@ -284,6 +289,9 @@ int Metadata::toPngData(png_structp png_ptr, png_infop info_ptr, int metaFlags) 
 				desc << " (" << d->creatorInfo.creatorVcsVersion << ')';
 			}
 			desc << '\n';
+			if (!d->creatorInfo.creatorVersionDesc.empty()) {
+				desc << d->creatorInfo.creatorVersionDesc << '\n';
+			}
 		}
 	}
 
