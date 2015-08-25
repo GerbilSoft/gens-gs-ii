@@ -132,7 +132,8 @@ INSTANTIATE_TEST_CASE_P(ByteswapTest_benchmark_NoFlags, ByteswapTest_benchmark,
 
 // NOTE: byteswap.c only implements MMX using GNU assembler.
 // TODO: Add some flag to disable non-MMX asm optimizations, e.g. 'bswap'.
-#if defined(__i386__) || defined(__amd64__)
+#if defined(__GNUC__) && \
+    (defined(__i386__) || defined(__amd64__))
 INSTANTIATE_TEST_CASE_P(ByteswapTest_benchmark_MMX, ByteswapTest_benchmark,
 	::testing::Values(ByteswapTest_flags(MDP_CPUFLAG_X86_MMX, 0)
 ));

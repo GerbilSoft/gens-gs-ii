@@ -26,7 +26,8 @@
 
 // NOTE: We're implementing the MMX and SSE2 code
 // using GNU inline assembler *only*.
-#if defined(__i386__) || defined(__amd64__)
+#if defined(__GNUC__) && \
+    (defined(__i386__) || defined(__amd64__))
 #define SOUNDMGR_HAS_MMX 1
 #endif
 

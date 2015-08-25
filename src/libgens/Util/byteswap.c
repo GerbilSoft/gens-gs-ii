@@ -39,7 +39,8 @@ void __byte_swap_16_array(void *ptr, unsigned int n)
 	assert((n & 1) == 0);
 	n &= ~1;
 
-#if defined(__i386__) || defined(__amd64__)
+#if defined(__GNUC__) && \
+    (defined(__i386__) || defined(__amd64__))
 	if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
 		// MMX: Swap 8 bytes (4 words) at a time.
 		for (; n > 8; n -= 8, cptr += 8) {
@@ -89,7 +90,7 @@ void __byte_swap_16_array(void *ptr, unsigned int n)
 			);
 		}
 	}
-#endif
+#endif /* defined(__GNUC__) && (defined(__i386__) || defined(__amd64__)) */
 
 	// C version.
 	// Used if MMX isn't available, or if the
@@ -115,7 +116,8 @@ void __byte_swap_32_array(void *ptr, unsigned int n)
 	assert((n & 3) == 0);
 	n &= ~3;
 
-#if defined(__i386__) || defined(__amd64__)
+#if defined(__GNUC__) && \
+    (defined(__i386__) || defined(__amd64__))
 	// i486+ / amd64: Use 'bswap'.
 	// Swap 8 bytes (4 DWORDs) at a time.
 	for (; n > 8; n -= 8, cptr += 8) {
@@ -133,7 +135,7 @@ void __byte_swap_32_array(void *ptr, unsigned int n)
 	}
 	// If the block isn't a multiple of 8 bytes,
 	// the C implementation will handle the rest.
-#endif
+#endif /* defined(__GNUC__) && (defined(__i386__) || defined(__amd64__)) */
 
 	// C version.
 	// Used if optimized asm isn't available, or if the
