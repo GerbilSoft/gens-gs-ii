@@ -61,7 +61,7 @@ void __byte_swap_16_array(void *ptr, unsigned int n)
 		// If the block isn't a multiple of 8 bytes,
 		// the C implementation will handle the rest.
 	} else {
-		// Try using 'xchg' instead.
+		// Use 'rol' for 16-bit byteswapping.
 		// Swapping 8 bytes (4 words) at a time.
 		for (; n > 8; n -= 8, cptr += 8) {
 			__asm__ (
