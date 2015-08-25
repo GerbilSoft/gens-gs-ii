@@ -201,6 +201,8 @@ int main(int argc, char *argv[])
 	fprintf(stderr, "LibGens test suite: Byteswapping tests.\n\n");
 
 	::testing::InitGoogleTest(&argc, argv);
-	//LibGens::Init(); /* not needed for byteswapping code */
+	// NOTE: Array byteswap functions support MMX,
+	// so we need to initialize LibGens' CPU_Flags variable.
+	LibGens::Init();
 	return RUN_ALL_TESTS();
 }

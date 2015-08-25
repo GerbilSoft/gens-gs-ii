@@ -20,6 +20,7 @@
  ***************************************************************************/
 
 #include "byteswap.h"
+#include "cpuflags.h"
 
 // C includes.
 #include <assert.h>
@@ -38,8 +39,34 @@ void __byte_swap_16_array(void *ptr, unsigned int n)
 	assert((n & 1) == 0);
 	n &= ~1;
 
-	// TODO: Add an x86-optimized version, possibly using SSE.
-	for (; n != 0; n -= 2, cptr += 2) {
+#if defined(__i386__) || defined(__amd64__)
+	if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
+		// MMX: Swap 8 bytes (4 words) at a time.
+		for (; n > 8; n -= 8, cptr += 8) {
+			__asm__ (
+				"movq	(%[cptr]), %%mm0\n"
+				"movq	%%mm0, %%mm1\n"
+				"psllw	$8, %%mm0\n"
+				"psrlw	$8, %%mm1\n"
+				"por	%%mm0, %%mm1\n"
+				"movq	%%mm1, (%[cptr])\n"
+				:
+				: [cptr] "r" (cptr)
+				// FIXME: gcc complains mm? registers are unknown.
+				// May need to compile with -mmmx...
+				//: "mm0", "mm1"
+			);
+		}
+
+		// If the block isn't a multiple of 8 bytes,
+		// the C implementation will handle the rest.
+	}
+#endif
+
+	// C version.
+	// Used if MMX isn't available, or if the
+	// block isn't a multiple of 8 bytes.
+	for (; n > 0; n -= 2, cptr += 2) {
 		x = *cptr;
 		*cptr = *(cptr + 1);
 		*(cptr + 1) = x;
