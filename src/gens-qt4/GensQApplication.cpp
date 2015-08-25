@@ -92,6 +92,7 @@ void GensQApplicationPrivate::gqaInit(void)
 	QCoreApplication::setApplicationName(QLatin1String("Gens/GS II"));
 
 	// Version number.
+	// NOTE: gens-qt4's version is currently tied to LibGens.
 	QCoreApplication::setApplicationVersion(QLatin1String(LibGens::version));
 
 	// Set the application icon.
