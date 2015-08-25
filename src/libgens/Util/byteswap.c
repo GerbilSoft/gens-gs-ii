@@ -96,8 +96,8 @@ void __byte_swap_16_array(void *ptr, unsigned int n)
 	// block isn't a multiple of 8 bytes.
 	for (; n > 0; n -= 2, cptr += 2) {
 		x = *cptr;
-		*cptr = *(cptr + 1);
-		*(cptr + 1) = x;
+		*cptr = *(cptr+1);
+		*(cptr+1) = x;
 	}
 }
 
