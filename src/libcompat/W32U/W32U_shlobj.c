@@ -54,6 +54,10 @@ BOOL SHGetSpecialFolderPathU(HWND hwndOwner, char *lpszPath, int cbPath, int csi
 	BOOL ret;
 	int wc_ret;
 
+	// TODO: Rewrite this to dynamically load a function:
+	// - SHGetKnownFolderPath() (Vista+)
+	// - SHGetFolderPath() (Win2000+; Win9x with shfolder.dll)
+	// - SHGetSpecialFolderPath() (Win9x)
 	if (!W32U_IsUnicode()) {
 #ifdef ENABLE_ANSI_WINDOWS
 		// Call the ANSI function and convert from ANSI first.
