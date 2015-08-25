@@ -156,17 +156,17 @@ void AboutDialogPrivate::initAboutDialogText(void)
 		sPrgTitle += QLatin1String(LibGens::version_desc) + sLineBreak;
 	}
 
+	if (LibGens::version_vcs != nullptr) {
+		// Append the VCS revision to the title text.
+		sPrgTitle += QLatin1String(LibGens::version_vcs) + sLineBreak;
+	}
+
 #if !defined(GENS_ENABLE_EMULATION)
 	//: "NO-EMULATION BUILD" means CPU cores aren't compiled in. Used for testing Gens/GS II on new platforms.
 	sPrgTitle += QLatin1String("<b>") +
 			AboutDialog::tr("NO-EMULATION BUILD") +
 			QLatin1String("</b>") + sLineBreak;
 #endif
-
-	if (LibGens::version_vcs != nullptr) {
-		// Append the VCS revision to the title text.
-		sPrgTitle += QLatin1String(LibGens::version_vcs) + sLineBreak;
-	}
 
 	// TODO: Should this be translatable?
 	sPrgTitle += sLineBreak +
