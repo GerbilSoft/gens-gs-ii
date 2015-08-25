@@ -60,6 +60,27 @@ void __byte_swap_16_array(void *ptr, unsigned int n)
 
 		// If the block isn't a multiple of 8 bytes,
 		// the C implementation will handle the rest.
+	} else {
+		// Try using 'xchg' instead.
+		// Swapping 4 bytes (2 words) at a time.
+		for (; n > 4; n -= 4, cptr += 4) {
+			__asm__ (
+				// NOTE: xorl+movw is slightly faster than
+				// movzwl on Core 2 T7200.
+				"xorl	%%eax, %%eax\n"
+				"xorl	%%edx, %%edx\n"
+				"movw	(%[cptr]), %%ax\n"
+				"movw	2(%[cptr]), %%dx\n"
+				// rol seems to be faster than xchg %al, %ah.
+				"rol	$8, %%ax\n"
+				"rol	$8, %%dx\n"
+				"movw	%%ax, (%[cptr])\n"
+				"movw	%%dx, 2(%[cptr])\n"
+				:
+				: [cptr] "r" (cptr)
+				: "eax", "edx"
+			);
+		}
 	}
 #endif
 
