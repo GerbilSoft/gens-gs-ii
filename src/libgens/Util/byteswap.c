@@ -140,11 +140,11 @@ void __byte_swap_32_array(void *ptr, unsigned int n)
 	// block isn't a multiple of 8 bytes.
 	for (; n > 0; n -= 4, cptr += 4) {
 		x = *cptr;
-		y = *(cptr + 1);
-		
-		*cptr = *(cptr + 3);
-		*(cptr + 1) = *(cptr + 2);
-		*(cptr + 2) = y;
-		*(cptr + 3) = x;
+		y = *(cptr+1);
+
+		*cptr = *(cptr+3);
+		*(cptr+1) = *(cptr+2);
+		*(cptr+2) = y;
+		*(cptr+3) = x;
 	}
 }
