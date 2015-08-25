@@ -70,10 +70,15 @@ void __byte_swap_16_array(void *ptr, unsigned int n)
 				// TODO: Interleaving instructions improved
 				// ByteswapTest_benchmark by ~30ms, though
 				// it reduces readability.
+				// FIXME: xorl *should* improve performance
+				// by eliminating partial register stalls,
+				// but it actually decreases it slightly...
+				#if 0
 				"xorl	%%eax, %%eax\n"
 				"xorl	%%edx, %%edx\n"
 				"xorl	%%esi, %%esi\n"
 				"xorl	%%edi, %%edi\n"
+				#endif
 				"movw	(%[cptr]), %%ax\n"
 				"movw	2(%[cptr]), %%dx\n"
 				"movw	4(%[cptr]), %%si\n"
