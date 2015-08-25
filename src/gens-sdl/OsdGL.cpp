@@ -630,21 +630,38 @@ void OsdGL::draw(void)
 	// TODO: Adjust for visible texture size.
 	int y = (240 - d->chrH);
 
-	// TODO: Message Enable, Message Color.
-	// TODO: Switch from vector to list?
-	// TODO: Move to OsdGLPrivate?
+	// Print from top to bottom to avoid collisions
+	// with the drop shadow. (C64 font)
+	// In order to do that, we first have to check
+	// how many messages are visible onscreen.
+	int firstIdx = d->osdList.size();
 	for (int i = (int)d->osdList.size() - 1; i >= 0; i--) {
 		OsdGLPrivate::OsdMessage *osdMsg = d->osdList[i];
 		if (!osdMsg)
 			continue;
 
-		// NOTE: Message expiration is checked at the beginning of the function.
+		// This is a valid message.
+		if (y <= 0) {
+			// Out of space.
+			// Don't process any more messages.
+			break;
+		}
+
+		// Process this message.
+		y -= d->chrH;
+		firstIdx = i;
+	}
+
+	// TODO: Message Enable, Message Color.
+	// TODO: Switch from vector to list?
+	// TODO: Move to OsdGLPrivate?
+	for (int i = firstIdx; i < (int)d->osdList.size(); i++) {
+		OsdGLPrivate::OsdMessage *osdMsg = d->osdList[i];
+		if (!osdMsg)
+			continue;
 
 		// Message is now being displayed.
 		osdMsg->hasDisplayed = true;
-
-		// Next line.
-		y -= d->chrH;
 
 		// Check for fade-out.
 		float alpha = 1.0f;
@@ -660,6 +677,9 @@ void OsdGL::draw(void)
 		d->printLine(d->chrW+1, y+1, osdMsg->msg);
 		d->setGLColor(d->msgColor, alpha);
 		d->printLine(d->chrW, y, osdMsg->msg);
+
+		// Next line.
+		y += d->chrH;
 	}
 
 	// Done with vertex and texture coordinate arrays.
