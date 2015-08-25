@@ -2,7 +2,7 @@
  * libgens: Gens Emulation Library.                                        *
  * byteswap.h: Byteswapping functions.                                     *
  *                                                                         *
- * Copyright (c) 2008-2011 by David Korth                                  *
+ * Copyright (c) 2008-2015 by David Korth                                  *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -96,14 +96,14 @@ extern "C" {
 #endif
 
 /**
- * __byte_swap_16_array(): 16-bit byteswap function.
+ * 16-bit byteswap function.
  * @param Pointer to array to swap.
  * @param n Number of bytes to swap. (Must be divisible by 2; an extra odd byte will be ignored.)
  */
 void __byte_swap_16_array(void *ptr, unsigned int n);
 
 /**
- * __byte_swap_32_array(): 32-bit byteswap function.
+ * 32-bit byteswap function.
  * @param Pointer to array to swap.
  * @param n Number of bytes to swap. (Must be divisible by 4; extra bytes will be ignored.)
  */

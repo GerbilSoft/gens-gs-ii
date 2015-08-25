@@ -2,7 +2,7 @@
  * libgens/tests: Gens Emulation Library. (Test Suite)                     *
  * ByteswapTest.cpp: Byteswapping tests.                                   *
  *                                                                         *
- * Copyright (c) 2011-2013 by David Korth.                                 *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -28,7 +28,9 @@
 // C includes. (C++ namespace)
 #include <cstdio>
 #include <cstring>
-using namespace std;
+
+// Test data.
+#include "ByteswapTest_data.h"
 
 namespace LibGens { namespace Tests {
 
@@ -97,9 +99,7 @@ int ByteswapTest::CheckRuntimeByteorder(void)
 	return 0;
 }
 
-
 /** Test cases. **/
-
 
 /**
  * Check that the runtime byteorder matches the compile-time byteorder.
@@ -119,7 +119,6 @@ TEST_F(ByteswapTest, checkRuntimeByteorder)
 	// Make sure the byteorders are equivalent.
 	ASSERT_EQ(byteorder_compiled, byteorder_runtime);
 }
-
 
 /**
  * Check little-endian byteswapping macros (non-array).
@@ -147,7 +146,6 @@ TEST_F(ByteswapTest, checkLittleEndianMacros)
 	EXPECT_EQ(swap32, cpu_to_le32(orig32));
 }
 
-
 /**
  * Check big-endian byteswapping macros (non-array).
  */
@@ -174,9 +172,33 @@ TEST_F(ByteswapTest, checkBigEndianMacros)
 	EXPECT_EQ(swap32, cpu_to_be32(orig32));
 }
 
+/**
+ * Test 16-bit array byteswapping.
+ */
+TEST_F(ByteswapTest, checkByteSwap16Array)
+{
+	uint8_t data[516];
+	memcpy(data, ByteswapTest_data_orig, sizeof(data));
+	__byte_swap_16_array(data, sizeof(data));
+	ASSERT_EQ(0, memcmp(data, ByteswapTest_data_swap16, sizeof(data)));
+}
+
+/**
+ * Test 16-bit array byteswapping.
+ */
+TEST_F(ByteswapTest, checkByteSwap32Array)
+{
+	uint8_t data[516];
+	memcpy(data, ByteswapTest_data_orig, sizeof(data));
+	__byte_swap_32_array(data, sizeof(data));
+	for (int i = 0; i < 516; i++) {
+		printf("i == %d, data[i] == %02X, ByteswapTest_data_swap32[i] == %02X, ByteswapTest_data_orig[i] == %02X\n",
+		       i, data[i], ByteswapTest_data_swap32[i], ByteswapTest_data_orig[i]);
+	}
+	ASSERT_EQ(0, memcmp(data, ByteswapTest_data_swap32, sizeof(data)));
+}
 
 } }
-
 
 int main(int argc, char *argv[])
 {

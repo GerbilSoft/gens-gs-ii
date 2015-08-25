@@ -44,7 +44,10 @@ ADD_TEST(NAME test_VdpPalette_DAC_SMS
 ENDIF(NOT MSVC)
 
 # Byteswap test.
-ADD_EXECUTABLE(ByteswapTest ByteswapTest.cpp)
+ADD_EXECUTABLE(ByteswapTest
+	ByteswapTest.cpp
+	ByteswapTest_data.c
+	)
 TARGET_LINK_LIBRARIES(ByteswapTest gens ${GTEST_LIBRARY})
 ADD_TEST(NAME ByteswapTest
 	COMMAND ByteswapTest)
