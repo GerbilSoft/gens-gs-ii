@@ -87,8 +87,30 @@ void __byte_swap_32_array(void *ptr, unsigned int n)
 	assert((n & 3) == 0);
 	n &= ~3;
 
-	// TODO: Add an x86-optimized version using bswap and/or SSE.
-	for (; n != 0; n -= 4, cptr += 4) {
+#if defined(__i386__) || defined(__amd64__)
+	// i486+ / amd64: Use 'bswap'.
+	// Swap 8 bytes (4 DWORDs) at a time.
+	for (; n > 8; n -= 8, cptr += 8) {
+		__asm__ (
+			"movl	(%[cptr]), %%eax\n"
+			"movl	4(%[cptr]), %%edx\n"
+			"bswap	%%eax\n"
+			"bswap	%%edx\n"
+			"movl	%%eax, (%[cptr])\n"
+			"movl	%%edx, 4(%[cptr])\n"
+			:
+			: [cptr] "r" (cptr)
+			: "eax", "edx"
+		);
+	}
+	// If the block isn't a multiple of 8 bytes,
+	// the C implementation will handle the rest.
+#endif
+
+	// C version.
+	// Used if optimized asm isn't available, or if the
+	// block isn't a multiple of 8 bytes.
+	for (; n > 0; n -= 4, cptr += 4) {
 		x = *cptr;
 		y = *(cptr + 1);
 		
