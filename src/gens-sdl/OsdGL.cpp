@@ -632,9 +632,11 @@ void OsdGL::draw(void)
 
 	// Print from top to bottom to avoid collisions
 	// with the drop shadow. (C64 font)
-	// In order to do that, we first have to check
-	// how many messages are visible onscreen.
-	int firstIdx = d->osdList.size();
+	// In order to do that, we first have to check how many
+	// messages are visible onscreen. Note that we have to
+	// process the entire list, since nullptr entries aren't
+	// removed until every entry in the list has expired.
+	int firstIdx = (int)d->osdList.size();
 	for (int i = (int)d->osdList.size() - 1; i >= 0; i--) {
 		OsdGLPrivate::OsdMessage *osdMsg = d->osdList[i];
 		if (!osdMsg)
@@ -642,7 +644,7 @@ void OsdGL::draw(void)
 
 		// This is a valid message.
 		if (y <= 0) {
-			// Out of space.
+			// Out of screen space.
 			// Don't process any more messages.
 			break;
 		}
