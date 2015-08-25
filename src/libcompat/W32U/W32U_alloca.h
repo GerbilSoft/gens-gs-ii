@@ -38,7 +38,9 @@
 #ifdef _MSC_VER
 // MSVC: _alloca() is in malloc.h.
 #include <malloc.h>
+#ifndef alloca
 #define alloca(size) _alloca(size)
+#endif
 #else /* !_MSC_VER */
 // Other compilers: alloca() is in stdlib.h.
 #include <stdlib.h>
