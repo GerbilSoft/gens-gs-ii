@@ -22,6 +22,9 @@
 #include "ZomgBase.hpp"
 #include "Metadata.hpp"
 
+// C includes. (C++ namespace)
+#include <cerrno>
+
 namespace LibZomg {
 
 ZomgBase::ZomgBase(const char *filename, ZomgFileMode mode)

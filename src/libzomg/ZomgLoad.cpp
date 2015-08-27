@@ -47,6 +47,7 @@
 #include <cstdint>
 #include <cstring>
 #include <cassert>
+#include <cerrno>
 
 // PngReader.
 #include "PngReader.hpp"

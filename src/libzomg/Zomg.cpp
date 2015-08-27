@@ -49,6 +49,7 @@
 #include <cstdio>
 #include <cstring>
 #include <ctime>
+#include <cerrno>
 
 // C++ includes.
 #include <string>
