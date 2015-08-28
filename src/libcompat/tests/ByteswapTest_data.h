@@ -1,5 +1,5 @@
 /***************************************************************************
- * libgens/tests: Gens Emulation Library. (Test Suite)                     *
+ * libcompat/tests: Compatibility Library. (Test Suite)                    *
  * ByteswapTest_data.c: ByteswapTest test data.                            *
  *                                                                         *
  * Copyright (c) 2015 by David Korth.                                      *
@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_TESTS_BYTESWAPTEST_DATA_H__
-#define __LIBGENS_TESTS_BYTESWAPTEST_DATA_H__
+#ifndef __LIBCOMPAT_TESTS_BYTESWAPTEST_DATA_H__
+#define __LIBCOMPAT_TESTS_BYTESWAPTEST_DATA_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,4 +45,4 @@ extern const uint8_t ByteswapTest_data_swap32[516];
 }
 #endif
 
-#endif /* __LIBGENS_TESTS_BYTESWAPTEST_DATA_H__ */
+#endif /* __LIBCOMPAT_TESTS_BYTESWAPTEST_DATA_H__ */

@@ -1,5 +1,5 @@
 /***************************************************************************
- * libgens/tests: Gens Emulation Library. (Test Suite)                     *
+ * libcompat/tests: Compatibility Library. (Test Suite)                    *
  * ByteswapTest_data.c: ByteswapTest test data.                            *
  *                                                                         *
  * Copyright (c) 2015 by David Korth.                                      *
