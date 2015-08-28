@@ -11,4 +11,7 @@ The following changes have been made to the original:
 - POSIX regular expressions are disabled on embedded systems,
   such as RVL. (compiler defines __embedded__ == 1)
 
+- Added workarounds for issues encountered with devkitPPC and
+  libogc, including color output and millisecond timing.
+
 To obtain the original gtest-1.7.0, visit http://code.google.com/p/googletest/
