@@ -2,6 +2,7 @@ IF("$ENV{DEVKITPRO}" STREQUAL "")
 	MESSAGE(FATAL_ERROR "Please set DEVKITPRO in your environment.\nexport DEVKITPRO=/path/to/devkitpro")
 ENDIF()
 
+# TODO: Don't set it to Linux.
 SET(CMAKE_SYSTEM_NAME Linux)
 
 # Bypass -rdynamic.
