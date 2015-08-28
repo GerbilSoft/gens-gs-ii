@@ -37,8 +37,7 @@
  */
 void __byte_swap_16_array(void *ptr, unsigned int n)
 {
-	unsigned char *cptr = (unsigned char*)ptr;
-	unsigned char x;
+	uint16_t *wptr = (uint16_t*)ptr;
 
 	// Don't allow uneven lengths.
 	assert((n & 1) == 0);
@@ -50,27 +49,25 @@ void __byte_swap_16_array(void *ptr, unsigned int n)
 #if defined(__GNUC__) && \
     (defined(__i386__) || defined(__amd64__))
 	if (CPU_Flags & MDP_CPUFLAG_X86_SSE2) {
-		// If cptr isn't 16-byte aligned, swap words
+		// If wptr isn't 16-byte aligned, swap words
 		// manually until we get to 16-byte alignment.
-		for (; ((uintptr_t)cptr % 16 != 0) && n > 0;
-		     n -= 2, cptr += 2)
+		for (; ((uintptr_t)wptr % 16 != 0) && n > 0;
+		     n -= 2, wptr++)
 		{
-			x = *cptr;
-			*cptr = *(cptr+1);
-			*(cptr+1) = x;
+			*wptr = __swab16(*wptr);
 		}
 
 		// SSE2: Swap 16 bytes (8 words) at a time.
-		for (; n >= 16; n -= 16, cptr += 16) {
+		for (; n >= 16; n -= 16, wptr += 8) {
 			__asm__ (
-				"movdqa	(%[cptr]), %%xmm0\n"
+				"movdqa	(%[wptr]), %%xmm0\n"
 				"movdqa	%%xmm0, %%xmm1\n"
 				"psllw	$8, %%xmm0\n"
 				"psrlw	$8, %%xmm1\n"
 				"por	%%xmm0, %%xmm1\n"
-				"movdqa	%%xmm1, (%[cptr])\n"
+				"movdqa	%%xmm1, (%[wptr])\n"
 				:
-				: [cptr] "r" (cptr)
+				: [wptr] "r" (wptr)
 				// FIXME: gcc complains xmm? registers are unknown.
 				// May need to compile with -msse...
 				//: "xmm0", "xmm1"
@@ -81,16 +78,16 @@ void __byte_swap_16_array(void *ptr, unsigned int n)
 		// the C implementation will handle the rest.
 	} else if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
 		// MMX: Swap 8 bytes (4 words) at a time.
-		for (; n >= 8; n -= 8, cptr += 8) {
+		for (; n >= 8; n -= 8, wptr += 4) {
 			__asm__ (
-				"movq	(%[cptr]), %%mm0\n"
+				"movq	(%[wptr]), %%mm0\n"
 				"movq	%%mm0, %%mm1\n"
 				"psllw	$8, %%mm0\n"
 				"psrlw	$8, %%mm1\n"
 				"por	%%mm0, %%mm1\n"
-				"movq	%%mm1, (%[cptr])\n"
+				"movq	%%mm1, (%[wptr])\n"
 				:
-				: [cptr] "r" (cptr)
+				: [wptr] "r" (wptr)
 				// FIXME: gcc complains mm? registers are unknown.
 				// May need to compile with -mmmx...
 				//: "mm0", "mm1"
@@ -105,43 +102,51 @@ void __byte_swap_16_array(void *ptr, unsigned int n)
 	} else {
 		// Use 'rol' for 16-bit byteswapping.
 		// Swapping 8 bytes (4 words) at a time.
-		for (; n >= 8; n -= 8, cptr += 8) {
+		for (; n >= 8; n -= 8, wptr += 4) {
 			__asm__ (
 				// NOTE: xorl+movw is slightly faster than
 				// movzwl on Core 2 T7200.
 				// TODO: Interleaving instructions improved
 				// ByteswapTest_benchmark by ~30ms, though
 				// it reduces readability.
-				"movzwl	(%[cptr]), %%eax\n"
-				"movzwl	2(%[cptr]), %%edx\n"
-				"movzwl	4(%[cptr]), %%esi\n"
-				"movzwl	6(%[cptr]), %%edi\n"
+				"movzwl	(%[wptr]), %%eax\n"
+				"movzwl	2(%[wptr]), %%edx\n"
+				"movzwl	4(%[wptr]), %%esi\n"
+				"movzwl	6(%[wptr]), %%edi\n"
 				// rol seems to be faster than xchg %al, %ah.
 				"rol	$8, %%ax\n"
 				"rol	$8, %%dx\n"
 				"rol	$8, %%si\n"
 				"rol	$8, %%di\n"
-				"movw	%%ax, (%[cptr])\n"
-				"movw	%%dx, 2(%[cptr])\n"
-				"movw	%%si, 4(%[cptr])\n"
-				"movw	%%di, 6(%[cptr])\n"
+				"movw	%%ax, (%[wptr])\n"
+				"movw	%%dx, 2(%[wptr])\n"
+				"movw	%%si, 4(%[wptr])\n"
+				"movw	%%di, 6(%[wptr])\n"
 				:
-				: [cptr] "r" (cptr)
+				: [wptr] "r" (wptr)
 				: "eax", "edx", "esi", "edi"
 			);
 		}
 	}
 #endif /* defined(__GNUC__) && (defined(__i386__) || defined(__amd64__)) */
 
-	// C version.
-	// Used if MMX isn't available, or if the
-	// block isn't a multiple of 8 bytes.
-	// TODO: Use uint16_t*; x86 supports unaligned word access.
-	for (; n > 0; n -= 2, cptr += 2) {
-		x = *cptr;
-		*cptr = *(cptr+1);
-		*(cptr+1) = x;
+	// C version using unaligned WORDs.
+	// Used if optimized asm isn't available.
+	for (; n >= 16; n -= 16, wptr += 8) {
+		*(wptr+0) = __swab16(*(wptr+0));
+		*(wptr+1) = __swab16(*(wptr+1));
+		*(wptr+2) = __swab16(*(wptr+2));
+		*(wptr+3) = __swab16(*(wptr+3));
+		*(wptr+4) = __swab16(*(wptr+4));
+		*(wptr+5) = __swab16(*(wptr+5));
+		*(wptr+6) = __swab16(*(wptr+6));
+		*(wptr+7) = __swab16(*(wptr+7));
 	}
+
+	// Get any remaining WORDs.
+	for (; n > 0; n -= 2, wptr++) {
+		*wptr = __swab16(*wptr);
+	}	
 }
 
 /**
@@ -151,45 +156,22 @@ void __byte_swap_16_array(void *ptr, unsigned int n)
  */
 void __byte_swap_32_array(void *ptr, unsigned int n)
 {
-	unsigned char *cptr = (unsigned char*)ptr;
-	unsigned char x, y;
+	uint32_t *dwptr = (uint32_t*)ptr;
 
 	// Don't allow lengths that aren't divisible by 4.
 	assert((n & 3) == 0);
 	n &= ~3;
 
-#if defined(__GNUC__) && \
-    (defined(__i386__) || defined(__amd64__))
-	// i486+ / amd64: Use 'bswap'.
-	// Swap 8 bytes (4 DWORDs) at a time.
-	for (; n >= 8; n -= 8, cptr += 8) {
-		__asm__ (
-			"movl	(%[cptr]), %%eax\n"
-			"movl	4(%[cptr]), %%edx\n"
-			"bswap	%%eax\n"
-			"bswap	%%edx\n"
-			"movl	%%eax, (%[cptr])\n"
-			"movl	%%edx, 4(%[cptr])\n"
-			:
-			: [cptr] "r" (cptr)
-			: "eax", "edx"
-		);
+	// C version using unaligned DWORDs.
+	for (; n >= 16; n -= 16, dwptr += 4) {
+		*(dwptr+0) = __swab32(*(dwptr+0));
+		*(dwptr+1) = __swab32(*(dwptr+1));
+		*(dwptr+2) = __swab32(*(dwptr+2));
+		*(dwptr+3) = __swab32(*(dwptr+3));
 	}
-	// If the block isn't a multiple of 8 bytes,
-	// the C implementation will handle the rest.
-#endif /* defined(__GNUC__) && (defined(__i386__) || defined(__amd64__)) */
 
-	// C version.
-	// Used if optimized asm isn't available, or if the
-	// block isn't a multiple of 8 bytes.
-	// TODO: Use uint32_t*; x86 supports unaligned word access.
-	for (; n > 0; n -= 4, cptr += 4) {
-		x = *cptr;
-		y = *(cptr+1);
-
-		*cptr = *(cptr+3);
-		*(cptr+1) = *(cptr+2);
-		*(cptr+2) = y;
-		*(cptr+3) = x;
+	// Get any remaining DWORDs.
+	for (; n > 0; n -= 4, dwptr++) {
+		*dwptr = __swab32(*dwptr);
 	}
 }
