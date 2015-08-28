@@ -33,7 +33,7 @@
 // Test data.
 #include "ByteswapTest_data.h"
 
-namespace LibGens { namespace Tests {
+namespace LibCompat { namespace Tests {
 
 struct ByteswapTest_flags {
 	uint32_t cpuFlags;
