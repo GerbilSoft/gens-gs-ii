@@ -61,7 +61,7 @@ void __byte_swap_16_array(void *ptr, unsigned int n)
 		}
 
 		// SSE2: Swap 16 bytes (8 words) at a time.
-		for (; n > 16; n -= 16, cptr += 16) {
+		for (; n >= 16; n -= 16, cptr += 16) {
 			__asm__ (
 				"movdqa	(%[cptr]), %%xmm0\n"
 				"movdqa	%%xmm0, %%xmm1\n"
@@ -81,7 +81,7 @@ void __byte_swap_16_array(void *ptr, unsigned int n)
 		// the C implementation will handle the rest.
 	} else if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
 		// MMX: Swap 8 bytes (4 words) at a time.
-		for (; n > 8; n -= 8, cptr += 8) {
+		for (; n >= 8; n -= 8, cptr += 8) {
 			__asm__ (
 				"movq	(%[cptr]), %%mm0\n"
 				"movq	%%mm0, %%mm1\n"
@@ -105,7 +105,7 @@ void __byte_swap_16_array(void *ptr, unsigned int n)
 	} else {
 		// Use 'rol' for 16-bit byteswapping.
 		// Swapping 8 bytes (4 words) at a time.
-		for (; n > 8; n -= 8, cptr += 8) {
+		for (; n >= 8; n -= 8, cptr += 8) {
 			__asm__ (
 				// NOTE: xorl+movw is slightly faster than
 				// movzwl on Core 2 T7200.
@@ -162,7 +162,7 @@ void __byte_swap_32_array(void *ptr, unsigned int n)
     (defined(__i386__) || defined(__amd64__))
 	// i486+ / amd64: Use 'bswap'.
 	// Swap 8 bytes (4 DWORDs) at a time.
-	for (; n > 8; n -= 8, cptr += 8) {
+	for (; n >= 8; n -= 8, cptr += 8) {
 		__asm__ (
 			"movl	(%[cptr]), %%eax\n"
 			"movl	4(%[cptr]), %%edx\n"
