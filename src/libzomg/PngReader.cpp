@@ -21,7 +21,6 @@
 
 #include "PngReader.hpp"
 #include "img_data.h"
-#include "zomg_byteswap.h"
 
 // libpng
 #include <png.h>

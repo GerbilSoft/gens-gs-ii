@@ -32,7 +32,6 @@
 #include "libcompat/reentrant.h"
 
 #include "Zomg.hpp"
-#include "zomg_byteswap.h"
 
 #ifdef _WIN32
 // MiniZip Win32 I/O handler.

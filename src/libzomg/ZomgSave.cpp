@@ -25,7 +25,7 @@
  */
 
 #include "Zomg.hpp"
-#include "zomg_byteswap.h"
+#include "libcompat/byteswap.h"
 #include "Metadata.hpp"
 
 // MiniZip
@@ -305,7 +305,7 @@ inline SaveMemByteswap<zomg_order>::SaveMemByteswap(const void *mem, size_t siz,
 			// TODO: Byteswapping memcpy().
 			void *bswap_buf = malloc(siz);
 			memcpy(bswap_buf, mem, siz);
-			__zomg_byte_swap_16_array(bswap_buf, siz);
+			__byte_swap_16_array(bswap_buf, siz);
 			m_mem = reinterpret_cast<uintptr_t>(bswap_buf) | 1;
 			break;
 		}
@@ -317,7 +317,7 @@ inline SaveMemByteswap<zomg_order>::SaveMemByteswap(const void *mem, size_t siz,
 			// TODO: Byteswapping memcpy().
 			void *bswap_buf = malloc(siz);
 			memcpy(bswap_buf, mem, siz);
-			__zomg_byte_swap_32_array(bswap_buf, siz);
+			__byte_swap_32_array(bswap_buf, siz);
 			m_mem = reinterpret_cast<uintptr_t>(bswap_buf) | 1;
 			break;
 		}

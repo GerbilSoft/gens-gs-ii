@@ -21,7 +21,6 @@
 
 #include "PngWriter.hpp"
 #include "img_data.h"
-#include "zomg_byteswap.h"
 
 // ZOMG metadata.
 #include "Metadata.hpp"

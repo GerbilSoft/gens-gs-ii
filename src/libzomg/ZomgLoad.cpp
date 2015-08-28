@@ -25,7 +25,7 @@
  */
 
 #include "Zomg.hpp"
-#include "zomg_byteswap.h"
+#include "libcompat/byteswap.h"
 
 // MiniZip
 #include "minizip/unzip.h"
@@ -206,14 +206,14 @@ static inline void LoadMemByteswap(void *mem, size_t siz, ZomgByteorder_t emu_or
 		case ZOMG_BYTEORDER_16BE:
 			assert(emu_order == ZOMG_BYTEORDER_16LE || emu_order == ZOMG_BYTEORDER_16BE);
 			// 16-bit data needs to be byteswapped.
-			__zomg_byte_swap_16_array(mem, siz);
+			__byte_swap_16_array(mem, siz);
 			break;
 
 		case ZOMG_BYTEORDER_32LE:
 		case ZOMG_BYTEORDER_32BE:
 			assert(emu_order == ZOMG_BYTEORDER_32LE || emu_order == ZOMG_BYTEORDER_32BE);
 			// 32-bit data needs to be byteswapped.
-			__zomg_byte_swap_32_array(mem, siz);
+			__byte_swap_32_array(mem, siz);
 			break;
 
 		default:

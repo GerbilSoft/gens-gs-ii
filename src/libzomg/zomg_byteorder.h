@@ -1,9 +1,9 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
- * byteorder.h.in: Source file for byteorder.h.                            *
+ * libzomg: Zipped Original Memory from Genesis.                           *
+ * byteorder.h: System byte order enumeration.                             *
  * Indicates the system byteorder as detected by TEST_BIG_ENDIAN().        *
  *                                                                         *
- * Copyright (c) 2011-2013 by David Korth.                                 *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -23,12 +23,7 @@
 #ifndef __LIBZOMG_BYTEORDER_H__
 #define __LIBZOMG_BYTEORDER_H__
 
-#define ZOMG_LIL_ENDIAN 1234
-#define ZOMG_BIG_ENDIAN 4321
-#define ZOMG_PDP_ENDIAN 3412
-
-/* System byteorder. */
-#cmakedefine ZOMG_BYTEORDER @ZOMG_BYTEORDER@
+#include "libcompat/byteorder.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,10 +40,10 @@ typedef enum _ZomgByteorder_t {
 	ZOMG_BYTEORDER_32LE,	// 32-bit LE
 	ZOMG_BYTEORDER_32BE,	// 32-bit BE
 
-#if ZOMG_BYTEORDER == ZOMG_LIL_ENDIAN
+#if SYS_BYTEORDER == SYS_LIL_ENDIAN
 	ZOMG_BYTEORDER_16H = ZOMG_BYTEORDER_16LE,	// 16-bit host-endian
 	ZOMG_BYTEORDER_32H = ZOMG_BYTEORDER_32LE,	// 32-bit host-endian
-#else /* ZOMG_BYTEORDER == ZOMG_BIG_ENDIAN */
+#else /* SYS_BYTEORDER == SYS_BIG_ENDIAN */
 	ZOMG_BYTEORDER_16H = ZOMG_BYTEORDER_16BE,	// 16-bit host-endian
 	ZOMG_BYTEORDER_32H = ZOMG_BYTEORDER_32BE,	// 32-bit host-endian
 #endif
