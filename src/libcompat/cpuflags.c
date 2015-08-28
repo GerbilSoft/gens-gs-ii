@@ -54,6 +54,13 @@ uint32_t LibCompat_GetCPUFlags(void)
 	uint8_t can_FXSAVE = 0;
 	uint8_t can_XSAVE = 0;
 
+	if (CPU_Flags != 0) {
+		// CPU_Flags was already set.
+		// NOTE: We're assuming the case where CPU_Flags == 0
+		// after initialization is rare.
+		return CPU_Flags;
+	}
+
 	if (!is_cpuid_supported()) {
 		// CPUID is not supported.
 		// This CPU must be an early 486 or older.
