@@ -132,17 +132,15 @@ uint32_t LibCompat_GetCPUFlags(void)
 			can_FXSAVE = 1;
 #endif /* _WIN32 */
 		}
-
-		if (can_FXSAVE) {
-			CPU_Flags |= MDP_CPUFLAG_X86_SSE;
-			// MMXext is a subset of SSE.
-			// See http://www.x86-64.org/pipermail/patches/2005-March/003261.html
-			CPU_Flags |= MDP_CPUFLAG_X86_MMXEXT;
-		}
 	}
 
 	// Check for other SSE instruction sets.
 	if (can_FXSAVE) {
+		CPU_Flags |= MDP_CPUFLAG_X86_SSE;
+		// MMXext is a subset of SSE.
+		// See http://www.x86-64.org/pipermail/patches/2005-March/003261.html
+		CPU_Flags |= MDP_CPUFLAG_X86_MMXEXT;
+
 		if (__edx & CPUFLAG_IA32_EDX_SSE2)
 			CPU_Flags |= MDP_CPUFLAG_X86_SSE2;
 		if (__ecx & CPUFLAG_IA32_ECX_SSE3)
