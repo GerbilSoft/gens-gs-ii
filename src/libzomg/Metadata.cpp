@@ -26,6 +26,9 @@
 // _POSIX_SOURCE and _POSIX_C_SOURCE definitions.
 #include "libcompat/reentrant.h"
 
+// Ensure CPU_Flags is initialized.
+#include "libcompat/cpuflags.h"
+
 #include "Metadata.hpp"
 
 // C includes. (C++ namespace)
@@ -167,6 +170,9 @@ void Metadata::InitProgramMetadata(const char *creator,
 				const char *creatorVersion,
 				const char *creatorVcsVersion)
 {
+	// Ensure CPU_Flags is initialized.
+	LibCompat_GetCPUFlags();
+
 	// Save creator information.
 	MetadataPrivate::creatorInfo.creator =
 		(creator ? string(creator) : string());
