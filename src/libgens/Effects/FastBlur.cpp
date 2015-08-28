@@ -27,7 +27,7 @@
 
 #include "FastBlur.hpp"
 #include "Util/MdFb.hpp"
-#include "Util/cpuflags.h"
+#include "libcompat/cpuflags.h"
 
 // C includes.
 #include <stdlib.h>

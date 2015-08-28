@@ -1,5 +1,5 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
+ * libcompat: Compatibility library.                                       *
  * cpuflags.h: CPU flag definitions and functions.                         *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_UTIL_CPUFLAGS_H__
-#define __LIBGENS_UTIL_CPUFLAGS_H__
+#ifndef __LIBCOMPAT_CPUFLAGS_H__
+#define __LIBCOMPAT_CPUFLAGS_H__
 
 #include <stdint.h>
 
@@ -30,7 +30,16 @@
 extern "C" {
 #endif
 
-// TODO: Use MDP's mdp_cpuflags.h instead of this copypasta!
+// NOTE: This MUST be kept in sync with MDP's mdp_cpuflags.h.
+// We're not adding a dependency on MDP to libcompat, since
+// that doesn't make sense.
+
+// Prevent conflicts with MDP's mdp_cpuflags.h.
+// If mdp_cpuflags.h is included first, those definitions
+// will be preferred. Note that this can cause compile errors
+// if either version gets out of sync.
+#ifndef __MDP_CPUFLAGS_H
+#define __MDP_CPUFLAGS_H
 
 /* CPU flags (IA32/x86_64) */
 #if defined(__i386__) || defined(__amd64__) || \
@@ -72,11 +81,13 @@ extern "C" {
 
 #endif /* defined(__i386__) || defined(__amd64__) */
 
+#endif /* __MDP_CPUFLAGS_H */
+
 extern uint32_t CPU_Flags;
-uint32_t LibGens_GetCPUFlags(void);
+uint32_t LibCompat_GetCPUFlags(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __LIBGENS_UTIL_CPUFLAGS_H__ */
+#endif /* __LIBCOMPAT_CPUFLAGS_H__ */

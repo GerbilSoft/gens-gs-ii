@@ -24,7 +24,7 @@
 
 #include "lg_main.hpp"
 #include "Util/byteswap.h"
-#include "Util/cpuflags.h"
+#include "libcompat/cpuflags.h"
 
 // C includes. (C++ namespace)
 #include <cstdio>

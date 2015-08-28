@@ -80,16 +80,15 @@ CHECK_FUNCTION_EXISTS(memalign HAVE_MEMALIGN)
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libcompat.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.libcompat.h")
 
-# NOTE: Currently, libcompat has no source files
-# other than W32U. Hence, we need to include a dummy
-# source file on non-Windows platforms.
-IF(NOT WIN32)
-SET(libcompat_SRCS dummy.c)
-ENDIF(NOT WIN32)
+SET(libcompat_SRCS
+	cpuflags.c
+	)
 
 SET(libcompat_H
 	reentrant.h
 	aligned_malloc.h
+	cpuflags.h
+	cpuflags_x86.h
 	)
 
 IF(WIN32)

@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 #include "SoundMgr.hpp"
-#include "Util/cpuflags.h"
+#include "libcompat/cpuflags.h"
 
 // C includes. (C++ namespace)
 #include <cstring>

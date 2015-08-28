@@ -1,5 +1,5 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
+ * libcompat: Compatibility library.                                       *
  * cpuflags.c: CPU flag definitions and functions.                         *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
@@ -31,10 +31,6 @@
 // CPU flags.
 uint32_t CPU_Flags = 0;
 
-// MDP CPU flag definitions.
-// TODO: Switch to MDP!
-//#include "mdp/mdp_cpuflags.h"
-
 // CPU-specific flag definitions.
 // These are for internal use by LibGens_GetCPUFlags() only.
 #include "cpuflags_x86.h"
@@ -44,7 +40,7 @@ uint32_t CPU_Flags = 0;
  * Stores the CPU flags in the global variable CPU_Flags.
  * @return CPU flags.
  */
-uint32_t LibGens_GetCPUFlags(void)
+uint32_t LibCompat_GetCPUFlags(void)
 {
 #if defined(__i386__) || defined(__amd64__) || \
     defined(_M_IX86) || defined(_M_X64)

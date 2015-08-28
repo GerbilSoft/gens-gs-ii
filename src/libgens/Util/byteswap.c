@@ -20,7 +20,7 @@
  ***************************************************************************/
 
 #include "byteswap.h"
-#include "cpuflags.h"
+#include "libcompat/cpuflags.h"
 
 // C includes.
 #include <assert.h>

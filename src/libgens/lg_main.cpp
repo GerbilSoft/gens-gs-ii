@@ -25,7 +25,7 @@
 
 #include "lg_main.hpp"
 #include "macros/git.h"
-#include "Util/cpuflags.h"
+#include "libcompat/cpuflags.h"
 #include "Util/Timing.hpp"
 
 // CPU emulation code.
@@ -129,7 +129,7 @@ int Init(void)
 	// TODO: Clear LibGens variables.
 
 	// Detect CPU flags.
-	LibGens_GetCPUFlags();
+	LibCompat_GetCPUFlags();
 
 	// Initialize LibGens subsystems.
 	M68K::Init();

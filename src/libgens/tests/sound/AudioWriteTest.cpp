@@ -26,7 +26,7 @@
 
 // LibGens.
 #include "lg_main.hpp"
-#include "Util/cpuflags.h"
+#include "libcompat/cpuflags.h"
 
 // Sound Manager
 #include "sound/SoundMgr.hpp"
