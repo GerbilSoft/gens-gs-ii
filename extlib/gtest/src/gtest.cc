@@ -776,6 +776,11 @@ std::string UnitTestImpl::CurrentOsStackTraceExceptTop(int skip_count) {
   return "";
 }
 
+#if defined(HW_RVL) || defined(HW_DOL)
+// Gens/GS II: gettick()
+#include <ogc/lwp_watchdog.h>
+#endif
+
 // Returns the current time in milliseconds.
 TimeInMillis GetTimeInMillis() {
 #if GTEST_OS_WINDOWS_MOBILE || defined(__BORLANDC__)
@@ -822,6 +827,20 @@ TimeInMillis GetTimeInMillis() {
 #elif GTEST_HAS_GETTIMEOFDAY_
   struct timeval now;
   gettimeofday(&now, NULL);
+  #if defined(HW_RVL) || defined(HW_DOL)
+    // Gens/GS II: devkitPPC's gettimeofday() is completely broken.
+    // tv_sec is correct, but tv_usec always returns a value less than 400.
+    // Reference: http://devkitpro.org/viewtopic.php?t=3056&p=15322
+    #ifdef tick_microsecs
+    #undef tick_microsecs
+    #endif
+    #ifdef tick_nanosecs
+    #undef tick_nanosecs
+    #endif
+    #define tick_microsecs(ticks) ((((u64)(ticks)*8)/(u64)(TB_TIMER_CLOCK/125))%1000000)
+    #define tick_nanosecs(ticks) ((((u64)(ticks)*8000)/(u64)(TB_TIMER_CLOCK/125))%1000000000)
+    now.tv_usec = tick_microsecs(gettick());
+  #endif
   return static_cast<TimeInMillis>(now.tv_sec) * 1000 + now.tv_usec / 1000;
 #else
 # error "Don't know how to get the current time on your system."
