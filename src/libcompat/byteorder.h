@@ -41,7 +41,8 @@
 #define SYS_BIG_ENDIAN 4321
 #define SYS_PDP_ENDIAN 3412
 
-#if defined(__hppa__) || defined(__HPPA__) || \
+#if (defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)) || \
+    defined(__hppa__) || defined(__HPPA__) || \
     defined(__m68k__) || defined(__MC68K__) || defined(_M_M68K) || \
     defined(mc68000) || defined(M68000) || \
     ((defined(__mips) || defined(__mips__) || defined(__mips) || defined(__MIPS__)) && \
@@ -56,6 +57,11 @@
 #define SYS_IS_BIG_ENDIAN 1
 #undef SYS_IS_LIL_ENDIAN
 #undef SYS_IS_PDP_ENDIAN
+
+#elif defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_PDP_ENDIAN__)
+
+/* System is PDP-endian. */
+#error Why are you trying to run a Genesis emulator on a PDP?
 
 #else
 
