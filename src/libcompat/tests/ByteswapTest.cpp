@@ -255,7 +255,11 @@ INSTANTIATE_TEST_CASE_P(ByteswapTest_SSE2, ByteswapTest,
 
 } }
 
-int main(int argc, char *argv[])
+/**
+ * Test suite main function.
+ * Called by gtest_main.inc.cpp's main().
+ */
+static int test_main(int argc, char *argv[])
 {
 	fprintf(stderr, "LibCompat test suite: Byteswapping tests.\n\n");
 	// Initialize CPU flags.
@@ -264,3 +268,5 @@ int main(int argc, char *argv[])
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
 }
+
+#include "gtest_main.inc.cpp"
