@@ -24,6 +24,22 @@
 // C includes.
 #include <assert.h>
 
+#ifdef _MSC_VER
+#define inline __inline
+#endif
+
+/**
+ * Byteswap two 16-bit WORDs in a 32-bit DWORD.
+ * @param dword DWORD containing two 16-bit WORDs.
+ * @return DWORD containing the byteswapped 16-bit WORDs.
+ */
+static inline uint32_t swap_two_16_in_32(uint32_t dword)
+{
+	uint32_t tmp1 = (dword >> 8) & 0x00FF00FF;
+	uint32_t tmp2 = (dword << 8) & 0xFF00FF00;
+	return (tmp1 | tmp2);
+}
+
 /**
  * 16-bit byteswap function.
  * @param ptr Pointer to array to swap. (MUST be 16-bit aligned!)
@@ -37,17 +53,23 @@ void __byte_swap_16_array(uint16_t *ptr, unsigned int n)
 	assert((n & 1) == 0);
 	n &= ~1;
 
-	// Process 8 DWORDs per iteration.
-	for (; n >= 16; n -= 16, ptr += 8) {
-		*(ptr+0) = __swab16(*(ptr+0));
-		*(ptr+1) = __swab16(*(ptr+1));
-		*(ptr+2) = __swab16(*(ptr+2));
-		*(ptr+3) = __swab16(*(ptr+3));
-		*(ptr+4) = __swab16(*(ptr+4));
-		*(ptr+5) = __swab16(*(ptr+5));
-		*(ptr+6) = __swab16(*(ptr+6));
-		*(ptr+7) = __swab16(*(ptr+7));
+	// Check if ptr is 32-bit aligned.
+	if (((uintptr_t)ptr & 3) != 0) {
+		// Byteswap the first WORD to fix alignment.
+		*ptr = __swab16(*ptr);
+		ptr++;
 	}
+
+	// Process 8 WORDs per iteration,
+	// using 32-bit accesses.
+	uint32_t *dwptr = (uint32_t*)ptr;
+	for (; n >= 16; n -= 16, dwptr += 4) {
+		*(dwptr+0) = swap_two_16_in_32(*(dwptr+0));
+		*(dwptr+1) = swap_two_16_in_32(*(dwptr+1));
+		*(dwptr+2) = swap_two_16_in_32(*(dwptr+2));
+		*(dwptr+3) = swap_two_16_in_32(*(dwptr+3));
+	}
+	ptr = (uint16_t*)dwptr;
 
 	// Process remaining WORDs.
 	for (; n > 0; n -= 2, ptr++) {
