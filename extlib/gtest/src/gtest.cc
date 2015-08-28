@@ -2624,6 +2624,10 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
 
 #if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_SYMBIAN || GTEST_OS_ZOS || GTEST_OS_IOS
   const bool use_color = false;
+#elif defined(HW_RVL) || defined(HW_DOL)
+  // Gens/GS II: devkitPPC's isatty() always returns 0.
+  // libogc's console does support color, so force it on.
+  const bool use_color = true;
 #else
   static const bool in_color_mode =
       ShouldUseColor(posix::IsATTY(posix::FileNo(stdout)) != 0);
@@ -2656,6 +2660,13 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   fflush(stdout);
   // Restores the text color.
   SetConsoleTextAttribute(stdout_handle, old_color_attrs);
+#elif defined(HW_RVL) || defined(HW_DOL)
+  // Gens/GS II: libogc doesn't seem to like the
+  // ANSI escape sequences used by Google Test.
+  // Among other things, "reset" doesn't work.
+  printf("\033[3%s;0m", GetAnsiColorCode(color));
+  vprintf(fmt, args);
+  printf("\033[37;0m");
 #else
   printf("\033[0;3%sm", GetAnsiColorCode(color));
   vprintf(fmt, args);
