@@ -10,6 +10,10 @@ The following changes have been made to the original:
 - fseek() and ftell() have been replaced with fseeko() and ftello()
   for Large File Support on Unix and Linux platforms. (7z uses native
   Win32 functions on Windows, so Windows is not affected by this change.)
+- Ppmd7.c and Ppmd8.c now include <string.h> on non-Windows compilers
+  instead of <memory.h>:
+  - glibc: memory.h is simply a wrapper for string.h.
+  - devkitPPC: memory.h doesn't exist; the functions are in string.h.
 
 To obtain the original LZMA SDK 9.20, visit
 http://www.7-zip.org/sdk.html
