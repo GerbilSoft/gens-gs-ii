@@ -340,7 +340,7 @@ int VdpSpriteMaskingTest::loadVRam(ScreenMode screenMode)
 	// Data was read successfully.
 
 	// Byteswap VRam to host-endian.
-	be16_to_cpu_array(out, out_pos);
+	be16_to_cpu_array((uint16_t*)out, out_pos);
 
 	// Copy VRam to the VDP.
 	m_vdp->dbg_writeVRam_16(0, (uint16_t*)out, out_pos);

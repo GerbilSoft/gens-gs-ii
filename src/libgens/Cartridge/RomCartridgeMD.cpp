@@ -431,7 +431,7 @@ int RomCartridgeMD::loadRom(void)
 	}
 
 	// Byteswap the ROM image.
-	be16_to_cpu_array(m_romData, m_romData_size);
+	be16_to_cpu_array((uint16_t*)m_romData, m_romData_size);
 
 	// Initialize the ROM mapper.
 	// NOTE: This must be done after loading the ROM;

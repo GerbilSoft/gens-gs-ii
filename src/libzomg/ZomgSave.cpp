@@ -303,7 +303,7 @@ inline SaveMemByteswap<zomg_order>::SaveMemByteswap(const void *mem, size_t siz,
 			assert(emu_order == ZOMG_BYTEORDER_16LE || emu_order == ZOMG_BYTEORDER_16BE);
 			// 16-bit data needs to be byteswapped.
 			// TODO: Byteswapping memcpy().
-			void *bswap_buf = malloc(siz);
+			uint16_t *bswap_buf = (uint16_t*)malloc(siz);
 			memcpy(bswap_buf, mem, siz);
 			__byte_swap_16_array(bswap_buf, siz);
 			m_mem = reinterpret_cast<uintptr_t>(bswap_buf) | 1;
@@ -315,7 +315,7 @@ inline SaveMemByteswap<zomg_order>::SaveMemByteswap(const void *mem, size_t siz,
 			assert(emu_order == ZOMG_BYTEORDER_32LE || emu_order == ZOMG_BYTEORDER_32BE);
 			// 32-bit data needs to be byteswapped.
 			// TODO: Byteswapping memcpy().
-			void *bswap_buf = malloc(siz);
+			uint32_t *bswap_buf = (uint32_t*)malloc(siz);
 			memcpy(bswap_buf, mem, siz);
 			__byte_swap_32_array(bswap_buf, siz);
 			m_mem = reinterpret_cast<uintptr_t>(bswap_buf) | 1;
