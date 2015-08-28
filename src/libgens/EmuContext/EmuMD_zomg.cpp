@@ -77,8 +77,6 @@ using std::string;
 #include "libcompat/W32U/W32U_mini.h"
 #endif
 
-#include "Util/byteswap.h"
-
 namespace LibGens {
 
 /**

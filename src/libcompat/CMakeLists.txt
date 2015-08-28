@@ -82,6 +82,7 @@ CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libcompat.h.in" "${CMAKE_CURR
 
 SET(libcompat_SRCS
 	cpuflags.c
+	byteswap.c
 	)
 
 SET(libcompat_H
@@ -89,6 +90,7 @@ SET(libcompat_H
 	aligned_malloc.h
 	cpuflags.h
 	cpuflags_x86.h
+	byteswap.h
 	)
 
 IF(WIN32)
@@ -131,3 +133,8 @@ IF(WIN32)
 	# - SHGetSpecialFolderPath()
 	TARGET_LINK_LIBRARIES(compat shell32)
 ENDIF(WIN32)
+
+# Test suite.
+IF(BUILD_TESTING)
+       ADD_SUBDIRECTORY(tests)
+ENDIF(BUILD_TESTING)

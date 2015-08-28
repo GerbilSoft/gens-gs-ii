@@ -37,20 +37,7 @@
 using std::auto_ptr;
 using std::string;
 
-#include "Util/byteswap.h"
-
-// TODO: Move into byteswap.h.
-/**
- * BYTE_ADDR_INVERT: Inversion flag for byte-addressing.
- * ROM and RAM is stored in host 16-bit endian.
- * Hence, bytewide access needs to have the LSB inverted
- * on little-endian machines.
- */
-#if GENS_BYTEORDER == GENS_LIL_ENDIAN
-#define BYTE_ADDR_INVERT 1
-#else /* GENS_BYTEORDER = GENS_BIG_ENDIAN */
-#define BYTE_ADDR_INVERT 0
-#endif
+#include "libcompat/byteswap.h"
 
 namespace LibGens {
 
@@ -175,7 +162,7 @@ uint8_t TmssReg::readByte(uint32_t address) const
 	if (!m_tmssRom)
 		return 0xFF;
 	address &= m_tmssRom_mask;
-	return m_tmssRom[address ^ BYTE_ADDR_INVERT];
+	return m_tmssRom[address ^ U16DATA_U8_INVERT];
 }
 
 /**

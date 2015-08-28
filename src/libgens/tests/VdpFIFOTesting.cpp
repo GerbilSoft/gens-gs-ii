@@ -33,7 +33,6 @@
 #include "Vdp/Vdp.hpp"
 #include "cpu/M68K.hpp"
 #include "libzomg/zomg_m68k.h"
-#include "Util/byteswap.h"
 
 // ARRAY_SIZE(x)
 #include "macros/common.h"

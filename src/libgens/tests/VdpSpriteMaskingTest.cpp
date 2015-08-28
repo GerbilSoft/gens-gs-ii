@@ -29,7 +29,7 @@
 // LibGens VDP.
 #include "Vdp/Vdp.hpp"
 #include "cpu/M68K_Mem.hpp"
-#include "Util/byteswap.h"
+#include "libcompat/byteswap.h"
 
 // ARRAY_SIZE(x)
 #include "macros/common.h"

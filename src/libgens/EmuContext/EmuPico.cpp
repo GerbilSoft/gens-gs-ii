@@ -35,8 +35,6 @@
 #include "cpu/M68K_Mem.hpp"
 #include "sound/SoundMgr.hpp"
 
-#include "Util/byteswap.h"
-
 // LibGens OSD handler.
 #include "lg_osd.h"
 

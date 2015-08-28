@@ -26,14 +26,14 @@ using LibGens::MdFb;
 // C includes.
 #include <stdlib.h>
 
-// Byteswapping macros.
-#include "libgens/Util/byteswap.h"
+// System byte order.
+#include "libcompat/byteorder.h"
 
 // GL_UNSIGNED_INT_8_8_8_8_REV is needed for native byte-order on PowerPC.
 // When used with GL_BGRA, it's effectively the same as GL_ARGB.
-#if GENS_BYTEORDER == GENS_BIG_ENDIAN
+#if SYS_BYTEORDER == SYS_BIG_ENDIAN
 #define SDLGL_UNSIGNED_BYTE GL_UNSIGNED_INT_8_8_8_8_REV
-#else
+#else /* SYS_BYTEORDER == SYS_LIL_ENDIAN */
 #define SDLGL_UNSIGNED_BYTE GL_UNSIGNED_BYTE
 #endif
 

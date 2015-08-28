@@ -38,9 +38,6 @@
 // LOG_MSG() subsystem.
 #include "macros/log_msg.h"
 
-// Byteswapping macros and functions.
-#include "Util/byteswap.h"
-
 // C++ includes.
 #include <string>
 using std::string;

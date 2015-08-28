@@ -26,10 +26,7 @@
 
 #include <stdint.h>
 #include "../macros/common.h"
-
-// NOTE: This file is generated at compile-time.
-// It's located in the binary directory.
-#include "libgens/Util/byteorder.h"
+#include "libcompat/byteorder.h"
 
 namespace LibGens {
 
@@ -40,10 +37,10 @@ namespace VdpStructs {
 	#pragma pack(1)
 	struct PACKED SprEntry_m5 {
 		uint16_t y;	// Mask == 0x1FF (0x3FF in IM2)
-#if GENS_BYTEORDER == GENS_LIL_ENDIAN
+#if SYS_BYTEORDER == SYS_LIL_ENDIAN
 		uint8_t link;	// Mask == 0x7F
 		uint8_t sz;	// ----hhvv; units are cells
-#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
+#else /* SYS_BYTEORDER == SYS_BIG_ENDIAN */
 		uint8_t sz;	// ----hhvv; units are cells
 		uint8_t link;	// Mask == 0x7F
 #endif
@@ -70,12 +67,12 @@ namespace VdpStructs {
 	// NOTE: VRAM is 16-bit host-endian.
 	#pragma pack(1)
 	struct PACKED SprEntry_tms {
-#if GENS_BYTEORDER == GENS_LIL_ENDIAN
+#if SYS_BYTEORDER == SYS_LIL_ENDIAN
 		uint8_t x;              // X position.
 		uint8_t y;              // Y position, plus one.
 		uint8_t color_ec;       // Color and EC bit.
 		uint8_t sprite;         // Sprite pattern.
-#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
+#else /* SYS_BYTEORDER == SYS_BIG_ENDIAN */
 		uint8_t y;              // Y position, plus one.
 		uint8_t x;              // X position.
 		uint8_t sprite;         // Sprite pattern.

@@ -1,5 +1,5 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
+ * libcompat: Compatibility library.                                       *
  * byteswap.c: Byteswapping functions.                                     *
  *                                                                         *
  * Copyright (c) 2008-2015 by David Korth                                  *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 
 #include "byteswap.h"
-#include "libcompat/cpuflags.h"
+#include "cpuflags.h"
 
 // C includes.
 #include <assert.h>

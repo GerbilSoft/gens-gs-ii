@@ -34,7 +34,7 @@
 #include "libzomg/zomg_vdp.h"
 
 #include "../macros/common.h"
-#include "../Util/byteswap.h"
+#include "libcompat/byteswap.h"
 
 namespace LibGens {
 

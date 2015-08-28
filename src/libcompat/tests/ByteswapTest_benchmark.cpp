@@ -22,9 +22,9 @@
 // Google Test
 #include "gtest/gtest.h"
 
-#include "lg_main.hpp"
-#include "Util/byteswap.h"
-#include "libcompat/cpuflags.h"
+// CPU flags and byteswapping macros.
+#include "byteswap.h"
+#include "cpuflags.h"
 
 // C includes. (C++ namespace)
 #include <cstdio>

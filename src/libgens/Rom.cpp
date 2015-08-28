@@ -49,7 +49,7 @@ using std::u16string;
 #include "libgenstext/StringManip.hpp"
 
 // LibGens includes.
-#include "Util/byteswap.h"
+#include "libcompat/byteswap.h"
 #include "macros/common.h"
 #include "lg_osd.h"
 

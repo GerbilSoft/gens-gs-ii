@@ -43,16 +43,6 @@ ADD_TEST(NAME test_VdpPalette_DAC_SMS
 	COMMAND test_VdpPalette_DAC PalTest_SMS.txt)
 ENDIF(NOT MSVC)
 
-# Byteswap test.
-ADD_EXECUTABLE(ByteswapTest
-	ByteswapTest.cpp
-	ByteswapTest_data.c
-	ByteswapTest_benchmark.cpp
-	)
-TARGET_LINK_LIBRARIES(ByteswapTest gens ${GTEST_LIBRARY})
-ADD_TEST(NAME ByteswapTest
-	COMMAND ByteswapTest)
-
 # Sprite Masking & Overflow Test ROM.
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 ADD_EXECUTABLE(VdpSpriteMaskingTest

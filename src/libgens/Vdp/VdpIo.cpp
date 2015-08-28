@@ -28,7 +28,7 @@
 #include "macros/log_msg.h"
 
 // Byteswapping macros.
-#include "Util/byteswap.h"
+#include "libcompat/byteswap.h"
 
 // M68K CPU.
 #include "cpu/star_68k.h"
