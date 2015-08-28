@@ -82,8 +82,20 @@ CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libcompat.h.in" "${CMAKE_CURR
 
 SET(libcompat_SRCS
 	cpuflags.c
-	byteswap.c
 	)
+
+# Determine the byteswap source file to use.
+IF(NOT CMAKE_SYSTEM_PROCESSOR)
+	MESSAGE(FATAL_ERROR "CMAKE_SYSTEM_PROCESSOR is empty.")
+ENDIF(NOT CMAKE_SYSTEM_PROCESSOR)
+STRING(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" arch)
+IF("${arch}" MATCHES i[0-9]86|x86|x86_64|amd64)
+	SET(libcompat_SRCS ${libcompat_SRCS} byteswap_x86.c)
+ELSE()
+	MESSAGE(WARNING "Architecture-specific byteswap.c not available; using generic version.")
+	SET(libcompat_SRCS ${libcompat_SRCS} byteswap.c)
+ENDIF()
+UNSET(arch)
 
 SET(libcompat_H
 	reentrant.h
