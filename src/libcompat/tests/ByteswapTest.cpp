@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include "ByteswapTest.hpp"
+
 // Google Test
 #include "gtest/gtest.h"
 
@@ -35,20 +37,60 @@
 
 namespace LibCompat { namespace Tests {
 
-class ByteswapTest : public ::testing::Test
+class ByteswapTest : public ::testing::TestWithParam<ByteswapTest_flags>
 {
 	protected:
 		ByteswapTest()
-			: ::testing::Test() { }
+			: ::testing::TestWithParam<ByteswapTest_flags>() { }
 		virtual ~ByteswapTest() { }
 
-		virtual void SetUp(void) { }
-		virtual void TearDown(void) { }
+		virtual void SetUp(void);
+		virtual void TearDown(void);
 
 	protected:
 		static const char *ByteorderString(int byteorder);
 		static int CheckRuntimeByteorder(void);
+
+		// Previous CPU flags.
+		uint32_t cpuFlags_old;
 };
+
+/**
+ * Set up the test.
+ */
+void ByteswapTest::SetUp(void)
+{
+	// Verify CPU flags.
+	ByteswapTest_flags flags = GetParam();
+	uint32_t totalFlags = (flags.cpuFlags | flags.cpuFlags_slow);
+	if (flags.cpuFlags != 0) {
+		ASSERT_NE(0U, CPU_Flags & totalFlags) <<
+			"CPU does not support the required flags for this test.";
+	}
+
+	// Check if the CPU flag is slow.
+	if (CPU_Flags & flags.cpuFlags_slow) {
+		if ((CPU_Flags & totalFlags) == flags.cpuFlags_slow) {
+			// CPU is always slow.
+			printf("WARNING: CPU is known to be slow with this flag.\n"
+			       "Don't rely on the benchmark results.\n");
+		} else if ((CPU_Flags & totalFlags) == totalFlags) {
+			// CPU may be slow.
+			printf("WARNING: CPU may be slow with some instructions provided by this flag.\n");
+		}
+	}
+
+	cpuFlags_old = CPU_Flags;
+	CPU_Flags = flags.cpuFlags;
+}
+
+/**
+ * Tear down the test.
+ */
+void ByteswapTest::TearDown(void)
+{
+	CPU_Flags = cpuFlags_old;
+}
 
 /**
  * Get a string representation of a given system byte order.
@@ -105,7 +147,7 @@ int ByteswapTest::CheckRuntimeByteorder(void)
 /**
  * Check that the runtime byteorder matches the compile-time byteorder.
  */
-TEST_F(ByteswapTest, checkRuntimeByteorder)
+TEST_P(ByteswapTest, checkRuntimeByteorder)
 {
 	// Print the compile-time byte ordering.
 	const int byteorder_compiled = SYS_BYTEORDER;
@@ -124,7 +166,7 @@ TEST_F(ByteswapTest, checkRuntimeByteorder)
 /**
  * Check little-endian byteswapping macros (non-array).
  */
-TEST_F(ByteswapTest, checkLittleEndianMacros)
+TEST_P(ByteswapTest, checkLittleEndianMacros)
 {
 	const uint16_t orig16 = 0x1234;
 	const uint32_t orig32 = 0x12345678;
@@ -150,7 +192,7 @@ TEST_F(ByteswapTest, checkLittleEndianMacros)
 /**
  * Check big-endian byteswapping macros (non-array).
  */
-TEST_F(ByteswapTest, checkBigEndianMacros)
+TEST_P(ByteswapTest, checkBigEndianMacros)
 {
 	const uint16_t orig16 = 0x1234;
 	const uint32_t orig32 = 0x12345678;
@@ -176,7 +218,7 @@ TEST_F(ByteswapTest, checkBigEndianMacros)
 /**
  * Test 16-bit array byteswapping.
  */
-TEST_F(ByteswapTest, checkByteSwap16Array)
+TEST_P(ByteswapTest, checkByteSwap16Array)
 {
 	uint8_t data[516];
 	memcpy(data, ByteswapTest_data_orig, sizeof(data));
@@ -187,13 +229,29 @@ TEST_F(ByteswapTest, checkByteSwap16Array)
 /**
  * Test 16-bit array byteswapping.
  */
-TEST_F(ByteswapTest, checkByteSwap32Array)
+TEST_P(ByteswapTest, checkByteSwap32Array)
 {
 	uint8_t data[516];
 	memcpy(data, ByteswapTest_data_orig, sizeof(data));
 	__byte_swap_32_array(data, sizeof(data));
 	ASSERT_EQ(0, memcmp(data, ByteswapTest_data_swap32, sizeof(data)));
 }
+
+INSTANTIATE_TEST_CASE_P(ByteswapTest_NoFlags, ByteswapTest,
+	::testing::Values(ByteswapTest_flags(0, 0)
+));
+
+// NOTE: byteswap.c only implements MMX/SSE2 using GNU assembler.
+// TODO: Add some flag to disable non-MMX/SSE2 asm optimizations, e.g. 'bswap'.
+#if defined(__GNUC__) && \
+    (defined(__i386__) || defined(__amd64__))
+INSTANTIATE_TEST_CASE_P(ByteswapTest_MMX, ByteswapTest,
+	::testing::Values(ByteswapTest_flags(MDP_CPUFLAG_X86_MMX, 0)
+));
+INSTANTIATE_TEST_CASE_P(ByteswapTest_SSE2, ByteswapTest,
+	::testing::Values(ByteswapTest_flags(MDP_CPUFLAG_X86_SSE2, MDP_CPUFLAG_X86_SSE2SLOW)
+));
+#endif
 
 } }
 
@@ -202,6 +260,7 @@ int main(int argc, char *argv[])
 	fprintf(stderr, "LibCompat test suite: Byteswapping tests.\n\n");
 	// Initialize CPU flags.
 	LibCompat_GetCPUFlags();
+	// Run the test.
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
 }

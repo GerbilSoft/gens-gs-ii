@@ -13,6 +13,7 @@ INCLUDE_DIRECTORIES(${GTEST_INCLUDE_DIR})
 # Byteswap test.
 ADD_EXECUTABLE(ByteswapTest
 	ByteswapTest.cpp
+	ByteswapTest.hpp
 	ByteswapTest_data.c
 	ByteswapTest_data.h
 	ByteswapTest_benchmark.cpp

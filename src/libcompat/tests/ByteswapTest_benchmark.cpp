@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include "ByteswapTest.hpp"
+
 // Google Test
 #include "gtest/gtest.h"
 
@@ -34,17 +36,6 @@
 #include "ByteswapTest_data.h"
 
 namespace LibCompat { namespace Tests {
-
-struct ByteswapTest_flags {
-	uint32_t cpuFlags;
-	uint32_t cpuFlags_slow;
-
-	ByteswapTest_flags(uint32_t cpuFlags, uint32_t cpuFlags_slow)
-	{
-		this->cpuFlags = cpuFlags;
-		this->cpuFlags_slow = cpuFlags_slow;
-	}
-};
 
 class ByteswapTest_benchmark : public ::testing::TestWithParam<ByteswapTest_flags>
 {
@@ -130,8 +121,8 @@ INSTANTIATE_TEST_CASE_P(ByteswapTest_benchmark_NoFlags, ByteswapTest_benchmark,
 	::testing::Values(ByteswapTest_flags(0, 0)
 ));
 
-// NOTE: byteswap.c only implements MMX using GNU assembler.
-// TODO: Add some flag to disable non-MMX asm optimizations, e.g. 'bswap'.
+// NOTE: byteswap.c only implements MMX/SSE2 using GNU assembler.
+// TODO: Add some flag to disable non-MMX/SSE2 asm optimizations, e.g. 'bswap'.
 #if defined(__GNUC__) && \
     (defined(__i386__) || defined(__amd64__))
 INSTANTIATE_TEST_CASE_P(ByteswapTest_benchmark_MMX, ByteswapTest_benchmark,
