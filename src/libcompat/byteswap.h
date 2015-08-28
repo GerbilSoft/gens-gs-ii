@@ -25,6 +25,8 @@
 /* Get the system byte order. */
 #include "byteorder.h"
 
+#include <stdint.h>
+
 #define __swab16(x) (((x) << 8) | ((x) >> 8))
 
 #define __swab32(x) \
@@ -96,17 +98,17 @@ extern "C" {
 
 /**
  * 16-bit byteswap function.
- * @param Pointer to array to swap.
+ * @param ptr Pointer to array to swap. (MUST be 16-bit aligned!)
  * @param n Number of bytes to swap. (Must be divisible by 2; an extra odd byte will be ignored.)
  */
-void __byte_swap_16_array(void *ptr, unsigned int n);
+void __byte_swap_16_array(uint16_t *ptr, unsigned int n);
 
 /**
  * 32-bit byteswap function.
- * @param Pointer to array to swap.
+ * @param ptr Pointer to array to swap. (MUST be 32-bit aligned!)
  * @param n Number of bytes to swap. (Must be divisible by 4; extra bytes will be ignored.)
  */
-void __byte_swap_32_array(void *ptr, unsigned int n);
+void __byte_swap_32_array(uint32_t *ptr, unsigned int n);
 
 #ifdef __cplusplus
 }

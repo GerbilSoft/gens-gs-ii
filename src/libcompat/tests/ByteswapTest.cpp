@@ -222,7 +222,7 @@ TEST_P(ByteswapTest, checkByteSwap16Array)
 {
 	uint8_t data[516];
 	memcpy(data, ByteswapTest_data_orig, sizeof(data));
-	__byte_swap_16_array(data, sizeof(data));
+	__byte_swap_16_array((uint16_t*)data, sizeof(data));
 	ASSERT_EQ(0, memcmp(data, ByteswapTest_data_swap16, sizeof(data)));
 }
 
@@ -233,7 +233,7 @@ TEST_P(ByteswapTest, checkByteSwap32Array)
 {
 	uint8_t data[516];
 	memcpy(data, ByteswapTest_data_orig, sizeof(data));
-	__byte_swap_32_array(data, sizeof(data));
+	__byte_swap_32_array((uint32_t*)data, sizeof(data));
 	ASSERT_EQ(0, memcmp(data, ByteswapTest_data_swap32, sizeof(data)));
 }
 

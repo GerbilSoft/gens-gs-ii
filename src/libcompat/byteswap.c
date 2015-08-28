@@ -26,52 +26,58 @@
 
 /**
  * 16-bit byteswap function.
- * @param Pointer to array to swap.
+ * @param ptr Pointer to array to swap. (MUST be 16-bit aligned!)
  * @param n Number of bytes to swap. (Must be divisible by 2; an extra odd byte will be ignored.)
  */
-void __byte_swap_16_array(void *ptr, unsigned int n)
+void __byte_swap_16_array(uint16_t *ptr, unsigned int n)
 {
-	unsigned char *cptr = (unsigned char*)ptr;
-	unsigned char x;
-
-	// Don't allow uneven lengths.
+	// Verify the block is 16-bit aligned
+	// and is a multiple of 2 bytes.
+	assert(((uintptr_t)ptr & 1) == 0);
 	assert((n & 1) == 0);
 	n &= ~1;
 
-	// NOTE: We can't assume that the system supports
-	// unaligned word access, so we have to get each
-	// byte individually.
-	for (; n > 0; n -= 2, cptr += 2) {
-		x = *cptr;
-		*cptr = *(cptr+1);
-		*(cptr+1) = x;
+	// Process 8 DWORDs per iteration.
+	for (; n >= 16; n -= 16, ptr += 8) {
+		*(ptr+0) = __swab16(*(ptr+0));
+		*(ptr+1) = __swab16(*(ptr+1));
+		*(ptr+2) = __swab16(*(ptr+2));
+		*(ptr+3) = __swab16(*(ptr+3));
+		*(ptr+4) = __swab16(*(ptr+4));
+		*(ptr+5) = __swab16(*(ptr+5));
+		*(ptr+6) = __swab16(*(ptr+6));
+		*(ptr+7) = __swab16(*(ptr+7));
 	}
+
+	// Process remaining WORDs.
+	for (; n > 0; n -= 2, ptr++) {
+		*ptr = __swab16(*ptr);
+	}	
 }
 
 /**
  * 32-bit byteswap function.
- * @param Pointer to array to swap.
+ * @param ptr Pointer to array to swap. (MUST be 32-bit aligned!)
  * @param n Number of bytes to swap. (Must be divisible by 4; extra bytes will be ignored.)
  */
-void __byte_swap_32_array(void *ptr, unsigned int n)
+void __byte_swap_32_array(uint32_t *ptr, unsigned int n)
 {
-	unsigned char *cptr = (unsigned char*)ptr;
-	unsigned char x, y;
-
-	// Don't allow lengths that aren't divisible by 4.
+	// Verify the block is 32-bit aligned
+	// and is a multiple of 4 bytes.
+	assert(((uintptr_t)ptr & 3) == 0);
 	assert((n & 3) == 0);
 	n &= ~3;
 
-	// NOTE: We can't assume that the system supports
-	// unaligned word access, so we have to get each
-	// byte individually.
-	for (; n > 0; n -= 4, cptr += 4) {
-		x = *cptr;
-		y = *(cptr+1);
+	// Process 4 DWORDs per iteration.
+	for (; n >= 16; n -= 16, ptr += 4) {
+		*(ptr+0) = __swab32(*(ptr+0));
+		*(ptr+1) = __swab32(*(ptr+1));
+		*(ptr+2) = __swab32(*(ptr+2));
+		*(ptr+3) = __swab32(*(ptr+3));
+	}
 
-		*cptr = *(cptr+3);
-		*(cptr+1) = *(cptr+2);
-		*(cptr+2) = y;
-		*(cptr+3) = x;
+	// Process remaining DWORDs.
+	for (; n > 0; n -= 4, ptr++) {
+		*ptr = __swab32(*ptr);
 	}
 }

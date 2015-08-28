@@ -99,7 +99,7 @@ TEST_P(ByteswapTest_benchmark, checkByteSwap16Array)
 	// Run this test 10,000,000 times.
 	for (int i = 10000000; i > 0; i--) {
 		memcpy(data, ByteswapTest_data_orig, sizeof(data));
-		__byte_swap_16_array(data, sizeof(data));
+		__byte_swap_16_array((uint16_t*)data, sizeof(data));
 	}
 }
 
@@ -113,7 +113,7 @@ TEST_P(ByteswapTest_benchmark, checkByteSwap32Array)
 	// Run this test 10,000,000 times.
 	for (int i = 10000000; i > 0; i--) {
 		memcpy(data, ByteswapTest_data_orig, sizeof(data));
-		__byte_swap_32_array(data, sizeof(data));
+		__byte_swap_32_array((uint32_t*)data, sizeof(data));
 	}
 }
 
@@ -121,7 +121,7 @@ INSTANTIATE_TEST_CASE_P(ByteswapTest_benchmark_NoFlags, ByteswapTest_benchmark,
 	::testing::Values(ByteswapTest_flags(0, 0)
 ));
 
-// NOTE: byteswap.c only implements MMX/SSE2 using GNU assembler.
+// NOTE: byteswap_x86.c only implements MMX/SSE2 using GNU assembler.
 // TODO: Add some flag to disable non-MMX/SSE2 asm optimizations, e.g. 'bswap'.
 #if defined(__GNUC__) && \
     (defined(__i386__) || defined(__amd64__))
