@@ -80,22 +80,25 @@ CHECK_FUNCTION_EXISTS(memalign HAVE_MEMALIGN)
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libcompat.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.libcompat.h")
 
+# Determine the byteswap source file to use.
+IF(NOT DEFINED libcompat_BYTESWAP_SRCS)
+	IF(NOT CMAKE_SYSTEM_PROCESSOR)
+		MESSAGE(FATAL_ERROR "CMAKE_SYSTEM_PROCESSOR is empty.")
+	ENDIF(NOT CMAKE_SYSTEM_PROCESSOR)
+	STRING(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" arch)
+	IF("${arch}" MATCHES i[0-9]86|x86|x86_64|amd64)
+		SET(libcompat_BYTESWAP_SRCS byteswap_x86.c CACHE INTERNAL "Architecture-specific byteswap implementation.")
+	ELSE()
+		MESSAGE(WARNING "Architecture-specific byteswap.c not available; using generic version.")
+		SET(libcompat_BYTESWAP_SRCS byteswap.c CACHE INTERNAL "Architecture-specific byteswap implementation.")
+	ENDIF()
+	UNSET(arch)
+ENDIF(NOT DEFINED libcompat_BYTESWAP_SRCS)
+
 SET(libcompat_SRCS
 	cpuflags.c
+	${libcompat_BYTESWAP_SRCS}
 	)
-
-# Determine the byteswap source file to use.
-IF(NOT CMAKE_SYSTEM_PROCESSOR)
-	MESSAGE(FATAL_ERROR "CMAKE_SYSTEM_PROCESSOR is empty.")
-ENDIF(NOT CMAKE_SYSTEM_PROCESSOR)
-STRING(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" arch)
-IF("${arch}" MATCHES i[0-9]86|x86|x86_64|amd64)
-	SET(libcompat_SRCS ${libcompat_SRCS} byteswap_x86.c)
-ELSE()
-	MESSAGE(WARNING "Architecture-specific byteswap.c not available; using generic version.")
-	SET(libcompat_SRCS ${libcompat_SRCS} byteswap.c)
-ENDIF()
-UNSET(arch)
 
 SET(libcompat_H
 	reentrant.h
