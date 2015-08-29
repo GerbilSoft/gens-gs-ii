@@ -338,7 +338,6 @@ uint32_t LibCompat_GetCPUFlags(void)
 		// Eliminate spaces from the brand string.
 		elimSpaces(CPU_FullName, sizeof(CPU_FullName),
 			   brand_string.c, sizeof(brand_string.c));
-		printf("CPU full name: %s\n", CPU_FullName);
 	}
 
 	// Check for SSE2SLOW, SSE3SLOW, and AVXSLOW.
