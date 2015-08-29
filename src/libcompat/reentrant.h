@@ -64,17 +64,27 @@ static __forceinline struct tm *__cdecl localtime_r(const time_t *_Time, struct 
 #endif /* _WIN32 */
 #endif /* !HAVE_LOCALTIME_R */
 
-#if !defined(WIN32) && !defined(HAVE_GETPWUID_R)
+#if !defined(_WIN32) && \
+    (defined(__unix__) || defined(__unix) || defined(unix) || \
+     defined(__linux__) || defined(__linux) || defined(linux) || \
+     (defined(__APPLE__) && defined(__MACH__)) )
+/**
+ * System is Unix, Linux, or Mac OS X.
+ * getpwuid_r() must be available.
+ */
+#if !defined(HAVE_GETPWUID_R)
 #error Platform is missing getpwuid_r(), please implement it.
 #if 0
 #include <pwd.h>
 int getpwuid_r(uid_t uid, struct passwd *pwd,
 	       char *buf, size_t buflen, struct passwd **result);
 #endif
-#endif
+#endif /* !defined(HAVE_GETPWUID_R) */
+
+#endif /* not Unix / Linux / MacOS X */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __LIBCOMPAT_W32U_SHLOBJ_H__ */
+#endif /* __LIBCOMPAT_REENTRANT_H__ */
