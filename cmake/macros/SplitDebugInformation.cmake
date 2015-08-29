@@ -25,6 +25,7 @@ MACRO(SPLIT_DEBUG_INFORMATION EXE_TARGET)
 SET(SPLIT_OK 1)
 IF(MSVC)
 	# MSVC splits debug information by itself.
+	SET(SPLIT_OK 0)
 ELSEIF(NOT CMAKE_OBJCOPY)
 	# 'objcopy' is missing.
 	SET(SPLIT_OK 0)
