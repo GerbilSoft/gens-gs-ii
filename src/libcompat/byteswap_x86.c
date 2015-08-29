@@ -57,6 +57,8 @@ static inline uint32_t swap_two_16_in_32(uint32_t dword)
  */
 void __byte_swap_16_array(uint16_t *ptr, unsigned int n)
 {
+	uint32_t *dwptr;
+
 	// Verify the block is 16-bit aligned
 	// and is a multiple of 2 bytes.
 	assert(((uintptr_t)ptr & 1) == 0);
@@ -127,7 +129,7 @@ void __byte_swap_16_array(uint16_t *ptr, unsigned int n)
 
 	// Process 8 WORDs per iteration,
 	// using 32-bit accesses.
-	uint32_t *dwptr = (uint32_t*)ptr;
+	dwptr = (uint32_t*)ptr;
 	for (; n >= 16; n -= 16, dwptr += 4) {
 		*(dwptr+0) = swap_two_16_in_32(*(dwptr+0));
 		*(dwptr+1) = swap_two_16_in_32(*(dwptr+1));
