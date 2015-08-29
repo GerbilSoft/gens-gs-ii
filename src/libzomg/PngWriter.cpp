@@ -146,7 +146,6 @@ void PngWriterPrivate::T_writePNG_rows_16(const Zomg_Img_Data_t *img_data, uint8
 {
 	#define MMASK(bits) ((1 << (bits)) - 1)
 	uint8_t r, g, b;
-	uint8_t oldR, oldG, oldB;
 
 	// Write the rows.
 	const uint16_t *screen = (const uint16_t*)img_data->data;
@@ -160,7 +159,6 @@ void PngWriterPrivate::T_writePNG_rows_16(const Zomg_Img_Data_t *img_data, uint8
 			b = (uint8_t)((*screen) & MMASK(BBits)) << (8 - BBits);
 
 			// Fill in the unused bits with a copy of the MSBs.
-			oldR = r; oldG = g; oldB = b;
 			r |= (r >> RBits);
 			g |= (g >> GBits);
 			b |= (b >> BBits);
