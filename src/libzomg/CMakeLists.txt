@@ -32,15 +32,11 @@ SET(libzomg_SRCS
 	PngReader.cpp
 	)
 IF(WIN32)
-	SET(libzomg_SRCS
-		${libzomg_SRCS}
-		Metadata_win32.cpp
-		)
+	SET(libzomg_SRCS ${libzomg_SRCS} Metadata_win32.cpp)
+ELSEIF(LIBOGC)
+	SET(libzomg_SRCS ${libzomg_SRCS} Metadata_ogc.cpp)
 ELSE()
-	SET(libzomg_SRCS
-		${libzomg_SRCS}
-		Metadata_unix.cpp
-		)
+	SET(libzomg_SRCS ${libzomg_SRCS} Metadata_unix.cpp)
 ENDIF()
 
 # Headers.
