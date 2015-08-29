@@ -53,16 +53,16 @@ SET(RVL_C_FLAGS "-mrvl -mcpu=750 -meabi -mhard-float")
 
 # Enable Wii bulids.
 SET(HW_RVL 1)
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${RVL_C_FLAGS}")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${RVL_C_FLAGS}")
+SET(CMAKE_C_FLAGS "${RVL_C_FLAGS}" CACHE STRING "Flags used by the compiler during all build types." FORCE)
+SET(CMAKE_CXX_FLAGS "${RVL_C_FLAGS}" CACHE STRING "Flags used by the compiler during all build types." FORCE)
 SET(LIBOGC_PLATFORM "wii")
 
 # Equivalent code for enabling GameCube builds,
 # but disabled because we're not targetting GameCube.
 IF(0)
 SET(HW_DOL 1)
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${DOL_C_FLAGS}")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DOL_C_FLAGS}")
+SET(CMAKE_C_FLAGS "${DOL_C_FLAGS}" CACHE STRING "Flags used by the compiler during all build types." FORCE)
+SET(CMAKE_CXX_FLAGS "${DOL_C_FLAGS}" CACHE STRING "Flags used by the compiler during all build types." FORCE)
 SET(LIBOGC_PLATFORM "cube")
 ENDIF(0)
 
@@ -76,6 +76,6 @@ IF(NOT EXISTS "${LIBOGC_LIBRARY_DIR}")
 ENDIF(NOT EXISTS "${LIBOGC_LIBRARY_DIR}")
 # CMake implicit libraries are set after the toolchain is processed.
 # Add libogc.a to LDFLAGS as a workaround.
-SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LIBOGC_LIBRARY}")
-SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${LIBOGC_LIBRARY}")
+SET(CMAKE_EXE_LINKER_FLAGS "${LIBOGC_LIBRARY}" CACHE STRING "Flags used by the linker." FORCE)
+SET(CMAKE_SHARED_LINKER_FLAGS "${LIBOGC_LIBRARY}" CACHE STRING "Flags used by the linker during the creation of dll's." FORCE)
 LINK_DIRECTORIES("${LIBOGC_LIBRARY_DIR}")
