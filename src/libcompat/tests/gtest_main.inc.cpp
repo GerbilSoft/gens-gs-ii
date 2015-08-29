@@ -24,79 +24,8 @@
 // embedded systems.
 
 #if defined(HW_RVL) || defined(HW_DOL)
-/** Wii or GameCube hardware. **/
-
-// libogc
-#include <gccore.h>
-static GXRModeObj *rmode = nullptr;
-static void *xfb = nullptr;
-
-/**
- * Wait for the next full frame.
- * In interlaced mode, this waits for both fields to be drawn.
- */
-static void video_waitForFrame(void)
-{
-	VIDEO_WaitVSync();
-	if (rmode->viTVMode&VI_NON_INTERLACE) {
-		VIDEO_WaitVSync();
-	} else {
-		while (VIDEO_GetNextField())
-			VIDEO_WaitVSync();
-	}
-}
-
-/**
- * Initialize libogc's VIDEO and CON subsystems.
- */
-static void init_libogc(void)
-{
-	// Initialize video using the preferred video mode.
-	// This corresponds to the settings in the Wii System Menu.
-	VIDEO_Init();
-	rmode = VIDEO_GetPreferredMode(nullptr);
-
-	// Workaround for overscan issues. (from DOP-Mii)
-	// NOTE: This effectively decreases visible area from 80x30 to 80x28 on NTSC!
-	if (rmode->viTVMode == VI_NTSC || CONF_GetEuRGB60() || CONF_GetProgressiveScan())
-                GX_AdjustForOverscan(rmode, rmode, 0, (u16)(rmode->viWidth * 0.026));
-
-	VIDEO_Configure(rmode);
-
-	// Initialize the display.
-	xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
-	VIDEO_ClearFrameBuffer(rmode, xfb, COLOR_BLACK);
-	VIDEO_SetNextFramebuffer(xfb);
-	VIDEO_SetBlack(FALSE);
-	VIDEO_Flush();
-
-	// Wait for the next frame before we initialize the console.
-	video_waitForFrame();
-
-	// Initialize the console. (Required for printf().)
-	CON_InitEx(rmode,		// video mode
-		   0,			// xstart
-		   0,			// ystart
-		   rmode->fbWidth,	// xres
-		   rmode->xfbHeight	// yres
-		 );
-}
-
-int main(int argc, char *argv[])
-{
-	// Initialize libogc's VIDEO and CON subsystems.
-	init_libogc();
-
-	// Run the test suite.
-	int ret = test_main(argc, argv);
-
-	// Wait for the final frame to be rendered before
-	// returning to the loader. This ensures that
-	// test information isn't cut off.
-	// TODO: Add a timeout and/or wait for a button press?
-	video_waitForFrame();
-	return ret;
-}
+// libogc: Wii or GameCube hardware.
+#include "gtest_main.ogc.inc.cpp"
 
 #else
 
