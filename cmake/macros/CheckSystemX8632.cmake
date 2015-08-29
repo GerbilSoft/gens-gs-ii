@@ -34,15 +34,15 @@ MACRO(CHECK_SYSTEM_X86_32 _RESULT)
 			#error Not X86_32. Aborting.
 			#endif
 
-			int main(void) { return 0; }" TMP_CHECK_X86_32)
+			int main(void) { return 0; }" CHECK_X86_32)
 
-		IF(TMP_CHECK_X86_32)
+		IF(CHECK_X86_32)
 			SET(CHECKED_X86_32 1 CACHE INTERNAL "Is the system X86_32?")
 			MESSAGE(STATUS "Checking if the system is X86_32: yes")
-		ELSE(TMP_CHECK_X86_32)
+		ELSE(CHECK_X86_32)
 			SET(CHECKED_X86_32 0 CACHE INTERNAL "Is the system X86_32?")
 			MESSAGE(STATUS "Checking if the system is X86_32: no")
-		ENDIF(TMP_CHECK_X86_32)
+		ENDIF(CHECK_X86_32)
 	ENDIF(NOT DEFINED CHECKED_X86_32)
 	SET(${_RESULT} ${CHECKED_X86_32})
 ENDMACRO (CHECK_SYSTEM_X86_32)
