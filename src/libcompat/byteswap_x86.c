@@ -30,6 +30,22 @@
 // C includes.
 #include <assert.h>
 
+#ifdef _MSC_VER
+#define inline __inline
+#endif
+
+/**
+ * Byteswap two 16-bit WORDs in a 32-bit DWORD.
+ * @param dword DWORD containing two 16-bit WORDs.
+ * @return DWORD containing the byteswapped 16-bit WORDs.
+ */
+static inline uint32_t swap_two_16_in_32(uint32_t dword)
+{
+	uint32_t tmp1 = (dword >> 8) & 0x00FF00FF;
+	uint32_t tmp2 = (dword << 8) & 0xFF00FF00;
+	return (tmp1 | tmp2);
+}
+
 /**
  * 16-bit byteswap function.
  * @param ptr Pointer to array to swap. (MUST be 16-bit aligned!)
@@ -46,8 +62,7 @@ void __byte_swap_16_array(uint16_t *ptr, unsigned int n)
 	// TODO: Don't bother with MMX or SSE2
 	// if n is below a certain size?
 
-#if defined(__GNUC__) && \
-    (defined(__i386__) || defined(__amd64__))
+#if defined(__GNUC__)
 	if (CPU_Flags & MDP_CPUFLAG_X86_SSE2) {
 		// If wptr isn't 16-byte aligned, swap words
 		// manually until we get to 16-byte alignment.
@@ -99,50 +114,23 @@ void __byte_swap_16_array(uint16_t *ptr, unsigned int n)
 
 		// If the block isn't a multiple of 8 bytes,
 		// the C implementation will handle the rest.
-	} else {
-		// Use 'rol' for 16-bit byteswapping.
-		// Swapping 8 bytes (4 words) at a time.
-		for (; n >= 8; n -= 8, ptr += 4) {
-			__asm__ (
-				// NOTE: xorl+movw is slightly faster than
-				// movzwl on Core 2 T7200.
-				// TODO: Interleaving instructions improved
-				// ByteswapTest_benchmark by ~30ms, though
-				// it reduces readability.
-				"movzwl	(%[ptr]), %%eax\n"
-				"movzwl	2(%[ptr]), %%edx\n"
-				"movzwl	4(%[ptr]), %%esi\n"
-				"movzwl	6(%[ptr]), %%edi\n"
-				// rol seems to be faster than xchg %al, %ah.
-				"rol	$8, %%ax\n"
-				"rol	$8, %%dx\n"
-				"rol	$8, %%si\n"
-				"rol	$8, %%di\n"
-				"movw	%%ax, (%[ptr])\n"
-				"movw	%%dx, 2(%[ptr])\n"
-				"movw	%%si, 4(%[ptr])\n"
-				"movw	%%di, 6(%[ptr])\n"
-				:
-				: [ptr] "r" (ptr)
-				: "eax", "edx", "esi", "edi"
-			);
-		}
 	}
-#endif /* defined(__GNUC__) && (defined(__i386__) || defined(__amd64__)) */
+#endif /* defined(__GNUC__) */
 
 	// C version. Used if optimized asm isn't available,
 	// or if we have a block that isn't a multiple of
 	// 16 (SSE2) or 8 (MMX) bytes.
-	for (; n >= 16; n -= 16, ptr += 8) {
-		*(ptr+0) = __swab16(*(ptr+0));
-		*(ptr+1) = __swab16(*(ptr+1));
-		*(ptr+2) = __swab16(*(ptr+2));
-		*(ptr+3) = __swab16(*(ptr+3));
-		*(ptr+4) = __swab16(*(ptr+4));
-		*(ptr+5) = __swab16(*(ptr+5));
-		*(ptr+6) = __swab16(*(ptr+6));
-		*(ptr+7) = __swab16(*(ptr+7));
+
+	// Process 8 WORDs per iteration,
+	// using 32-bit accesses.
+	uint32_t *dwptr = (uint32_t*)ptr;
+	for (; n >= 16; n -= 16, dwptr += 4) {
+		*(dwptr+0) = swap_two_16_in_32(*(dwptr+0));
+		*(dwptr+1) = swap_two_16_in_32(*(dwptr+1));
+		*(dwptr+2) = swap_two_16_in_32(*(dwptr+2));
+		*(dwptr+3) = swap_two_16_in_32(*(dwptr+3));
 	}
+	ptr = (uint16_t*)dwptr;
 
 	// Process remaining WORDs.
 	for (; n > 0; n -= 2, ptr++) {
