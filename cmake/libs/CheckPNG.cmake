@@ -27,8 +27,8 @@ IF(NOT PNG_FOUND)
 	SET(PNG_FOUND 1)
 	SET(HAVE_PNG 1)
 	SET(PNG_INCLUDE_DIR
-		"${CMAKE_CURRENT_SOURCE_DIR}/extlib/libpng/"
-		"${CMAKE_CURRENT_BINARY_DIR}/extlib/libpng/"
+		"${CMAKE_SOURCE_DIR}/extlib/libpng/"
+		"${CMAKE_BINARY_DIR}/extlib/libpng/"
 		)
 ENDIF(NOT PNG_FOUND)
 
