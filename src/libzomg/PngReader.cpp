@@ -285,14 +285,13 @@ PngReader::~PngReader()
 /**
  * Read an image from a PNG file in memory.
  * Image is always loaded as 32-bit xBGR.
- * @param img_data Image data. (Caller must free img_data->data.)
- * @param png_file PNG file data.
- * @param png_size Size of PNG file data.
+ * @param img_data	[out] Image data. (Caller must free img_data->data on success.)
+ * @param png_file	[in] PNG file data.
+ * @param png_size	[in] Size of PNG file data.
  * @return 0 on success; negative errno on error.
  */
 int PngReader::readFromMem(_Zomg_Img_Data_t *img_data, const void *png_file, size_t png_size)
 {
-	// TODO: Combine more of writeToFile() and writeToZip().
 	if (!img_data || !png_file || png_size == 0) {
 		// Invalid parameters.
 		return -EINVAL;
@@ -320,6 +319,52 @@ int PngReader::readFromMem(_Zomg_Img_Data_t *img_data, const void *png_file, siz
 	// Read from PNG.
 	int ret = d->readFromPng(png_ptr, info_ptr, img_data);
 	png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
+	return ret;
+}
+
+		/**
+ * Read an image from a PNG file.
+ * Image is always loaded as 32-bit xBGR.
+ * @param img_data	[out] Image data. (Caller must free img_data->data on success.)
+ * @param filename	[in] PNG file.
+ * @return 0 on success; negative errno on error.
+ */
+int PngReader::readFromFile(_Zomg_Img_Data_t *img_data, const char *filename)
+{
+	if (!img_data || !filename || !filename[0]) {
+		// Invalid parameters.
+		return -EINVAL;
+	}
+
+	png_structp png_ptr;
+	png_infop info_ptr;
+
+	// Initialize libpng.
+	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+	if (!png_ptr) {
+		return -ENOMEM;
+	}
+	info_ptr = png_create_info_struct(png_ptr);
+	if (!info_ptr) {
+		png_destroy_read_struct(&png_ptr, nullptr, nullptr);
+		return -ENOMEM;
+	}
+
+	// Output file.
+	FILE *f = fopen(filename, "rb");
+	if (!f) {
+		// Error opening the output file.
+		png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
+		return -errno;
+	}
+
+	// Initialize standard file I/O.
+	png_init_io(png_ptr, f);
+
+	// Read from PNG.
+	int ret = d->readFromPng(png_ptr, info_ptr, img_data);
+	png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
+	fclose(f);
 	return ret;
 }
 

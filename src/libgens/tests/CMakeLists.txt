@@ -85,3 +85,5 @@ DO_SPLIT_DEBUG(VdpFIFOTesting)
 
 # Sound tests.
 ADD_SUBDIRECTORY(sound)
+# Effects tests.
+ADD_SUBDIRECTORY(Effects)

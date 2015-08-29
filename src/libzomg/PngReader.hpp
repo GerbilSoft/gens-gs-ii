@@ -47,15 +47,25 @@ class PngReader
 
 	public:
 		// TODO: Better memory allocation semantics?
+
 		/**
 		 * Read an image from a PNG file in memory.
 		 * Image is always loaded as 32-bit xBGR.
-		 * @param img_data Image data. (Caller must free img_data->data.)
-		 * @param png_file PNG file data.
-		 * @param png_size Size of PNG file data.
+		 * @param img_data	[out] Image data. (Caller must free img_data->data on success.)
+		 * @param png_file	[in] PNG file data.
+		 * @param png_size	[in] Size of PNG file data.
 		 * @return 0 on success; negative errno on error.
 		 */
 		int readFromMem(_Zomg_Img_Data_t *img_data, const void *png_file, size_t png_size);
+
+		/**
+		 * Read an image from a PNG file.
+		 * Image is always loaded as 32-bit xBGR.
+		 * @param img_data	[out] Image data. (Caller must free img_data->data on success.)
+		 * @param filename	[in] PNG file.
+		 * @return 0 on success; negative errno on error.
+		 */
+		int readFromFile(_Zomg_Img_Data_t *img_data, const char *filename);
 };
 
 }
