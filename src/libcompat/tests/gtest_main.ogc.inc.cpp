@@ -34,6 +34,38 @@
 static GXRModeObj *rmode = nullptr;
 static void *xfb = nullptr;
 
+// These variables are set if the
+// corresponding button is pressed.
+static bool power_pressed = false;
+static bool reset_pressed = false;
+
+// Set if waiting for the user to press HOME.
+static bool waiting_for_home = false;
+
+/**
+ * POWER button callback.
+ */
+static void __Sys_PowerCallback(void)
+{
+	// FIXME: Handle POWER while running the tests.
+	// Currently, the test suite can't be interrupted.
+	if (waiting_for_home) {
+		power_pressed = true;
+	}
+}
+
+/**
+ * RESET button callback.
+ */
+static void __Sys_ResetCallback(void)
+{
+	// FIXME: Handle RESET while running the tests.
+	// Currently, the test suite can't be interrupted.
+	if (waiting_for_home) {
+		reset_pressed = true;
+	}
+}
+
 /**
  * Wait for the next full frame.
  * In interlaced mode, this waits for both fields to be drawn.
@@ -50,7 +82,7 @@ static void video_waitForFrame(void)
 }
 
 /**
- * Initialize libogc's VIDEO and CON subsystems.
+ * Initialize libogc's subsystems.
  */
 static void init_libogc(void)
 {
@@ -83,15 +115,81 @@ static void init_libogc(void)
 		   rmode->fbWidth,	// xres
 		   rmode->xfbHeight	// yres
 		 );
+
+	// Initialize Wii remotes.
+	WPAD_Init();
+}
+
+/**
+ * Shut down libogc's subsystems.
+ */
+static void end_libogc(void)
+{
+	WPAD_SetPowerButtonCallback(NULL);
+	WPAD_SetBatteryDeadCallback(NULL);
+
+	// Make sure the Wii remotes are closed properly.
+	while (WPAD_GetStatus() == WPAD_STATE_ENABLING) { }
+	if (WPAD_GetStatus() == WPAD_STATE_ENABLED) {
+		WPAD_Flush(WPAD_CHAN_ALL);
+		WPAD_Shutdown();
+	}
+	WPAD_Shutdown();
+}
+
+/**
+ * Wait for the HOME button to be pressed.
+ */
+static void wait_for_home(void)
+{
+	printf("\033[37;0m\nPress the HOME button to exit.");
+	video_waitForFrame();
+
+	waiting_for_home = true;
+	bool in_loop = true;
+	while (in_loop) {
+		// Update the Wii Remote status.
+		WPAD_ScanPads();
+
+		// Check if HOME was pressed on any controller.
+		for (int i = 0; i < 4; i++) {
+			if (WPAD_ButtonsDown(i) & WPAD_BUTTON_HOME) {
+				// HOME button pressed.
+				in_loop = false;
+				break;
+			}
+		}
+
+		// Check if POWER or RESET was pressed.
+		if (power_pressed) {
+			printf("\nPOWER button pressed; shutting down...");
+			video_waitForFrame();
+			SYS_ResetSystem(SYS_POWEROFF, 0, 0);
+		} else if (reset_pressed) {
+			printf("\nRESET button pressed; restarting...");
+			SYS_ResetSystem(SYS_RESTART, 0, 0);
+		}
+	}
+
+	printf("\nReturning to loader...");
+	video_waitForFrame();
 }
 
 int main(int argc, char *argv[])
 {
+	// Register power/reset callbacks.
+	SYS_SetPowerCallback(__Sys_PowerCallback);
+	SYS_SetResetCallback(__Sys_ResetCallback);
+
 	// Initialize libogc's subsystems.
 	init_libogc();
 
 	// Run the test suite.
 	int ret = test_main(argc, argv);
+	wait_for_home();
+
+	// Shut down libogc's subsystems.
+	end_libogc();
 
 	// Wait for the final frame to be rendered before
 	// returning to the loader. This ensures that
