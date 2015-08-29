@@ -78,48 +78,17 @@ class PngWriterPrivate
 		PngWriterPrivate &operator=(const PngWriterPrivate &);
 
 	public:
-		// Pixel masks.
-		static const uint16_t MASK_RED_15       = 0x7C00;
-		static const uint16_t MASK_GREEN_15     = 0x03E0;
-		static const uint16_t MASK_BLUE_15      = 0x001F;
-
-		static const uint16_t MASK_RED_16       = 0xF800;
-		static const uint16_t MASK_GREEN_16     = 0x07E0;
-		static const uint16_t MASK_BLUE_16      = 0x001F;
-
-		static const uint32_t MASK_RED_32       = 0xFF0000;
-		static const uint32_t MASK_GREEN_32     = 0x00FF00;
-		static const uint32_t MASK_BLUE_32      = 0x0000FF;
-
-		// Pixel shifts.
-		static const uint8_t SHIFT_RED_15       = 7;
-		static const uint8_t SHIFT_GREEN_15     = 2;
-		static const uint8_t SHIFT_BLUE_15      = 3;
-
-		static const uint8_t SHIFT_RED_16       = 8;
-		static const uint8_t SHIFT_GREEN_16     = 3;
-		static const uint8_t SHIFT_BLUE_16      = 3;
-
-		static const uint8_t SHIFT_RED_32       = 16;
-		static const uint8_t SHIFT_GREEN_32     = 8;
-		static const uint8_t SHIFT_BLUE_32      = 0;
-
 		/**
 		 * Write 16-bit PNG rows.
 		 * @param pixel Typename.
-		 * @param maskR Red mask.
-		 * @param maskG Green mask.
-		 * @param maskB Blue mask.
-		 * @param shiftR Red shift. (Right)
-		 * @param shiftG Green shift. (Right)
-		 * @param shiftB Blue shift. (Left)
+		 * @param RBits Red bits.
+		 * @param GBits Green bits.
+		 * @param BBits Blue bits.
 		 * @param img_data Image data.
 		 * @param row_buffer Row buffer. (Must be at least width * 3 bytes.)
 		 * @param png_ptr PNG pointer.
 		 */
-		template<typename pixel,
-			 const pixel maskR, const pixel maskG, const pixel maskB,
-			 const unsigned int shiftR, const unsigned int shiftG, const unsigned int shiftB>
+		template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
 		static void T_writePNG_rows_16(const Zomg_Img_Data_t *img_data, uint8_t *row_buffer,
 					       png_structp png_ptr);
 
@@ -164,33 +133,42 @@ PngWriterPrivate::~PngWriterPrivate()
 /**
  * Write 16-bit PNG rows.
  * @param pixel Typename.
- * @param maskR Red mask.
- * @param maskG Green mask.
- * @param maskB Blue mask.
- * @param shiftR Red shift. (Right)
- * @param shiftG Green shift. (Right)
- * @param shiftB Blue shift. (Left)
+ * @param RBits Red bits.
+ * @param GBits Green bits.
+ * @param BBits Blue bits.
  * @param img_data Image data.
  * @param row_buffer Row buffer. (Must be at least width * 3 bytes.)
  * @param png_ptr PNG pointer.
  */
-template<typename pixel,
-	 const pixel maskR, const pixel maskG, const pixel maskB,
-	 const unsigned int shiftR, const unsigned int shiftG, const unsigned int shiftB>
+template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
 void PngWriterPrivate::T_writePNG_rows_16(const Zomg_Img_Data_t *img_data, uint8_t *row_buffer,
 					  png_structp png_ptr)
 {
+	#define MMASK(bits) ((1 << (bits)) - 1)
+	uint8_t r, g, b;
+	uint8_t oldR, oldG, oldB;
+
 	// Write the rows.
 	const uint16_t *screen = (const uint16_t*)img_data->data;
 	const int row_adj = (img_data->pitch / sizeof(pixel)) - img_data->w;
 	for (int y = img_data->h; y > 0; y--) {
 		uint8_t *rowBufPtr = row_buffer;
-		for (int x = img_data->w; x > 0; x--, rowBufPtr += 3) {
-			// TODO: Fill in the unused bits with a copy of the MSBs.
-			pixel MD_Color = *screen++;
-			*(rowBufPtr + 0) = (uint8_t)((MD_Color & maskR) >> shiftR);
-			*(rowBufPtr + 1) = (uint8_t)((MD_Color & maskG) >> shiftG);
-			*(rowBufPtr + 2) = (uint8_t)((MD_Color & maskB) << shiftB);
+		for (int x = img_data->w; x > 0; x--, rowBufPtr += 3, screen++) {
+			// Get the color components.
+			r = (uint8_t)((*screen >> (GBits + BBits)) & MMASK(RBits)) << (8 - RBits);
+			g = (uint8_t)((*screen >> BBits) & MMASK(GBits)) << (8 - GBits);
+			b = (uint8_t)((*screen) & MMASK(BBits)) << (8 - BBits);
+
+			// Fill in the unused bits with a copy of the MSBs.
+			oldR = r; oldG = g; oldB = b;
+			r |= (r >> RBits);
+			g |= (g >> GBits);
+			b |= (b >> BBits);
+
+			// Save the new color components.
+			*(rowBufPtr + 0) = r;
+			*(rowBufPtr + 1) = g;
+			*(rowBufPtr + 2) = b;
 		}
 
 		// Write the row.
@@ -341,18 +319,14 @@ int PngWriterPrivate::writeToPng(png_structp png_ptr, png_infop info_ptr,
 	switch (img_data->bpp) {
 		case 15: {
 			// 15-bit color. (555)
-			T_writePNG_rows_16<uint16_t,
-					   MASK_RED_15, MASK_GREEN_15, MASK_BLUE_15,
-					   SHIFT_RED_15, SHIFT_GREEN_15, SHIFT_BLUE_15>
+			T_writePNG_rows_16<uint16_t, 5, 5, 5>
 					  (img_data, row.row_buffer, png_ptr);
 			break;
 		}
 
 		case 16: {
 			// 16-bit color. (565)
-			T_writePNG_rows_16<uint16_t,
-					   MASK_RED_16, MASK_GREEN_16, MASK_BLUE_16,
-					   SHIFT_RED_16, SHIFT_GREEN_16, SHIFT_BLUE_16>
+			T_writePNG_rows_16<uint16_t, 5, 6, 5>
 					  (img_data, row.row_buffer, png_ptr);
 			// TODO
 			break;
