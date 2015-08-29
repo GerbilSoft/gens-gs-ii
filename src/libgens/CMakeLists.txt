@@ -87,27 +87,14 @@ SET(libgens_UTIL_H
 	)
 
 # OS-specific timing functions.
-SET(libgens_TIMING_SRCS
-	Util/Timing.cpp
-	)
-SET(libgens_TIMING_H
-	Util/Timing.hpp
-	)
+SET(libgens_TIMING_SRCS Util/Timing.cpp)
+SET(libgens_TIMING_H Util/Timing.hpp)
 IF(WIN32)
-	SET(libgens_TIMING_SRCS
-		${libgens_TIMING_SRCS}
-		Util/Timing_win32.cpp
-		)
+	SET(libgens_TIMING_SRCS ${libgens_TIMING_SRCS} Util/Timing_win32.cpp)
 ELSEIF(APPLE)
-	SET(libgens_TIMING_SRCS
-		${libgens_TIMING_SRCS}
-		Util/Timing_mac.cpp
-		)
-ELSE()
-	SET(libgens_TIMING_SRCS
-		${libgens_TIMING_SRCS}
-		Util/Timing_unix.cpp
-		)
+	SET(libgens_TIMING_SRCS ${libgens_TIMING_SRCS} Util/Timing_mac.cpp)
+ELSEIF(UNIX OR LINUX)
+	SET(libgens_TIMING_SRCS ${libgens_TIMING_SRCS} Util/Timing_unix.cpp)
 ENDIF()
 
 SET(libgens_EMUCONTEXT_SRCS
