@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <assert.h>
 
 // CPU flags.
 // This variable is publicly accessible for performance reasons.
@@ -44,6 +45,61 @@ static char CPU_FullName[64] = {0};
 // CPU-specific flag definitions.
 // These are for internal use by LibGens_GetCPUFlags() only.
 #include "cpuflags_x86.h"
+
+/**
+ * Simple space elimination algorithm.
+ * We can't use libgenstext here because:
+ * 1. libcompat shouldn't depend on other Gens/GS II libraries.
+ * 2. StringManip is C++; this is C.
+ *
+ * @param dest		[out] Destination string.
+ * @param sz_dest	[in] Size of destination string. (should be > sz_src for NULL termination.)
+ * @param src		[in] Source string. (Might not be NULL-terminated.)
+ * @param sz_src	[in] Size of source string.
+ */
+static void elimSpaces(char *dest, unsigned int sz_dest,
+		       const char *src, unsigned int sz_src)
+{
+	char *dest_start = dest;
+	const char *src_end = src + sz_src;
+	int wasLastSpace = 1;
+
+	assert(sz_dest > sz_src);
+	for (; src < src_end; src++) {
+		if (isspace(*src)) {
+			if (!wasLastSpace) {
+				// Last character was not a space.
+				// Append this character, then mark
+				// the last character as a space.
+				*dest++ = *src;
+				wasLastSpace = 1;
+			}
+		} else {
+			// This character is not a space.
+			*dest++ = *src;
+			wasLastSpace = 0;
+		}
+	}
+
+	// Make sure the string is NULL-terminated.
+	if (*(dest-1) == 0) {
+		dest--;
+	} else {
+		*dest = 0;
+	}
+
+	// Check for any trailing spaces.
+	for (dest--; dest >= dest_start; dest--) {
+		if (isspace(*dest)) {
+			// Found a trailing space.
+			*dest = 0;
+		} else {
+			// Not a trailing space.
+			// We're done here.
+			break;
+		}
+	}
+}
 
 /**
  * Get the CPU flags.
@@ -276,44 +332,10 @@ uint32_t LibCompat_GetCPUFlags(void)
 			brand_string.i[8], brand_string.i[9],
 			brand_string.i[10], brand_string.i[11]);
 
-		// Simple space elimination algorithm.
-		// We can't use libgenstext here because:
-		// 1. libcompat shouldn't depend on other Gens/GS II libraries.
-		// 2. StringManip is C++; this is C.
-		char *cpuFullName = &CPU_FullName[0];
-		int wasLastSpace = 1;
-		for (const char *brandChr = &brand_string.c[0];
-		     brandChr < &brand_string.c[48]; brandChr++)
-		{
-			if (isspace(*brandChr)) {
-				if (!wasLastSpace) {
-					// Last character was not a space.
-					// Append this character, then mark
-					// the last character as a space.
-					*cpuFullName++ = *brandChr;
-					wasLastSpace = 1;
-				}
-			} else {
-				// This character is not a space.
-				*cpuFullName++ = *brandChr;
-				wasLastSpace = 0;
-			}
-		}
-
-		// Make sure the string is NULL-terminated.
-		*cpuFullName = 0;
-
-		// Check for any trailing spaces.
-		for (cpuFullName--; cpuFullName >= &CPU_FullName[0]; cpuFullName--) {
-			if (isspace(*cpuFullName)) {
-				// Found a trailing space.
-				*cpuFullName = 0;
-			} else {
-				// Not a trailing space.
-				// We're done here.
-				break;
-			}
-		}
+		// Eliminate spaces from the brand string.
+		elimSpaces(CPU_FullName, sizeof(CPU_FullName),
+			   brand_string.c, sizeof(brand_string.c));
+		printf("CPU full name: %s\n", CPU_FullName);
 	}
 
 	// Check for SSE2SLOW, SSE3SLOW, and AVXSLOW.
