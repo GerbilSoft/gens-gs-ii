@@ -327,11 +327,10 @@ int Metadata::toPngData(png_structp png_ptr, png_infop info_ptr, int metaFlags) 
 	if (metaFlags & MF_RomInfo) {
 		if (!d->romFilename.empty()) {
 			desc << "ROM: " << d->romFilename << '\n';
-			desc << "ROM CRC32:";
 			if (d->romCrc32 != 0) {
 				char buf[16];
 				snprintf(buf, sizeof(buf), "%08X", d->romCrc32);
-				desc << ' ' << buf << '\n';
+				desc << "ROM CRC32: " << buf << "\n";
 			}
 		}
 
