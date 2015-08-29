@@ -91,6 +91,11 @@ IF(NOT DEFINED libcompat_ARCH_SPECIFIC_SRCS)
 			cpuflags_x86.c
 			byteswap_x86.c
 			)
+	ELSEIF("${arch}" MATCHES powerpc|powerpc-eabi)
+		SET(libcompat_ARCH_SPECIFIC_SRCS
+			cpuflags_ppc.c
+			byteswap.c
+			)
 	ELSE()
 		SET(libcompat_ARCH_SPECIFIC_SRCS
 			cpuflags.c
