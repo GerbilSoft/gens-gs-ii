@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 // CPU flags.
 // This variable is publicly accessible for performance reasons.
@@ -274,8 +275,45 @@ uint32_t LibCompat_GetCPUFlags(void)
 		CPUID(CPUID_EXT_PROC_BRAND_STRING_3,
 			brand_string.i[8], brand_string.i[9],
 			brand_string.i[10], brand_string.i[11]);
-		memcpy(CPU_FullName, brand_string.c, sizeof(brand_string.c));
-		CPU_FullName[48] = 0;
+
+		// Simple space elimination algorithm.
+		// We can't use libgenstext here because:
+		// 1. libcompat shouldn't depend on other Gens/GS II libraries.
+		// 2. StringManip is C++; this is C.
+		char *cpuFullName = &CPU_FullName[0];
+		int wasLastSpace = 1;
+		for (const char *brandChr = &brand_string.c[0];
+		     brandChr < &brand_string.c[48]; brandChr++)
+		{
+			if (isspace(*brandChr)) {
+				if (!wasLastSpace) {
+					// Last character was not a space.
+					// Append this character, then mark
+					// the last character as a space.
+					*cpuFullName++ = *brandChr;
+					wasLastSpace = 1;
+				}
+			} else {
+				// This character is not a space.
+				*cpuFullName++ = *brandChr;
+				wasLastSpace = 0;
+			}
+		}
+
+		// Make sure the string is NULL-terminated.
+		*cpuFullName = 0;
+
+		// Check for any trailing spaces.
+		for (cpuFullName--; cpuFullName >= &CPU_FullName[0]; cpuFullName--) {
+			if (isspace(*cpuFullName)) {
+				// Found a trailing space.
+				*cpuFullName = 0;
+			} else {
+				// Not a trailing space.
+				// We're done here.
+				break;
+			}
+		}
 	}
 
 	// Check for SSE2SLOW, SSE3SLOW, and AVXSLOW.
