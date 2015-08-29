@@ -23,7 +23,9 @@
 
 #include "Timing.hpp"
 
-#if defined(_WIN32) || defined(__APPLE__)
+#if defined(_WIN32) || defined(__APPLE__) || \
+    (!defined(__unix__) && !defined(__unix) && !defined(unix) || \
+     !defined(__linux__) && !defined(__linux) && !defined(linux))
 #error This file is only for Unix and Linux systems, excluding Mac OS X.
 #endif
 
