@@ -5,12 +5,6 @@ PROJECT(gens-gs-ii)
 # - NASM: CMake 2.8.4
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.0)
 
-# UNSET() was added in cmake-2.6.3.
-# Define an equivalent macro for older versions.
-MACRO(UNSET var)
-	SET(${var})
-ENDMACRO(UNSET)
-
 # Set default build options.
 INCLUDE(cmake/options.cmake)
 
