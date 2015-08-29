@@ -129,7 +129,7 @@ static FORCE_INLINE_MALLOC void aligned_free(void *memptr)
 #elif defined(HAVE_MEMALIGN)
 
 // memalign()
-#include <stdlib.h>
+#include <malloc.h>
 
 static FORCE_INLINE_MALLOC void *aligned_malloc(size_t alignment, size_t size)
 {
