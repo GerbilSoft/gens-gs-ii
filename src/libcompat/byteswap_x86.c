@@ -41,6 +41,10 @@
  */
 static inline uint32_t swap_two_16_in_32(uint32_t dword)
 {
+	// NOTE: The 'rol 8' version was slightly faster on
+	// Core 2 T7200 in 64-bit mode when compiled with -O2;
+	// in 32-bit mode, the swap_two_16_in_32() version
+	// is always faster.
 	uint32_t tmp1 = (dword >> 8) & 0x00FF00FF;
 	uint32_t tmp2 = (dword << 8) & 0xFF00FF00;
 	return (tmp1 | tmp2);
