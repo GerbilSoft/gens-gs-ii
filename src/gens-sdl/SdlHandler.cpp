@@ -28,6 +28,9 @@ using LibGens::SoundMgr;
 // C includes. (C++ namespace)
 #include <cstdio>
 
+// aligned_malloc()
+#include "libcompat/aligned_malloc.h"
+
 #include <SDL.h>
 
 #include "RingBuffer.hpp"
@@ -232,7 +235,8 @@ int SdlHandler::init_audio(void)
 	m_sampleSize = 4; // TODO: Move to RingBuffer?
 	m_segBufferSamples = SoundMgr::GetSegLength();
 	m_segBufferLen = m_segBufferSamples * m_sampleSize;
-	m_segBuffer = (int16_t*)calloc(1, m_segBufferLen);
+	m_segBuffer = (int16_t*)aligned_malloc(16, m_segBufferLen);
+	memset(m_segBuffer, 0, m_segBufferLen);
 
 	// Audio is initialized.
 	return 0;
