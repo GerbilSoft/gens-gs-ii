@@ -19,5 +19,6 @@ ADD_EXECUTABLE(ByteswapTest
 	ByteswapTest_benchmark.cpp
 	)
 TARGET_LINK_LIBRARIES(ByteswapTest compat ${GTEST_LIBRARY})
+DO_SPLIT_DEBUG(ByteswapTest)
 ADD_TEST(NAME ByteswapTest
 	COMMAND ByteswapTest)

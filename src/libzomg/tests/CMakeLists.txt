@@ -15,6 +15,7 @@ ADD_EXECUTABLE(PrintMetadata
 	PrintMetadata.cpp
 	)
 TARGET_LINK_LIBRARIES(PrintMetadata zomg gens)
+DO_SPLIT_DEBUG(PrintMetadata)
 # NOTE: This isn't a standard test suite.
 # It prints the contents of what ZOMG.ini
 # would contain in a savestate.

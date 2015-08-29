@@ -15,6 +15,7 @@ ADD_EXECUTABLE(PsgRegisterTest
         PsgRegisterTest.cpp
         )
 TARGET_LINK_LIBRARIES(PsgRegisterTest gens ${GTEST_LIBRARY})
+DO_SPLIT_DEBUG(PsgRegisterTest)
 ADD_TEST(NAME PsgRegisterTest
         COMMAND PsgRegisterTest)
 
@@ -26,5 +27,6 @@ ADD_EXECUTABLE(AudioWriteTest
         AudioWriteTest_benchmark.cpp
         )
 TARGET_LINK_LIBRARIES(AudioWriteTest compat gens ${GTEST_LIBRARY})
+DO_SPLIT_DEBUG(AudioWriteTest)
 ADD_TEST(NAME AudioWriteTest
         COMMAND AudioWriteTest)

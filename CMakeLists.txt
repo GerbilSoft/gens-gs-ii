@@ -16,6 +16,17 @@ list (APPEND CMAKE_MODULE_PATH
 # Mac OS X: CMake doesn't include this by default.
 INCLUDE(CheckLibraryExists)
 
+# Split Debug macro.
+MACRO(DO_SPLIT_DEBUG _TARGET)
+	# Split debug information.
+	INCLUDE(SetMSVCDebugPath)
+	SET_MSVC_DEBUG_PATH(${_TARGET})
+	IF(SPLIT_DEBUG)
+		INCLUDE(SplitDebugInformation)
+		SPLIT_DEBUG_INFORMATION(${_TARGET})
+	ENDIF(SPLIT_DEBUG)
+ENDMACRO(DO_SPLIT_DEBUG)
+
 # Testing functions.
 INCLUDE(cmake/gtest.cmake)
 
