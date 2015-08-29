@@ -31,6 +31,18 @@
 uint32_t CPU_Flags = 0;
 
 /**
+ * Get the CPU flags.
+ * Stores the CPU flags in the global variable CPU_Flags.
+ * @return CPU flags.
+ */
+uint32_t LibCompat_GetCPUFlags(void)
+{
+	// No flags in the generic version...
+	CPU_Flags = 0;
+	return 0;
+}
+
+/**
  * Get the CPU vendor ID.
  * Equivalent to the 12-char vendor ID on x86.
  * @return Pointer to CPU vendor ID (null-terminated string), or NULL on error.
