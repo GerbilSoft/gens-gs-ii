@@ -174,14 +174,23 @@ void Metadata::InitProgramMetadata(const char *creator,
 	LibCompat_GetCPUFlags();
 
 	// Save creator information.
-	MetadataPrivate::creatorInfo.creator =
-		(creator ? string(creator) : string());
-	MetadataPrivate::creatorInfo.creatorVersion =
-		(creatorVersion ? string(creatorVersion) : string());
-	MetadataPrivate::creatorInfo.creatorVcsVersion =
-		(creatorVcsVersion ? string(creatorVcsVersion) : string());
+	if (creator) {
+		MetadataPrivate::creatorInfo.creator = string(creator);
+	}
+	if (creatorVersion) {
+		MetadataPrivate::creatorInfo.creatorVersion = string(creatorVersion);
+	}
+	if (creatorVcsVersion) {
+		MetadataPrivate::creatorInfo.creatorVcsVersion = string(creatorVcsVersion);
+	}
 
-       // Initialize system metadata.
+	// Save the CPU name.
+	const char *cpuName = LibCompat_GetCPUFullName();
+	if (cpuName) {
+		MetadataPrivate::sysInfo.cpu = string(cpuName);
+	}
+
+	// Initialize system metadata.
 	MetadataPrivate::InitSystemMetadata();
 }
 
