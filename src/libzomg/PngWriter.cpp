@@ -436,7 +436,6 @@ int PngWriter::writeToFile(const Zomg_Img_Data_t *img_data,
 	}
 
 	// Output file.
-	// TODO: Convert filename to Unicode or ANSI on Windows.
 	FILE *f = fopen(filename, "wb");
 	if (!f) {
 		// Error opening the output file.
