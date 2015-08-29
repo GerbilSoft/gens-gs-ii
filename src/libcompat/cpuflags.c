@@ -66,7 +66,10 @@ static void elimSpaces(char *dest, unsigned int sz_dest,
 
 	assert(sz_dest > sz_src);
 	for (; src < src_end; src++) {
-		if (isspace(*src)) {
+		if (*src == 0) {
+			// NULL terminator.
+			break;
+		} else if (isspace(*src)) {
 			if (!wasLastSpace) {
 				// Last character was not a space.
 				// Append this character, then mark
