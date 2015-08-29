@@ -19,9 +19,6 @@ INCLUDE(CheckLibraryExists)
 # Testing functions.
 INCLUDE(cmake/gtest.cmake)
 
-# Set default build options.
-INCLUDE(cmake/options.cmake)
-
 # Program information.
 SET(DESCRIPTION "Gens/GS II")
 SET(AUTHOR "David Korth")
