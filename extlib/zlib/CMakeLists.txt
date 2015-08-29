@@ -208,6 +208,16 @@ INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(zlib)
 SET_MSVC_DEBUG_PATH(zlibstatic)
 
+# Gens/GS II: Exclude from ALL and DEFAULT builds.
+SET_TARGET_PROPERTIES(zlib PROPERTIES
+	EXCLUDE_FROM_ALL TRUE
+	EXCLUDE_FROM_DEFAULT_BUILD TRUE
+	)
+SET_TARGET_PROPERTIES(zlibstatic PROPERTIES
+	EXCLUDE_FROM_ALL TRUE
+	EXCLUDE_FROM_DEFAULT_BUILD TRUE
+	)
+
 if(NOT CYGWIN)
     # This property causes shared libraries on Linux to have the full version
     # encoded into their final filename.  We disable this on Cygwin because

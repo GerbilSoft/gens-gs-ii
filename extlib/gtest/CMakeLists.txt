@@ -76,6 +76,16 @@ INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(gtest)
 SET_MSVC_DEBUG_PATH(gtest_main)
 
+# Gens/GS II: Exclude from ALL and DEFAULT builds.
+SET_TARGET_PROPERTIES(gtest PROPERTIES
+	EXCLUDE_FROM_ALL TRUE
+	EXCLUDE_FROM_DEFAULT_BUILD TRUE
+	)
+SET_TARGET_PROPERTIES(gtest_main PROPERTIES
+	EXCLUDE_FROM_ALL TRUE
+	EXCLUDE_FROM_DEFAULT_BUILD TRUE
+	)
+
 ########################################################################
 #
 # Samples on how to link user tests with gtest or gtest_main.
