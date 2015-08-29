@@ -79,6 +79,9 @@
 #define CPUID_EXT_FEATURES			((uint32_t)(0x00000007))
 #define CPUID_MAX_EXT_FUNCTIONS			((uint32_t)(0x80000000))
 #define CPUID_EXT_PROC_INFO_FEATURE_BITS	((uint32_t)(0x80000001))
+#define CPUID_EXT_PROC_BRAND_STRING_1		((uint32_t)(0x80000002))
+#define CPUID_EXT_PROC_BRAND_STRING_2		((uint32_t)(0x80000003))
+#define CPUID_EXT_PROC_BRAND_STRING_3		((uint32_t)(0x80000004))
 
 #ifdef _MSC_VER
 #include <intrin.h>

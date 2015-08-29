@@ -86,6 +86,20 @@ extern "C" {
 extern uint32_t CPU_Flags;
 uint32_t LibCompat_GetCPUFlags(void);
 
+/**
+ * Get the CPU vendor ID.
+ * Equivalent to the 12-char vendor ID on x86.
+ * @return Pointer to CPU vendor ID (null-terminated string), or NULL on error.
+ */
+const char *LibCompat_GetCPUVendorID(void);
+
+/**
+ * Get the full CPU name.
+ * Equivalent to the "brand string" on x86.
+ * @return Pointer to the full CPU name (null-terminated string), or NULL on error.
+ */
+const char *LibCompat_GetCPUFullName(void);
+
 #ifdef __cplusplus
 }
 #endif

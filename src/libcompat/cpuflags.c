@@ -29,7 +29,16 @@
 #include <string.h>
 
 // CPU flags.
+// This variable is publicly accessible for performance reasons.
 uint32_t CPU_Flags = 0;
+
+// CPU vendor ID. (NULL-terminated)
+// NOTE: x86 has 12 characters; others may have more.
+static char CPU_VendorID[16] = {0};
+
+// Full CPU name. (NULL-terminated)
+// NOTE: x86 has 48 characters; others may have more.
+static char CPU_FullName[64] = {0};
 
 // CPU-specific flag definitions.
 // These are for internal use by LibGens_GetCPUFlags() only.
@@ -61,6 +70,11 @@ uint32_t LibCompat_GetCPUFlags(void)
 		return CPU_Flags;
 	}
 
+	// Clear CPU flags, vendor ID, and full name.
+	CPU_Flags = 0;
+	CPU_VendorID[0] = 0;
+	CPU_FullName[0] = 0;
+
 	if (!is_cpuid_supported()) {
 		// CPUID is not supported.
 		// This CPU must be an early 486 or older.
@@ -74,6 +88,10 @@ uint32_t LibCompat_GetCPUFlags(void)
 		// No CPUID functions are supported.
 		return 0;
 	}
+
+	// Save the vendor string.
+	memcpy(CPU_VendorID, vendor.c, sizeof(vendor.c));
+	CPU_VendorID[12] = 0;
 
 	// Get the CPU feature flags.
 	CPUID(CPUID_PROC_INFO_FEATURE_BITS, __eax, __ebx, __ecx, __edx);
@@ -240,6 +258,26 @@ uint32_t LibCompat_GetCPUFlags(void)
 		}
 	}
 
+	// Check if the CPUID Processor Brand String functions
+	// (0x80000002, 0x80000003, 0x80000004) are supported.
+	if (maxFunc >= CPUID_EXT_PROC_BRAND_STRING_3) {
+		// CPUID Processor Brand String functions are supported.
+		// TODO: Generic string for unsupported CPUs?
+		// TODO: Space elimination algorithm?
+		union { uint32_t i[12]; char c[48]; } brand_string;
+		CPUID(CPUID_EXT_PROC_BRAND_STRING_1,
+			brand_string.i[0], brand_string.i[1],
+			brand_string.i[2], brand_string.i[3]);
+		CPUID(CPUID_EXT_PROC_BRAND_STRING_2,
+			brand_string.i[4], brand_string.i[5],
+			brand_string.i[6], brand_string.i[7]);
+		CPUID(CPUID_EXT_PROC_BRAND_STRING_3,
+			brand_string.i[8], brand_string.i[9],
+			brand_string.i[10], brand_string.i[11]);
+		memcpy(CPU_FullName, brand_string.c, sizeof(brand_string.c));
+		CPU_FullName[48] = 0;
+	}
+
 	// Check for SSE2SLOW, SSE3SLOW, and AVXSLOW.
 	// These require vendor-specific checks.
 	// Based on ffmpeg's libavutil/x86/cpu.c:
@@ -295,4 +333,44 @@ uint32_t LibCompat_GetCPUFlags(void)
 	CPU_Flags = 0;
 	return 0;
 #endif
+}
+
+/**
+ * Get the CPU vendor ID.
+ * Equivalent to the 12-char vendor ID on x86.
+ * @return Pointer to CPU vendor ID (null-terminated string), or NULL on error.
+ */
+const char *LibCompat_GetCPUVendorID(void)
+{
+	if (CPU_Flags == 0) {
+		// CPU flags might not have been obtained yet.
+		LibCompat_GetCPUFlags();
+	}
+
+	if (!CPU_VendorID[0]) {
+		// No vendor ID.
+		return NULL;
+	}
+
+	return CPU_VendorID;
+}
+
+/**
+ * Get the full CPU name.
+ * Equivalent to the "brand string" on x86.
+ * @return Pointer to the full CPU name (null-terminated string), or NULL on error.
+ */
+const char *LibCompat_GetCPUFullName(void)
+{
+	if (CPU_Flags == 0) {
+		// CPU flags might not have been obtained yet.
+		LibCompat_GetCPUFlags();
+	}
+
+	if (!CPU_FullName[0]) {
+		// No full name.
+		return NULL;
+	}
+
+	return CPU_FullName;
 }
