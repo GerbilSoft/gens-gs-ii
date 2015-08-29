@@ -448,14 +448,15 @@ int PngWriter::writeToFile(const Zomg_Img_Data_t *img_data,
 
 	// Write to PNG.
 	int ret = d->writeToPng(png_ptr, info_ptr, img_data, metadata, metaFlags);
+	png_destroy_write_struct(&png_ptr, &info_ptr);
 	fclose(f);
+
 	if (ret != 0) {
 		// Failed to write the PNG file.
 		// Delete it so we don't end up with a half-written image.
 		unlink(filename);
 	}
 
-	png_destroy_write_struct(&png_ptr, &info_ptr);
 	return ret;
 }
 
