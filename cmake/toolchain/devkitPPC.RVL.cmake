@@ -66,16 +66,37 @@ SET(CMAKE_CXX_FLAGS "${DOL_C_FLAGS}" CACHE STRING "Flags used by the compiler du
 SET(LIBOGC_PLATFORM "cube")
 ENDIF(0)
 
-# Always link in libogc.
-# NOTE: LINK_DIRECTORIES() isn't working...
-SET(LIBOGC 1)
+# Libraries to link in.
+# NOTE: These must be added in reverse order.
+SET(LIBS_TO_LINK "")
 SET(LIBOGC_LIBRARY_DIR "${DEVKITPRO}/libogc/lib/${LIBOGC_PLATFORM}")
-SET(LIBOGC_LIBRARY "${LIBOGC_LIBRARY_DIR}/libogc.a")
-IF(NOT EXISTS "${LIBOGC_LIBRARY_DIR}")
-	MESSAGE(FATAL_ERROR "libogc.a not found.\nLIBOGC_LIBRARY == ${LIBOGC_LIBRARY}")
-ENDIF(NOT EXISTS "${LIBOGC_LIBRARY_DIR}")
-# CMake implicit libraries are set after the toolchain is processed.
-# Add libogc.a to LDFLAGS as a workaround.
-SET(CMAKE_EXE_LINKER_FLAGS "${LIBOGC_LIBRARY}" CACHE STRING "Flags used by the linker." FORCE)
-SET(CMAKE_SHARED_LINKER_FLAGS "${LIBOGC_LIBRARY}" CACHE STRING "Flags used by the linker during the creation of dll's." FORCE)
+IF(NOT EXISTS "${LIBOGC_LIBRARY_DIR}/")
+	MESSAGE(FATAL_ERROR "libogc not found.\nLIBOGC_LIBRARY_DIR == ${LIBOGC_LIBRARY_DIR}")
+ENDIF(NOT EXISTS "${LIBOGC_LIBRARY_DIR}/")
 LINK_DIRECTORIES("${LIBOGC_LIBRARY_DIR}")
+
+# Always link in libogc.
+SET(LIBOGC 1)
+SET(LIBOGC_LIBRARY "${LIBOGC_LIBRARY_DIR}/libogc.a")
+IF(NOT EXISTS "${LIBOGC_LIBRARY}")
+	MESSAGE(FATAL_ERROR "libogc.a not found.\nLIBOGC_LIBRARY == ${LIBOGC_LIBRARY}")
+ENDIF(NOT EXISTS "${LIBOGC_LIBRARY}")
+SET(LIBS_TO_LINK "${LIBOGC_LIBRARY} ${LIBS_TO_LINK}")
+
+# Link in bte for Bluetooth. (required by wiiuse)
+SET(BTE_LIBRARY "${LIBOGC_LIBRARY_DIR}/libbte.a")
+IF(NOT EXISTS "${BTE_LIBRARY}")
+	MESSAGE(FATAL_ERROR "libbte.a not found.\nBTE_LIBRARY == ${BTE_LIBRARY}")
+ENDIF(NOT EXISTS "${BTE_LIBRARY}")
+SET(LIBS_TO_LINK "${BTE_LIBRARY} ${LIBS_TO_LINK}")
+
+# Link in wiiuse for controller input.
+SET(WIIUSE_LIBRARY "${LIBOGC_LIBRARY_DIR}/libwiiuse.a")
+IF(NOT EXISTS "${WIIUSE_LIBRARY}")
+	MESSAGE(FATAL_ERROR "libwiiuse.a not found.\nWIIUSE_LIBRARY == ${WIIUSE_LIBRARY}")
+ENDIF(NOT EXISTS "${WIIUSE_LIBRARY}")
+SET(LIBS_TO_LINK "${WIIUSE_LIBRARY} ${LIBS_TO_LINK}")
+
+# Set the standard libraries.
+SET(CMAKE_C_STANDARD_LIBRARIES "${LIBS_TO_LINK}")
+SET(CMAKE_CXX_STANDARD_LIBRARIES "${LIBS_TO_LINK}")
