@@ -20,21 +20,49 @@ SET(TESTSUITE_BASE_SRC
 
 # FIXME: Fix this test so it works on MSVC.
 IF(NOT MSVC)
-# VdpPalette test programs
-ADD_EXECUTABLE(test_VdpPalette_DAC_generate test_VdpPalette_DAC_generate.c)
-DO_SPLIT_DEBUG(test_VdpPalette_DAC_generate)
 
-ADD_EXECUTABLE(test_VdpPalette_DAC test_VdpPalette_DAC.cpp ${TESTSUITE_BASE_SRC})
+# VdpPalette test programs
+
+# test_VdpPalette_DAC_generate runs on the build system,
+# not the host system.
+# TODO: Port to Google Test.
+IF(CMAKE_CROSSCOMPILING)
+	# Cross-compiling.
+	# Use executables from a native build.
+	INCLUDE("${IMPORT_EXECUTABLES}/src/libgens/tests/ImportExecutables.cmake")
+ELSE(CMAKE_CROSSCOMPILING)
+	# Not cross-compiling.
+	ADD_EXECUTABLE(test_VdpPalette_DAC_generate test_VdpPalette_DAC_generate.c)
+	DO_SPLIT_DEBUG(test_VdpPalette_DAC_generate)
+
+	# Export these executables for cross-compiling.
+	# Reference: http://www.cmake.org/Wiki/CMake_Cross_Compiling
+	EXPORT(TARGETS test_VdpPalette_DAC_generate
+		FILE "${CMAKE_CURRENT_BINARY_DIR}/ImportExecutables.cmake"
+		)
+ENDIF(CMAKE_CROSSCOMPILING)
+
+# TODO: Port to Google Test.
+ADD_EXECUTABLE(test_VdpPalette_DAC
+	test_VdpPalette_DAC.cpp
+	${TESTSUITE_BASE_SRC})
 TARGET_LINK_LIBRARIES(test_VdpPalette_DAC gens)
 DO_SPLIT_DEBUG(test_VdpPalette_DAC)
 
+# NOTE: $<TARGET_FILE:gcbanner> is preferred,
+# but this doesn't seem to work on Ubuntu 10.04.
+# (cmake_2.8.0-5ubuntu1_i386)
+GET_PROPERTY(TEST_VDPPALETTE_DAC_GENERATE_EXE
+	TARGET test_VdpPalette_DAC_generate
+	PROPERTY LOCATION)
+
 # Generate the test files.
 ADD_TEST(NAME test_VdpPalette_DAC_generate_MD
-	COMMAND test_VdpPalette_DAC_generate --palmode MD PalTest_MD.txt)
+	COMMAND "${TEST_VDPPALETTE_DAC_GENERATE_EXE}" --palmode MD PalTest_MD.txt)
 ADD_TEST(NAME test_VdpPalette_DAC_generate_SMS
-	COMMAND test_VdpPalette_DAC_generate --palmode SMS PalTest_SMS.txt)
+	COMMAND "${TEST_VDPPALETTE_DAC_GENERATE_EXE}" --palmode SMS PalTest_SMS.txt)
 ADD_TEST(NAME test_VdpPalette_DAC_generate_GG
-	COMMAND test_VdpPalette_DAC_generate --palmode GG PalTest_GG.txt)
+	COMMAND "${TEST_VDPPALETTE_DAC_GENERATE_EXE}" --palmode GG PalTest_GG.txt)
 
 # Test the VDP DAC.
 ADD_TEST(NAME test_VdpPalette_DAC_MD
