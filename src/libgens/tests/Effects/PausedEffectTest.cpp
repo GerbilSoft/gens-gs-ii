@@ -21,17 +21,12 @@
 
 #include "PausedEffectTest.hpp"
 
-// Google Test
-#include "gtest/gtest.h"
-
 // LibGens
 #include "lg_main.hpp"
-#include "Util/MdFb.hpp"
 #include "Effects/PausedEffect.hpp"
 
 // LibZomg
 #include "libzomg/PngReader.hpp"
-#include "libzomg/img_data.h"
 using LibZomg::PngReader;
 
 // LibCompat
@@ -46,83 +41,7 @@ using LibZomg::PngReader;
 // C++ includes.
 #include <algorithm>
 
-// TODO: More sample data:
-// 48,000 Hz @ 50 Hz (960 samples)
-// 44,100 Hz @ 60 Hz (735 samples)
-// 44,100 Hz @ 50 Hz (882 samples)
-// The latter two are important because they test data blocks
-// that aren't multiples of 8 or 16 bytes. (MMX/SSE2)
-
 namespace LibGens { namespace Tests {
-
-class PausedEffectTest : public ::testing::TestWithParam<PausedEffectTest_flags>
-{
-	protected:
-		PausedEffectTest()
-			: ::testing::TestWithParam<PausedEffectTest_flags>()
-			, fb_normal(nullptr)
-			, fb_paused(nullptr)
-			, fb_test1(nullptr)
-			, fb_test2(nullptr) { }
-		virtual ~PausedEffectTest() { }
-
-		virtual void SetUp(void) override;
-		virtual void TearDown(void) override;
-
-		/**
-		 * Initialize image data.
-		 * @param bpp Color depth.
-		 */
-		void init(MdFb::ColorDepth bpp);
-
-		/**
-		 * Copy a loaded image to an MdFb in 15-bit color.
-		 * Source image must be 32-bit color.
-		 * @param fb	[out] Destination MdFb.
-		 * @param src	[in] Source img_data.
-		 */
-		void copyToFb15(MdFb *fb, const Zomg_Img_Data_t *src);
-
-		/**
-		 * Copy a loaded image to an MdFb in 16-bit color.
-		 * Source image must be 32-bit color.
-		 * @param fb	[out] Destination MdFb.
-		 * @param src	[in] Source img_data.
-		 */
-		void copyToFb16(MdFb *fb, const Zomg_Img_Data_t *src);
-
-		/**
-		 * Copy a loaded image to an MdFb in 32-bit color.
-		 * Source image must be 32-bit color.
-		 * @param fb	[out] Destination MdFb.
-		 * @param src	[in] Source img_data.
-		 */
-		void copyToFb32(MdFb *fb, const Zomg_Img_Data_t *src);
-
-		/**
-		 * Compare two framebuffers.
-		 * Both framebuffers must have the same color depth.
-		 * @param fb_expected	[in] Expected image.
-		 * @param fb_actual	[in] Actual image.
-		 */
-		void compareFb(const MdFb *fb_expected, const MdFb *fb_actual);
-
-	protected:
-		Zomg_Img_Data_t img_normal;
-		Zomg_Img_Data_t img_paused;
-
-		// Reference framebuffers.
-		MdFb *fb_normal;
-		MdFb *fb_paused;
-
-		// Test framebuffers.
-		// Paused Effect is applied here.
-		MdFb *fb_test1;	// 1-FB
-		MdFb *fb_test2;	// 2-FB
-
-		// Previous CPU flags.
-		uint32_t cpuFlags_old;
-};
 
 /**
  * Set up the test.
@@ -384,6 +303,8 @@ void PausedEffectTest::compareFb(const MdFb *fb_expected, const MdFb *fb_actual)
 		}
 	}
 }
+
+/** Main tests. **/
 
 /**
  * Test the Paused Effect in 15-bit color. (1-FB)
