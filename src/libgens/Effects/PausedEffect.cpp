@@ -252,18 +252,25 @@ inline void PausedEffectPrivate::DoPausedEffect_32_MMX(
 			"paddd		%%mm4, %%mm2\n"			// %mm2 == [px2] 0 + R * MULT | R * MULT + G * MULT + B * MULT
 
 			// The relevant grayscale values are in the low 16 bits of %mm1 and %mm2.
+			// Pack them into a single value.
 			"movd		%%mm1, %%eax\n"			// %ax == grayscale
 			"movd		%%mm2, %%edx\n"			// %dx == grayscale
 
 			// TODO: Optimize this.
-			"movb		%%ah, 0(%[outScreen])\n"
 			"movb		%%ah, 1(%[outScreen])\n"
 			"movb		%%ah, 2(%[outScreen])\n"
 			"movb		  $0, 3(%[outScreen])\n"
-			"movb		%%dh, 4(%[outScreen])\n"
 			"movb		%%dh, 5(%[outScreen])\n"
 			"movb		%%dh, 6(%[outScreen])\n"
 			"movb		  $0, 7(%[outScreen])\n"
+
+			// Double the blue value.
+			"paddusw	%%mm1, %%mm1\n"
+			"paddusw	%%mm2, %%mm2\n"
+			"movd		%%mm1, %%eax\n"			// %ax == doubled grayscale
+			"movd		%%mm2, %%edx\n"			// %dx == doubled grayscale
+			"movb		%%ah, 0(%[outScreen])\n"
+			"movb		%%dh, 4(%[outScreen])\n"
 			:
 			: [mdScreen] "r" (mdScreen)
 			, [outScreen] "r" (outScreen)
