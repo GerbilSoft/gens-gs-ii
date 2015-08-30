@@ -43,6 +43,7 @@ ADD_EXECUTABLE(FastBlurTest
 	EffectTest.hpp
         FastBlurTest.cpp
         FastBlurTest.hpp
+        FastBlurTest_benchmark.cpp
         )
 TARGET_LINK_LIBRARIES(FastBlurTest gens zomg ${GTEST_LIBRARY})
 DO_SPLIT_DEBUG(FastBlurTest)
