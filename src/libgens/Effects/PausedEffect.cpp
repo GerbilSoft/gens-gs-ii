@@ -60,10 +60,10 @@ class PausedEffectPrivate
 
 	public:
 		template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
-		static inline void T_DoPausedEffect(pixel* RESTRICT outScreen, const pixel* RESTRICT mdScreen);
-		
-		template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
 		static inline void T_DoPausedEffect(pixel* RESTRICT outScreen);
+
+		template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
+		static inline void T_DoPausedEffect(pixel* RESTRICT outScreen, const pixel* RESTRICT mdScreen);
 };
 
 #define MMASK(bits) ((1 << (bits)) - 1)
@@ -76,24 +76,22 @@ class PausedEffectPrivate
  * @param BBits Number of bits for Blue.
  * @param rInfo Rendering information.
  * @param scale Scaling value.
- * @param outScreen Pointer to the destination screen buffer. (MUST BE 336x240!)
- * @param mdScreen Pointer to the MD screen buffer. (MUST BE 336x240!)
+ * @param outScreen Pointer to the source/destination screen buffer. (MUST BE 336x240!)
  */
 template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
-inline void PausedEffectPrivate::T_DoPausedEffect(pixel* RESTRICT outScreen, const pixel* RESTRICT mdScreen)
+inline void PausedEffectPrivate::T_DoPausedEffect(pixel* RESTRICT outScreen)
 {
 	uint8_t r, g, b;
 	unsigned int nRG, nB;
 	float monoPx;
-	
+
 	for (unsigned int i = (336*240); i != 0; i--) {
 		// Get the color components.
-		r = (uint8_t)((*mdScreen >> (GBits + BBits)) & MMASK(RBits)) << (8 - RBits);
-		g = (uint8_t)((*mdScreen >> BBits) & MMASK(GBits)) << (8 - GBits);
-		b = (uint8_t)((*mdScreen) & MMASK(BBits)) << (8 - BBits);
-		mdScreen++;
+		r = (uint8_t)((*outScreen >> (GBits + BBits)) & MMASK(RBits)) << (8 - RBits);
+		g = (uint8_t)((*outScreen >> BBits) & MMASK(GBits)) << (8 - GBits);
+		b = (uint8_t)((*outScreen) & MMASK(BBits)) << (8 - BBits);
 
-		// Convert the color components to grayscale.
+		// Convert the color components to monochrome.
 		// TODO: SSE optimization.
 		// Grayscale vector: [0.299 0.587 0.114] (ITU-R BT.601)
 		// Source: http://en.wikipedia.org/wiki/YCbCr
@@ -126,22 +124,24 @@ inline void PausedEffectPrivate::T_DoPausedEffect(pixel* RESTRICT outScreen, con
  * @param BBits Number of bits for Blue.
  * @param rInfo Rendering information.
  * @param scale Scaling value.
- * @param outScreen Pointer to the source/destination screen buffer. (MUST BE 336x240!)
+ * @param outScreen Pointer to the destination screen buffer. (MUST BE 336x240!)
+ * @param mdScreen Pointer to the MD screen buffer. (MUST BE 336x240!)
  */
 template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
-inline void PausedEffectPrivate::T_DoPausedEffect(pixel* RESTRICT outScreen)
+inline void PausedEffectPrivate::T_DoPausedEffect(pixel* RESTRICT outScreen, const pixel* RESTRICT mdScreen)
 {
 	uint8_t r, g, b;
 	unsigned int nRG, nB;
 	float monoPx;
-
+	
 	for (unsigned int i = (336*240); i != 0; i--) {
 		// Get the color components.
-		r = (uint8_t)((*outScreen >> (GBits + BBits)) & MMASK(RBits)) << (8 - RBits);
-		g = (uint8_t)((*outScreen >> BBits) & MMASK(GBits)) << (8 - GBits);
-		b = (uint8_t)((*outScreen) & MMASK(BBits)) << (8 - BBits);
+		r = (uint8_t)((*mdScreen >> (GBits + BBits)) & MMASK(RBits)) << (8 - RBits);
+		g = (uint8_t)((*mdScreen >> BBits) & MMASK(GBits)) << (8 - GBits);
+		b = (uint8_t)((*mdScreen) & MMASK(BBits)) << (8 - BBits);
+		mdScreen++;
 
-		// Convert the color components to monochrome.
+		// Convert the color components to grayscale.
 		// TODO: SSE optimization.
 		// Grayscale vector: [0.299 0.587 0.114] (ITU-R BT.601)
 		// Source: http://en.wikipedia.org/wiki/YCbCr
