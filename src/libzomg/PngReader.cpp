@@ -85,10 +85,12 @@ class PngReaderPrivate
 		 * @param png_ptr	[in] PNG pointer.
 		 * @param info_ptr	[in] PNG info pointer.
 		 * @param img_data	[out] PNG image data.
+		 * @param flags		[in, opt] ReaderFlags.
 		 * @return 0 on success; negative errno on error.
 		 */
 		static int readFromPng(png_structp png_ptr, png_infop info_ptr,
-				       Zomg_Img_Data_t *img_data);
+				       Zomg_Img_Data_t *img_data,
+				       int flags = PngReader::RF_Default);
 };
 
 PngReaderPrivate::PngReaderPrivate(PngReader *q)
@@ -136,10 +138,11 @@ void PngReaderPrivate::png_io_mem_read(png_structp png_ptr, png_bytep buf, png_s
  * @param png_ptr	[in] PNG pointer.
  * @param info_ptr	[in] PNG info pointer.
  * @param img_data	[out] PNG image data.
+ * @param flags		[in, opt] ReaderFlags.
  * @return 0 on success; negative errno on error.
  */
 int PngReaderPrivate::readFromPng(png_structp png_ptr, png_infop info_ptr,
-				  Zomg_Img_Data_t *img_data)
+				  Zomg_Img_Data_t *img_data, int flags)
 {
 	assert(img_data != nullptr);
 	img_data->data = nullptr;	// TODO: Allow user-specified buffer?
@@ -147,6 +150,11 @@ int PngReaderPrivate::readFromPng(png_structp png_ptr, png_infop info_ptr,
 	img_data->h = 0;
 	img_data->pitch = 0;
 	img_data->bpp = 32;
+
+	// If 'flags' is negative, use the defaults.
+	if (flags < 0) {
+		flags = 0;
+	}
 
 	// Row pointers. [NOTE: Allocated after IHDR is read.]
 	png_byte **row_pointers = nullptr;
@@ -228,7 +236,16 @@ int PngReaderPrivate::readFromPng(png_structp png_ptr, png_infop info_ptr,
 	if (!has_alpha) {
 		// No alpha channel.
 		// Use filler instead.
-		png_set_filler(png_ptr, 0xFF, PNG_FILLER_AFTER);
+		if (flags & PngReader::RF_INVERTED_ALPHA) {
+			png_set_filler(png_ptr, 0x00, PNG_FILLER_AFTER);
+		} else {
+			png_set_filler(png_ptr, 0xFF, PNG_FILLER_AFTER);
+		}
+	} else {
+		if (flags & PngReader::RF_INVERTED_ALPHA) {
+			// Invert the alpha channel.
+			png_set_invert_alpha(png_ptr);
+		}
 	}
 
 	// We're using "BGR" color.
@@ -288,9 +305,12 @@ PngReader::~PngReader()
  * @param img_data	[out] Image data. (Caller must free img_data->data on success.)
  * @param png_file	[in] PNG file data.
  * @param png_size	[in] Size of PNG file data.
+ * @param flags		[in, opt] ReaderFlags.
  * @return 0 on success; negative errno on error.
  */
-int PngReader::readFromMem(_Zomg_Img_Data_t *img_data, const void *png_file, size_t png_size)
+int PngReader::readFromMem(Zomg_Img_Data_t *img_data,
+			   const void *png_file, size_t png_size,
+			   int flags)
 {
 	if (!img_data || !png_file || png_size == 0) {
 		// Invalid parameters.
@@ -317,7 +337,7 @@ int PngReader::readFromMem(_Zomg_Img_Data_t *img_data, const void *png_file, siz
 	png_set_read_fn(png_ptr, &png_mem, d->png_io_mem_read);
 
 	// Read from PNG.
-	int ret = d->readFromPng(png_ptr, info_ptr, img_data);
+	int ret = d->readFromPng(png_ptr, info_ptr, img_data, flags);
 	png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
 	return ret;
 }
@@ -327,9 +347,11 @@ int PngReader::readFromMem(_Zomg_Img_Data_t *img_data, const void *png_file, siz
  * Image is always loaded as 32-bit xBGR.
  * @param img_data	[out] Image data. (Caller must free img_data->data on success.)
  * @param filename	[in] PNG file.
+ * @param flags		[in, opt] ReaderFlags.
  * @return 0 on success; negative errno on error.
  */
-int PngReader::readFromFile(_Zomg_Img_Data_t *img_data, const char *filename)
+int PngReader::readFromFile(Zomg_Img_Data_t *img_data,
+			    const char *filename, int flags)
 {
 	if (!img_data || !filename || !filename[0]) {
 		// Invalid parameters.
@@ -362,7 +384,7 @@ int PngReader::readFromFile(_Zomg_Img_Data_t *img_data, const char *filename)
 	png_init_io(png_ptr, f);
 
 	// Read from PNG.
-	int ret = d->readFromPng(png_ptr, info_ptr, img_data);
+	int ret = d->readFromPng(png_ptr, info_ptr, img_data, flags);
 	png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
 	fclose(f);
 	return ret;

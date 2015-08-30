@@ -80,23 +80,14 @@ void PausedEffectTest::SetUp(void)
 	// Load the images.
 	// TODO: Use a parameter for bpp.
 	PngReader reader;
-	ASSERT_EQ(0, reader.readFromFile(&img_normal, "PausedEffect.Normal.32.png"));
-	ASSERT_EQ(0, reader.readFromFile(&img_paused, "PausedEffect.SW.32.png"));
-
-	// NOTE: PngReader sets the high byte in the image data
-	// to 0xFF, indicating fully opaque.
-	// TODO: Add a parameter to tell it not to do that?
-	uint32_t sz_normal, sz_paused;
-	sz_normal = img_normal.h * img_normal.pitch / 4;
-	sz_paused = img_paused.h * img_paused.pitch / 4;
-	ASSERT_EQ(sz_normal, sz_paused) <<
-		"The \"Normal\" and \"Paused\" images have different sizes.";
-	uint32_t *pNormal = (uint32_t*)img_normal.data;
-	uint32_t *pPaused = (uint32_t*)img_paused.data;
-	for (; sz_normal > 0; sz_normal--) {
-		*pNormal++ &= 0x00FFFFFF;
-		*pPaused++ &= 0x00FFFFFF;
-	}
+	int ret = reader.readFromFile(&img_normal,
+			"PausedEffect.Normal.32.png",
+			PngReader::RF_INVERTED_ALPHA);
+	ASSERT_EQ(0, ret) << "Error loading \"PausedEffect.Normal.32.png\": " << strerror(-ret);
+	ret = reader.readFromFile(&img_paused,
+			"PausedEffect.SW.32.png",
+			PngReader::RF_INVERTED_ALPHA);
+	ASSERT_EQ(0, ret) << "Error loading \"PausedEffect.SW.32.png\": " << strerror(-ret);
 
 	// Allocate an MdFb.
 	fb = new MdFb();
