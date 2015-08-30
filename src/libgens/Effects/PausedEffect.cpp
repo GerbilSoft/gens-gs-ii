@@ -77,6 +77,15 @@ class PausedEffectPrivate
 			unsigned int pxCount);
 
 #ifdef HAVE_MMX
+		static inline void DoPausedEffect_32_SSE2(
+			uint32_t* RESTRICT outScreen,
+			unsigned int pxCount);
+
+		static inline void DoPausedEffect_32_SSE2(
+			uint32_t* RESTRICT outScreen,
+			const uint32_t* RESTRICT mdScreen,
+			unsigned int pxCount);
+
 		static inline void DoPausedEffect_32_MMX(
 			uint32_t* RESTRICT outScreen,
 			unsigned int pxCount);
@@ -242,7 +251,10 @@ void PausedEffect::DoPausedEffect(MdFb *outScreen)
 		case MdFb::BPP_32:
 		default:
 #ifdef HAVE_MMX
-			if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
+			if (CPU_Flags & MDP_CPUFLAG_X86_SSE2) {
+				PausedEffectPrivate::DoPausedEffect_32_SSE2(
+					outScreen->fb32(), pxCount);
+			} else if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
 				PausedEffectPrivate::DoPausedEffect_32_MMX(
 					outScreen->fb32(), pxCount);
 			} else
@@ -289,7 +301,10 @@ void PausedEffect::DoPausedEffect(MdFb* RESTRICT outScreen, const MdFb* RESTRICT
 		case MdFb::BPP_32:
 		default:
 #ifdef HAVE_MMX
-			if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
+			if (CPU_Flags & MDP_CPUFLAG_X86_SSE2) {
+				PausedEffectPrivate::DoPausedEffect_32_SSE2(
+					outScreen->fb32(), mdScreen->fb32(), pxCount);
+			} else if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
 				PausedEffectPrivate::DoPausedEffect_32_MMX(
 					outScreen->fb32(), mdScreen->fb32(), pxCount);
 			} else
