@@ -21,10 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-/**
- * NOTE: The video effects here are applied to MD_Screen[].
- */
-
 #include "FastBlur.hpp"
 #include "Util/MdFb.hpp"
 #include "libcompat/cpuflags.h"
@@ -38,15 +34,14 @@
 #include <cstdint>
 #include <cstring>
 
-// TODO: Move this somewhere else!
-#if defined(__GNUC__) && (defined(__i386__) || defined(__amd64__))
-#define HAVE_MMX
-#endif
-
 // Mask constants.
 #define MASK_DIV2_15		((uint16_t)(0x3DEF))
 #define MASK_DIV2_16		((uint16_t)(0x7BCF))
 #define MASK_DIV2_32		((uint32_t)(0x007F7F7F))
+
+#if defined(__GNUC__) && (defined(__i386__) || defined(__amd64__))
+#define HAVE_MMX
+#endif
 
 namespace LibGens {
 
@@ -72,7 +67,6 @@ class FastBlurPrivate
 #ifdef HAVE_MMX
 		static const uint32_t MASK_DIV2_15_MMX[2];
 		static const uint32_t MASK_DIV2_16_MMX[2];
-		static const uint32_t MASK_DIV2_32_MMX[2];
 
 		static void DoFastBlur_16_MMX(uint16_t *outScreen, unsigned int pxCount, const uint32_t *mask);
 		static void DoFastBlur_16_MMX(uint16_t *outScreen, const uint16_t *mdScreen,
@@ -83,6 +77,26 @@ class FastBlurPrivate
 					      unsigned int pxCount);
 #endif /* HAVE_MMX */
 };
+
+#ifdef HAVE_MMX
+const uint32_t FastBlurPrivate::MASK_DIV2_15_MMX[2] = {0x3DEF3DEF, 0x3DEF3DEF};
+const uint32_t FastBlurPrivate::MASK_DIV2_16_MMX[2] = {0x7BCF7BCF, 0x7BCF7BCF};
+#endif /* HAVE_MMX */
+
+}
+
+#ifdef HAVE_MMX
+// MMX/SSE2-optimized functions.
+#define __IN_LIBGENS_FASTBLUR_CPP__
+#define DO_1FB
+#include "FastBlur.x86.inc.cpp"
+#undef DO_1FB
+#define DO_2FB
+#include "FastBlur.x86.inc.cpp"
+#undef DO_2FB
+#endif /* HAVE_MMX */
+
+namespace LibGens {
 
 /**
  * Apply a Fast Blur effect to the screen buffer.
@@ -133,199 +147,6 @@ inline void FastBlurPrivate::T_DoFastBlur(pixel *outScreen, const pixel *mdScree
 		mdScreen++;
 	}
 }
-
-#ifdef HAVE_MMX
-const uint32_t FastBlurPrivate::MASK_DIV2_15_MMX[2] = {0x3DEF3DEF, 0x3DEF3DEF};
-const uint32_t FastBlurPrivate::MASK_DIV2_16_MMX[2] = {0x7BCF7BCF, 0x7BCF7BCF};
-const uint32_t FastBlurPrivate::MASK_DIV2_32_MMX[2] = {0x007F7F7F, 0x007F7F7F};
-
-/**
- * 15/16-bit color Fast Blur, MMX-optimized.
- * @param outScreen Source and destination screen.
- * @param pxCount Pixel count.
- * @param mask Division mask to use. (MASK_DIV2_15_MMX[] or MASK_DIV2_16_MMX[])
- */
-void FastBlurPrivate::DoFastBlur_16_MMX(uint16_t *outScreen, unsigned int pxCount, const uint32_t *mask)
-{
-	// Load the 15/16-bit color mask.
-	__asm__ (
-		"movq %0, %%mm7"
-		:
-		: "m" (*mask)
-		);
-
-	// Blur the pixels.
-	// TODO: Do more than 4px at a time?
-	assert(pxCount % 4 == 0);
-	for (unsigned int i = (pxCount / 4); i != 0; i--) {
-		__asm__ (
-			// Get source pixels.
-			"movq	 (%0), %%mm0\n"
-			"movq	2(%0), %%mm1\n"
-
-			// Blur source pixels.
-			// NOTE: This may lose some precision in the Red LSB on LE architectures.
-			"psrld	$1, %%mm0\n"
-			"psrld	$1, %%mm1\n"
-			"pand	%%mm7, %%mm0\n"
-			"pand	%%mm7, %%mm1\n"
-			"paddw	%%mm1, %%mm0\n"
-
-			// Put destination pixels.
-			"movq	%%mm0, (%0)\n"
-			:
-			: "r" (outScreen)
-			);
-
-		// Next group of pixels.
-		outScreen += 4;
-	}
-
-	// Reset the FPU state.
-	__asm__ ("emms");
-}
-
-/**
- * 15/16-bit color Fast Blur, MMX-optimized.
- * @param outScreen Destination screen.
- * @param mdScreen Source screen.
- * @param pxCount Pixel count.
- * @param mask Division mask to use. (MASK_DIV2_15_MMX[] or MASK_DIV2_16_MMX[])
- */
-void FastBlurPrivate::DoFastBlur_16_MMX(uint16_t *outScreen, const uint16_t *mdScreen,
-					unsigned int pxCount, const uint32_t *mask)
-{
-	// Load the 15/16-bit color mask.
-	__asm__ (
-		"movq %0, %%mm7"
-		:
-		: "m" (*mask)
-		);
-
-	// Blur the pixels.
-	// TODO: Do more than 4px at a time?
-	assert(pxCount % 4 == 0);
-	for (unsigned int i = (pxCount / 4); i != 0; i--) {
-		__asm__ (
-			// Get source pixels.
-			"movq	 (%1), %%mm0\n"
-			"movq	2(%1), %%mm1\n"
-
-			// Blur source pixels.
-			// NOTE: This may lose some precision in the Red LSB on LE architectures.
-			"psrld	$1, %%mm0\n"
-			"psrld	$1, %%mm1\n"
-			"pand	%%mm7, %%mm0\n"
-			"pand	%%mm7, %%mm1\n"
-			"paddw	%%mm1, %%mm0\n"
-
-			// Put destination pixels.
-			"movq	%%mm0, (%0)\n"
-			:
-			: "r" (outScreen), "r" (mdScreen)
-			);
-
-		// Next group of pixels.
-		outScreen += 4;
-		mdScreen += 4;
-	}
-
-	// Reset the FPU state.
-	__asm__ ("emms");
-}
-
-/**
- * 32-bit color Fast Blur, MMX-optimized.
- * @param outScreen Source and destination screen.
- * @param pxCount Pixel count.
- */
-void FastBlurPrivate::DoFastBlur_32_MMX(uint32_t *outScreen, unsigned int pxCount)
-{
-	// Load the 32-bit color mask.
-	__asm__ (
-		"movq %0, %%mm7"
-		:
-		: "m" (MASK_DIV2_32_MMX[0])
-		);
-
-	// Blur the pixels.
-	// TODO: Do more than 2px at a time?
-	assert(pxCount % 2 == 0);
-	for (unsigned int i = (pxCount / 2); i != 0; i--) {
-		__asm__ (
-			// Get source pixels.
-			"movq	 (%0), %%mm0\n"
-			"movq	4(%0), %%mm1\n"
-
-			// Blur source pixels.
-			// NOTE: This may lose some precision in the Red LSB on LE architectures.
-			"psrld	$1, %%mm0\n"
-			"psrld	$1, %%mm1\n"
-			"pand	%%mm7, %%mm0\n"
-			"pand	%%mm7, %%mm1\n"
-			"paddd	%%mm1, %%mm0\n"
-
-			// Put destination pixels.
-			"movq	%%mm0, (%0)\n"
-			:
-			: "r" (outScreen)
-			);
-
-		// Next group of pixels.
-		outScreen += 2;
-	}
-
-	// Reset the FPU state.
-	__asm__ ("emms");
-}
-
-/**
- * 32-bit color Fast Blur, MMX-optimized.
- * @param outScreen Destination screen.
- * @param mdScreen Source screen.
- * @param pxCount Pixel count.
- */
-void FastBlurPrivate::DoFastBlur_32_MMX(uint32_t *outScreen, const uint32_t *mdScreen, unsigned int pxCount)
-{
-	// Load the 32-bit color mask.
-	__asm__ (
-		"movq %0, %%mm7"
-		:
-		: "m" (MASK_DIV2_32_MMX[0])
-		);
-
-	// Blur the pixels.
-	// TODO: Do more than 2px at a time?
-	assert(pxCount % 2 == 0);
-	for (unsigned int i = (pxCount / 2); i != 0; i--) {
-		__asm__ (
-			// Get source pixels.
-			"movq	 (%1), %%mm0\n"
-			"movq	4(%1), %%mm1\n"
-
-			// Blur source pixels.
-			// NOTE: This may lose some precision in the Red LSB on LE architectures.
-			"psrld	$1, %%mm0\n"
-			"psrld	$1, %%mm1\n"
-			"pand	%%mm7, %%mm0\n"
-			"pand	%%mm7, %%mm1\n"
-			"paddd	%%mm1, %%mm0\n"
-
-			// Put destination pixels.
-			"movq	%%mm0, (%0)\n"
-			:
-			: "r" (outScreen), "r" (mdScreen)
-			);
-
-		// Next group of pixels.
-		outScreen += 2;
-		mdScreen += 2;
-	}
-
-	// Reset the FPU state.
-	__asm__ ("emms");
-}
-#endif /* HAVE_MMX */
 
 /**
  * Apply a Fast Blur effect to the screen buffer.
