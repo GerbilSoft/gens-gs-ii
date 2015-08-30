@@ -64,8 +64,7 @@ inline void PausedEffectPrivate::DoPausedEffect_32_MMX(
 	);
 
 	// Convert the pixels to grayscale.
-	// TODO: Apply the Blue tint.
-	// TODO: Do more than 1px at a time?
+	// TODO: Do more than 2px at a time?
 	assert(pxCount % 2 == 0);
 	for (pxCount /= 2; pxCount > 0; pxCount--) {
 		// %mm0 == 0
