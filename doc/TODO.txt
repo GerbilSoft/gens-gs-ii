@@ -44,12 +44,8 @@ OpenGL (gens-sdl):
   - GL_EXT_bgra is also built into GL 1.2.
     - Still needed for GL 1.1, i.e. Windows GDI renderer.
 - Aspect ratio constraint: Use integers?
-- Add Fast Blur using SW and shaders. (hotkey F9)
-- Add Paused Tint using SW only.
-  - Shader is unnecessary because paused tint is done once and then
-    emulation is paused.
-  - Also, I can't chain shaders easily, so fast blur + paused ==
-    at least one software fallback anyway.
+- Add Fast Blur using shaders. (hotkey F9)
+  - Currently available using SW rendering.
 
 Windows:
 - Set console code page to UTF-8.
