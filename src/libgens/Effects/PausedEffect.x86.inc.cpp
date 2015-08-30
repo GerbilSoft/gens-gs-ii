@@ -71,7 +71,7 @@ inline void PausedEffectPrivate::DoPausedEffect_32_MMX(
 		// %mm1 == first pixel as words
 		// %mm2 == second pixel as words
 		// %mm3 == px1 temporary
-		// %mm4 == px1 temporary
+		// %mm4 == px2 temporary
 		// %mm7 == grayscale vector
 		__asm__ (
 #ifdef DO_2FB
