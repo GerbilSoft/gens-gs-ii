@@ -21,10 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-/**
- * NOTE: The video effects here are applied to MD_Screen[].
- */
-
 #include "PausedEffect.hpp"
 
 // MD framebuffer.
