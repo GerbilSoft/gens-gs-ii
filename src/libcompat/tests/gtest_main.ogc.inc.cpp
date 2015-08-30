@@ -28,6 +28,10 @@
 #error gtest_main.ogc.inc.cpp is for libogc only.
 #endif
 
+#if !defined(HW_RVL)
+#error gtest_main.ogc.inc.cpp is currently HW_RVL only.
+#endif
+
 // libogc
 #include <gccore.h>
 #include <wiiuse/wpad.h>
