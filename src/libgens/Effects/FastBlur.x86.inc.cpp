@@ -109,9 +109,9 @@ void FastBlurPrivate::DoFastBlur_16_MMX(
  * @param pxCount   [in]  Pixel count.
  */
 void FastBlurPrivate::DoFastBlur_32_MMX(
-	uint32_t *outScreen,
+	uint32_t* RESTRICT outScreen,
 #ifdef DO_2FB
-	const uint32_t *mdScreen,
+	const uint32_t* RESTRICT mdScreen,
 #endif
 	unsigned int pxCount)
 {

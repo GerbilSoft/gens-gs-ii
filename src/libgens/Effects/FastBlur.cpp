@@ -68,13 +68,23 @@ class FastBlurPrivate
 		static const uint32_t MASK_DIV2_15_MMX[2];
 		static const uint32_t MASK_DIV2_16_MMX[2];
 
-		static void DoFastBlur_16_MMX(uint16_t *outScreen, unsigned int pxCount, const uint32_t *mask);
-		static void DoFastBlur_16_MMX(uint16_t *outScreen, const uint16_t *mdScreen,
-					      unsigned int pxCount, const uint32_t *mask);
+		static void DoFastBlur_16_MMX(
+			uint16_t* RESTRICT outScreen,
+			unsigned int pxCount,
+			const uint32_t *mask);
+		static void DoFastBlur_16_MMX(
+			uint16_t* RESTRICT outScreen,
+			const uint16_t* RESTRICT mdScreen,
+			unsigned int pxCount,
+			const uint32_t *mask);
 
-		static void DoFastBlur_32_MMX(uint32_t *outScreen, unsigned int pxCount);
-		static void DoFastBlur_32_MMX(uint32_t *outScreen, const uint32_t *mdScreen,
-					      unsigned int pxCount);
+		static void DoFastBlur_32_MMX(
+			uint32_t* RESTRICT outScreen,
+			unsigned int pxCount);
+		static void DoFastBlur_32_MMX(
+			uint32_t* RESTRICT outScreen,
+			const uint32_t* RESTRICT mdScreen,
+			unsigned int pxCount);
 #endif /* HAVE_MMX */
 };
 
