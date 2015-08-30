@@ -39,6 +39,90 @@
 namespace LibGens {
 
 /**
+ * 32-bit color Fast Blur, SSE2-optimized.
+ * @param outScreen [out] Destination screen.
+ * @param mdScreen  [in]  Source screen. [2-FB only]
+ * @param pxCount   [in]  Pixel count.
+ */
+void FastBlurPrivate::DoFastBlur_32_SSE2(
+	uint32_t* RESTRICT outScreen,
+#ifdef DO_2FB
+	const uint32_t* RESTRICT mdScreen,
+#endif
+	unsigned int pxCount)
+{
+	// Make sure the framebuffer(s) are 16-byte aligned.
+	assert((uintptr_t)outScreen % 16 == 0);
+#ifdef DO_2FB
+	assert((uintptr_t)mdScreen % 16 == 0);
+#endif
+
+	static const uint32_t ALIGN(16) MASK_DIV2_32_SSE2[4] =
+		{0x007F7F7F, 0x007F7F7F, 0x007F7F7F, 0x007F7F7F};
+
+	// Load the 32-bit color mask.
+	__asm__ (
+		"movdqa %[MASK_DIV2_32_SSE2], %%xmm7"
+		:
+		: [MASK_DIV2_32_SSE2] "m" (MASK_DIV2_32_SSE2[0])
+		);
+
+	// Blur 8px at a time.
+	assert(pxCount % 8 == 0);
+	for (pxCount /= 8; pxCount > 0; pxCount--) {
+		__asm__ (
+			// Get source pixels.
+			// TODO: movdqu, or movdqa + shift?
+#ifdef DO_2FB
+			"movdqa	  (%[mdScreen]), %%xmm0\n"
+			"movdqu	 4(%[mdScreen]), %%xmm1\n"
+			"movdqa	16(%[mdScreen]), %%xmm2\n"
+			"movdqu	20(%[mdScreen]), %%xmm3\n"
+#else /* DO_1FB */
+			"movdqa	  (%[outScreen]), %%xmm0\n"
+			"movdqu	 4(%[outScreen]), %%xmm1\n"
+			"movdqa	16(%[outScreen]), %%xmm2\n"
+			"movdqu	20(%[outScreen]), %%xmm3\n"
+#endif
+
+			// Blur source pixels.
+			// NOTE: This may lose some precision in the Red LSB on LE architectures.
+			"psrld	    $1, %%xmm0\n"
+			"psrld	    $1, %%xmm1\n"
+			"psrld	    $1, %%xmm2\n"
+			"psrld	    $1, %%xmm3\n"
+			"pand	%%xmm7, %%xmm0\n"
+			"pand	%%xmm7, %%xmm1\n"
+			"pand	%%xmm7, %%xmm2\n"
+			"pand	%%xmm7, %%xmm3\n"
+			"paddd	%%xmm1, %%xmm0\n"
+			"paddd	%%xmm3, %%xmm2\n"
+
+			// Put destination pixels.
+			"movdqa	%%xmm0,   (%[outScreen])\n"
+			"movdqa	%%xmm2, 16(%[outScreen])\n"
+			:
+			: [outScreen] "r" (outScreen)
+#ifdef DO_2FB
+			, [mdScreen] "r" (mdScreen)
+#endif
+			// FIXME: gcc complains that xmm? registers are unknown.
+			// May need to compile with -msse...
+			//: "xmm0", "xmm1", "xmm2", "xmm3"
+			);
+
+		// Next group of pixels.
+		outScreen += 8;
+#ifdef DO_2FB
+		mdScreen += 8;
+#endif
+	}
+
+	// Reset the FPU state.
+	__asm__ __volatile__ ("emms");
+}
+
+/**
  * 15/16-bit color Fast Blur, MMX-optimized.
  * @param outScreen	[out] Destination screen.
  * @param mdScreen	[in]  Source screen. [2-FB only]
@@ -118,7 +202,8 @@ void FastBlurPrivate::DoFastBlur_32_MMX(
 #endif
 	unsigned int pxCount)
 {
-	static const uint32_t MASK_DIV2_32_MMX[2] = {0x007F7F7F, 0x007F7F7F};
+	static const uint32_t MASK_DIV2_32_MMX[2] =
+		{0x007F7F7F, 0x007F7F7F};
 
 	// Load the 32-bit color mask.
 	__asm__ (
@@ -127,8 +212,7 @@ void FastBlurPrivate::DoFastBlur_32_MMX(
 		: [MASK_DIV2_32_MMX] "m" (MASK_DIV2_32_MMX[0])
 		);
 
-	// Blur 4 pixels at a time.
-	// (We're actually reading 5 pixels, but the fifth is input only.)
+	// Blur 4px at a time.
 	assert(pxCount % 4 == 0);
 	for (pxCount /= 4; pxCount > 0; pxCount--) {
 		__asm__ (
