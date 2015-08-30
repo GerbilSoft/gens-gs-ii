@@ -31,12 +31,12 @@ GET_PROPERTY(STAR_S68K_EXE TARGET star_s68k PROPERTY LOCATION)
 # Special build commands for main68k.asm and sub68k.asm
 ADD_CUSTOM_COMMAND(
 	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/main68k.asm
-	COMMAND ${STAR_M68K_EXE} main68k.asm -hog -name main68k_
+	COMMAND "${STAR_M68K_EXE}" main68k.asm -hog -name main68k_
 	DEPENDS star_m68k
 	)
 ADD_CUSTOM_COMMAND(
 	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/sub68k.asm
-	COMMAND ${STAR_S68K_EXE} sub68k.asm -hog -name sub68k_
+	COMMAND "${STAR_S68K_EXE}" sub68k.asm -hog -name sub68k_
 	DEPENDS star_s68k
 	)
 
