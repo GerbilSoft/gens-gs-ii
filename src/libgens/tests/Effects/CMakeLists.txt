@@ -10,6 +10,20 @@ INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../")
 # Google Test.
 INCLUDE_DIRECTORIES(${GTEST_INCLUDE_DIR})
 
+# Copy the reference images to the test directory.
+FILE(COPY
+	Effects.Normal.15.png
+	Effects.Normal.16.png
+	Effects.Normal.32.png
+	PausedEffect.SW-int.15.png
+	PausedEffect.SW-int.16.png
+	PausedEffect.SW-int.32.png
+	FastBlur.SW.15.png
+	FastBlur.SW.16.png
+	FastBlur.SW.32.png
+	DESTINATION "${CMAKE_CURRENT_BINARY_DIR}"
+	)
+
 # Paused Effect Test.
 ADD_EXECUTABLE(PausedEffectTest
 	EffectTest.cpp
@@ -23,13 +37,14 @@ DO_SPLIT_DEBUG(PausedEffectTest)
 ADD_TEST(NAME PausedEffectTest
         COMMAND PausedEffectTest)
 
-# Copy the reference images to the test directory.
-FILE(COPY
-	Effects.Normal.15.png
-	Effects.Normal.16.png
-	Effects.Normal.32.png
-	PausedEffect.SW-int.15.png
-	PausedEffect.SW-int.16.png
-	PausedEffect.SW-int.32.png
-	DESTINATION "${CMAKE_CURRENT_BINARY_DIR}"
-	)
+# Fast Blur Test.
+ADD_EXECUTABLE(FastBlurTest
+	EffectTest.cpp
+	EffectTest.hpp
+        FastBlurTest.cpp
+        FastBlurTest.hpp
+        )
+TARGET_LINK_LIBRARIES(FastBlurTest gens zomg ${GTEST_LIBRARY})
+DO_SPLIT_DEBUG(FastBlurTest)
+ADD_TEST(NAME FastBlurTest
+        COMMAND FastBlurTest)
