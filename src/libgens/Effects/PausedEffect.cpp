@@ -60,10 +60,15 @@ class PausedEffectPrivate
 
 	public:
 		template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
-		static inline void T_DoPausedEffect(pixel* RESTRICT outScreen);
+		static inline void T_DoPausedEffect(
+			pixel* RESTRICT outScreen,
+			unsigned int pxCount);
 
 		template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
-		static inline void T_DoPausedEffect(pixel* RESTRICT outScreen, const pixel* RESTRICT mdScreen);
+		static inline void T_DoPausedEffect(
+			pixel* RESTRICT outScreen,
+			const pixel* RESTRICT mdScreen,
+			unsigned int pxCount);
 };
 
 #define MMASK(bits) ((1 << (bits)) - 1)
@@ -74,18 +79,19 @@ class PausedEffectPrivate
  * @param RBits Number of bits for Red.
  * @param GBits Number of bits for Green.
  * @param BBits Number of bits for Blue.
- * @param rInfo Rendering information.
- * @param scale Scaling value.
- * @param outScreen Pointer to the source/destination screen buffer. (MUST BE 336x240!)
+ * @param outScreen Pointer to the source/destination screen buffer.
+ * @param pxCount Pixel count.
  */
 template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
-inline void PausedEffectPrivate::T_DoPausedEffect(pixel* RESTRICT outScreen)
+inline void PausedEffectPrivate::T_DoPausedEffect(
+	pixel* RESTRICT outScreen,
+	unsigned int pxCount)
 {
 	uint8_t r, g, b;
 	unsigned int nRG, nB;
 	float monoPx;
 
-	for (unsigned int i = (336*240); i != 0; i--) {
+	for (; pxCount > 0; pxCount--) {
 		// Get the color components.
 		r = (uint8_t)((*outScreen >> (GBits + BBits)) & MMASK(RBits)) << (8 - RBits);
 		g = (uint8_t)((*outScreen >> BBits) & MMASK(GBits)) << (8 - GBits);
@@ -122,19 +128,21 @@ inline void PausedEffectPrivate::T_DoPausedEffect(pixel* RESTRICT outScreen)
  * @param RBits Number of bits for Red.
  * @param GBits Number of bits for Green.
  * @param BBits Number of bits for Blue.
- * @param rInfo Rendering information.
- * @param scale Scaling value.
  * @param outScreen Pointer to the destination screen buffer. (MUST BE 336x240!)
  * @param mdScreen Pointer to the MD screen buffer. (MUST BE 336x240!)
+ * @param pxCount Pixel count.
  */
 template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
-inline void PausedEffectPrivate::T_DoPausedEffect(pixel* RESTRICT outScreen, const pixel* RESTRICT mdScreen)
+inline void PausedEffectPrivate::T_DoPausedEffect(
+	pixel* RESTRICT outScreen,
+	const pixel* RESTRICT mdScreen,
+	unsigned int pxCount)
 {
 	uint8_t r, g, b;
 	unsigned int nRG, nB;
 	float monoPx;
 	
-	for (unsigned int i = (336*240); i != 0; i--) {
+	for (; pxCount > 0; pxCount--) {
 		// Get the color components.
 		r = (uint8_t)((*mdScreen >> (GBits + BBits)) & MMASK(RBits)) << (8 - RBits);
 		g = (uint8_t)((*mdScreen >> BBits) & MMASK(GBits)) << (8 - GBits);
@@ -174,21 +182,22 @@ void PausedEffect::DoPausedEffect(MdFb *outScreen)
 {
 	// Reference the framebuffer.
 	outScreen->ref();
+	const unsigned int pxCount = (outScreen->pxPitch() * outScreen->numLines());
 
 	// Render to outScreen.
 	switch (outScreen->bpp()) {
 		case MdFb::BPP_15:
 			PausedEffectPrivate::T_DoPausedEffect<uint16_t, 5, 5, 5>
-				(outScreen->fb16());
+				(outScreen->fb16(), pxCount);
 			break;
 		case MdFb::BPP_16:
 			PausedEffectPrivate::T_DoPausedEffect<uint16_t, 5, 6, 5>
-				(outScreen->fb16());
+				(outScreen->fb16(), pxCount);
 			break;
 		case MdFb::BPP_32:
 		default:
 			PausedEffectPrivate::T_DoPausedEffect<uint32_t, 8, 8, 8>
-				(outScreen->fb32());
+				(outScreen->fb32(), pxCount);
 			break;
 	}
 
@@ -210,20 +219,24 @@ void PausedEffect::DoPausedEffect(MdFb* RESTRICT outScreen, const MdFb* RESTRICT
 	// Set outScreen's bpp to match mdScreen.
 	outScreen->setBpp(mdScreen->bpp());
 
+	// Pixel count.
+	// TODO: Verify that both framebuffers are the same.
+	const unsigned int pxCount = (outScreen->pxPitch() * outScreen->numLines());
+
 	// Render to outScreen.
 	switch (outScreen->bpp()) {
 		case MdFb::BPP_15:
 			PausedEffectPrivate::T_DoPausedEffect<uint16_t, 5, 5, 5>
-				(outScreen->fb16(), mdScreen->fb16());
+				(outScreen->fb16(), mdScreen->fb16(), pxCount);
 			break;
 		case MdFb::BPP_16:
 			PausedEffectPrivate::T_DoPausedEffect<uint16_t, 5, 6, 5>
-				(outScreen->fb16(), mdScreen->fb16());
+				(outScreen->fb16(), mdScreen->fb16(), pxCount);
 			break;
 		case MdFb::BPP_32:
 		default:
 			PausedEffectPrivate::T_DoPausedEffect<uint32_t, 8, 8, 8>
-				(outScreen->fb32(), mdScreen->fb32());
+				(outScreen->fb32(), mdScreen->fb32(), pxCount);
 			break;
 	}
 
