@@ -217,7 +217,7 @@ int doScreenShot(const MdFb *fb, const Rom *rom)
 	} while (!access(scrFilename, F_OK));
 
 	// Take the screenshot.
-	int ret = Screenshot::toFile(fb, rom, scrFilename);
+	int ret = Screenshot::toFile(scrFilename, fb, rom);
 	return (ret == 0 ? scrNumber : ret);
 }
 
