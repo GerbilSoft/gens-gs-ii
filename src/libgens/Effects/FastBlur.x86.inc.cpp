@@ -38,6 +38,10 @@
 
 namespace LibGens {
 
+#if 0
+// FIXME: SSE2 Fast Blur is generally slow due to
+// unaligned access requirements.
+
 /**
  * 32-bit color Fast Blur, SSE2-optimized.
  * @param outScreen [out] Destination screen.
@@ -121,6 +125,7 @@ void FastBlurPrivate::DoFastBlur_32_SSE2(
 	// Reset the FPU state.
 	__asm__ __volatile__ ("emms");
 }
+#endif
 
 /**
  * 15/16-bit color Fast Blur, MMX-optimized.

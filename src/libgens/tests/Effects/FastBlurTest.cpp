@@ -158,9 +158,13 @@ INSTANTIATE_TEST_CASE_P(FastBlurTest_NoFlags, FastBlurTest,
 INSTANTIATE_TEST_CASE_P(FastBlurTest_MMX, FastBlurTest,
 	::testing::Values(EffectTest_flags(MDP_CPUFLAG_X86_MMX, 0)
 ));
+#if 0
+// FIXME: SSE2 Fast Blur is generally slow due to
+// unaligned access requirements.
 INSTANTIATE_TEST_CASE_P(FastBlurTest_SSE2, FastBlurTest,
 	::testing::Values(EffectTest_flags(MDP_CPUFLAG_X86_SSE2, MDP_CPUFLAG_X86_SSE2SLOW)
 ));
+#endif
 #endif
 
 } }

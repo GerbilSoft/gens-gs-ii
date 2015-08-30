@@ -68,6 +68,9 @@ class FastBlurPrivate
 		static const uint32_t MASK_DIV2_15_MMX[2];
 		static const uint32_t MASK_DIV2_16_MMX[2];
 
+#if 0
+// FIXME: SSE2 Fast Blur is generally slow due to
+// unaligned access requirements.
 		static void DoFastBlur_32_SSE2(
 			uint32_t* RESTRICT outScreen,
 			unsigned int pxCount);
@@ -75,6 +78,7 @@ class FastBlurPrivate
 			uint32_t* RESTRICT outScreen,
 			const uint32_t* RESTRICT mdScreen,
 			unsigned int pxCount);
+#endif
 
 		static void DoFastBlur_16_MMX(
 			uint16_t* RESTRICT outScreen,
@@ -208,9 +212,7 @@ void FastBlur::DoFastBlur(MdFb* RESTRICT outScreen)
 		case MdFb::BPP_32:
 		default:
 #ifdef HAVE_MMX
-			if (CPU_Flags & MDP_CPUFLAG_X86_SSE2) {
-				FastBlurPrivate::DoFastBlur_32_SSE2(outScreen->fb32(), pxCount);
-			} else if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
+			if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
 				FastBlurPrivate::DoFastBlur_32_MMX(outScreen->fb32(), pxCount);
 			} else
 #endif /* HAVE_MMX */
@@ -275,9 +277,7 @@ void FastBlur::DoFastBlur(MdFb* RESTRICT outScreen, const MdFb* RESTRICT mdScree
 		case MdFb::BPP_32:
 		default:
 #ifdef HAVE_MMX
-			if (CPU_Flags & MDP_CPUFLAG_X86_SSE2) {
-				FastBlurPrivate::DoFastBlur_32_SSE2(outScreen->fb32(), mdScreen->fb32(), pxCount);
-			} else if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
+			if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
 				FastBlurPrivate::DoFastBlur_32_MMX(outScreen->fb32(), mdScreen->fb32(), pxCount);
 			}
 #endif /* HAVE_MMX */
