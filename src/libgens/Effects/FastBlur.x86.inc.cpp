@@ -127,30 +127,40 @@ void FastBlurPrivate::DoFastBlur_32_MMX(
 		: [MASK_DIV2_32_MMX] "m" (MASK_DIV2_32_MMX[0])
 		);
 
-	// Blur the pixels.
-	// TODO: Do more than 2px at a time?
-	assert(pxCount % 2 == 0);
-	for (unsigned int i = (pxCount / 2); i != 0; i--) {
+	// Blur 4 pixels at a time.
+	// (We're actually reading 5 pixels, but the fifth is input only.)
+	assert(pxCount % 4 == 0);
+	for (pxCount /= 4; pxCount > 0; pxCount--) {
 		__asm__ (
 			// Get source pixels.
 #ifdef DO_2FB
-			"movq	 (%[mdScreen]), %%mm0\n"
-			"movq	4(%[mdScreen]), %%mm1\n"
+			"movq	  (%[mdScreen]), %%mm0\n"
+			"movq	 4(%[mdScreen]), %%mm1\n"
+			"movq	 8(%[mdScreen]), %%mm2\n"
+			"movq	12(%[mdScreen]), %%mm3\n"
 #else /* DO_1FB */
-			"movq	 (%[outScreen]), %%mm0\n"
-			"movq	4(%[outScreen]), %%mm1\n"
+			"movq	  (%[outScreen]), %%mm0\n"
+			"movq	 4(%[outScreen]), %%mm1\n"
+			"movq	 8(%[outScreen]), %%mm2\n"
+			"movq	12(%[outScreen]), %%mm3\n"
 #endif
 
 			// Blur source pixels.
 			// NOTE: This may lose some precision in the Red LSB on LE architectures.
 			"psrld	$1, %%mm0\n"
 			"psrld	$1, %%mm1\n"
+			"psrld	$1, %%mm2\n"
+			"psrld	$1, %%mm3\n"
 			"pand	%%mm7, %%mm0\n"
 			"pand	%%mm7, %%mm1\n"
+			"pand	%%mm7, %%mm2\n"
+			"pand	%%mm7, %%mm3\n"
 			"paddd	%%mm1, %%mm0\n"
+			"paddd	%%mm3, %%mm2\n"
 
 			// Put destination pixels.
-			"movq	%%mm0, (%0)\n"
+			"movq	%%mm0,  (%[outScreen])\n"
+			"movq	%%mm2, 8(%[outScreen])\n"
 			:
 			: [outScreen] "r" (outScreen)
 #ifdef DO_2FB
@@ -158,13 +168,13 @@ void FastBlurPrivate::DoFastBlur_32_MMX(
 #endif
 			// FIXME: gcc complains that mm? registers are unknown.
 			// May need to compile with -mmmx...
-			//: "mm0", "mm1"
+			//: "mm0", "mm1", "mm2", "mm3"
 			);
 
 		// Next group of pixels.
-		outScreen += 2;
+		outScreen += 4;
 #ifdef DO_2FB
-		mdScreen += 2;
+		mdScreen += 4;
 #endif
 	}
 
