@@ -23,9 +23,9 @@ ADD_TEST(NAME PausedEffectTest
 
 # Copy the reference images to the test directory.
 FILE(COPY
-	PausedEffect.Normal.15.png
-	PausedEffect.Normal.16.png
-	PausedEffect.Normal.32.png
+	Effects.Normal.15.png
+	Effects.Normal.16.png
+	Effects.Normal.32.png
 	PausedEffect.SW-int.15.png
 	PausedEffect.SW-int.16.png
 	PausedEffect.SW-int.32.png
