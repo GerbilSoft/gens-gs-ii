@@ -393,7 +393,7 @@ TEST_P(PausedEffectTest, do15bit_1FB)
 	// Initialize the images.
 	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_15));
 	// Initialize the test framebuffer with the "normal" image.
-	copyToFb15(fb_test1, &img_normal);
+	ASSERT_NO_FATAL_FAILURE(copyToFb15(fb_test1, &img_normal));
 	// Apply the "paused" effect. (1-FB version)
 	PausedEffect::DoPausedEffect(fb_test1);
 	// Compare it to the known good "paused" image.
@@ -408,7 +408,7 @@ TEST_P(PausedEffectTest, do15bit_2FB)
 	// Initialize the images.
 	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_15));
 	// Initialize the test framebuffer with the "normal" image.
-	copyToFb15(fb_test1, &img_normal);
+	ASSERT_NO_FATAL_FAILURE(copyToFb15(fb_test1, &img_normal));
 	// Apply the "paused" effect. (2-FB version)
 	PausedEffect::DoPausedEffect(fb_test2, fb_test1);
 	// Compare it to the known good "paused" image.
@@ -423,7 +423,7 @@ TEST_P(PausedEffectTest, do16bit_1FB)
 	// Initialize the images.
 	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_16));
 	// Initialize the test framebuffer with the "normal" image.
-	copyToFb16(fb_test1, &img_normal);
+	ASSERT_NO_FATAL_FAILURE(copyToFb16(fb_test1, &img_normal));
 	// Apply the "paused" effect. (1-FB version)
 	PausedEffect::DoPausedEffect(fb_test1);
 	// Compare it to the known good "paused" image.
@@ -438,7 +438,7 @@ TEST_P(PausedEffectTest, do16bit_2FB)
 	// Initialize the images.
 	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_16));
 	// Initialize the test framebuffer with the "normal" image.
-	copyToFb16(fb_test1, &img_normal);
+	ASSERT_NO_FATAL_FAILURE(copyToFb16(fb_test1, &img_normal));
 	// Apply the "paused" effect. (2-FB version)
 	PausedEffect::DoPausedEffect(fb_test2, fb_test1);
 	// Compare it to the known good "paused" image.
@@ -453,7 +453,7 @@ TEST_P(PausedEffectTest, do32bit_1FB)
 	// Initialize the images.
 	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_32));
 	// Initialize the test framebuffer with the "normal" image.
-	copyToFb32(fb_test1, &img_normal);
+	ASSERT_NO_FATAL_FAILURE(copyToFb32(fb_test1, &img_normal));
 	// Apply the "paused" effect. (1-FB version)
 	PausedEffect::DoPausedEffect(fb_test1);
 	// Compare it to the known good "paused" image.
@@ -468,7 +468,7 @@ TEST_P(PausedEffectTest, do32bit_2FB)
 	// Initialize the images.
 	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_32));
 	// Initialize the test framebuffer with the "normal" image.
-	copyToFb32(fb_test1, &img_normal);
+	ASSERT_NO_FATAL_FAILURE(copyToFb32(fb_test1, &img_normal));
 	// Apply the "paused" effect. (2-FB version)
 	PausedEffect::DoPausedEffect(fb_test2, fb_test1);
 	// Compare it to the known good "paused" image.
