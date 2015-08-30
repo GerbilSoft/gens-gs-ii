@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include "PausedEffectTest.hpp"
+
 // Google Test
 #include "gtest/gtest.h"
 
@@ -53,11 +55,11 @@ using LibZomg::PngReader;
 
 namespace LibGens { namespace Tests {
 
-class PausedEffectTest : public ::testing::Test
+class PausedEffectTest : public ::testing::TestWithParam<PausedEffectTest_flags>
 {
 	protected:
 		PausedEffectTest()
-			: ::testing::Test()
+			: ::testing::TestWithParam<PausedEffectTest_flags>()
 			, fb_normal(nullptr)
 			, fb_paused(nullptr)
 			, fb_test1(nullptr)
@@ -117,6 +119,9 @@ class PausedEffectTest : public ::testing::Test
 		// Paused Effect is applied here.
 		MdFb *fb_test1;	// 1-FB
 		MdFb *fb_test2;	// 2-FB
+
+		// Previous CPU flags.
+		uint32_t cpuFlags_old;
 };
 
 /**
@@ -131,6 +136,55 @@ void PausedEffectTest::SetUp(void)
 	// Images must be initialized by calling init() from
 	// the test cases. We're reserving the parameter for
 	// CPU flags.
+
+	// Verify the CPU flags.
+	PausedEffectTest_flags flags = GetParam();
+	uint32_t totalFlags = (flags.cpuFlags | flags.cpuFlags_slow);
+	if (flags.cpuFlags != 0) {
+		ASSERT_NE(0U, CPU_Flags & totalFlags) <<
+			"CPU does not support the required flags for this test.";
+	}
+
+	// Check if the CPU flag is slow.
+	if (CPU_Flags & flags.cpuFlags_slow) {
+		if ((CPU_Flags & totalFlags) == flags.cpuFlags_slow) {
+			// CPU is always slow.
+			printf("WARNING: CPU is known to be slow with this flag.\n"
+			       "Don't rely on the benchmark results.\n");
+		} else if ((CPU_Flags & totalFlags) == totalFlags) {
+			// CPU may be slow.
+			printf("WARNING: CPU may be slow with some instructions provided by this flag.\n");
+		}
+	}
+
+	cpuFlags_old = CPU_Flags;
+	CPU_Flags = flags.cpuFlags;
+}
+
+/**
+ * Tear down the test.
+ */
+void PausedEffectTest::TearDown(void)
+{
+	// Free the image data.
+	free(img_normal.data);
+	free(img_paused.data);
+
+	// Unreference the framebuffers.
+	if (fb_normal) {
+		fb_normal->unref();
+	}
+	if (fb_paused) {
+		fb_paused->unref();
+	}
+	if (fb_test1) {
+		fb_test1->unref();
+	}
+	if (fb_test2) {
+		fb_test2->unref();
+	}
+
+	CPU_Flags = cpuFlags_old;
 }
 
 /**
@@ -210,30 +264,6 @@ void PausedEffectTest::init(MdFb::ColorDepth bpp)
 			break;
 		default:
 			ASSERT_TRUE(false) << "bpp is invalid: " << bpp;
-	}
-}
-
-/**
- * Tear down the test.
- */
-void PausedEffectTest::TearDown(void)
-{
-	// Free the image data.
-	free(img_normal.data);
-	free(img_paused.data);
-
-	// Unreference the framebuffers.
-	if (fb_normal) {
-		fb_normal->unref();
-	}
-	if (fb_paused) {
-		fb_paused->unref();
-	}
-	if (fb_test1) {
-		fb_test1->unref();
-	}
-	if (fb_test2) {
-		fb_test2->unref();
 	}
 }
 
@@ -358,7 +388,7 @@ void PausedEffectTest::compareFb(const MdFb *fb_expected, const MdFb *fb_actual)
 /**
  * Test the Paused Effect in 15-bit color. (1-FB)
  */
-TEST_F(PausedEffectTest, do15bit_1FB)
+TEST_P(PausedEffectTest, do15bit_1FB)
 {
 	// Initialize the images.
 	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_15));
@@ -373,7 +403,7 @@ TEST_F(PausedEffectTest, do15bit_1FB)
 /**
  * Test the Paused Effect in 15-bit color. (2-FB)
  */
-TEST_F(PausedEffectTest, do15bit_2FB)
+TEST_P(PausedEffectTest, do15bit_2FB)
 {
 	// Initialize the images.
 	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_15));
@@ -388,7 +418,7 @@ TEST_F(PausedEffectTest, do15bit_2FB)
 /**
  * Test the Paused Effect in 16-bit color. (1-FB)
  */
-TEST_F(PausedEffectTest, do16bit_1FB)
+TEST_P(PausedEffectTest, do16bit_1FB)
 {
 	// Initialize the images.
 	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_16));
@@ -403,7 +433,7 @@ TEST_F(PausedEffectTest, do16bit_1FB)
 /**
  * Test the Paused Effect in 16-bit color. (2-FB)
  */
-TEST_F(PausedEffectTest, do16bit_2FB)
+TEST_P(PausedEffectTest, do16bit_2FB)
 {
 	// Initialize the images.
 	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_16));
@@ -418,7 +448,7 @@ TEST_F(PausedEffectTest, do16bit_2FB)
 /**
  * Test the Paused Effect in 32-bit color. (1-FB)
  */
-TEST_F(PausedEffectTest, do32bit_1FB)
+TEST_P(PausedEffectTest, do32bit_1FB)
 {
 	// Initialize the images.
 	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_32));
@@ -433,7 +463,7 @@ TEST_F(PausedEffectTest, do32bit_1FB)
 /**
  * Test the Paused Effect in 32-bit color. (2-FB)
  */
-TEST_F(PausedEffectTest, do32bit_2FB)
+TEST_P(PausedEffectTest, do32bit_2FB)
 {
 	// Initialize the images.
 	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_32));
@@ -444,6 +474,21 @@ TEST_F(PausedEffectTest, do32bit_2FB)
 	// Compare it to the known good "paused" image.
 	compareFb(fb_paused, fb_test2);
 }
+
+INSTANTIATE_TEST_CASE_P(PausedEffectTest_NoFlags, PausedEffectTest,
+	::testing::Values(PausedEffectTest_flags(0, 0)
+));
+
+// NOTE: PausedEffect.cpp only implements MMX/SSE2 using GNU assembler.
+#if defined(__GNUC__) && \
+    (defined(__i386__) || defined(__amd64__))
+INSTANTIATE_TEST_CASE_P(PausedEffectTest_MMX, PausedEffectTest,
+	::testing::Values(PausedEffectTest_flags(MDP_CPUFLAG_X86_MMX, 0)
+));
+INSTANTIATE_TEST_CASE_P(PausedEffectTest_SSE2, PausedEffectTest,
+	::testing::Values(PausedEffectTest_flags(MDP_CPUFLAG_X86_SSE2, MDP_CPUFLAG_X86_SSE2SLOW)
+));
+#endif
 
 } }
 
