@@ -12,6 +12,8 @@ INCLUDE_DIRECTORIES(${GTEST_INCLUDE_DIR})
 
 # Paused Effect Test.
 ADD_EXECUTABLE(PausedEffectTest
+	EffectTest.cpp
+	EffectTest.hpp
         PausedEffectTest.cpp
         PausedEffectTest.hpp
         PausedEffectTest_benchmark.cpp
