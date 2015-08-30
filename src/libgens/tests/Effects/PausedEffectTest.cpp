@@ -68,6 +68,12 @@ class PausedEffectTest : public ::testing::Test
 		virtual void TearDown(void) override;
 
 		/**
+		 * Initialize image data.
+		 * @param bpp Color depth.
+		 */
+		void init(MdFb::ColorDepth bpp);
+
+		/**
 		 * Copy a loaded image to an MdFb in 32-bit color.
 		 * Source image must be 32-bit color.
 		 * @param fb	[out] Destination MdFb.
@@ -106,17 +112,52 @@ void PausedEffectTest::SetUp(void)
 	memset(&img_normal, 0, sizeof(img_normal));
 	memset(&img_paused, 0, sizeof(img_paused));
 
+	// Images must be initialized by calling init() from
+	// the test cases. We're reserving the parameter for
+	// CPU flags.
+}
+
+/**
+ * Initialize image data.
+ * @param bpp Color depth.
+ * @return 0 on success; non-zero on error.
+ */
+void PausedEffectTest::init(MdFb::ColorDepth bpp)
+{
 	// Load the images.
-	// TODO: Use a parameter for bpp.
+	int bppNum;
+	switch (bpp) {
+		case MdFb::BPP_15:
+			bppNum = 15;
+			break;
+		case MdFb::BPP_16:
+			bppNum = 16;
+			break;
+		case MdFb::BPP_32:
+			bppNum = 32;
+			break;
+		default:
+			ASSERT_TRUE(false) << "bpp is invalid: " << bpp;
+	}
+
+	char filename_normal[64];
+	char filename_paused[64];
+
+	// "Normal" filename.
+	snprintf(filename_normal, sizeof(filename_normal),
+		 "PausedEffect.Normal.%d.png", bppNum);
+	// "Paused" filename. (SW == software rendering)
+	snprintf(filename_paused, sizeof(filename_normal),
+		 "PausedEffect.SW.%d.png", bppNum);
+
+	// Load the images.
 	PngReader reader;
-	int ret = reader.readFromFile(&img_normal,
-			"PausedEffect.Normal.32.png",
+	int ret = reader.readFromFile(&img_normal, filename_normal,
 			PngReader::RF_INVERTED_ALPHA);
-	ASSERT_EQ(0, ret) << "Error loading \"PausedEffect.Normal.32.png\": " << strerror(-ret);
-	ret = reader.readFromFile(&img_paused,
-			"PausedEffect.SW.32.png",
+	ASSERT_EQ(0, ret) << "Error loading \"" << filename_normal << "\": " << strerror(-ret);
+	ret = reader.readFromFile(&img_paused, filename_paused,
 			PngReader::RF_INVERTED_ALPHA);
-	ASSERT_EQ(0, ret) << "Error loading \"PausedEffect.SW.32.png\": " << strerror(-ret);
+	ASSERT_EQ(0, ret) << "Error loading \"" << filename_paused << "\": " << strerror(-ret);
 
 	// Allocate the framebuffers.
 	fb_normal = new MdFb();
@@ -126,11 +167,10 @@ void PausedEffectTest::SetUp(void)
 	fb_test2 = new MdFb();
 
 	// Set the framebuffers' color depth.
-	// TODO: Parameter.
-	fb_normal->setBpp(MdFb::BPP_32);
-	fb_paused->setBpp(MdFb::BPP_32);
-	fb_test1->setBpp(MdFb::BPP_32);
-	fb_test2->setBpp(MdFb::BPP_32);
+	fb_normal->setBpp(bpp);
+	fb_paused->setBpp(bpp);
+	fb_test1->setBpp(bpp);
+	fb_test2->setBpp(bpp);
 
 	// Make sure the images have the correct dimensions.
 	EXPECT_EQ(fb_normal->pxPerLine(), (int)img_normal.w);
@@ -227,6 +267,9 @@ void PausedEffectTest::compareFb(const MdFb *fb_expected, const MdFb *fb_actual)
  */
 TEST_F(PausedEffectTest, do32bit_1FB)
 {
+	// Initialize the images.
+	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_32));
+
 	// Initialize the test framebuffer with the "normal" image.
 	copyToFb32(fb_test1, &img_normal);
 
@@ -242,6 +285,9 @@ TEST_F(PausedEffectTest, do32bit_1FB)
  */
 TEST_F(PausedEffectTest, do32bit_2FB)
 {
+	// Initialize the images.
+	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_32));
+
 	// Initialize the test framebuffer with the "normal" image.
 	copyToFb32(fb_test1, &img_normal);
 
