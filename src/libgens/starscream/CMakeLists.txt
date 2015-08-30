@@ -11,7 +11,9 @@ IF(CMAKE_CROSSCOMPILING)
 ELSE(CMAKE_CROSSCOMPILING)
 	# Not cross-compiling.
 	ADD_EXECUTABLE(star_m68k star_m68k.c)
+	DO_SPLIT_DEBUG(star_m68k)
 	ADD_EXECUTABLE(star_s68k star_s68k.c)
+	DO_SPLIT_DEBUG(star_s68k)
 
 	# Export these executables for cross-compiling.
 	# Reference: http://www.cmake.org/Wiki/CMake_Cross_Compiling
@@ -39,7 +41,6 @@ ADD_CUSTOM_COMMAND(
 	)
 
 # Starscream library.
-# FIXME: Set the PDB filename.
 ENABLE_LANGUAGE(ASM_NASM)
 ADD_LIBRARY(starscream STATIC
 	${CMAKE_CURRENT_BINARY_DIR}/main68k.asm
@@ -50,3 +51,5 @@ ADD_LIBRARY(starscream STATIC
 	# (CMake's NMake generator can't handle a pure ASM_NASM library.)
 	dummy.c
 	)
+INCLUDE(SetMSVCDebugPath)
+SET_MSVC_DEBUG_PATH(starscream)
