@@ -513,7 +513,11 @@ INSTANTIATE_TEST_CASE_P(ScreenH40SpriteLimit, VdpSpriteMaskingTest,
 
 } }
 
-int main(int argc, char *argv[])
+/**
+ * Test suite main function.
+ * Called by gtest_main.inc.cpp's main().
+ */
+static int test_main(int argc, char *argv[])
 {
 	fprintf(stderr, "LibGens test suite: VDP Sprite Masking & Overflow tests.\n\n");
 
@@ -528,3 +532,5 @@ int main(int argc, char *argv[])
 	LibGens::End();
 	return ret;
 }
+
+#include "libcompat/tests/gtest_main.inc.cpp"

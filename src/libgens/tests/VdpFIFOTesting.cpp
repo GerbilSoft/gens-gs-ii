@@ -592,7 +592,11 @@ INSTANTIATE_TEST_CASE_P(Page22, VdpFIFOTesting,
 		));
 } }
 
-int main(int argc, char *argv[])
+/**
+ * Test suite main function.
+ * Called by gtest_main.inc.cpp's main().
+ */
+static int test_main(int argc, char *argv[])
 {
 	// NOTE: Tests cannot be run out of order.
 	// TODO: Enforce that.
@@ -605,3 +609,5 @@ int main(int argc, char *argv[])
 			"Original ROM (c) 2013 by Nemesis.\n\n");
 	return RUN_ALL_TESTS();
 }
+
+#include "libcompat/tests/gtest_main.inc.cpp"

@@ -79,7 +79,7 @@ ADD_EXECUTABLE(VdpSpriteMaskingTest
 	VdpSpriteMaskingTest.cpp
 	VdpSpriteMaskingTest_data.c
 	)
-TARGET_LINK_LIBRARIES(VdpSpriteMaskingTest gens ${ZLIB_LIBRARY} ${GTEST_LIBRARY})
+TARGET_LINK_LIBRARIES(VdpSpriteMaskingTest compat gens ${ZLIB_LIBRARY} ${GTEST_LIBRARY})
 DO_SPLIT_DEBUG(VdpSpriteMaskingTest)
 ADD_TEST(NAME VdpSpriteMaskingTest
 	COMMAND VdpSpriteMaskingTest)
@@ -104,7 +104,7 @@ ADD_EXECUTABLE(VdpFIFOTesting
 	VdpFIFOTesting.cpp
 	VdpFIFOTesting_data.c
 	)
-TARGET_LINK_LIBRARIES(VdpFIFOTesting gens ${GTEST_LIBRARY})
+TARGET_LINK_LIBRARIES(VdpFIFOTesting compat gens ${GTEST_LIBRARY})
 DO_SPLIT_DEBUG(VdpFIFOTesting)
 # NOTE: Disabled for now until I can find a way
 # to not check tests that are known to fail.

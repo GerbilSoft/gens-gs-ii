@@ -169,7 +169,11 @@ INSTANTIATE_TEST_CASE_P(AudioWriteTest_SSE2, AudioWriteTest,
 
 } }
 
-int main(int argc, char *argv[])
+/**
+ * Test suite main function.
+ * Called by gtest_main.inc.cpp's main().
+ */
+static int test_main(int argc, char *argv[])
 {
 	fprintf(stderr, "LibGens test suite: SoundMgr audio write test.\n\n");
 	LibGens::Init();
@@ -178,3 +182,5 @@ int main(int argc, char *argv[])
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
 }
+
+#include "libcompat/tests/gtest_main.inc.cpp"
