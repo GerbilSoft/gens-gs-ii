@@ -226,20 +226,44 @@ inline void PausedEffectPrivate::DoPausedEffect_32_MMX(
 	// TODO: Apply the Blue tint.
 	// TODO: Do more than 1px at a time?
 	assert(pxCount % 2 == 0);
-	for (pxCount /= 1; pxCount > 0; pxCount--) {
+	for (pxCount /= 2; pxCount > 0; pxCount--) {
+		// %mm0 == 0
+		// %mm1 == first pixel as words
+		// %mm2 == second pixel as words
+		// %mm3 == px1 temporary
+		// %mm4 == px1 temporary
+		// %mm7 == grayscale vector
 		__asm__ (
-			"movd		(%[mdScreen]), %%mm1\n"		// Get 1 pixel.
+			"movq		(%[mdScreen]), %%mm1\n"		// Get 2 pixels.
+			"movq		%%mm1, %%mm2\n"			// Same 2 pixels.
 			"punpcklbw	%%mm0, %%mm1\n"			// Unpack %mm1 into words using %mm0 as high bytes.
-			"pmaddwd	%%mm7, %%mm1\n"			// %mm1 == 0 + R * MULT | G * MULT + B * MULT
-			"movd		%%mm1, %%edx\n"			// %edx == G * MULT + B * MULT
-			"psrlq		$32, %%mm1\n"			// %mm1 == 0 + R * MULT
-			"movd		%%mm1, %%eax\n"			// %eax == 0 + R * MULT
-			"add		%%edx, %%eax\n"
+			"punpckhbw	%%mm0, %%mm2\n"			// Unpack %mm2 into words using %mm0 as low bytes.
+
+			"pmaddwd	%%mm7, %%mm1\n"			// %mm1 == [px1] 0 + R * MULT | G * MULT + B * MULT
+			"pmaddwd	%%mm7, %%mm2\n"			// %mm2 == [px2] 0 + R * MULT | G * MULT + B * MULT
+
+			// Temporarily use mm3/mm4 to get the R values.
+			"movq		%%mm1, %%mm3\n"			// %mm3 == [px1] 0 + R * MULT | G * MULT + B * MULT
+			"movq		%%mm2, %%mm4\n"			// %mm4 == [px2] 0 + R * MULT | G * MULT + B * MULT
+			"psrlq		  $32, %%mm3\n"			// %mm3 == [px1]            0 | 0 + R * MULT
+			"psrlq		  $32, %%mm4\n"			// %mm4 == [px2]            0 | 0 + R * MULT
+			// Add %mm3/%mm4 back to %mm1/%mm2.
+			"paddd		%%mm3, %%mm1\n"			// %mm1 == [px1] 0 + R * MULT | R * MULT + G * MULT + B * MULT
+			"paddd		%%mm4, %%mm2\n"			// %mm2 == [px2] 0 + R * MULT | R * MULT + G * MULT + B * MULT
+
+			// The relevant grayscale values are in the low 16 bits of %mm1 and %mm2.
+			"movd		%%mm1, %%eax\n"			// %ax == grayscale
+			"movd		%%mm2, %%edx\n"			// %dx == grayscale
+
 			// TODO: Optimize this.
 			"movb		%%ah, 0(%[outScreen])\n"
 			"movb		%%ah, 1(%[outScreen])\n"
 			"movb		%%ah, 2(%[outScreen])\n"
-			"movb		$0, 3(%[outScreen])\n"
+			"movb		  $0, 3(%[outScreen])\n"
+			"movb		%%dh, 4(%[outScreen])\n"
+			"movb		%%dh, 5(%[outScreen])\n"
+			"movb		%%dh, 6(%[outScreen])\n"
+			"movb		  $0, 7(%[outScreen])\n"
 			:
 			: [mdScreen] "r" (mdScreen)
 			, [outScreen] "r" (outScreen)
@@ -250,8 +274,8 @@ inline void PausedEffectPrivate::DoPausedEffect_32_MMX(
 		);
 
 		// Next group of pixels.
-		outScreen += 1;
-		mdScreen += 1;
+		outScreen += 2;
+		mdScreen += 2;
 	}
 
 	// Reset the FPU state.
