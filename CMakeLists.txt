@@ -100,7 +100,7 @@ ENDIF(CMAKE_CROSSCOMPILING)
 INCLUDE(CheckZLIB)
 INCLUDE(CheckPNG)
 INCLUDE(CheckLZMA)
-#INCLUDE(CheckOpenGL)
+INCLUDE(CheckOpenGL)
 INCLUDE(CheckPopt)
 
 # Project subdirectories.
