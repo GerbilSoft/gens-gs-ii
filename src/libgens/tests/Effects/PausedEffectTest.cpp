@@ -124,8 +124,8 @@ void PausedEffectTest::SetUp(void)
 	// Set the framebuffers' color depth.
 	// TODO: Parameter.
 	fb_normal->setBpp(MdFb::BPP_32);
-	fb_normal->setBpp(MdFb::BPP_32);
-	fb_normal->setBpp(MdFb::BPP_32);
+	fb_paused->setBpp(MdFb::BPP_32);
+	fb_test->setBpp(MdFb::BPP_32);
 
 	// Make sure the images have the correct dimensions.
 	EXPECT_EQ(fb_normal->pxPerLine(), (int)img_normal.w);
