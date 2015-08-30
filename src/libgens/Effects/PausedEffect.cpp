@@ -79,12 +79,34 @@ class PausedEffectPrivate
 #ifdef HAVE_MMX
 		static inline void DoPausedEffect_32_MMX(
 			uint32_t* RESTRICT outScreen,
+			unsigned int pxCount);
+
+		static inline void DoPausedEffect_32_MMX(
+			uint32_t* RESTRICT outScreen,
 			const uint32_t* RESTRICT mdScreen,
 			unsigned int pxCount);
 #endif
 };
 
+}
+
+#if defined(HAVE_MMX)
+// MMX/SSE2-optimized functions.
+#define __IN_LIBGENS_PAUSEDEFFECT_CPP__
+#define DO_1FB
+#include "PausedEffect.x86.inc.cpp"
+#undef DO_1FB
+#define DO_2FB
+#include "PausedEffect.x86.inc.cpp"
+#undef DO_2FB
+#endif
+
+namespace LibGens {
+
 #define MMASK(bits) ((1 << (bits)) - 1)
+
+// TODO: Use an include file for the C++ version,
+// using DO_1FB and DO_2FB?
 
 /**
  * Tint the screen a purple hue to indicate that emulation is paused. [1-FB]
@@ -197,105 +219,6 @@ inline void PausedEffectPrivate::T_DoPausedEffect(
 	}
 }
 
-#ifdef HAVE_MMX
-
-/**
- * Tint the screen a purple hue to indicate that emulation is paused. [2-FB]
- * (32-bit color, MMX-optimized.)
- * @param outScreen Pointer to the source/destination screen buffer.
- * @param mdScreen Pointer to the MD screen buffer.
- * @param pxCount Pixel count.
- */
-inline void PausedEffectPrivate::DoPausedEffect_32_MMX(
-	uint32_t* RESTRICT outScreen,
-	const uint32_t* RESTRICT mdScreen,
-	unsigned int pxCount)
-{
-	// Grayscale vector: [0.299 0.587 0.114] (ITU-R BT.601)
-	// Source: http://en.wikipedia.org/wiki/YCbCr
-
-	// Load the 32-bit grayscale vector.
-	// Reference: http://www.asmcommunity.net/forums/topic/?id=19704
-	static const uint64_t GRAY_32_MMX = {0x0000004D0096001D};
-	__asm__ (
-		"movq	%[GRAY_32_MMX], %%mm7\n"
-		"pxor	%%mm0, %%mm0\n"
-		:
-		: [GRAY_32_MMX] "m" (GRAY_32_MMX)
-	);
-
-	// Convert the pixels to grayscale.
-	// TODO: Apply the Blue tint.
-	// TODO: Do more than 1px at a time?
-	assert(pxCount % 2 == 0);
-	for (pxCount /= 2; pxCount > 0; pxCount--) {
-		// %mm0 == 0
-		// %mm1 == first pixel as words
-		// %mm2 == second pixel as words
-		// %mm3 == px1 temporary
-		// %mm4 == px1 temporary
-		// %mm7 == grayscale vector
-		__asm__ (
-			"movq		(%[mdScreen]), %%mm1\n"		// Get 2 pixels.
-			"movq		%%mm1, %%mm2\n"			// Same 2 pixels.
-			"punpcklbw	%%mm0, %%mm1\n"			// Unpack %mm1 into words using %mm0 as high bytes.
-			"punpckhbw	%%mm0, %%mm2\n"			// Unpack %mm2 into words using %mm0 as low bytes.
-
-			"pmaddwd	%%mm7, %%mm1\n"			// %mm1 == [px1] 0 + R * MULT | G * MULT + B * MULT
-			"pmaddwd	%%mm7, %%mm2\n"			// %mm2 == [px2] 0 + R * MULT | G * MULT + B * MULT
-
-			// Temporarily use mm3/mm4 to get the R values.
-			"movq		%%mm1, %%mm3\n"			// %mm3 == [px1] 0 + R * MULT | G * MULT + B * MULT
-			"movq		%%mm2, %%mm4\n"			// %mm4 == [px2] 0 + R * MULT | G * MULT + B * MULT
-			"psrlq		  $32, %%mm3\n"			// %mm3 == [px1]            0 | 0 + R * MULT
-			"psrlq		  $32, %%mm4\n"			// %mm4 == [px2]            0 | 0 + R * MULT
-			// Add %mm3/%mm4 back to %mm1/%mm2.
-			"paddd		%%mm3, %%mm1\n"			// %mm1 == [px1] 0 + R * MULT | R * MULT + G * MULT + B * MULT
-			"paddd		%%mm4, %%mm2\n"			// %mm2 == [px2] 0 + R * MULT | R * MULT + G * MULT + B * MULT
-
-			// The relevant grayscale values are in the low 16 bits of %mm1 and %mm2.
-			// Pack them into a single value.
-			"movd		%%mm1, %%eax\n"			// %ax == grayscale
-			"movd		%%mm2, %%edx\n"			// %dx == grayscale
-
-			// TODO: Optimize this.
-			"movb		%%ah, 1(%[outScreen])\n"
-			"movb		%%ah, 2(%[outScreen])\n"
-			"movb		  $0, 3(%[outScreen])\n"
-			"movb		%%dh, 5(%[outScreen])\n"
-			"movb		%%dh, 6(%[outScreen])\n"
-			"movb		  $0, 7(%[outScreen])\n"
-
-			// Double the blue value.
-			// NOTE: We're doing byte-wise adds because word-wise would
-			// have extra precision, which can cause the blue value to
-			// be slightly more than double the grayscale value.
-			"paddusb	%%mm1, %%mm1\n"
-			"paddusb	%%mm2, %%mm2\n"
-			"movd		%%mm1, %%eax\n"			// %ax == doubled grayscale
-			"movd		%%mm2, %%edx\n"			// %dx == doubled grayscale
-			"movb		%%ah, 0(%[outScreen])\n"
-			"movb		%%dh, 4(%[outScreen])\n"
-			:
-			: [mdScreen] "r" (mdScreen)
-			, [outScreen] "r" (outScreen)
-			// FIXME: gcc complains mm? registers are unknown.
-			// May need to compile with -mmmx...
-			//: "mm0", "mm1"
-			: "eax", "edx"
-		);
-
-		// Next group of pixels.
-		outScreen += 2;
-		mdScreen += 2;
-	}
-
-	// Reset the FPU state.
-	__asm__ __volatile__ ("emms");
-}
-
-#endif /* HAVE_MMX */
-
 /**
  * Tint the screen a purple hue to indicate that emulation is paused.
  * @param outScreen Source and destination screen.
@@ -318,8 +241,16 @@ void PausedEffect::DoPausedEffect(MdFb *outScreen)
 			break;
 		case MdFb::BPP_32:
 		default:
-			PausedEffectPrivate::T_DoPausedEffect<uint32_t, 8, 8, 8>
-				(outScreen->fb32(), pxCount);
+#ifdef HAVE_MMX
+			if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
+				PausedEffectPrivate::DoPausedEffect_32_MMX(
+					outScreen->fb32(), pxCount);
+			} else
+#endif /* HAVE_MMX */
+			{
+				PausedEffectPrivate::T_DoPausedEffect<uint32_t, 8, 8, 8>
+					(outScreen->fb32(), pxCount);
+			}
 			break;
 	}
 
