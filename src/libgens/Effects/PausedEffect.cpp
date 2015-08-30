@@ -265,8 +265,11 @@ inline void PausedEffectPrivate::DoPausedEffect_32_MMX(
 			"movb		  $0, 7(%[outScreen])\n"
 
 			// Double the blue value.
-			"paddusw	%%mm1, %%mm1\n"
-			"paddusw	%%mm2, %%mm2\n"
+			// NOTE: We're doing byte-wise adds because word-wise would
+			// have extra precision, which can cause the blue value to
+			// be slightly more than double the grayscale value.
+			"paddusb	%%mm1, %%mm1\n"
+			"paddusb	%%mm2, %%mm2\n"
 			"movd		%%mm1, %%eax\n"			// %ax == doubled grayscale
 			"movd		%%mm2, %%edx\n"			// %dx == doubled grayscale
 			"movb		%%ah, 0(%[outScreen])\n"
