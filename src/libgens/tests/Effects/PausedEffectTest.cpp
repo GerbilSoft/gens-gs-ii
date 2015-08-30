@@ -31,15 +31,11 @@ using LibZomg::PngReader;
 
 // LibCompat
 #include "libcompat/cpuflags.h"
-#include "libcompat/aligned_malloc.h"
 
 // C includes. (C++ namespace)
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-
-// C++ includes.
-#include <algorithm>
 
 namespace LibGens { namespace Tests {
 
