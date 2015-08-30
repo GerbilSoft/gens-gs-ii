@@ -20,3 +20,14 @@ TARGET_LINK_LIBRARIES(PausedEffectTest gens zomg ${GTEST_LIBRARY})
 DO_SPLIT_DEBUG(PausedEffectTest)
 ADD_TEST(NAME PausedEffectTest
         COMMAND PausedEffectTest)
+
+# Copy the reference images to the test directory.
+FILE(COPY
+	PausedEffect.Normal.15.png
+	PausedEffect.Normal.16.png
+	PausedEffect.Normal.32.png
+	PausedEffect.SW-int.15.png
+	PausedEffect.SW-int.16.png
+	PausedEffect.SW-int.32.png
+	DESTINATION "${CMAKE_CURRENT_BINARY_DIR}"
+	)
