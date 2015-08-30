@@ -55,7 +55,7 @@ inline void PausedEffectPrivate::DoPausedEffect_32_MMX(
 
 	// Load the 32-bit grayscale vector.
 	// Reference: http://www.asmcommunity.net/forums/topic/?id=19704
-	static const uint64_t GRAY_32_MMX = {0x0000004D0096001D};
+	static const uint64_t GRAY_32_MMX = 0x0000004D0096001D;
 	__asm__ (
 		"movq	%[GRAY_32_MMX], %%mm7\n"
 		"pxor	%%mm0, %%mm0\n"
