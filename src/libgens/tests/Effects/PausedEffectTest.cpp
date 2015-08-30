@@ -206,9 +206,9 @@ void PausedEffectTest::copyToFb15(MdFb *fb, const Zomg_Img_Data_t *src)
 		uint16_t *pDest = fb->lineBuf16(line);
 		const uint32_t *pSrc = pData;
 		for (int x = src->w; x > 0; x--, pDest++, pSrc++) {
-			r = (*pData >> 16) & 0xFF;
-			g = (*pData >> 8) & 0xFF;
-			b = (*pData >> 0) & 0xFF;
+			r = (*pSrc >> 16) & 0xFF;
+			g = (*pSrc >> 8) & 0xFF;
+			b = (*pSrc >> 0) & 0xFF;
 			*pDest = ((r & 0xF8) << 7) |
 				 ((g & 0xF8) << 2) |
 				 ((b & 0xF8) >> 3);
@@ -237,9 +237,9 @@ void PausedEffectTest::copyToFb16(MdFb *fb, const Zomg_Img_Data_t *src)
 		uint16_t *pDest = fb->lineBuf16(line);
 		const uint32_t *pSrc = pData;
 		for (int x = src->w; x > 0; x--, pDest++, pSrc++) {
-			r = (*pData >> 16) & 0xFF;
-			g = (*pData >> 8) & 0xFF;
-			b = (*pData >> 0) & 0xFF;
+			r = (*pSrc >> 16) & 0xFF;
+			g = (*pSrc >> 8) & 0xFF;
+			b = (*pSrc >> 0) & 0xFF;
 			*pDest = ((r & 0xF8) << 8) |
 				 ((g & 0xFC) << 3) |
 				 ((b & 0xF8) >> 3);
