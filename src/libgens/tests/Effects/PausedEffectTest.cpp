@@ -60,7 +60,8 @@ class PausedEffectTest : public ::testing::Test
 			: ::testing::Test()
 			, fb_normal(nullptr)
 			, fb_paused(nullptr)
-			, fb_test(nullptr) { }
+			, fb_test1(nullptr)
+			, fb_test2(nullptr) { }
 		virtual ~PausedEffectTest() { }
 
 		virtual void SetUp(void) override;
@@ -90,9 +91,10 @@ class PausedEffectTest : public ::testing::Test
 		MdFb *fb_normal;
 		MdFb *fb_paused;
 
-		// Test framebuffer.
+		// Test framebuffers.
 		// Paused Effect is applied here.
-		MdFb *fb_test;
+		MdFb *fb_test1;	// 1-FB
+		MdFb *fb_test2;	// 2-FB
 };
 
 /**
@@ -119,13 +121,16 @@ void PausedEffectTest::SetUp(void)
 	// Allocate the framebuffers.
 	fb_normal = new MdFb();
 	fb_paused = new MdFb();
-	fb_test = new MdFb();
+	fb_test1 = new MdFb();
+	// TODO: Only allocate for 2-FB tests?
+	fb_test2 = new MdFb();
 
 	// Set the framebuffers' color depth.
 	// TODO: Parameter.
 	fb_normal->setBpp(MdFb::BPP_32);
 	fb_paused->setBpp(MdFb::BPP_32);
-	fb_test->setBpp(MdFb::BPP_32);
+	fb_test1->setBpp(MdFb::BPP_32);
+	fb_test2->setBpp(MdFb::BPP_32);
 
 	// Make sure the images have the correct dimensions.
 	EXPECT_EQ(fb_normal->pxPerLine(), (int)img_normal.w);
@@ -148,9 +153,18 @@ void PausedEffectTest::TearDown(void)
 	free(img_paused.data);
 
 	// Unreference the framebuffers.
-	fb_normal->unref();
-	fb_paused->unref();
-	fb_test->unref();
+	if (fb_normal) {
+		fb_normal->unref();
+	}
+	if (fb_paused) {
+		fb_paused->unref();
+	}
+	if (fb_test1) {
+		fb_test1->unref();
+	}
+	if (fb_test2) {
+		fb_test2->unref();
+	}
 }
 
 /**
@@ -209,19 +223,33 @@ void PausedEffectTest::compareFb(const MdFb *fb_expected, const MdFb *fb_actual)
 }
 
 /**
- * Test the Paused Effect in 32-bit color.
+ * Test the Paused Effect in 32-bit color. (1-FB)
  */
-TEST_F(PausedEffectTest, do32bit)
+TEST_F(PausedEffectTest, do32bit_1FB)
 {
 	// Initialize the test framebuffer with the "normal" image.
-	copyToFb32(fb_test, &img_normal);
+	copyToFb32(fb_test1, &img_normal);
 
 	// Apply the "paused" effect. (1-FB version)
-	// TODO: Test 2-FB version as well.
-	PausedEffect::DoPausedEffect(fb_test);
+	PausedEffect::DoPausedEffect(fb_test1);
 
 	// Compare it to the known good "paused" image.
-	compareFb(fb_paused, fb_test);
+	compareFb(fb_paused, fb_test1);
+}
+
+/**
+ * Test the Paused Effect in 32-bit color. (2-FB)
+ */
+TEST_F(PausedEffectTest, do32bit_2FB)
+{
+	// Initialize the test framebuffer with the "normal" image.
+	copyToFb32(fb_test1, &img_normal);
+
+	// Apply the "paused" effect. (2-FB version)
+	PausedEffect::DoPausedEffect(fb_test2, fb_test1);
+
+	// Compare it to the known good "paused" image.
+	compareFb(fb_paused, fb_test2);
 }
 
 } }
