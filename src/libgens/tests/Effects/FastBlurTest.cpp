@@ -59,7 +59,7 @@ const char *FastBlurTest::renderType(void)
 }
 
 /**
- * Test the Fast Blur in 15-bit color. (1-FB)
+ * Test the Fast Blur effect in 15-bit color. (1-FB)
  */
 TEST_P(FastBlurTest, do15bit_1FB)
 {
@@ -74,7 +74,7 @@ TEST_P(FastBlurTest, do15bit_1FB)
 }
 
 /**
- * Test the Fast Blur in 15-bit color. (2-FB)
+ * Test the Fast Blur effect in 15-bit color. (2-FB)
  */
 TEST_P(FastBlurTest, do15bit_2FB)
 {
@@ -89,7 +89,7 @@ TEST_P(FastBlurTest, do15bit_2FB)
 }
 
 /**
- * Test the Fast Blur in 16-bit color. (1-FB)
+ * Test the Fast Blur effect in 16-bit color. (1-FB)
  */
 TEST_P(FastBlurTest, do16bit_1FB)
 {
@@ -104,7 +104,7 @@ TEST_P(FastBlurTest, do16bit_1FB)
 }
 
 /**
- * Test the Fast Blur in 16-bit color. (2-FB)
+ * Test the Fast Blur effect in 16-bit color. (2-FB)
  */
 TEST_P(FastBlurTest, do16bit_2FB)
 {
@@ -119,7 +119,7 @@ TEST_P(FastBlurTest, do16bit_2FB)
 }
 
 /**
- * Test the Fast Blur in 32-bit color. (1-FB)
+ * Test the Fast Blur effect in 32-bit color. (1-FB)
  */
 TEST_P(FastBlurTest, do32bit_1FB)
 {
@@ -134,7 +134,7 @@ TEST_P(FastBlurTest, do32bit_1FB)
 }
 
 /**
- * Test the Fast Blur in 32-bit color. (2-FB)
+ * Test the Fast Blur effect in 32-bit color. (2-FB)
  */
 TEST_P(FastBlurTest, do32bit_2FB)
 {
