@@ -207,6 +207,8 @@ void FastBlurPrivate::DoFastBlur_32_MMX(
 #endif
 	unsigned int pxCount)
 {
+	// FIXME: 2FB version is slower on Core 2 T7200
+	// than the C implementation.
 	static const uint32_t MASK_DIV2_32_MMX[2] =
 		{0x007F7F7F, 0x007F7F7F};
 
