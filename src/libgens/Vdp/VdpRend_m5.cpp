@@ -47,9 +47,9 @@
 #define LINEBUF_WIN_W	0x0200
 
 // Tile pixel positions.
-#include "Util/byteswap.h"
+#include "libcompat/byteorder.h"
 
-#if GENS_BYTEORDER == GENS_LIL_ENDIAN
+#if SYS_BYTEORDER == SYS_LIL_ENDIAN
 #define TILE_PX0	0x0000F000
 #define TILE_PX1	0x00000F00
 #define TILE_PX2	0x000000F0
@@ -66,7 +66,7 @@
 #define TILE_SHIFT5	24
 #define TILE_SHIFT6	20
 #define TILE_SHIFT7	16
-#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
+#else /* SYS_BYTEORDER == SYS_BIG_ENDIAN */
 #define TILE_PX0	0xF0000000
 #define TILE_PX1	0x0F000000
 #define TILE_PX2	0x00F00000

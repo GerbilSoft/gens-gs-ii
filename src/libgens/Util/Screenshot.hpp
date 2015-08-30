@@ -50,18 +50,18 @@ class Screenshot
 		 * File will be in PNG format.
 		 * TODO: Metadata flags parameter.
 		 * @param fb		[in] MD framebuffer.
-		 * @param rom		[in] ROM object. (Needed for some metadata.)
 		 * @param filename	[in] Filename for the screenshot.
+		 * @param rom		[in, opt] ROM object. (Needed for some metadata.)
 		 * @return 0 on success; negative errno on error.
 		 */
-		static int toFile(const MdFb *fb, const Rom *rom, const char *filename);
+		static int toFile(const char *filename, const MdFb *fb, const Rom *rom);
 
 		/**
 		 * Save a screenshot to a ZOMG savestate.
 		 * TODO: Metadata flags parameter.
 		 * @param zomg	[in,out] ZOMG savestate.
 		 * @param fb	[in] MD framebuffer.
-		 * @param rom	[in] ROM object. (Needed for some metadata.)
+		 * @param rom	[in, opt] ROM object. (Needed for some metadata.)
 		 * @return 0 on success; negative errno on error.
 		 */
 		static int toZomg(LibZomg::ZomgBase *zomg, const MdFb *fb, const Rom *rom);

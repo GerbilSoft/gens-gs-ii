@@ -26,6 +26,9 @@
 // _POSIX_SOURCE and _POSIX_C_SOURCE definitions.
 #include "libcompat/reentrant.h"
 
+// Ensure CPU_Flags is initialized.
+#include "libcompat/cpuflags.h"
+
 #include "Metadata.hpp"
 
 // C includes. (C++ namespace)
@@ -169,6 +172,9 @@ void Metadata::InitProgramMetadata(const char *creator,
 				const char *creatorVersionDesc,
 				const char *creatorVcsVersion)
 {
+	// Ensure CPU_Flags is initialized.
+	LibCompat_GetCPUFlags();
+
 	// Save creator information.
 	MetadataPrivate::creatorInfo.creator =
 		(creator ? string(creator) : string());
@@ -179,7 +185,12 @@ void Metadata::InitProgramMetadata(const char *creator,
 	MetadataPrivate::creatorInfo.creatorVcsVersion =
 		(creatorVcsVersion ? string(creatorVcsVersion) : string());
 
-       // Initialize system metadata.
+	// Save the CPU name.
+	const char *cpuName = LibCompat_GetCPUFullName();
+	MetadataPrivate::sysInfo.cpu =
+		(cpuName ? string(cpuName) : string());
+
+	// Initialize system metadata.
 	MetadataPrivate::InitSystemMetadata();
 }
 
@@ -229,7 +240,11 @@ std::string Metadata::toZomgIni(int metaFlags) const
 	// ROM metadata.
 	if (metaFlags & MF_RomInfo) {
 		d->WriteValue(oss, "ROM", d->romFilename);
-		d->WriteValue(oss, "ROM_CRC32", d->romCrc32, 8, true);
+		if (d->romCrc32 != 0) {
+			d->WriteValue(oss, "ROM_CRC32", d->romCrc32, 8, true);
+		} else {
+			d->WriteValue(oss, "ROM_CRC32", "");
+		}
 		// TODO
 		d->WriteValue(oss, "ROM_Size", "" /*d->romSize, 1, false*/);
 		d->WriteValue(oss, "Region", d->region);
@@ -316,11 +331,11 @@ int Metadata::toPngData(png_structp png_ptr, png_infop info_ptr, int metaFlags) 
 	if (metaFlags & MF_RomInfo) {
 		if (!d->romFilename.empty()) {
 			desc << "ROM: " << d->romFilename << '\n';
-			desc << "ROM CRC32: ";
-
-			char buf[16];
-			snprintf(buf, sizeof(buf), "%08X", d->romCrc32);
-			desc << buf << '\n';
+			if (d->romCrc32 != 0) {
+				char buf[16];
+				snprintf(buf, sizeof(buf), "%08X", d->romCrc32);
+				desc << "ROM CRC32: " << buf << "\n";
+			}
 		}
 
 		/* TODO: ROM size.

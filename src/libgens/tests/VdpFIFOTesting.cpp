@@ -33,7 +33,6 @@
 #include "Vdp/Vdp.hpp"
 #include "cpu/M68K.hpp"
 #include "libzomg/zomg_m68k.h"
-#include "Util/byteswap.h"
 
 // ARRAY_SIZE(x)
 #include "macros/common.h"
@@ -89,7 +88,8 @@ inline ::std::ostream& operator<<(::std::ostream& os, const VdpFIFOTesting_mode&
 class VdpFIFOTesting : public ::testing::TestWithParam<VdpFIFOTesting_mode>
 {
 	protected:
-		VdpFIFOTesting() { }
+		VdpFIFOTesting()
+			: ::testing::TestWithParam<VdpFIFOTesting_mode>() { }
 		virtual ~VdpFIFOTesting() { }
 
 		virtual void SetUp(void) override;

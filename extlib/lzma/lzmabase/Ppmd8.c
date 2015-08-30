@@ -2,7 +2,14 @@
 2010-03-24 : Igor Pavlov : Public domain
 This code is based on PPMd var.I (2002): Dmitry Shkarin : Public domain */
 
+/* Gens/GS II: memory.h has mem*() functions on MSVC and MinGW-w64. *
+ * On glibc, it's a wrapper for string.h.                           *
+ * It doesn't exist on some embedded systems, e.g. devkitPPC.       */
+#ifdef _WIN32
 #include <memory.h>
+#else
+#include <string.h>
+#endif
 
 #include "Ppmd8.h"
 

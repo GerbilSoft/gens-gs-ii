@@ -46,18 +46,6 @@ ENDIF(NOT WIN32)
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libgens.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.libgens.h")
 
-# Test system byteorder.
-# TODO: Universal Binary support; detect PDP endian.
-INCLUDE(TestBigEndian)
-TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
-IF(IS_BIG_ENDIAN)
-	SET(GENS_BYTEORDER "GENS_BIG_ENDIAN")
-ELSE(IS_BIG_ENDIAN)
-	SET(GENS_BYTEORDER "GENS_LIL_ENDIAN")
-ENDIF(IS_BIG_ENDIAN)
-UNSET(IS_BIG_ENDIAN)
-CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/Util/byteorder.h.in" "${CMAKE_CURRENT_BINARY_DIR}/Util/byteorder.h")
-
 # Sources.
 SET(libgens_SRCS
 	lg_main.cpp
@@ -77,6 +65,7 @@ SET(libgens_SRCS
 	credits.c
 	lg_osd.c
 	sound/SoundMgr.cpp
+	sound/SoundMgr_write.cpp
 	Data/32X/fw_32x.c
 	Cartridge/RomCartridgeMD.cpp
 	Save/EEPRomI2C.cpp
@@ -86,43 +75,26 @@ SET(libgens_SRCS
 	)
 
 SET(libgens_UTIL_SRCS
-	Util/byteswap.c
 	Util/gens_siginfo.c
-	Util/cpuflags.c
 	Util/MdFb.cpp
 	Util/Screenshot.cpp
 	)
 
 SET(libgens_UTIL_H
-	Util/byteswap.h
 	Util/gens_siginfo.h
-	Util/cpuflags.h
 	Util/MdFb.hpp
 	Util/Screenshot.hpp
 	)
 
 # OS-specific timing functions.
-SET(libgens_TIMING_SRCS
-	Util/Timing.cpp
-	)
-SET(libgens_TIMING_H
-	Util/Timing.hpp
-	)
+SET(libgens_TIMING_SRCS Util/Timing.cpp)
+SET(libgens_TIMING_H Util/Timing.hpp)
 IF(WIN32)
-	SET(libgens_TIMING_SRCS
-		${libgens_TIMING_SRCS}
-		Util/Timing_win32.cpp
-		)
+	SET(libgens_TIMING_SRCS ${libgens_TIMING_SRCS} Util/Timing_win32.cpp)
 ELSEIF(APPLE)
-	SET(libgens_TIMING_SRCS
-		${libgens_TIMING_SRCS}
-		Util/Timing_mac.cpp
-		)
-ELSE()
-	SET(libgens_TIMING_SRCS
-		${libgens_TIMING_SRCS}
-		Util/Timing_unix.cpp
-		)
+	SET(libgens_TIMING_SRCS ${libgens_TIMING_SRCS} Util/Timing_mac.cpp)
+ELSEIF(UNIX OR LINUX)
+	SET(libgens_TIMING_SRCS ${libgens_TIMING_SRCS} Util/Timing_unix.cpp)
 ENDIF()
 
 SET(libgens_EMUCONTEXT_SRCS

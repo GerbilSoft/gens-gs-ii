@@ -30,9 +30,6 @@
 #include "cpu/M68K.hpp"
 #include "cpu/Z80.hpp"
 
-// Byteswapping macros and functions.
-#include "Util/byteswap.h"
-
 // Sound Manager.
 #include "sound/SoundMgr.hpp"
 
@@ -148,16 +145,16 @@ int EmuMD::softReset(void)
 		M68K_Mem::ms_RomCartridge->fixChecksum();
 	else
 		M68K_Mem::ms_RomCartridge->restoreChecksum();
-	
+
 	// Reset the M68K, Z80, and YM2612.
 	M68K::Reset();
 	Z80::SoftReset();
 	SoundMgr::ms_Ym2612.reset();
-	
+
 	// Z80 state should be reset to the default value.
 	// Z80's initial state is RESET.
 	M68K_Mem::Z80_State = (Z80_STATE_ENABLED | Z80_STATE_RESET);	// TODO: "Sound, Z80" setting.
-	
+
 	// TODO: Genesis Plus randomizes the restart line.
 	// See genesis.c:176.
 	return 0;

@@ -20,7 +20,7 @@
  ***************************************************************************/
 
 #include "VdpCache.hpp"
-#include "../Util/byteswap.h"
+#include "libcompat/byteorder.h"
 
 #include "VdpTypes.hpp"
 using namespace LibGens::VdpTypes;
@@ -198,7 +198,7 @@ void VdpCache::update_m5(const VRam_t *vram)
 				// TODO: Combine with update_m4, since this function is
 				// nearly identical except for the pattern retrieval code?
 				uint32_t src = vram_src[y];
-#if GENS_BYTEORDER == GENS_LIL_ENDIAN
+#if SYS_BYTEORDER == SYS_LIL_ENDIAN
 				// Rotate the source data into the correct order.
 				src = (src << 16) | (src >> 16);
 #endif

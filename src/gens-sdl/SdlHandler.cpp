@@ -28,6 +28,9 @@ using LibGens::SoundMgr;
 // C includes. (C++ namespace)
 #include <cstdio>
 
+// aligned_malloc()
+#include "libcompat/aligned_malloc.h"
+
 #include <SDL.h>
 
 #include "RingBuffer.hpp"
@@ -232,7 +235,8 @@ int SdlHandler::init_audio(void)
 	m_sampleSize = 4; // TODO: Move to RingBuffer?
 	m_segBufferSamples = SoundMgr::GetSegLength();
 	m_segBufferLen = m_segBufferSamples * m_sampleSize;
-	m_segBuffer = (int16_t*)calloc(1, m_segBufferLen);
+	m_segBuffer = (int16_t*)aligned_malloc(16, m_segBufferLen);
+	memset(m_segBuffer, 0, m_segBufferLen);
 
 	// Audio is initialized.
 	return 0;
@@ -315,47 +319,18 @@ void SdlHandler::sdl_audio_callback(void *userdata, uint8_t *stream, int len)
  */
 void SdlHandler::update_audio(void)
 {
-	// Mostly copied from GensQt4's ABackend.
-	// TODO: Reimplement the MMX version.
-	// TODO: Move to LibGens.
+	// TODO: If !m_audioDevice, just clear the internal
+	// audio buffer instead of writing it.
 
-	// Convert from "int32_t" to int16_t.
-	int16_t *dest = m_segBuffer;
-
-	// Source buffer pointers.
-	int32_t *srcL = &SoundMgr::ms_SegBufL[0];
-	int32_t *srcR = &SoundMgr::ms_SegBufR[0];
-
-	for (int i = SoundMgr::GetSegLength() - 1; i >= 0;
-	     i--, srcL++, srcR++, dest += 2)
-	{
-		if (*srcL < -0x8000) {
-			*dest = -0x8000;
-		} else if (*srcL > 0x7FFF) {
-			*dest = 0x7FFF;
-		} else {
-			*dest = (int16_t)(*srcL);
-		}
-
-		if (*srcR < -0x8000) {
-			*(dest+1) = -0x8000;
-		} else if (*srcR > 0x7FFF) {
-			*(dest+1) = 0x7FFF;
-		} else {
-			*(dest+1) = (int16_t)(*srcR);
-		}
-	}
-
-	// Clear the segment buffers.
-	// These buffers are additive, so if they aren't cleared,
-	// we'll end up with static.
-	memset(SoundMgr::ms_SegBufL, 0, m_segBufferSamples * sizeof(SoundMgr::ms_SegBufL[0]));
-	memset(SoundMgr::ms_SegBufR, 0, m_segBufferSamples * sizeof(SoundMgr::ms_SegBufL[0]));
+	// FIXME: If our buffer is too small, we'll lose
+	// some of the audio.
+	int samples = SoundMgr::writeStereo(m_segBuffer, m_segBufferSamples);
 
 	// Write to the ringbuffer.
-	if (m_audioDevice > 0) {
+	if (m_audioDevice > 0 && samples > 0) {
+		const int bytes = samples * m_sampleSize;
 		SDL_LockAudioDevice(m_audioDevice);
-		m_audioBuffer->write(reinterpret_cast<uint8_t*>(m_segBuffer), m_segBufferLen);
+		m_audioBuffer->write(reinterpret_cast<const uint8_t*>(m_segBuffer), bytes);
 		SDL_UnlockAudioDevice(m_audioDevice);
 	}
 }

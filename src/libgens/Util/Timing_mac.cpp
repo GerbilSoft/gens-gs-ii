@@ -23,8 +23,8 @@
 
 #include "Timing.hpp"
 
-#ifndef __APPLE__
-#error This file is only for Windows systems.
+#if !defined(__APPLE__) || !defined(__MACH__)
+#error This file is only for Mac OS X systems.
 #endif
 
 #include <mach/mach_time.h>

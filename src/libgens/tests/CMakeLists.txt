@@ -22,9 +22,11 @@ SET(TESTSUITE_BASE_SRC
 IF(NOT MSVC)
 # VdpPalette test programs
 ADD_EXECUTABLE(test_VdpPalette_DAC_generate test_VdpPalette_DAC_generate.c)
+DO_SPLIT_DEBUG(test_VdpPalette_DAC_generate)
 
 ADD_EXECUTABLE(test_VdpPalette_DAC test_VdpPalette_DAC.cpp ${TESTSUITE_BASE_SRC})
 TARGET_LINK_LIBRARIES(test_VdpPalette_DAC gens)
+DO_SPLIT_DEBUG(test_VdpPalette_DAC)
 
 # Generate the test files.
 ADD_TEST(NAME test_VdpPalette_DAC_generate_MD
@@ -43,12 +45,6 @@ ADD_TEST(NAME test_VdpPalette_DAC_SMS
 	COMMAND test_VdpPalette_DAC PalTest_SMS.txt)
 ENDIF(NOT MSVC)
 
-# Byteswap test.
-ADD_EXECUTABLE(ByteswapTest ByteswapTest.cpp)
-TARGET_LINK_LIBRARIES(ByteswapTest gens ${GTEST_LIBRARY})
-ADD_TEST(NAME ByteswapTest
-	COMMAND ByteswapTest)
-
 # Sprite Masking & Overflow Test ROM.
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 ADD_EXECUTABLE(VdpSpriteMaskingTest
@@ -56,6 +52,7 @@ ADD_EXECUTABLE(VdpSpriteMaskingTest
 	VdpSpriteMaskingTest_data.c
 	)
 TARGET_LINK_LIBRARIES(VdpSpriteMaskingTest gens ${ZLIB_LIBRARY} ${GTEST_LIBRARY})
+DO_SPLIT_DEBUG(VdpSpriteMaskingTest)
 ADD_TEST(NAME VdpSpriteMaskingTest
 	COMMAND VdpSpriteMaskingTest)
 
@@ -65,21 +62,13 @@ ADD_EXECUTABLE(Z80Tests
 	Z80/Z80Tests.cpp
 	)
 TARGET_LINK_LIBRARIES(Z80Tests mdZ80 ${GTEST_LIBRARY})
+DO_SPLIT_DEBUG(Z80Tests)
 # NOTE: zexdoc/zexall isn't working.
 #ADD_TEST(NAME Z80Tests
 #	COMMAND Z80Tests)
 ENDIF(GENS_ENABLE_EMULATION)
 
 ADD_SUBDIRECTORY(EEPRomI2CTest)
-
-# PSG Register Test.
-INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
-ADD_EXECUTABLE(PsgRegisterTest
-	PsgRegisterTest.cpp
-	)
-TARGET_LINK_LIBRARIES(PsgRegisterTest gens ${GTEST_LIBRARY})
-ADD_TEST(NAME PsgRegisterTest
-	COMMAND PsgRegisterTest)
 
 # VDP FIFO Testing
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
@@ -88,7 +77,13 @@ ADD_EXECUTABLE(VdpFIFOTesting
 	VdpFIFOTesting_data.c
 	)
 TARGET_LINK_LIBRARIES(VdpFIFOTesting gens ${GTEST_LIBRARY})
+DO_SPLIT_DEBUG(VdpFIFOTesting)
 # NOTE: Disabled for now until I can find a way
 # to not check tests that are known to fail.
 #ADD_TEST(NAME VdpFIFOTesting
 #	COMMAND VdpFIFOTesting)
+
+# Sound tests.
+ADD_SUBDIRECTORY(sound)
+# Effects tests.
+ADD_SUBDIRECTORY(Effects)

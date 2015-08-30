@@ -5,12 +5,6 @@ PROJECT(gens-gs-ii)
 # - NASM: CMake 2.8.4
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.0)
 
-# UNSET() was added in cmake-2.6.3.
-# Define an equivalent macro for older versions.
-MACRO(UNSET var)
-	SET(${var})
-ENDMACRO(UNSET)
-
 # Set default build options.
 INCLUDE(cmake/options.cmake)
 
@@ -22,11 +16,19 @@ list (APPEND CMAKE_MODULE_PATH
 # Mac OS X: CMake doesn't include this by default.
 INCLUDE(CheckLibraryExists)
 
+# Split Debug macro.
+MACRO(DO_SPLIT_DEBUG _TARGET)
+	# Split debug information.
+	INCLUDE(SetMSVCDebugPath)
+	SET_MSVC_DEBUG_PATH(${_TARGET})
+	IF(SPLIT_DEBUG)
+		INCLUDE(SplitDebugInformation)
+		SPLIT_DEBUG_INFORMATION(${_TARGET})
+	ENDIF(SPLIT_DEBUG)
+ENDMACRO(DO_SPLIT_DEBUG)
+
 # Testing functions.
 INCLUDE(cmake/gtest.cmake)
-
-# Set default build options.
-INCLUDE(cmake/options.cmake)
 
 # Program information.
 SET(DESCRIPTION "Gens/GS II")

@@ -1,9 +1,8 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
- * byteorder.h.in: Source file for byteorder.h.                            *
- * Indicates the system byteorder as detected by TEST_BIG_ENDIAN().        *
+ * libcompat/tests: Compatibility Library. (Test Suite)                    *
+ * gtest_main.inc.cpp: main() function for test suites.                    *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -20,14 +19,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_UTIL_BYTEORDER_H__
-#define __LIBGENS_UTIL_BYTEORDER_H__
+// NOTE: You must have a static int test_main() function that has the
+// actual test case code. This file merely initializes gtest for certain
+// embedded systems.
 
-#define GENS_LIL_ENDIAN 1234
-#define GENS_BIG_ENDIAN 4321
-#define GENS_PDP_ENDIAN 3412
+#if defined(HW_RVL) || defined(HW_DOL)
+// libogc: Wii or GameCube hardware.
+#include "gtest_main.ogc.inc.cpp"
 
-/* System byteorder. */
-#cmakedefine GENS_BYTEORDER @GENS_BYTEORDER@
+#else
 
-#endif /* __LIBGENS_UTIL_BYTEORDER_H__ */
+/* Standard desktop system. */
+
+int main(int argc, char *argv[])
+{
+	return test_main(argc, argv);
+}
+
+#endif

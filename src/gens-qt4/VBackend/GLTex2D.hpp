@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -40,14 +40,14 @@
 #include <GL/gl.h>
 #endif
 
-// Byteswapping macros.
-#include "libgens/Util/byteswap.h"
+// System byte order.
+#include "libcompat/byteorder.h"
 
 // GL_UNSIGNED_INT_8_8_8_8_REV is needed for native byte-order on PowerPC.
 // When used with GL_BGRA, it's effectively the same as GL_ARGB.
-#if GENS_BYTEORDER == GENS_BIG_ENDIAN
+#if SYS_BYTEORDER == SYS_BIG_ENDIAN
 #define GLTEX2D_FORMAT_32BIT GL_UNSIGNED_INT_8_8_8_8_REV
-#else
+#else /* SYS_BYTEORDER == SYS_LIL_ENDIAN */
 #define GLTEX2D_FORMAT_32BIT GL_UNSIGNED_BYTE
 #endif
 

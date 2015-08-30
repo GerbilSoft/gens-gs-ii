@@ -1,6 +1,6 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
- * cpuflags.c: CPU flag definitions and functions.                         *
+ * libcompat: Compatibility library.                                       *
+ * cpuflags.c: CPU flag definitions and functions. (i386/amd64 version)    *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,35 +21,101 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#if !defined(__i386__) && !defined(__amd64__) && \
+    !defined(_M_IX86) && !defined(_M_X64)
+#error Do not compile byteswap_x86.c on non-x86 CPUs!
+#endif
+
 #include "cpuflags.h"
 
 // C includes.
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
+#include <assert.h>
 
 // CPU flags.
+// This variable is publicly accessible for performance reasons.
 uint32_t CPU_Flags = 0;
 
-// MDP CPU flag definitions.
-// TODO: Switch to MDP!
-//#include "mdp/mdp_cpuflags.h"
+// CPU vendor ID. (NULL-terminated)
+// NOTE: x86 has 12 characters; others may have more.
+static char CPU_VendorID[16] = {0};
+
+// Full CPU name. (NULL-terminated)
+// NOTE: x86 has 48 characters; others may have more.
+static char CPU_FullName[64] = {0};
 
 // CPU-specific flag definitions.
 // These are for internal use by LibGens_GetCPUFlags() only.
 #include "cpuflags_x86.h"
 
 /**
+ * Simple space elimination algorithm.
+ * We can't use libgenstext here because:
+ * 1. libcompat shouldn't depend on other Gens/GS II libraries.
+ * 2. StringManip is C++; this is C.
+ *
+ * @param dest		[out] Destination string.
+ * @param sz_dest	[in] Size of destination string. (should be > sz_src for NULL termination.)
+ * @param src		[in] Source string. (Might not be NULL-terminated.)
+ * @param sz_src	[in] Size of source string.
+ */
+static void elimSpaces(char *dest, unsigned int sz_dest,
+		       const char *src, unsigned int sz_src)
+{
+	char *dest_start = dest;
+	const char *src_end = src + sz_src;
+	int wasLastSpace = 1;
+
+	assert(sz_dest > sz_src);
+	for (; src < src_end; src++) {
+		if (*src == 0) {
+			// NULL terminator.
+			break;
+		} else if (isspace(*src)) {
+			if (!wasLastSpace) {
+				// Last character was not a space.
+				// Append this character, then mark
+				// the last character as a space.
+				*dest++ = *src;
+				wasLastSpace = 1;
+			}
+		} else {
+			// This character is not a space.
+			*dest++ = *src;
+			wasLastSpace = 0;
+		}
+	}
+
+	// Make sure the string is NULL-terminated.
+	if (*(dest-1) == 0) {
+		dest--;
+	} else {
+		*dest = 0;
+	}
+
+	// Check for any trailing spaces.
+	for (dest--; dest >= dest_start; dest--) {
+		if (isspace(*dest)) {
+			// Found a trailing space.
+			*dest = 0;
+		} else {
+			// Not a trailing space.
+			// We're done here.
+			break;
+		}
+	}
+}
+
+/**
  * Get the CPU flags.
  * Stores the CPU flags in the global variable CPU_Flags.
  * @return CPU flags.
  */
-uint32_t LibGens_GetCPUFlags(void)
+uint32_t LibCompat_GetCPUFlags(void)
 {
-#if defined(__i386__) || defined(__amd64__) || \
-    defined(_M_IX86) || defined(_M_X64)
-	// IA32/x86_64.
-
 	// Check if cpuid is supported.
 	unsigned int __eax, __ebx, __ecx, __edx;
 	int family = 0, model = 0;
@@ -57,6 +123,18 @@ uint32_t LibGens_GetCPUFlags(void)
 	unsigned int maxFunc;
 	uint8_t can_FXSAVE = 0;
 	uint8_t can_XSAVE = 0;
+
+	if (CPU_Flags != 0) {
+		// CPU_Flags was already set.
+		// NOTE: We're assuming the case where CPU_Flags == 0
+		// after initialization is rare.
+		return CPU_Flags;
+	}
+
+	// Clear CPU flags, vendor ID, and full name.
+	CPU_Flags = 0;
+	CPU_VendorID[0] = 0;
+	CPU_FullName[0] = 0;
 
 	if (!is_cpuid_supported()) {
 		// CPUID is not supported.
@@ -71,6 +149,10 @@ uint32_t LibGens_GetCPUFlags(void)
 		// No CPUID functions are supported.
 		return 0;
 	}
+
+	// Save the vendor string.
+	memcpy(CPU_VendorID, vendor.c, sizeof(vendor.c));
+	CPU_VendorID[12] = 0;
 
 	// Get the CPU feature flags.
 	CPUID(CPUID_PROC_INFO_FEATURE_BITS, __eax, __ebx, __ecx, __edx);
@@ -136,17 +218,15 @@ uint32_t LibGens_GetCPUFlags(void)
 			can_FXSAVE = 1;
 #endif /* _WIN32 */
 		}
-
-		if (can_FXSAVE) {
-			CPU_Flags |= MDP_CPUFLAG_X86_SSE;
-			// MMXext is a subset of SSE.
-			// See http://www.x86-64.org/pipermail/patches/2005-March/003261.html
-			CPU_Flags |= MDP_CPUFLAG_X86_MMXEXT;
-		}
 	}
 
 	// Check for other SSE instruction sets.
 	if (can_FXSAVE) {
+		CPU_Flags |= MDP_CPUFLAG_X86_SSE;
+		// MMXext is a subset of SSE.
+		// See http://www.x86-64.org/pipermail/patches/2005-March/003261.html
+		CPU_Flags |= MDP_CPUFLAG_X86_MMXEXT;
+
 		if (__edx & CPUFLAG_IA32_EDX_SSE2)
 			CPU_Flags |= MDP_CPUFLAG_X86_SSE2;
 		if (__ecx & CPUFLAG_IA32_ECX_SSE3)
@@ -239,6 +319,28 @@ uint32_t LibGens_GetCPUFlags(void)
 		}
 	}
 
+	// Check if the CPUID Processor Brand String functions
+	// (0x80000002, 0x80000003, 0x80000004) are supported.
+	if (maxFunc >= CPUID_EXT_PROC_BRAND_STRING_3) {
+		// CPUID Processor Brand String functions are supported.
+		// TODO: Generic string for unsupported CPUs?
+		// TODO: Space elimination algorithm?
+		union { uint32_t i[12]; char c[48]; } brand_string;
+		CPUID(CPUID_EXT_PROC_BRAND_STRING_1,
+			brand_string.i[0], brand_string.i[1],
+			brand_string.i[2], brand_string.i[3]);
+		CPUID(CPUID_EXT_PROC_BRAND_STRING_2,
+			brand_string.i[4], brand_string.i[5],
+			brand_string.i[6], brand_string.i[7]);
+		CPUID(CPUID_EXT_PROC_BRAND_STRING_3,
+			brand_string.i[8], brand_string.i[9],
+			brand_string.i[10], brand_string.i[11]);
+
+		// Eliminate spaces from the brand string.
+		elimSpaces(CPU_FullName, sizeof(CPU_FullName),
+			   brand_string.c, sizeof(brand_string.c));
+	}
+
 	// Check for SSE2SLOW, SSE3SLOW, and AVXSLOW.
 	// These require vendor-specific checks.
 	// Based on ffmpeg's libavutil/x86/cpu.c:
@@ -288,10 +390,44 @@ uint32_t LibGens_GetCPUFlags(void)
 
 	// Return the CPU flags.
 	return CPU_Flags;
+}
 
-#else
-	// No flags for this CPU.
-	CPU_Flags = 0;
-	return 0;
-#endif
+/**
+ * Get the CPU vendor ID.
+ * Equivalent to the 12-char vendor ID on x86.
+ * @return Pointer to CPU vendor ID (null-terminated string), or NULL on error.
+ */
+const char *LibCompat_GetCPUVendorID(void)
+{
+	if (CPU_Flags == 0) {
+		// CPU flags might not have been obtained yet.
+		LibCompat_GetCPUFlags();
+	}
+
+	if (!CPU_VendorID[0]) {
+		// No vendor ID.
+		return NULL;
+	}
+
+	return CPU_VendorID;
+}
+
+/**
+ * Get the full CPU name.
+ * Equivalent to the "brand string" on x86.
+ * @return Pointer to the full CPU name (null-terminated string), or NULL on error.
+ */
+const char *LibCompat_GetCPUFullName(void)
+{
+	if (CPU_Flags == 0) {
+		// CPU flags might not have been obtained yet.
+		LibCompat_GetCPUFlags();
+	}
+
+	if (!CPU_FullName[0]) {
+		// No full name.
+		return NULL;
+	}
+
+	return CPU_FullName;
 }

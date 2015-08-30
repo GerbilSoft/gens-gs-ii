@@ -47,15 +47,53 @@ class PngReader
 
 	public:
 		// TODO: Better memory allocation semantics?
+
+		enum ReaderFlags {
+			/**
+			 * Default flags.
+			 */
+			RF_Default = 0,
+
+			/**
+			 * Use standard alpha channel semantics.
+			 * 0x00 == transparent, 0xFF == opaque
+			 * This is compatible with OpenGL.
+			 */
+			RF_STANDARD_ALPHA	= 0,
+
+			/**
+			 * Use inverted alpha channel semantics.
+			 * 0xFF == transparent, 0xFF == opaque
+			 * This is compatible with Gens/GS II's
+			 * internal rendering code, which doesn't use
+			 * alpha-transparency and clears the high byte.
+			 */
+			RF_INVERTED_ALPHA	= (1 << 0),
+		};
+
 		/**
 		 * Read an image from a PNG file in memory.
 		 * Image is always loaded as 32-bit xBGR.
-		 * @param img_data Image data. (Caller must free img_data->data.)
-		 * @param png_file PNG file data.
-		 * @param png_size Size of PNG file data.
+		 * @param img_data	[out] Image data. (Caller must free img_data->data on success.)
+		 * @param png_file	[in] PNG file data.
+		 * @param png_size	[in] Size of PNG file data.
+		 * @param flags		[in, opt] ReaderFlags.
 		 * @return 0 on success; negative errno on error.
 		 */
-		int readFromMem(_Zomg_Img_Data_t *img_data, const void *png_file, size_t png_size);
+		int readFromMem(_Zomg_Img_Data_t *img_data,
+				const void *png_file, size_t png_size,
+				int flags = RF_Default);
+
+		/**
+		 * Read an image from a PNG file.
+		 * Image is always loaded as 32-bit xBGR.
+		 * @param img_data	[out] Image data. (Caller must free img_data->data on success.)
+		 * @param filename	[in] PNG file.
+		 * @param flags		[in, opt] ReaderFlags.
+		 * @return 0 on success; negative errno on error.
+		 */
+		int readFromFile(_Zomg_Img_Data_t *img_data, const char *filename,
+				 int flags = RF_Default);
 };
 
 }

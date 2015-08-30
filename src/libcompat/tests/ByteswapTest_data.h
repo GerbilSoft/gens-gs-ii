@@ -1,9 +1,8 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
- * byteorder.h.in: Source file for byteorder.h.                            *
- * Indicates the system byteorder as detected by TEST_BIG_ENDIAN().        *
+ * libcompat/tests: Compatibility Library. (Test Suite)                    *
+ * ByteswapTest_data.c: ByteswapTest test data.                            *
  *                                                                         *
- * Copyright (c) 2011-2013 by David Korth.                                 *
+ * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -20,42 +19,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBZOMG_BYTEORDER_H__
-#define __LIBZOMG_BYTEORDER_H__
-
-#define ZOMG_LIL_ENDIAN 1234
-#define ZOMG_BIG_ENDIAN 4321
-#define ZOMG_PDP_ENDIAN 3412
-
-/* System byteorder. */
-#cmakedefine ZOMG_BYTEORDER @ZOMG_BYTEORDER@
+#ifndef __LIBCOMPAT_TESTS_BYTESWAPTEST_DATA_H__
+#define __LIBCOMPAT_TESTS_BYTESWAPTEST_DATA_H__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * ZOMG byteorder enumeration.
- * Used for memory blocks that might be byteswapped.
+ * Original test data.
  */
-typedef enum _ZomgByteorder_t {
-	ZOMG_BYTEORDER_8,	// 8-bit
-	ZOMG_BYTEORDER_16LE,	// 16-bit LE
-	ZOMG_BYTEORDER_16BE,	// 16-bit BE
-	ZOMG_BYTEORDER_32LE,	// 32-bit LE
-	ZOMG_BYTEORDER_32BE,	// 32-bit BE
+extern const uint8_t ByteswapTest_data_orig[516];
 
-#if ZOMG_BYTEORDER == ZOMG_LIL_ENDIAN
-	ZOMG_BYTEORDER_16H = ZOMG_BYTEORDER_16LE,	// 16-bit host-endian
-	ZOMG_BYTEORDER_32H = ZOMG_BYTEORDER_32LE,	// 32-bit host-endian
-#else /* ZOMG_BYTEORDER == ZOMG_BIG_ENDIAN */
-	ZOMG_BYTEORDER_16H = ZOMG_BYTEORDER_16BE,	// 16-bit host-endian
-	ZOMG_BYTEORDER_32H = ZOMG_BYTEORDER_32BE,	// 32-bit host-endian
-#endif
-} ZomgByteorder_t;
+/**
+ * 16-bit byteswapped test data.
+ */
+extern const uint8_t ByteswapTest_data_swap16[516];
+
+/**
+ * 32-bit byteswapped test data.
+ */
+extern const uint8_t ByteswapTest_data_swap32[516];
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __LIBZOMG_BYTEORDER_H__ */
+#endif /* __LIBCOMPAT_TESTS_BYTESWAPTEST_DATA_H__ */

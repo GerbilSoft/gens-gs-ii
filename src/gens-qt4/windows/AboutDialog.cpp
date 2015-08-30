@@ -38,10 +38,12 @@
 
 // LibGens includes.
 #include "libgens/lg_main.hpp"
-#include "libgens/Util/cpuflags.h"
 #include "libgens/Util/Timing.hpp"
 #include "libgens/credits.h"
 #include "libgens/macros/common.h"
+
+// CPU flags.
+#include "libcompat/cpuflags.h"
 
 // C includes.
 #include <string.h>

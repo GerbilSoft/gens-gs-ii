@@ -52,7 +52,7 @@ Ram_68k_t Ram_68k;
 #include "EmuContext/EmuContext.hpp"
 
 // Miscellaneous.
-#include "Util/byteswap.h"
+#include "libcompat/byteswap.h"
 #include "macros/log_msg.h"
 
 // C wrapper functions for Starscream.

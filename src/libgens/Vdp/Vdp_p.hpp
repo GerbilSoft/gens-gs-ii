@@ -25,7 +25,7 @@
 #define __LIBGENS_MD_VDP_P_HPP__
 
 #include <stdint.h>
-#include "Util/byteswap.h"
+#include "libcompat/byteorder.h"
 
 // Needed for FORCE_INLINE.
 #include "../macros/common.h"
@@ -432,10 +432,10 @@ class VdpPrivate
 		// Line buffer for current line.
 		union LineBuf_t {
 			struct LineBuf_px_t {
-#if GENS_BYTEORDER == GENS_LIL_ENDIAN
+#if SYS_BYTEORDER == SYS_LIL_ENDIAN
 				uint8_t pixel;
 				uint8_t layer;
-#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
+#else /* SYS_BYTEORDER == SYS_BIG_ENDIAN */
 				uint8_t layer;
 				uint8_t pixel;
 #endif
@@ -483,10 +483,10 @@ class VdpPrivate
 				uint16_t Num_Tile;	// M5: Includes palette, priority, and flip bits.
 				struct {
 					// M4/TMS sprite information.
-#if GENS_BYTEORDER == GENS_LIL_ENDIAN
+#if SYS_BYTEORDER == SYS_LIL_ENDIAN
 					uint8_t sprite;	// TMS/M4: Sprite pattern number.
 					uint8_t color;	// TMS:    Color number.
-#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
+#else /* SYS_BYTEORDER == SYS_BIG_ENDIAN */
 					uint8_t color;	// TMS:    Color number.
 					uint8_t sprite;	// TMS/M4: Sprite pattern number.
 #endif

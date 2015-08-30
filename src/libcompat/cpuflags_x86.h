@@ -24,8 +24,6 @@
 #ifndef __LIBGENS_UTIL_CPUFLAGS_X86_H__
 #define __LIBGENS_UTIL_CPUFLAGS_X86_H__
 
-#include "../macros/common.h"
-
 #if defined(__i386__) || defined(__amd64__) || \
     defined(_M_IX86) || defined(_M_X64)
 // IA32 CPU flags
@@ -81,6 +79,9 @@
 #define CPUID_EXT_FEATURES			((uint32_t)(0x00000007))
 #define CPUID_MAX_EXT_FUNCTIONS			((uint32_t)(0x80000000))
 #define CPUID_EXT_PROC_INFO_FEATURE_BITS	((uint32_t)(0x80000001))
+#define CPUID_EXT_PROC_BRAND_STRING_1		((uint32_t)(0x80000002))
+#define CPUID_EXT_PROC_BRAND_STRING_2		((uint32_t)(0x80000003))
+#define CPUID_EXT_PROC_BRAND_STRING_3		((uint32_t)(0x80000004))
 
 #ifdef _MSC_VER
 #include <intrin.h>
@@ -121,6 +122,28 @@
 #else
 #error Missing 'cpuid' asm implementation for this compiler.
 #endif
+
+/**
+ * Force a function to be marked as inline.
+ * FORCE_INLINE: Release builds only.
+ * FORCE_INLINE_DEBUG: Debug and release builds.
+ */
+#if defined(__GNUC__) && (__GNUC__ >= 4)
+// FIXME: gcc complains that these functions
+// might not be inlinable.
+//#define FORCE_INLINE_DEBUG __attribute__ ((always_inline))
+#define FORCE_INLINE_DEBUG __inline
+#elif defined(_MSC_VER)
+#define FORCE_INLINE_DEBUG __forceinline
+#else
+#define FORCE_INLINE_DEBUG __inline__
+#endif
+
+#ifdef NDEBUG
+#define FORCE_INLINE FORCE_INLINE_DEBUG
+#else /* !NDEBUG */
+#define FORCE_INLINE
+#endif /* NDEBUG */
 
 /**
  * Check if CPUID is supported on this CPU.

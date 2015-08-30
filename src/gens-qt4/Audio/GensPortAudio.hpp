@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -38,35 +38,34 @@
 // Audio Ring Buffer.
 #include "ARingBuffer.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class GensPortAudio : public ABackend
 {
 	public:
 		GensPortAudio();
 		~GensPortAudio();
-		
+
 		inline bool isOpen(void) const { return m_open; }
-		
+
 		void open(void);
 		void close(void);
-		
+
 		/**
 		 * Properties.
 		 */
 		void setRate(int newRate);
 		void setStereo(bool newStereo);
-		
+
 		/**
-		 * write(): Write the current segment to the audio buffer.
+		 * Write the current segment to the audio buffer.
 		 * @return 0 on success; non-zero on error.
 		 */
 		int write(void);
-		
+
 		void wpSegWait(void) const { /*m_buffer.wpSegWait();*/ }
 		bool isBufferEmpty(void) const { return true; /*return m_buffer.isBufferEmpty();*/ }
-	
+
 	protected:
 		// Static PortAudio callback function.
 		static int GensPaCallback(const void *inputBuffer, void *outputBuffer,
@@ -81,23 +80,29 @@ class GensPortAudio : public ABackend
 						framesPerBuffer,
 						timeInfo, statusFlags);
 		}
-		
+
 		// PortAudio callback function.
 		int gensPaCallback(const void *inputBuffer, void *outputBuffer,
 				   unsigned long framesPerBuffer,
 				   const PaStreamCallbackTimeInfo *timeInfo,
 				   PaStreamCallbackFlags statusFlags);
-		
+
 		// PortAudio stream.
 		PaStream *m_stream;
-		
+
 		// Audio buffer.
 		int16_t m_buffer[1024*SEGMENTS_TO_BUFFER*2];
 		unsigned long m_bufferPos; // Byte position in m_buffer.
 		QMutex m_mtxBuffer;
-		
+
 		// Sample size. (Calculated on open().)
 		int m_sampleSize;
+
+		// FIXME: SoundMgr::writeStereo() requires a 16-byte
+		// aligned destination buffer for SSE2.
+		// GensPortAudio will be removed later, so I'm using
+		// a bounce buffer as a workaround.
+		int16_t *m_tmpWriteBuf;
 };
 
 }

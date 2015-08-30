@@ -1,8 +1,8 @@
 /***************************************************************************
- * libgens/tests: Gens Emulation Library. (Test Suite)                     *
+ * libcompat/tests: Compatibility Library. (Test Suite)                    *
  * ByteswapTest.cpp: Byteswapping tests.                                   *
  *                                                                         *
- * Copyright (c) 2011-2013 by David Korth.                                 *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -19,46 +19,92 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include "ByteswapTest.hpp"
+
 // Google Test
 #include "gtest/gtest.h"
-
-#include "lg_main.hpp"
-#include "Util/byteswap.h"
 
 // C includes. (C++ namespace)
 #include <cstdio>
 #include <cstring>
-using namespace std;
 
-namespace LibGens { namespace Tests {
+// CPU flags and byteswapping macros.
+#include "byteswap.h"
+#include "cpuflags.h"
 
-class ByteswapTest : public ::testing::Test
+// Test data.
+#include "ByteswapTest_data.h"
+
+namespace LibCompat { namespace Tests {
+
+class ByteswapTest : public ::testing::TestWithParam<ByteswapTest_flags>
 {
 	protected:
-		ByteswapTest() { }
+		ByteswapTest()
+			: ::testing::TestWithParam<ByteswapTest_flags>() { }
 		virtual ~ByteswapTest() { }
 
-		virtual void SetUp(void) { }
-		virtual void TearDown(void) { }
+		virtual void SetUp(void);
+		virtual void TearDown(void);
 
 	protected:
 		static const char *ByteorderString(int byteorder);
 		static int CheckRuntimeByteorder(void);
+
+		// Previous CPU flags.
+		uint32_t cpuFlags_old;
 };
 
 /**
- * Get a string representation of a given Gens byteorder.
+ * Set up the test.
+ */
+void ByteswapTest::SetUp(void)
+{
+	// Verify CPU flags.
+	ByteswapTest_flags flags = GetParam();
+	uint32_t totalFlags = (flags.cpuFlags | flags.cpuFlags_slow);
+	if (flags.cpuFlags != 0) {
+		ASSERT_NE(0U, CPU_Flags & totalFlags) <<
+			"CPU does not support the required flags for this test.";
+	}
+
+	// Check if the CPU flag is slow.
+	if (CPU_Flags & flags.cpuFlags_slow) {
+		if ((CPU_Flags & totalFlags) == flags.cpuFlags_slow) {
+			// CPU is always slow.
+			printf("WARNING: CPU is known to be slow with this flag.\n"
+			       "Don't rely on the benchmark results.\n");
+		} else if ((CPU_Flags & totalFlags) == totalFlags) {
+			// CPU may be slow.
+			printf("WARNING: CPU may be slow with some instructions provided by this flag.\n");
+		}
+	}
+
+	cpuFlags_old = CPU_Flags;
+	CPU_Flags = flags.cpuFlags;
+}
+
+/**
+ * Tear down the test.
+ */
+void ByteswapTest::TearDown(void)
+{
+	CPU_Flags = cpuFlags_old;
+}
+
+/**
+ * Get a string representation of a given system byte order.
  * @param byteorder Gens byteorder.
  * @return String representation.
  */
 const char *ByteswapTest::ByteorderString(int byteorder)
 {
 	switch (byteorder) {
-		case GENS_LIL_ENDIAN:
+		case SYS_LIL_ENDIAN:
 			return "little-endian";
-		case GENS_BIG_ENDIAN:
+		case SYS_BIG_ENDIAN:
 			return "big-endian";
-		case GENS_PDP_ENDIAN:
+		case SYS_PDP_ENDIAN:
 			return "PDP-endian";
 		default:
 			return "Unknown";
@@ -86,27 +132,25 @@ int ByteswapTest::CheckRuntimeByteorder(void)
 	byteorder_check.d = boCheck_32;
 
 	if (!memcmp(byteorder_check.b, boCheck_LE, sizeof(byteorder_check.b)))
-		return GENS_LIL_ENDIAN;
+		return SYS_LIL_ENDIAN;
 	else if (!memcmp(byteorder_check.b, boCheck_BE, sizeof(byteorder_check.b)))
-		return GENS_BIG_ENDIAN;
+		return SYS_BIG_ENDIAN;
 	else if (!memcmp(byteorder_check.b, boCheck_PDP, sizeof(byteorder_check.b)))
-		return GENS_PDP_ENDIAN;
+		return SYS_PDP_ENDIAN;
 
 	// Unknown byteorder.
 	return 0;
 }
 
-
 /** Test cases. **/
-
 
 /**
  * Check that the runtime byteorder matches the compile-time byteorder.
  */
-TEST_F(ByteswapTest, checkRuntimeByteorder)
+TEST_P(ByteswapTest, checkRuntimeByteorder)
 {
 	// Print the compile-time byte ordering.
-	const int byteorder_compiled = GENS_BYTEORDER;
+	const int byteorder_compiled = SYS_BYTEORDER;
 	const char *byteorder_compiled_str = ByteorderString(byteorder_compiled);
 	fprintf(stderr, "Compile-time byteorder: %s\n", byteorder_compiled_str);
 
@@ -119,18 +163,17 @@ TEST_F(ByteswapTest, checkRuntimeByteorder)
 	ASSERT_EQ(byteorder_compiled, byteorder_runtime);
 }
 
-
 /**
  * Check little-endian byteswapping macros (non-array).
  */
-TEST_F(ByteswapTest, checkLittleEndianMacros)
+TEST_P(ByteswapTest, checkLittleEndianMacros)
 {
 	const uint16_t orig16 = 0x1234;
 	const uint32_t orig32 = 0x12345678;
-#if GENS_BYTEORDER == GENS_LIL_ENDIAN
+#if SYS_BYTEORDER == SYS_LIL_ENDIAN
 	const uint16_t swap16 = 0x1234;
 	const uint32_t swap32 = 0x12345678;
-#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
+#else /* SYS_BYTEORDER == SYS_BIG_ENDIAN */
 	const uint16_t swap16 = 0x3412;
 	const uint32_t swap32 = 0x78563412;
 #endif
@@ -146,18 +189,17 @@ TEST_F(ByteswapTest, checkLittleEndianMacros)
 	EXPECT_EQ(swap32, cpu_to_le32(orig32));
 }
 
-
 /**
  * Check big-endian byteswapping macros (non-array).
  */
-TEST_F(ByteswapTest, checkBigEndianMacros)
+TEST_P(ByteswapTest, checkBigEndianMacros)
 {
 	const uint16_t orig16 = 0x1234;
 	const uint32_t orig32 = 0x12345678;
-#if GENS_BYTEORDER == GENS_LIL_ENDIAN
+#if SYS_BYTEORDER == SYS_LIL_ENDIAN
 	const uint16_t swap16 = 0x3412;
 	const uint32_t swap32 = 0x78563412;
-#else /* GENS_BYTEORDER == GENS_BIG_ENDIAN */
+#else /* SYS_BYTEORDER == SYS_BIG_ENDIAN */
 	const uint16_t swap16 = 0x1234;
 	const uint32_t swap32 = 0x12345678;
 #endif
@@ -173,15 +215,58 @@ TEST_F(ByteswapTest, checkBigEndianMacros)
 	EXPECT_EQ(swap32, cpu_to_be32(orig32));
 }
 
+/**
+ * Test 16-bit array byteswapping.
+ */
+TEST_P(ByteswapTest, checkByteSwap16Array)
+{
+	uint8_t data[516];
+	memcpy(data, ByteswapTest_data_orig, sizeof(data));
+	__byte_swap_16_array((uint16_t*)data, sizeof(data));
+	ASSERT_EQ(0, memcmp(data, ByteswapTest_data_swap16, sizeof(data)));
+}
+
+/**
+ * Test 16-bit array byteswapping.
+ */
+TEST_P(ByteswapTest, checkByteSwap32Array)
+{
+	uint8_t data[516];
+	memcpy(data, ByteswapTest_data_orig, sizeof(data));
+	__byte_swap_32_array((uint32_t*)data, sizeof(data));
+	ASSERT_EQ(0, memcmp(data, ByteswapTest_data_swap32, sizeof(data)));
+}
+
+INSTANTIATE_TEST_CASE_P(ByteswapTest_NoFlags, ByteswapTest,
+	::testing::Values(ByteswapTest_flags(0, 0)
+));
+
+// NOTE: byteswap.c only implements MMX/SSE2 using GNU assembler.
+// TODO: Add some flag to disable non-MMX/SSE2 asm optimizations, e.g. 'bswap'.
+#if defined(__GNUC__) && \
+    (defined(__i386__) || defined(__amd64__))
+INSTANTIATE_TEST_CASE_P(ByteswapTest_MMX, ByteswapTest,
+	::testing::Values(ByteswapTest_flags(MDP_CPUFLAG_X86_MMX, 0)
+));
+INSTANTIATE_TEST_CASE_P(ByteswapTest_SSE2, ByteswapTest,
+	::testing::Values(ByteswapTest_flags(MDP_CPUFLAG_X86_SSE2, MDP_CPUFLAG_X86_SSE2SLOW)
+));
+#endif
 
 } }
 
-
-int main(int argc, char *argv[])
+/**
+ * Test suite main function.
+ * Called by gtest_main.inc.cpp's main().
+ */
+static int test_main(int argc, char *argv[])
 {
-	fprintf(stderr, "LibGens test suite: Byteswapping tests.\n\n");
-
+	fprintf(stderr, "LibCompat test suite: Byteswapping tests.\n\n");
+	// Initialize CPU flags.
+	LibCompat_GetCPUFlags();
+	// Run the test.
 	::testing::InitGoogleTest(&argc, argv);
-	//LibGens::Init(); /* not needed for byteswapping code */
 	return RUN_ALL_TESTS();
 }
+
+#include "gtest_main.inc.cpp"

@@ -66,6 +66,19 @@
 #endif /* defined(__GNUC__) */
 #endif /* !defined(PACKED) */
 
+// RESTRICT keyword.
+#ifndef RESTRICT
+#if defined(__cplusplus) && defined(__GNUC__)
+#define RESTRICT __restrict__
+#elif defined(_MSC_VER)
+#define RESTRICT __restrict
+#elif __STDC_VERSION__ >= 199901L
+#define RESTRICT restrict
+#else
+#define RESTRICT
+#endif
+#endif /* RESTRICT */
+
 /** Typedefs. **/
 
 /** Miscellaneous. **/

@@ -1,8 +1,9 @@
 /***************************************************************************
  * libzomg: Zipped Original Memory from Genesis.                           *
- * zomg_byteswap.c: Byteswapping functions.                                *
+ * byteorder.h: System byte order enumeration.                             *
+ * Indicates the system byteorder as detected by TEST_BIG_ENDIAN().        *
  *                                                                         *
- * Copyright (c) 2008-2010 by David Korth                                  *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -19,57 +20,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "zomg_byteswap.h"
+#ifndef __LIBZOMG_BYTEORDER_H__
+#define __LIBZOMG_BYTEORDER_H__
 
-// C includes.
-#include <assert.h>
+#include "libcompat/byteorder.h"
 
-/**
- * __zomg_byte_swap_16_array(): 16-bit byteswap function.
- * @param Pointer to array to swap.
- * @param n Number of bytes to swap. (Must be divisible by 2; an extra odd byte will be ignored.)
- */
-void __zomg_byte_swap_16_array(void *ptr, unsigned int n)
-{
-	unsigned char *cptr = (unsigned char*)ptr;
-	unsigned char x;
-	
-	// Don't allow uneven lengths.
-	assert((n & 1) == 0);
-	n &= ~1;
-	
-	// TODO: Add an x86-optimized version, possibly using SSE.
-	for (; n != 0; n -= 2, cptr += 2)
-	{
-		x = *cptr;
-		*cptr = *(cptr + 1);
-		*(cptr + 1) = x;
-	}
-}
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * __zomg_byte_swap_32_array(): 32-bit byteswap function.
- * @param Pointer to array to swap.
- * @param n Number of bytes to swap. (Must be divisible by 4; extra bytes will be ignored.)
+ * ZOMG byteorder enumeration.
+ * Used for memory blocks that might be byteswapped.
  */
-void __zomg_byte_swap_32_array(void *ptr, unsigned int n)
-{
-	unsigned char *cptr = (unsigned char*)ptr;
-	unsigned char x, y;
-	
-	// Don't allow lengths that aren't divisible by 4.
-	assert((n & 3) == 0);
-	n &= ~3;
-	
-	// TODO: Add an x86-optimized version using bswap and/or SSE.
-	for (; n != 0; n -= 4, cptr += 4)
-	{
-		x = *cptr;
-		y = *(cptr + 1);
-		
-		*cptr = (*cptr + 3);
-		*(cptr + 1) = (*cptr + 2);
-		*(cptr + 2) = y;
-		*(cptr + 3) = x;
-	}
+typedef enum _ZomgByteorder_t {
+	ZOMG_BYTEORDER_8,	// 8-bit
+	ZOMG_BYTEORDER_16LE,	// 16-bit LE
+	ZOMG_BYTEORDER_16BE,	// 16-bit BE
+	ZOMG_BYTEORDER_32LE,	// 32-bit LE
+	ZOMG_BYTEORDER_32BE,	// 32-bit BE
+
+#if SYS_BYTEORDER == SYS_LIL_ENDIAN
+	ZOMG_BYTEORDER_16H = ZOMG_BYTEORDER_16LE,	// 16-bit host-endian
+	ZOMG_BYTEORDER_32H = ZOMG_BYTEORDER_32LE,	// 32-bit host-endian
+#else /* SYS_BYTEORDER == SYS_BIG_ENDIAN */
+	ZOMG_BYTEORDER_16H = ZOMG_BYTEORDER_16BE,	// 16-bit host-endian
+	ZOMG_BYTEORDER_32H = ZOMG_BYTEORDER_32BE,	// 32-bit host-endian
+#endif
+} ZomgByteorder_t;
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* __LIBZOMG_BYTEORDER_H__ */

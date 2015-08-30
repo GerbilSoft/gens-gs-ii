@@ -63,16 +63,41 @@ CHECK_FUNCTION_EXISTS(memalign HAVE_MEMALIGN)
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libcompat.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.libcompat.h")
 
-# NOTE: Currently, libcompat has no source files
-# other than W32U. Hence, we need to include a dummy
-# source file on non-Windows platforms.
-IF(NOT WIN32)
-SET(libcompat_SRCS dummy.c)
-ENDIF(NOT WIN32)
+# Determine the byteswap source file to use.
+IF(NOT DEFINED libcompat_ARCH_SPECIFIC_SRCS)
+	IF(NOT CMAKE_SYSTEM_PROCESSOR)
+		MESSAGE(FATAL_ERROR "CMAKE_SYSTEM_PROCESSOR is empty.")
+	ENDIF(NOT CMAKE_SYSTEM_PROCESSOR)
+	STRING(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" arch)
+	IF("${arch}" MATCHES i[0-9]86|x86|x86_64|amd64)
+		SET(libcompat_ARCH_SPECIFIC_SRCS
+			cpuflags_x86.c
+			byteswap_x86.c
+			)
+	ELSEIF("${arch}" MATCHES powerpc|powerpc-eabi)
+		SET(libcompat_ARCH_SPECIFIC_SRCS
+			cpuflags_ppc.c
+			byteswap.c
+			)
+	ELSE()
+		SET(libcompat_ARCH_SPECIFIC_SRCS
+			cpuflags.c
+			byteswap.c
+			)
+	ENDIF()
+	UNSET(arch)
+ENDIF(NOT DEFINED libcompat_ARCH_SPECIFIC_SRCS)
+
+SET(libcompat_SRCS
+	${libcompat_ARCH_SPECIFIC_SRCS}
+	)
 
 SET(libcompat_H
 	reentrant.h
 	aligned_malloc.h
+	cpuflags.h
+	cpuflags_x86.h
+	byteswap.h
 	)
 
 IF(WIN32)
@@ -113,3 +138,8 @@ IF(WIN32)
 	# - SHGetSpecialFolderPath()
 	TARGET_LINK_LIBRARIES(compat shell32)
 ENDIF(WIN32)
+
+# Test suite.
+IF(BUILD_TESTING)
+       ADD_SUBDIRECTORY(tests)
+ENDIF(BUILD_TESTING)

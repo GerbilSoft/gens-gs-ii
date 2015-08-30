@@ -113,55 +113,57 @@ void ScreenshotPrivate::toImgData(Zomg_Img_Data_t *img_data,
 
 	// System ID.
 	// TODO: Pass the MDP system ID directly.
-	const char *sysId;
-	switch (rom->sysId()) {
-		case Rom::MDP_SYSTEM_UNKNOWN:
-		default:
-			sysId = nullptr;
-			break;
-		case Rom::MDP_SYSTEM_MD:
-			sysId = "MD";
-			break;
-		case Rom::MDP_SYSTEM_MCD:
-			sysId = "MCD";
-			break;
-		case Rom::MDP_SYSTEM_32X:
-			sysId = "32X";
-			break;
-		case Rom::MDP_SYSTEM_MCD32X:
-			// TODO: "MCD32X", or "MCD,32X"?
-			// Note that "MCD" and "32X" imply MD.
-			sysId = "MCD,32X";
-			break;
-		case Rom::MDP_SYSTEM_SMS:
-			sysId = "SMS";
-			break;
-		case Rom::MDP_SYSTEM_GG:
-			sysId = "GG";
-			break;
-		case Rom::MDP_SYSTEM_SG1000:
-			sysId = "SG-1000";
-			break;
-		case Rom::MDP_SYSTEM_PICO:
-			sysId = "Pico";
-			break;
-		/* TODO: ColecoVision.
-		case Rom::MDP_SYSTEM_CV:
-			sysId = "CV";
-			break;
-		*/
+	if (rom) {
+		const char *sysId;
+		switch (rom->sysId()) {
+			case Rom::MDP_SYSTEM_UNKNOWN:
+			default:
+				sysId = nullptr;
+				break;
+			case Rom::MDP_SYSTEM_MD:
+				sysId = "MD";
+				break;
+			case Rom::MDP_SYSTEM_MCD:
+				sysId = "MCD";
+				break;
+			case Rom::MDP_SYSTEM_32X:
+				sysId = "32X";
+				break;
+			case Rom::MDP_SYSTEM_MCD32X:
+				// TODO: "MCD32X", or "MCD,32X"?
+				// Note that "MCD" and "32X" imply MD.
+				sysId = "MCD,32X";
+				break;
+			case Rom::MDP_SYSTEM_SMS:
+				sysId = "SMS";
+				break;
+			case Rom::MDP_SYSTEM_GG:
+				sysId = "GG";
+				break;
+			case Rom::MDP_SYSTEM_SG1000:
+				sysId = "SG-1000";
+				break;
+			case Rom::MDP_SYSTEM_PICO:
+				sysId = "Pico";
+				break;
+			/* TODO: ColecoVision.
+			case Rom::MDP_SYSTEM_CV:
+				sysId = "CV";
+				break;
+			*/
+		}
+
+		if (sysId != nullptr) {
+			metadata->setSystemId(string(sysId));
+		};
+
+		//metadata.setRegion();		// TODO: Get region code.
+		// TODO: Save ROM filename with extension; also, z_file?
+		metadata->setRomFilename(rom->filename_baseNoExt());
+		metadata->setRomCrc32(rom->rom_crc32());
+		//metadata->setRomSize(rom->romSize());	// TODO; also, include SMD header?
+		// TODO: Add more metadata.
 	}
-
-	if (sysId != nullptr) {
-		metadata->setSystemId(string(sysId));
-	};
-
-	//metadata.setRegion();		// TODO: Get region code.
-	// TODO: Save ROM filename with extension; also, z_file?
-	metadata->setRomFilename(rom->filename_baseNoExt());
-	metadata->setRomCrc32(rom->rom_crc32());
-	//metadata->setRomSize(rom->romSize());	// TODO; also, include SMD header?
-	// TODO: Add more metadata.
 }
 
 /**
@@ -169,14 +171,14 @@ void ScreenshotPrivate::toImgData(Zomg_Img_Data_t *img_data,
  * File will be in PNG format.
  * TODO: Metadata flags parameter.
  * TODO: Make filename the first parameter?
- * @param fb		[in] MD framebuffer.
- * @param rom		[in] ROM object. (Needed for some metadata.)
  * @param filename	[in] Filename for the screenshot.
+ * @param fb		[in] MD framebuffer.
+ * @param rom		[in, opt] ROM object. (Needed for some metadata.)
  * @return 0 on success; negative errno on error.
  */
-int Screenshot::toFile(const MdFb *fb, const Rom *rom, const char *filename)
+int Screenshot::toFile(const char *filename, const MdFb *fb, const Rom *rom)
 {
-	if (!fb || !rom || !filename || !filename[0])
+	if (!fb || !filename || !filename[0])
 		return -EINVAL;
 
 	// TODO: metaFlags.
@@ -196,12 +198,12 @@ int Screenshot::toFile(const MdFb *fb, const Rom *rom, const char *filename)
  * TODO: Metadata flags parameter.
  * @param zomg	[in,out] ZOMG savestate.
  * @param fb	[in] MD framebuffer.
- * @param rom	[in] ROM object. (Needed for some metadata.)
+ * @param rom	[in, opt] ROM object. (Needed for some metadata.)
  * @return 0 on success; negative errno on error.
  */
 int Screenshot::toZomg(LibZomg::ZomgBase *zomg, const MdFb *fb, const Rom *rom)
 {
-	if (!zomg || !fb || !rom)
+	if (!zomg || !fb)
 		return -EINVAL;
 
 	// TODO: metaFlags.

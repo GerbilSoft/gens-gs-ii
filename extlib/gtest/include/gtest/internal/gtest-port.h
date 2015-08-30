@@ -306,6 +306,9 @@
 # if GTEST_OS_LINUX_ANDROID
 // On Android, <regex.h> is only available starting with Gingerbread.
 #  define GTEST_HAS_POSIX_RE (__ANDROID_API__ >= 9)
+# elif defined(__embedded__) && __embedded__
+   /* Gens/GS II: Disable regular expressions on embedded platforms, e.g. devkitPPC. */
+#  define GTEST_HAS_POSIX_RE 0
 # else
 #  define GTEST_HAS_POSIX_RE (!GTEST_OS_WINDOWS)
 # endif
@@ -632,6 +635,9 @@ using ::std::tuple_size;
 // By default, we assume that stream redirection is supported on all
 // platforms except known mobile ones.
 # if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_SYMBIAN
+#  define GTEST_HAS_STREAM_REDIRECTION 0
+# elif defined(__embedded__) && __embedded__
+   /* Gens/GS II: Disable stream redirection on embedded platforms, e.g. devkitPPC. */
 #  define GTEST_HAS_STREAM_REDIRECTION 0
 # else
 #  define GTEST_HAS_STREAM_REDIRECTION 1

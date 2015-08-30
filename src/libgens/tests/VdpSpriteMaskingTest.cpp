@@ -29,7 +29,7 @@
 // LibGens VDP.
 #include "Vdp/Vdp.hpp"
 #include "cpu/M68K_Mem.hpp"
-#include "Util/byteswap.h"
+#include "libcompat/byteswap.h"
 
 // ARRAY_SIZE(x)
 #include "macros/common.h"
@@ -81,7 +81,8 @@ class VdpSpriteMaskingTest : public ::testing::TestWithParam<VdpSpriteMaskingTes
 {
 	protected:
 		VdpSpriteMaskingTest()
-			: m_vdp(nullptr) { }
+			: ::testing::TestWithParam<VdpSpriteMaskingTest_mode>()
+			, m_vdp(nullptr) { }
 		virtual ~VdpSpriteMaskingTest() { }
 
 		virtual void SetUp(void);
@@ -339,7 +340,7 @@ int VdpSpriteMaskingTest::loadVRam(ScreenMode screenMode)
 	// Data was read successfully.
 
 	// Byteswap VRam to host-endian.
-	be16_to_cpu_array(out, out_pos);
+	be16_to_cpu_array((uint16_t*)out, out_pos);
 
 	// Copy VRam to the VDP.
 	m_vdp->dbg_writeVRam_16(0, (uint16_t*)out, out_pos);

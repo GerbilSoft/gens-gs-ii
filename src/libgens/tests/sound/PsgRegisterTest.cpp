@@ -43,7 +43,8 @@ class PsgRegisterTest : public ::testing::Test
 {
 	protected:
 		PsgRegisterTest()
-			: m_psg(nullptr) { }
+			: ::testing::Test()
+			, m_psg(nullptr) { }
 		virtual ~PsgRegisterTest() { }
 
 		virtual void SetUp(void) override;

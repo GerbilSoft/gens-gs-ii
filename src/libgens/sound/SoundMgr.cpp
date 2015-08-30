@@ -24,9 +24,12 @@
 
 #include "SoundMgr.hpp"
 
-// C includes.
-#include <math.h>
-#include <string.h>
+// C includes. (C++ namespace)
+#include <cmath>
+#include <cstring>
+
+// C++ includes.
+#include <algorithm>
 
 // M68K.hpp has CLOCK_NTSC and CLOCK_PAL #defines.
 // TODO: Convert to static const ints and move elsewhere.
@@ -39,14 +42,42 @@
 // ALIGN()
 #include "libcompat/aligned_malloc.h"
 
+#include "SoundMgr_p.hpp"
 namespace LibGens {
 
-// Static variable initialization.
-int SoundMgr::ms_SegLength = 0;
+/** SoundManagerPrivate **/
 
-// Line extrapolation values. [312 + extra room to prevent overflows]
-// Index 0 == start; Index 1 == length
-unsigned int SoundMgr::ms_Extrapol[312+8][2];
+// Audio settings.
+int SoundMgrPrivate::rate = 44100;
+bool SoundMgrPrivate::isPal = false;
+
+/**
+ * Calculate the segment length.
+ * @param rate Sound rate, in Hz.
+ * @param isPal If true, system is PAL.
+ * @return Segment length.
+ */
+int SoundMgrPrivate::CalcSegLength(int rate, bool isPal)
+{
+	if (rate > SoundMgr::MAX_SAMPLING_RATE) {
+		// TODO: Support higher rates than 48 kHz.
+		rate = SoundMgr::MAX_SAMPLING_RATE;
+	}
+
+	switch (rate) {
+		case 11025:	return (isPal ? 220 : 184);
+		case 16000:	return (isPal ? 320 : 267);
+		case 22050:	return (isPal ? 441 : 368);
+		case 32000:	return (isPal ? 640 : 534);
+		case 44100:	return (isPal ? 882 : 735);
+		case 48000:	return (isPal ? 960 : 800);
+		default:
+			// Segment size is ceil(rate / framesPerSecond).
+			return (int)ceil((double)rate / (isPal ? 50.0 : 60.0));
+	}
+}
+
+/** SoundMgr **/
 
 // Segment buffer.
 // Stores up to 882 32-bit stereo samples.
@@ -60,9 +91,12 @@ int32_t ALIGN(16) SoundMgr::ms_SegBufR[MAX_SEGMENT_SIZE];
 Psg SoundMgr::ms_Psg;
 Ym2612 SoundMgr::ms_Ym2612;
 
-// Audio settings.
-int SoundMgr::ms_Rate = 44100;
-bool SoundMgr::ms_IsPal = false;
+// Static variable initialization.
+int SoundMgr::ms_SegLength = 0;
+
+// Line extrapolation values. [312 + extra room to prevent overflows]
+// Index 0 == start; Index 1 == length
+unsigned int SoundMgr::ms_Extrapol[312+8][2];
 
 void SoundMgr::Init(void)
 {
@@ -82,11 +116,11 @@ void SoundMgr::End(void)
  */
 void SoundMgr::ReInit(int rate, bool isPal, bool preserveState)
 {
-	ms_Rate = rate;
-	ms_IsPal = isPal;
+	SoundMgrPrivate::rate = rate;
+	SoundMgrPrivate::isPal = isPal;
 
 	// Calculate the segment length.
-	ms_SegLength = CalcSegLength(rate, isPal);
+	ms_SegLength = SoundMgrPrivate::CalcSegLength(rate, isPal);
 
 	// Build the sound extrapolation table.
 	const int lines = (isPal ? 312 : 262);
@@ -123,30 +157,16 @@ void SoundMgr::ReInit(int rate, bool isPal, bool preserveState)
 	}
 }
 
-/**
- * Calculate the segment length.
- * @param rate Sound rate, in Hz.
- * @param isPal If true, system is PAL.
- * @return Segment length.
- */
-int SoundMgr::CalcSegLength(int rate, bool isPal)
-{
-	if (rate > MAX_SAMPLING_RATE) {
-		// TODO: Support higher rates than 48 kHz.
-		rate = MAX_SAMPLING_RATE;
-	}
+/** ReInit() wrappers. **/
 
-	switch (rate) {
-		case 11025:	return (isPal ? 220 : 184);
-		case 16000:	return (isPal ? 320 : 267);
-		case 22050:	return (isPal ? 441 : 368);
-		case 32000:	return (isPal ? 640 : 534);
-		case 44100:	return (isPal ? 882 : 735);
-		case 48000:	return (isPal ? 960 : 800);
-		default:
-			// Segment size is ceil(rate / framesPerSecond).
-			return (int)ceil((double)rate / (isPal ? 50.0 : 60.0));
-	}
+void SoundMgr::SetRate(int rate, bool preserveState)
+{
+	ReInit(rate, SoundMgrPrivate::isPal, preserveState);
+}
+
+void SoundMgr::SetRegion(bool isPal, bool preserveState)
+{
+	ReInit(SoundMgrPrivate::rate, isPal, preserveState);
 }
 
 }

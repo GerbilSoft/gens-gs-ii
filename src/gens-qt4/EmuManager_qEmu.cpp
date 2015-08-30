@@ -512,7 +512,7 @@ void EmuManager::doScreenShot(void)
 
 	// Take the screenshot.
 	MdFb *fb = gqt4_emuContext->m_vdp->MD_Screen->ref();
-	int ret = Screenshot::toFile(fb, m_rom, scrFilename.toUtf8().constData());
+	int ret = Screenshot::toFile(scrFilename.toUtf8().constData(), fb, m_rom);
 	fb->unref();
 
 	// Done using the framebuffer.
