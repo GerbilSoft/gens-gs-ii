@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgens/tests: Gens Emulation Library. (Test Suite)                     *
- * PausedEffectTest.cpp: Paused Effect test. (Common header)               *
+ * PausedEffectTest.hpp: Paused Effect test. (Common header)               *
  *                                                                         *
  * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
