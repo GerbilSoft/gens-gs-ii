@@ -124,8 +124,8 @@ inline void PausedEffectPrivate::T_DoPausedEffect(
  * @param RBits Number of bits for Red.
  * @param GBits Number of bits for Green.
  * @param BBits Number of bits for Blue.
- * @param outScreen Pointer to the destination screen buffer. (MUST BE 336x240!)
- * @param mdScreen Pointer to the MD screen buffer. (MUST BE 336x240!)
+ * @param outScreen Pointer to the destination screen buffer.
+ * @param mdScreen Pointer to the MD screen buffer.
  * @param pxCount Pixel count.
  */
 template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
