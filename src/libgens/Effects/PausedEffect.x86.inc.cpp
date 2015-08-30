@@ -52,6 +52,12 @@ inline void PausedEffectPrivate::DoPausedEffect_32_SSE2(
 #endif
 	unsigned int pxCount)
 {
+	// Make sure the framebuffer(s) are 16-byte aligned.
+	assert((uintptr_t)outScreen % 16 == 0);
+#ifdef DO_2FB
+	assert((uintptr_t)mdScreen % 16 == 0);
+#endif
+
 	// Grayscale vector: [0.299 0.587 0.114] (ITU-R BT.601)
 	// Source: http://en.wikipedia.org/wiki/YCbCr
 
@@ -67,12 +73,6 @@ inline void PausedEffectPrivate::DoPausedEffect_32_SSE2(
 		: [GRAY_32_SSE2] "m" (GRAY_32_SSE2)
 		, [BLUE_MASK_32_SSE2] "m" (BLUE_MASK_32_SSE2)
 	);
-
-	// Make sure the framebuffer(s) are 16-byte aligned.
-	assert((uintptr_t)outScreen % 16 == 0);
-#ifdef DO_2FB
-	assert((uintptr_t)mdScreen % 16 == 0);
-#endif
 
 	// Convert the pixels to grayscale.
 	// TODO: Apply the Blue tint.
