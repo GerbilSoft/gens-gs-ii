@@ -100,7 +100,7 @@ inline void PausedEffectPrivate::T_DoPausedEffect(
 {
 	uint8_t r, g, b;
 	unsigned int nRG, nB;
-	float monoPx;
+	unsigned int monoPx;
 
 	for (; pxCount > 0; pxCount--) {
 		// Get the color components.
@@ -108,11 +108,16 @@ inline void PausedEffectPrivate::T_DoPausedEffect(
 		g = (uint8_t)((*outScreen >> BBits) & MMASK(GBits)) << (8 - GBits);
 		b = (uint8_t)((*outScreen) & MMASK(BBits)) << (8 - BBits);
 
-		// Convert the color components to monochrome.
-		// TODO: SSE optimization.
+		// Convert the color components to grayscale.
 		// Grayscale vector: [0.299 0.587 0.114] (ITU-R BT.601)
 		// Source: http://en.wikipedia.org/wiki/YCbCr
-		monoPx = ((float)r * 0.299f) + ((float)g * 0.587f) + ((float)b * 0.114f);
+		// NOTE: Old float code that was more accurate, but slower.
+		//monoPx = ((float)r * 0.299f) + ((float)g * 0.587f) + ((float)b * 0.114f);
+
+		// Integer grayscale vector: [0x4D, 0x96, 0x1D]
+		// Reference: http://www.asmcommunity.net/forums/topic/?id=19704
+		monoPx = (r * 0x4D) + (g * 0x96) + (b * 0x1D);
+		monoPx >>= 8;
 
 		// Save the R and G components.
 		nRG = (uint8_t)monoPx;
@@ -151,7 +156,7 @@ inline void PausedEffectPrivate::T_DoPausedEffect(
 {
 	uint8_t r, g, b;
 	unsigned int nRG, nB;
-	float monoPx;
+	unsigned int monoPx;
 	
 	for (; pxCount > 0; pxCount--) {
 		// Get the color components.
@@ -161,10 +166,15 @@ inline void PausedEffectPrivate::T_DoPausedEffect(
 		mdScreen++;
 
 		// Convert the color components to grayscale.
-		// TODO: SSE optimization.
 		// Grayscale vector: [0.299 0.587 0.114] (ITU-R BT.601)
 		// Source: http://en.wikipedia.org/wiki/YCbCr
-		monoPx = ((float)r * 0.299f) + ((float)g * 0.587f) + ((float)b * 0.114f);
+		// NOTE: Old float code that was more accurate, but slower.
+		//monoPx = ((float)r * 0.299f) + ((float)g * 0.587f) + ((float)b * 0.114f);
+
+		// Integer grayscale vector: [0x4D, 0x96, 0x1D]
+		// Reference: http://www.asmcommunity.net/forums/topic/?id=19704
+		monoPx = (r * 0x4D) + (g * 0x96) + (b * 0x1D);
+		monoPx >>= 8;
 
 		// Save the R and G components.
 		nRG = (uint8_t)monoPx;

@@ -135,9 +135,9 @@ void PausedEffectTest::init(MdFb::ColorDepth bpp)
 	// "Normal" filename.
 	snprintf(filename_normal, sizeof(filename_normal),
 		 "PausedEffect.Normal.%d.png", bppNum);
-	// "Paused" filename. (SW == software rendering)
+	// "Paused" filename. (SW-int == software rendering, integer arithmetic)
 	snprintf(filename_paused, sizeof(filename_normal),
-		 "PausedEffect.SW.%d.png", bppNum);
+		 "PausedEffect.SW-int.%d.png", bppNum);
 
 	// Load the images.
 	PngReader reader;
