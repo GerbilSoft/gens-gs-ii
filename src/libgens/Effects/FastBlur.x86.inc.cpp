@@ -76,8 +76,8 @@ void FastBlurPrivate::DoFastBlur_16_MMX(
 
 			// Blur source pixels.
 			// NOTE: This may lose some precision in the Red LSB on LE architectures.
-			"psrld	$1, %%mm0\n"
-			"psrld	$1, %%mm1\n"
+			"psrlw	$1, %%mm0\n"
+			"psrlw	$1, %%mm1\n"
 			"pand	%%mm7, %%mm0\n"
 			"pand	%%mm7, %%mm1\n"
 			"paddw	%%mm1, %%mm0\n"
