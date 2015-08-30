@@ -49,6 +49,16 @@ const char *PausedEffectTest::baseFilename(void)
 }
 
 /**
+ * Get the render type for the output reference images.
+ * @return Render type, e.g. "SW" or "SW-int".
+ */
+const char *PausedEffectTest::renderType(void)
+{
+	// Software rendering using integers instead of floats.
+	return "SW-int";
+}
+
+/**
  * Test the Paused Effect in 15-bit color. (1-FB)
  */
 TEST_P(PausedEffectTest, do15bit_1FB)

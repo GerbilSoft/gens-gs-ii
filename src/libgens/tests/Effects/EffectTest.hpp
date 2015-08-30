@@ -66,6 +66,12 @@ class EffectTest : public ::testing::TestWithParam<EffectTest_flags>
 		virtual const char *baseFilename(void) = 0;
 
 		/**
+		 * Get the render type for the output reference images.
+		 * @return Render type, e.g. "SW" or "SW-int".
+		 */
+		virtual const char *renderType(void) = 0;
+
+		/**
 		 * Initialize image data.
 		 * @param bpp Color depth.
 		 */

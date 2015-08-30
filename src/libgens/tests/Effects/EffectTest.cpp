@@ -130,15 +130,20 @@ void EffectTest::init(MdFb::ColorDepth bpp)
 	ASSERT_TRUE(base_filename != nullptr);
 	ASSERT_NE(0, base_filename[0]);
 
+	// Get the render type.
+	const char *render_type = renderType();
+	ASSERT_TRUE(render_type != nullptr);
+	ASSERT_NE(0, render_type[0]);
+
 	char filename_normal[64];
 	char filename_paused[64];
 
-	// "Normal" filename.
+	// Original image.
 	snprintf(filename_normal, sizeof(filename_normal),
 		 "Effects.Normal.%d.png", bppNum);
-	// "Paused" filename. (SW-int == software rendering, integer arithmetic)
+	// Result image.
 	snprintf(filename_paused, sizeof(filename_normal),
-		 "%s.SW-int.%d.png", base_filename, bppNum);
+		 "%s.%s.%d.png", base_filename, render_type, bppNum);
 
 	// Load the images.
 	PngReader reader;

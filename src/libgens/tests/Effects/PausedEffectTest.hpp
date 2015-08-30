@@ -38,6 +38,12 @@ class PausedEffectTest : public EffectTest
 		 * @return Base filename, e.g. "PausedEffect".
 		 */
 		virtual const char *baseFilename(void) override;
+
+		/**
+		 * Get the render type for the output reference images.
+		 * @return Render type, e.g. "SW" or "SW-int".
+		 */
+		virtual const char *renderType(void) override;
 };
 
 } }
