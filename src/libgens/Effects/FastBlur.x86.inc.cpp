@@ -60,8 +60,8 @@ void FastBlurPrivate::DoFastBlur_16_MMX(
 		: [mask] "m" (*mask)
 		);
 
-	// Blur the pixels.
-	// TODO: Do more than 4px at a time?
+	// Blur 4px at a time.
+	// TODO: Figure out how to blur 8px at a time.
 	assert(pxCount % 4 == 0);
 	for (unsigned int i = (pxCount / 4); i != 0; i--) {
 		__asm__ (
@@ -76,8 +76,8 @@ void FastBlurPrivate::DoFastBlur_16_MMX(
 
 			// Blur source pixels.
 			// NOTE: This may lose some precision in the Red LSB on LE architectures.
-			"psrlw	$1, %%mm0\n"
-			"psrlw	$1, %%mm1\n"
+			"psrlw	   $1, %%mm0\n"
+			"psrlw	   $1, %%mm1\n"
 			"pand	%%mm7, %%mm0\n"
 			"pand	%%mm7, %%mm1\n"
 			"paddw	%%mm1, %%mm0\n"
@@ -147,10 +147,10 @@ void FastBlurPrivate::DoFastBlur_32_MMX(
 
 			// Blur source pixels.
 			// NOTE: This may lose some precision in the Red LSB on LE architectures.
-			"psrld	$1, %%mm0\n"
-			"psrld	$1, %%mm1\n"
-			"psrld	$1, %%mm2\n"
-			"psrld	$1, %%mm3\n"
+			"psrld	   $1, %%mm0\n"
+			"psrld	   $1, %%mm1\n"
+			"psrld	   $1, %%mm2\n"
+			"psrld	   $1, %%mm3\n"
 			"pand	%%mm7, %%mm0\n"
 			"pand	%%mm7, %%mm1\n"
 			"pand	%%mm7, %%mm2\n"
