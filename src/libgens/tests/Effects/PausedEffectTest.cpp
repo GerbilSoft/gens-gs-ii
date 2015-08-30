@@ -74,6 +74,22 @@ class PausedEffectTest : public ::testing::Test
 		void init(MdFb::ColorDepth bpp);
 
 		/**
+		 * Copy a loaded image to an MdFb in 15-bit color.
+		 * Source image must be 32-bit color.
+		 * @param fb	[out] Destination MdFb.
+		 * @param src	[in] Source img_data.
+		 */
+		void copyToFb15(MdFb *fb, const Zomg_Img_Data_t *src);
+
+		/**
+		 * Copy a loaded image to an MdFb in 16-bit color.
+		 * Source image must be 32-bit color.
+		 * @param fb	[out] Destination MdFb.
+		 * @param src	[in] Source img_data.
+		 */
+		void copyToFb16(MdFb *fb, const Zomg_Img_Data_t *src);
+
+		/**
 		 * Copy a loaded image to an MdFb in 32-bit color.
 		 * Source image must be 32-bit color.
 		 * @param fb	[out] Destination MdFb.
@@ -179,8 +195,22 @@ void PausedEffectTest::init(MdFb::ColorDepth bpp)
 	EXPECT_EQ(fb_normal->numLines(),  (int)img_paused.h);
 
 	// Copy the reference images into the framebuffers.
-	copyToFb32(fb_normal, &img_normal);
-	copyToFb32(fb_paused, &img_paused);
+	switch (bpp) {
+		case MdFb::BPP_15:
+			copyToFb15(fb_normal, &img_normal);
+			copyToFb15(fb_paused, &img_paused);
+			break;
+		case MdFb::BPP_16:
+			copyToFb16(fb_normal, &img_normal);
+			copyToFb16(fb_paused, &img_paused);
+			break;
+		case MdFb::BPP_32:
+			copyToFb32(fb_normal, &img_normal);
+			copyToFb32(fb_paused, &img_paused);
+			break;
+		default:
+			ASSERT_TRUE(false) << "bpp is invalid: " << bpp;
+	}
 }
 
 /**
@@ -204,6 +234,68 @@ void PausedEffectTest::TearDown(void)
 	}
 	if (fb_test2) {
 		fb_test2->unref();
+	}
+}
+
+/**
+ * Copy a loaded image to an MdFb in 15-bit color.
+ * Source image must be 32-bit color.
+ * @param fb	[out] Destination MdFb.
+ * @param src	[in] Source img_data.
+ */
+void PausedEffectTest::copyToFb15(MdFb *fb, const Zomg_Img_Data_t *src)
+{
+	ASSERT_EQ(32, src->bpp);
+
+	// Set the MdFb to 15-bit color.
+	fb->setBpp(MdFb::BPP_15);
+
+	// Copy the image to the MdFb.
+	uint8_t r, g, b;
+	const uint32_t *pData = (const uint32_t*)src->data;
+	for (int line = 0; line < fb->numLines(); line++) {
+		uint16_t *pDest = fb->lineBuf16(line);
+		const uint32_t *pSrc = pData;
+		for (int x = src->w; x > 0; x--, pDest++, pSrc++) {
+			r = (*pData >> 16) & 0xFF;
+			g = (*pData >> 8) & 0xFF;
+			b = (*pData >> 0) & 0xFF;
+			*pDest = ((r & 0xF8) << 7) |
+				 ((g & 0xF8) << 2) |
+				 ((b & 0xF8) >> 3);
+		}
+		pData += (src->pitch / 4);
+	}
+}
+
+/**
+ * Copy a loaded image to an MdFb in 16-bit color.
+ * Source image must be 32-bit color.
+ * @param fb	[out] Destination MdFb.
+ * @param src	[in] Source img_data.
+ */
+void PausedEffectTest::copyToFb16(MdFb *fb, const Zomg_Img_Data_t *src)
+{
+	ASSERT_EQ(32, src->bpp);
+
+	// Set the MdFb to 16-bit color.
+	fb->setBpp(MdFb::BPP_16);
+
+	// Copy the image to the MdFb.
+	uint8_t r, g, b;
+	const uint32_t *pData = (const uint32_t*)src->data;
+	for (int line = 0; line < fb->numLines(); line++) {
+		uint16_t *pDest = fb->lineBuf16(line);
+		const uint32_t *pSrc = pData;
+		for (int x = src->w; x > 0; x--, pDest++, pSrc++) {
+			r = (*pData >> 16) & 0xFF;
+			g = (*pData >> 8) & 0xFF;
+			b = (*pData >> 0) & 0xFF;
+			*pDest = ((r & 0xF8) << 8) |
+				 ((g & 0xFC) << 3) |
+				 ((b & 0xF8) >> 3);
+		}
+		pData += (src->pitch / 4);
 	}
 }
 
@@ -264,19 +356,76 @@ void PausedEffectTest::compareFb(const MdFb *fb_expected, const MdFb *fb_actual)
 }
 
 /**
+ * Test the Paused Effect in 15-bit color. (1-FB)
+ */
+TEST_F(PausedEffectTest, do15bit_1FB)
+{
+	// Initialize the images.
+	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_15));
+	// Initialize the test framebuffer with the "normal" image.
+	copyToFb15(fb_test1, &img_normal);
+	// Apply the "paused" effect. (1-FB version)
+	PausedEffect::DoPausedEffect(fb_test1);
+	// Compare it to the known good "paused" image.
+	compareFb(fb_paused, fb_test1);
+}
+
+/**
+ * Test the Paused Effect in 15-bit color. (2-FB)
+ */
+TEST_F(PausedEffectTest, do15bit_2FB)
+{
+	// Initialize the images.
+	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_15));
+	// Initialize the test framebuffer with the "normal" image.
+	copyToFb15(fb_test1, &img_normal);
+	// Apply the "paused" effect. (2-FB version)
+	PausedEffect::DoPausedEffect(fb_test2, fb_test1);
+	// Compare it to the known good "paused" image.
+	compareFb(fb_paused, fb_test2);
+}
+
+/**
+ * Test the Paused Effect in 16-bit color. (1-FB)
+ */
+TEST_F(PausedEffectTest, do16bit_1FB)
+{
+	// Initialize the images.
+	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_16));
+	// Initialize the test framebuffer with the "normal" image.
+	copyToFb16(fb_test1, &img_normal);
+	// Apply the "paused" effect. (1-FB version)
+	PausedEffect::DoPausedEffect(fb_test1);
+	// Compare it to the known good "paused" image.
+	compareFb(fb_paused, fb_test1);
+}
+
+/**
+ * Test the Paused Effect in 16-bit color. (2-FB)
+ */
+TEST_F(PausedEffectTest, do16bit_2FB)
+{
+	// Initialize the images.
+	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_16));
+	// Initialize the test framebuffer with the "normal" image.
+	copyToFb16(fb_test1, &img_normal);
+	// Apply the "paused" effect. (2-FB version)
+	PausedEffect::DoPausedEffect(fb_test2, fb_test1);
+	// Compare it to the known good "paused" image.
+	compareFb(fb_paused, fb_test2);
+}
+
+/**
  * Test the Paused Effect in 32-bit color. (1-FB)
  */
 TEST_F(PausedEffectTest, do32bit_1FB)
 {
 	// Initialize the images.
 	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_32));
-
 	// Initialize the test framebuffer with the "normal" image.
 	copyToFb32(fb_test1, &img_normal);
-
 	// Apply the "paused" effect. (1-FB version)
 	PausedEffect::DoPausedEffect(fb_test1);
-
 	// Compare it to the known good "paused" image.
 	compareFb(fb_paused, fb_test1);
 }
@@ -288,13 +437,10 @@ TEST_F(PausedEffectTest, do32bit_2FB)
 {
 	// Initialize the images.
 	ASSERT_NO_FATAL_FAILURE(init(MdFb::BPP_32));
-
 	// Initialize the test framebuffer with the "normal" image.
 	copyToFb32(fb_test1, &img_normal);
-
 	// Apply the "paused" effect. (2-FB version)
 	PausedEffect::DoPausedEffect(fb_test2, fb_test1);
-
 	// Compare it to the known good "paused" image.
 	compareFb(fb_paused, fb_test2);
 }
