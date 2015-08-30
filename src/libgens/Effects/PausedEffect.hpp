@@ -24,19 +24,7 @@
 #ifndef __LIBGENS_EFFECTS_PAUSEDEFFECT_HPP__
 #define __LIBGENS_EFFECTS_PAUSEDEFFECT_HPP__
 
-// RESTRICT keyword.
-// TODO: Move this to another file.
-#ifndef RESTRICT
-#if defined(__cplusplus) && defined(__GNUC__)
-#define RESTRICT __restrict__
-#elif defined(_MSC_VER)
-#define RESTRICT __restrict
-#elif __STDC_VERSION__ >= 199901L
-#define RESTRICT restrict
-#else
-#define RESTRICT
-#endif
-#endif /* RESTRICT */
+#include "../macros/common.h"
 
 namespace LibGens {
 

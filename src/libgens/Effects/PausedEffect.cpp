@@ -77,8 +77,10 @@ class PausedEffectPrivate
 			unsigned int pxCount);
 
 #ifdef HAVE_MMX
-		static inline void DoPausedEffect_32_MMX(uint32_t *outScreen,
-				const uint32_t *mdScreen, unsigned int pxCount);
+		static inline void DoPausedEffect_32_MMX(
+			uint32_t* RESTRICT outScreen,
+			const uint32_t* RESTRICT mdScreen,
+			unsigned int pxCount);
 #endif
 };
 
@@ -205,8 +207,8 @@ inline void PausedEffectPrivate::T_DoPausedEffect(
  * @param pxCount Pixel count.
  */
 inline void PausedEffectPrivate::DoPausedEffect_32_MMX(
-	uint32_t *outScreen,
-	const uint32_t *mdScreen,
+	uint32_t* RESTRICT outScreen,
+	const uint32_t* RESTRICT mdScreen,
 	unsigned int pxCount)
 {
 	// Grayscale vector: [0.299 0.587 0.114] (ITU-R BT.601)
