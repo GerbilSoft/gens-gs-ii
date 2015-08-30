@@ -89,6 +89,9 @@ void FastBlurPrivate::DoFastBlur_16_MMX(
 #ifdef DO_2FB
 			, [mdScreen] "r" (mdScreen)
 #endif
+			// FIXME: gcc complains that mm? registers are unknown.
+			// May need to compile with -mmmx...
+			//: "mm0", "mm1"
 			);
 
 		// Next group of pixels.
@@ -153,6 +156,9 @@ void FastBlurPrivate::DoFastBlur_32_MMX(
 #ifdef DO_2FB
 			, [mdScreen] "r" (mdScreen)
 #endif
+			// FIXME: gcc complains that mm? registers are unknown.
+			// May need to compile with -mmmx...
+			//: "mm0", "mm1"
 			);
 
 		// Next group of pixels.
