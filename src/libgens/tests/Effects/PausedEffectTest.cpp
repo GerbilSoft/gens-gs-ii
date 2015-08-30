@@ -221,9 +221,10 @@ void PausedEffectTest::copyToFb32(MdFb *fb, const Zomg_Img_Data_t *src)
 	fb->setBpp(MdFb::BPP_32);
 
 	// Copy the image to the MdFb.
+	const uint32_t bytesPerLine = src->w * 4;
 	const uint32_t *pData = (const uint32_t*)src->data;
 	for (int line = 0; line < fb->numLines(); line++) {
-		memcpy(fb->lineBuf32(line), pData, src->pitch);
+		memcpy(fb->lineBuf32(line), pData, bytesPerLine);
 		pData += (src->pitch / 4);
 	}
 }
