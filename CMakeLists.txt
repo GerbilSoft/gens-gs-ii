@@ -82,11 +82,25 @@ ENDIF()
 # Check for platform-specific functionality.
 INCLUDE(cmake/platform.cmake)
 
+IF(CMAKE_CROSSCOMPILING)
+	# Cross-compiling requires a native build due to generated
+	# executables being used in the build process.
+	# Reference: http://www.cmake.org/Wiki/CMake_Cross_Compiling
+	SET(IMPORT_EXECUTABLES "IMPORTFILE-NOTFOUND"
+		CACHE PATH "Point this to the root directory of a native build.")
+	IF(NOT IMPORT_EXECUTABLES)
+		MESSAGE(FATAL_ERROR "IMPORT_EXECUTABLES is not set.\nPoint it to the root directory of a native build.")
+	ENDIF(NOT IMPORT_EXECUTABLES)
+	IF(NOT EXISTS "${IMPORT_EXECUTABLES}/")
+		MESSAGE(FATAL_ERROR "IMPORT_EXECUTABLES is not set to a valid directory.\nPoint it to the root directory of a native build.")
+	ENDIF(NOT EXISTS "${IMPORT_EXECUTABLES}/")
+ENDIF(CMAKE_CROSSCOMPILING)
+
 # Check for required libraries.
 INCLUDE(CheckZLIB)
 INCLUDE(CheckPNG)
 INCLUDE(CheckLZMA)
-INCLUDE(CheckOpenGL)
+#INCLUDE(CheckOpenGL)
 INCLUDE(CheckPopt)
 
 # Project subdirectories.
