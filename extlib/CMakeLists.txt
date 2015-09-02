@@ -5,18 +5,27 @@ cmake_minimum_required(VERSION 2.6.0)
 
 # Assembly optimizations.
 # TODO: Test on all archs and fix Z_PREFIX issues.
-# FIXME: Building 32-bit on 64-bit Linux results in CMAKE_SYSTEM_PROCESSOR == x86_64.
+# TODO: Add more assembly files from contrib/ besides the
+# default ones that were listed in zlib's CMakeLists.txt.
 # TODO: If MASM, only enable on cmake-2.6.3+
-# TODO: Can't use MASM because of conflicts with NASM in cmake.
 # TODO: If nasm/yasm, only enable on cmake-2.8.4+
-# TODO: Symbol redefinitions.
-IF(0)
-IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i.|x)86\$")
-	SET(ASM686 "ON")
-ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^x86_64\$")
-	SET(AMD64 "ON")
-ENDIF()
-ENDIF()
+# cmake_minimum_required() statements have been added to zlib's
+# CMakeLists.txt to prevent errors, but ideally, we should be
+# able to simply disable asm on older versions.
+STRING(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" arch)
+IF(arch MATCHES "^(i.|x)86$|^x86_64$|^amd64$")
+	# i386/amd64. Check sizeof(void*) for the actual architecture,
+	# since building 32-bit on 64-bit isn't considered "cross-compiling",
+	# so CMAKE_SYSTEM_PROCESSOR might not be accurate.
+	# NOTE: CMake sometimes leaves this blank for MSVC builds,
+	# so check for 64-bit first so we can default to 32-bit.
+	IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
+		SET(AMD64 "ON")
+	ELSE()
+		SET(ASM686 "ON")
+	ENDIF()
+ENDIF(arch MATCHES "^(i.|x)86$|^x86_64$|^amd64$")
+UNSET(arch)
 
 # Don't install any of these libraries.
 SET(OLD_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
