@@ -230,13 +230,13 @@ static int getArgvAtoW(int *p_argcW, wchar_t **p_argvW[], wchar_t **p_envpW[])
 {
 	_startupinfo StartInfo;
 	// __getmainargs() returns.
-	int argcA;
-	char **argvA;
-	char **envpA;
+	int argcA = 0;
+	char **argvA = NULL;
+	char **envpA = NULL;
 	// Temporary variables.
 	int ret;
 	// UTF-16 data.
-	int argcW;
+	int argcW = 0;
 	wchar_t **argvW = NULL;
 	wchar_t **envpW = NULL;
 
@@ -469,13 +469,13 @@ out:
 int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 {
 	// __wgetmainargs() returns.
-	int argcW;
+	int argcW = 0;
 	wchar_t **argvW = NULL;
 	wchar_t **envpW = NULL;
 	// Temporary variables.
 	int ret = -1;
 	// UTF-8 data.
-	int argcU;
+	int argcU = 0;
 	char **argvU = NULL;
 	char **envpU = NULL;
 	// Is the system Unicode?
