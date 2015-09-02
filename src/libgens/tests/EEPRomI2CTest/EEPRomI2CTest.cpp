@@ -249,9 +249,9 @@ int main(int argc, char *argv[])
 	fprintf(stderr, "LibGens test suite: EEPRomI2C tests.\n");
 	LibGens::Init();
 	// Initialize the random number seed.
-	unsigned int seed = time(nullptr);
+	unsigned int seed = (unsigned int)time(nullptr);
 	srand(seed);
-	fprintf(stderr, "Random number seed is: %08X\n\n", seed);
+	fprintf(stderr, "Random number seed is: 0x%08X\n\n", seed);
 	fflush(nullptr);
 
 	::testing::InitGoogleTest(&argc, argv);
