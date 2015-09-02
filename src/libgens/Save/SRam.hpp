@@ -131,12 +131,12 @@ class SRam
 		// SRam data.
 		uint8_t m_sram[64*1024];
 		// These values should be 0 or 1.
-		uint8_t m_on;		// Is SRam enabled?
-		uint8_t m_write;	// Is SRam writable?
-		
+		bool m_on;		// Is SRam enabled?
+		bool m_write;		// Is SRam writable?
+
 		uint32_t m_start;	// SRam starting address.
 		uint32_t m_end;		// SRam ending address.
-		
+
 		// Dirty flag.
 		bool m_dirty;
 		int m_framesElapsed;
@@ -146,32 +146,20 @@ class SRam
 
 inline bool SRam::isOn(void) const
 {
-	assert(m_on <= 1);
-	return (bool)m_on;
+	return m_on;
 }
 inline void SRam::setOn(bool on)
 {
-	m_on = (uint8_t)on;
-	// NOTE: gcc complains if we use this
-	// assertion on 'on', since 'on' is
-	// declared as bool and thus should only
-	// ever be 0 or 1.
-	assert(m_on <= 1);
+	m_on = on;
 }
 
 inline bool SRam::isWrite(void) const
 {
-	assert(m_write <= 1);
-	return (bool)m_write;
+	return m_write;
 }
 inline void SRam::setWrite(bool write)
 {
-	m_write = (uint8_t)write;
-	// NOTE: gcc complains if we use this
-	// assertion on 'write', since 'write' is
-	// declared as bool and thus should only
-	// ever be 0 or 1.
-	assert(m_write <= 1);
+	m_write = write;
 }
 
 // TODO: Mask off the high byte in addresses?
@@ -193,8 +181,7 @@ inline void SRam::setEnd(uint32_t end)
  */
 inline bool SRam::canRead(void) const
 {
-	assert(m_on <= 1);
-	return (m_on != 0);
+	return m_on;
 }
 
 /**
@@ -203,8 +190,7 @@ inline bool SRam::canRead(void) const
  */
 inline bool SRam::canWrite(void) const
 {
-	assert(m_on <= 1 && m_write <= 1);
-	return (m_on != 0 && m_write != 0);
+	return (m_on && m_write);
 }
 
 /**
@@ -213,7 +199,7 @@ inline bool SRam::canWrite(void) const
  */
 inline void SRam::writeCtrl(uint8_t data)
 {
-	m_on = (data & 1);
+	m_on = !!(data & 1);
 	m_write = !(data & 2);
 }
 
@@ -225,7 +211,13 @@ inline void SRam::writeCtrl(uint8_t data)
  * TODO: Rename to dbg_readCtrl()?
  */
 inline uint8_t SRam::zomgReadCtrl(void) const
-	{ return (m_on | (!m_write << 1)); }
+{
+	// TODO: Optimize this?
+	uint8_t ret = 0;
+	if (m_on)	ret |= 1;
+	if (!m_write)	ret |= 2;
+	return ret;
+}
 
 /**
  * Check if a given address is in the SRam's range.
