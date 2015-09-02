@@ -382,6 +382,7 @@ ADD_EXECUTABLE(gens-qt4
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(gens-qt4)
 TARGET_LINK_LIBRARIES(gens-qt4 compat gens ${ZLIB_LIBRARY} genscd genskeys)
+DO_SPLIT_DEBUG(gens-qt4)
 ADD_DEPENDENCIES(gens-qt4 translations_target)
 
 # Additional libraries.
@@ -400,12 +401,6 @@ TARGET_LINK_LIBRARIES(gens-qt4 ${OPENGL_gl_LIBRARY})
 IF(HAVE_PORTAUDIO)
 	TARGET_LINK_LIBRARIES(gens-qt4 ${PORTAUDIO_LIBRARY})
 ENDIF(HAVE_PORTAUDIO)
-
-# Split debug information.
-IF(SPLIT_DEBUG)
-	INCLUDE(SplitDebugInformation)
-	SPLIT_DEBUG_INFORMATION(gens-qt4)
-ENDIF(SPLIT_DEBUG)
 
 # Compress the EXE.
 IF(COMPRESS_EXE)

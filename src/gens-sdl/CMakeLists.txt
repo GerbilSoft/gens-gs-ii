@@ -79,20 +79,13 @@ ADD_EXECUTABLE(gens-sdl
 	${gens-sdl_OSD_H}
 	)
 TARGET_LINK_LIBRARIES(gens-sdl compat gens genskeys zomg)
+DO_SPLIT_DEBUG(gens-sdl)
 
 # Additional libraries.
 TARGET_LINK_LIBRARIES(gens-sdl
 	${SDL2_LIBRARY}
 	${OPENGL_gl_LIBRARY}
 	)
-
-# Split debug information.
-INCLUDE(SetMSVCDebugPath)
-SET_MSVC_DEBUG_PATH(gens-sdl)
-IF(SPLIT_DEBUG)
-	INCLUDE(SplitDebugInformation)
-	SPLIT_DEBUG_INFORMATION(gens-sdl)
-ENDIF(SPLIT_DEBUG)
 
 # Compress the EXE.
 IF(COMPRESS_EXE)
