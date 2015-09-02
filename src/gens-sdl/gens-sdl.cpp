@@ -91,6 +91,7 @@ using LibZomg::Zomg;
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
+#include <cerrno>
 
 // C++ includes.
 #include <string>
