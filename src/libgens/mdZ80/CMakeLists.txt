@@ -4,13 +4,21 @@ PROJECT(mdZ80)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.4)
 
 # Sources.
-SET(SRCS
-	mdZ80_x86.asm
+SET(mdZ80_SRCS
 	mdZ80.c
 	mdZ80_reg.c
 	mdZ80_DAA.c
 	mdZ80_INC_DEC.c
 	)
+
+# i386 assembler sources.
+SET(mdZ80_ASM_NASM_SRCS
+	mdZ80_x86.asm
+	)
+
+# Explicitly specify ASM_NASM as the source language.
+SET_SOURCE_FILES_PROPERTIES(${mdZ80_ASM_NASM_SRCS}
+	PROPERTIES LANGUAGE ASM_NASM)
 
 ######################
 # Build the library. #
@@ -32,4 +40,7 @@ IF(MSVC)
 ENDIF(MSVC)
 
 ENABLE_LANGUAGE(ASM_NASM)
-ADD_LIBRARY(mdZ80 STATIC ${SRCS})
+ADD_LIBRARY(mdZ80 STATIC
+	${mdZ80_SRCS}
+	${mdZ80_ASM_NASM_SRCS}
+	)
