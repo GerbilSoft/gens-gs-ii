@@ -38,6 +38,14 @@
 
 /* Some versions of gcc implement parts of C++11, but not all of it. */
 
+/* For gcc-4.7+, make sure we're compiling with -std=c++11 or -std=gnu++11. */
+/* Older versions didn't set the correct value for __cplusplus. */
+#if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))
+#if __cplusplus < 201103L
+#error Please compile with -std=c++11 or -std=gnu++11.
+#endif /* __cplusplus */
+#endif /* __GNUC__ */
+
 /* Explicit virtual override: Added in gcc-4.7. */
 #if (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 7))
 #define CXX11_COMPAT_OVERRIDE
