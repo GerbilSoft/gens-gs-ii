@@ -2,7 +2,7 @@
  * gens-sdl: Gens/GS II basic SDL frontend.                                *
  * GLShaderFastBlur.cpp: OpenGL Shader. (Fast Blur)                        *
  *                                                                         *
- * Copyright (c) 2010-2011 by David Korth.                                 *
+ * Copyright (c) 2010-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -23,9 +23,6 @@
 
 // LOG_MSG() subsystem.
 #include "libgens/macros/log_msg.h"
-
-// C includes.
-#include <string.h>
 
 namespace GensSdl {
 
@@ -131,7 +128,7 @@ int GLShaderFastBlur::enable(void)
 		// TODO: POSIX error code?
 		return -1;
 	}
-	
+
 	// Enable the shader.
 	// TODO: Get texture width for the parameter!
 	glEnable(GL_FRAGMENT_PROGRAM_ARB);
