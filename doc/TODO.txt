@@ -20,7 +20,6 @@ Infrastructure:
   more than just "No SRAM". (e.g. different/no checksum algorithms)
 - localtime_r():
   - Call tzset() before using this function. (manpage says it may be necessary)
-  - Non-Windows wrapper should return _Tm, not ret.
 
 Sega Pico:
 - Add pen support.
