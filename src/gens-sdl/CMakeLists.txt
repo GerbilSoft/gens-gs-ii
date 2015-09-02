@@ -72,12 +72,26 @@ SET(gens-sdl_OSD_H
 	OsdFont_C64.hpp
 	)
 
+# Shader sources.
+SET(gens-sdl_SHADER_SRCS
+	GLShader.cpp
+	GLShaderFastBlur.cpp
+	)
+
+# Shader headers.
+SET(gens-sdl_SHADER_H
+	GLShader.hpp
+	GLShaderFastBlur.hpp
+	)
+
 # Main target.
 ADD_EXECUTABLE(gens-sdl
 	${gens-sdl_SRCS}
 	${gens-sdl_H}
 	${gens-sdl_OSD_SRCS}
 	${gens-sdl_OSD_H}
+	${gens-sdl_SHADER_SRCS}
+	${gens-sdl_SHADER_H}
 	)
 TARGET_LINK_LIBRARIES(gens-sdl compat gens genskeys zomg)
 DO_SPLIT_DEBUG(gens-sdl)
