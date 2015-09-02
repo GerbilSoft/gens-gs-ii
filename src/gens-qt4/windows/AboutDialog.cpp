@@ -386,7 +386,7 @@ QString AboutDialogPrivate::GetDebugInfo(void)
 	const QString alwaysSlowFlag =
 		QLatin1String("<span style='color: red; font-weight: bold'>%1</span>");
 
-#if defined(__i386__) || defined(__amd64__) || \
+#if defined(__i386__) || defined(__amd64__) || defined(__x86_64__) || \
     defined(_M_IX86) || defined(_M_X64)
 	struct CpuFlagInfo {
 		const char name[12];
@@ -451,7 +451,7 @@ QString AboutDialogPrivate::GetDebugInfo(void)
 #else
 	//: Used to indicate no special CPU features were found.
 	sDebugInfo += AboutDialog::tr("(none)");
-#endif /* defined(__i386__) || defined(__amd64__) */
+#endif /* defined(__i386__) || defined(__amd64__) || defined(__x86_64__) */
 	sDebugInfo += sLineBreak;
 
 	LibGens::Timing timing;

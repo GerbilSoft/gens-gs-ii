@@ -72,7 +72,7 @@ namespace LibGens {
  * Unix: Filename of "rar" or "unrar".
  * Windows: Filename of "unrar.dll".
  */
-#if defined(__amd64__)
+#if defined(__amd64__) || defined(__x86_64__)
 string DcRar::ms_RarBinary = "unrar64.dll";
 #else
 string DcRar::ms_RarBinary = "unrar.dll";

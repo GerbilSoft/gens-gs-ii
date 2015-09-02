@@ -24,7 +24,7 @@
 #ifndef __LIBGENS_UTIL_CPUFLAGS_X86_H__
 #define __LIBGENS_UTIL_CPUFLAGS_X86_H__
 
-#if defined(__i386__) || defined(__amd64__) || \
+#if defined(__i386__) || defined(__amd64__) || defined(__x86_64__) || \
     defined(_M_IX86) || defined(_M_X64)
 // IA32 CPU flags
 // References:
@@ -196,6 +196,6 @@ static FORCE_INLINE_DEBUG int is_cpuid_supported(void)
 #endif	
 }
 
-#endif /* defined(__i386__) || defined(__amd64__) */
+#endif /* defined(__i386__) || defined(__amd64__) || defined(__x86_64__) */
 
 #endif /* __LIBGENS_UTIL_CPUFLAGS_X86_H__ */

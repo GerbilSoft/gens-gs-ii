@@ -25,7 +25,7 @@
 #error PausedEffect.x86.inc.cpp should only be included by PausedEffect.cpp.
 #endif
 
-#if !defined(__GNUC__) || !(defined(__i386__) || defined(__amd64__))
+#if !defined(__GNUC__) || !(defined(__i386__) || defined(__amd64__) || defined(__x86_64__))
 #error PausedEffect.x86.inc.cpp should only be compiled on i386/amd64 with gcc.
 #endif
 

@@ -38,7 +38,7 @@
 #include "EmuContext/EmuContext.hpp"
 
 #if defined(__APPLE__) && defined(__MACH__) && \
-    (defined(__i386__) || defined(__amd64__))
+    (defined(__i386__) || defined(__amd64__) || defined(__x86_64__))
 // Mac OS X requires 16-byte aligned stacks.
 // Otherwise, the program will randomly crash in
 // __dyld_misaligned_stack_error().

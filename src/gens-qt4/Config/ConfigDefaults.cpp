@@ -77,7 +77,7 @@ const ConfigDefaults::DefaultSetting ConfigDefaults::DefaultSettings[] =
 	
 	/** External programs. **/
 #ifdef Q_OS_WIN32
-#ifdef __amd64__
+#if defined(__amd64__) || defined(__x86_64__)
 	{"External_Programs/UnRAR", "UnRAR64.dll", 0, 0,	DefaultSetting::VT_NONE, 0, 0},
 #else
 	{"External_Programs/UnRAR", "UnRAR.dll", 0, 0,		DefaultSetting::VT_NONE, 0, 0},

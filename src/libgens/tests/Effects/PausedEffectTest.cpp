@@ -154,7 +154,7 @@ INSTANTIATE_TEST_CASE_P(PausedEffectTest_NoFlags, PausedEffectTest,
 
 // NOTE: PausedEffect.cpp only implements MMX/SSE2 using GNU assembler.
 #if defined(__GNUC__) && \
-    (defined(__i386__) || defined(__amd64__))
+    (defined(__i386__) || defined(__amd64__) || defined(__x86_64__))
 INSTANTIATE_TEST_CASE_P(PausedEffectTest_MMX, PausedEffectTest,
 	::testing::Values(EffectTest_flags(MDP_CPUFLAG_X86_MMX, 0)
 ));

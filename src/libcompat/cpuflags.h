@@ -42,7 +42,7 @@ extern "C" {
 #define __MDP_CPUFLAGS_H
 
 /* CPU flags (IA32/x86_64) */
-#if defined(__i386__) || defined(__amd64__) || \
+#if defined(__i386__) || defined(__amd64__) || defined(__x86_64__) || \
     defined(_M_IX86) || defined(_M_X64)
 
 /*! BEGIN: MDP v1.0 CPU flags. !*/
@@ -79,7 +79,7 @@ extern "C" {
 #define MDP_CPUFLAG_X86_AVXSLOW		((uint32_t)(1 << 28))
 /*! END: MDP v1.x CPU flags. !*/
 
-#endif /* defined(__i386__) || defined(__amd64__) */
+#endif /* defined(__i386__) || defined(__amd64__) || defined(__x86_64__) */
 
 #endif /* __MDP_CPUFLAGS_H */
 

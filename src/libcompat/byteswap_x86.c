@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#if !defined(__i386__) && !defined(__amd64__) && \
+#if !defined(__i386__) && !defined(__amd64__) && !defined(__x86_64__) && \
     !defined(_M_IX86) && !defined(_M_X64)
 #error Do not compile byteswap_x86.c on non-x86 CPUs!
 #endif
