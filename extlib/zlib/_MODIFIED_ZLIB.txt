@@ -18,4 +18,7 @@ The following changes have been made to the original:
 
 - contrib/ has been stripped of everything but asm-optimized functions.
 
+- 64-bit assembly-optimized routines now check for __x86_64__ in addition
+  to __amd64__ for compatibility with certain compilers, e.g. icc.
+
 To obtain the original zlib-1.2.8, visit http://www.zlib.net
