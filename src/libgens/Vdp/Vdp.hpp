@@ -246,8 +246,8 @@ class Vdp
 		int dbg_setAddress(uint32_t address);
 		int dbg_getCtrlLatch(int *latch) const;
 		int dbg_setCtrlLatch(int latch);
-		int dbg_getTestReg(uint8_t *out) const;
-		int dbg_setTestReg(uint8_t val);
+		int dbg_getTestReg(uint16_t *out) const;
+		int dbg_setTestReg(uint16_t val);
 
 		// TODO: Better VRAM writing functions.
 		int dbg_writeVRam_16(uint32_t address, const uint16_t *vram, int length);

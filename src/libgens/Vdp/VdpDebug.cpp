@@ -139,7 +139,7 @@ int Vdp::dbg_setCtrlLatch(int latch)
  * @param out Buffer for test register value.
  * @return MDP error code.
  */
-int Vdp::dbg_getTestReg(uint8_t *out) const
+int Vdp::dbg_getTestReg(uint16_t *out) const
 {
 	*out = d->testReg;
 	return 0;
@@ -150,7 +150,7 @@ int Vdp::dbg_getTestReg(uint8_t *out) const
  * @param val Test register value.
  * @return MDP error code.
  */
-int Vdp::dbg_setTestReg(uint8_t val)
+int Vdp::dbg_setTestReg(uint16_t val)
 {
 	// TODO: Additional processing?
 	d->testReg = val;
