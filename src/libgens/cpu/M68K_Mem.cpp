@@ -1418,10 +1418,8 @@ inline void M68K_Mem::M68K_Write_Word_VDP(uint32_t address, uint16_t data)
 			vdp->writeCtrlMD(data);
 			break;
 		case 0x10: case 0x14:
-			// PSG control port. (Odd addresses only)
-			if (address & 1) {
-				SoundMgr::ms_Psg.write(data);
-			}
+			// PSG control port.
+			SoundMgr::ms_Psg.write(data & 0xFF);
 			break;
 		case 0x18:
 			// Unused write address.
