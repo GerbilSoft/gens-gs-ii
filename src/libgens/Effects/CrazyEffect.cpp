@@ -25,55 +25,73 @@
 #include "Util/MdFb.hpp"
 
 // C includes.
-#include <math.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <string.h>
 
-// Color component masks for 32-bit color.
-#define CRAZY_MASK32_R 0x00F80000
-#define CRAZY_MASK32_G 0x0000F800
-#define CRAZY_MASK32_B 0x000000F8
-#define CRAZY_ADD32_R  0x00080000
-#define CRAZY_ADD32_G  0x00000800
-#define CRAZY_ADD32_B  0x00000008
+// C includes. (C++ namespace)
+#include <cmath>
+#include <cstring>
+#include <cstdio>
 
 namespace LibGens {
 
-CrazyEffect::CrazyEffect()
+// TODO: Private class.
+
+template<typename pixel, uint8_t add_shift>
+static inline pixel adj_color(pixel px, pixel mask)
 {
-	// Initialize the color mask to CM_WHITE.
-	m_colorMask = CM_WHITE;
+	pixel add = 1 << add_shift;
+	px &= mask;
+	if ((rand() & 0x7FFF) > 0x2C00) {
+		if ((mask - add) <= px) {
+			px = mask;
+		} else {
+			px += add;
+		}
+	} else {
+		if (add >= px) {
+			px = 0;
+		} else {
+			px -= add;
+		}
+	}
+	return px;
 }
 
 /**
  * Do the "Crazy" effect.
- * @param screen MD screen.
+ * @param pixel     [in]  Type of pixel.
+ * @param RBits     [in]  Number of bits for Red.
+ * @param GBits     [in]  Number of bits for Green.
+ * @param BBits     [in]  Number of bits for Blue.
+ * @param outScreen [out] Destination screen.
  */
-template<typename pixel, pixel Rmask, pixel Gmask, pixel Bmask,
-		  pixel Radd, pixel Gadd, pixel Badd>
-inline void CrazyEffect::T_doCrazyEffect(pixel *screen)
+template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
+inline void CrazyEffect::T_doCrazyEffect(pixel *outScreen)
 {
 	if (m_colorMask == CM_BLACK) {
 		// Intro effect color is black.
 		// Simply clear the screen.
-		memset(screen, 0x00, 336*240*sizeof(pixel));
+		memset(outScreen, 0x00, 336*240*sizeof(pixel));
 		return;
 	}
 
+	const pixel Rmask = (0x1F << (RBits-5)) << (GBits + BBits);
+	const pixel Gmask = (0x1F << (GBits-5)) << BBits;
+	const pixel Bmask = (0x1F << (BBits-5));
 	const pixel RBmask = (Rmask | Bmask);
 	pixel r = 0, g = 0, b = 0;
 	pixel RB, G;
 
-	pixel *pix = &screen[336*240 - 1];
+	pixel *pix = &outScreen[336*240 - 1];
 	pixel *prev_l = pix - 336;
 	pixel *prev_p = pix - 1;
 
 	// TODO: Unroll the last-line/last-pixel code.
 	for (unsigned int i = 336*240; i != 0; i--) {
 		pixel pl, pp;
-		pl = (prev_l >= screen ? *prev_l : 0);
-		pp = (prev_p >= screen ? *prev_p : 0);
+		pl = (prev_l >= outScreen ? *prev_l : 0);
+		pp = (prev_p >= outScreen ? *prev_p : 0);
 
 		// Separate RB and G components.
 		RB = ((pl & RBmask) + (pp & RBmask)) >> 1;
@@ -81,52 +99,18 @@ inline void CrazyEffect::T_doCrazyEffect(pixel *screen)
 
 		if (m_colorMask & CM_RED) {
 			// Red channel.
-			r = RB & Rmask;
-			if ((rand() & 0x7FFF) > 0x2C00) {
-				if ((Rmask - Radd) <= r)
-					r = Rmask;
-				else
-					r += Radd;
-			} else {
-				if (Radd >= r)
-					r = 0;
-				else
-					r -= Radd;
-			}
+			r = adj_color<pixel, (RBits-5)+GBits+BBits>(RB, Rmask);
 		}
-
 		if (m_colorMask & CM_GREEN) {
 			// Green channel.
-			g = G & Gmask;
-			if ((rand() & 0x7FFF) > 0x2C00) {
-				if ((Gmask - Gadd) <= g)
-					g = Gmask;
-				else
-					g += Gadd;
-			} else {
-				if (Gadd >= g)
-					g = 0;
-				else
-					g -= Gadd;
-			}
+			g = adj_color<pixel, (GBits-5)+BBits>(G, Gmask);
 		}
-
 		if (m_colorMask & CM_BLUE) {
 			// Blue channel.
-			b = RB & Bmask;
-			if ((rand() & 0x7FFF) > 0x2C00) {
-				if ((Bmask - Badd) <= b)
-					b = Bmask;
-				else
-					b += Badd;
-			} else {
-				if (Badd >= b)
-					b = 0;
-				else
-					b -= Badd;
-			}
+			b = adj_color<pixel, (BBits-5)>(RB, Bmask);
 		}
 
+		// Combine the color components.
 		*pix = r | g | b;
 
 		// Next pixels.
@@ -135,6 +119,12 @@ inline void CrazyEffect::T_doCrazyEffect(pixel *screen)
 		pix--;
 	}
 }
+
+/** CrazyEffect **/
+
+CrazyEffect::CrazyEffect()
+	: m_colorMask(CM_WHITE)
+{ }
 
 /**
  * Run the "Crazy" effect.
@@ -145,20 +135,16 @@ void CrazyEffect::run(MdFb *fb)
 	// FIXME: Add a bpp value to fb.
 	switch (2 /*fb.bpp()*/) {
 		case 0: /*VdpPalette::BPP_15:*/
-			T_doCrazyEffect<uint16_t, 0x7C00, 0x03E0, 0x001F,
-					0x0400, 0x0020, 0x0001>(fb->fb16());
+			T_doCrazyEffect<uint16_t, 5, 5, 5>(fb->fb16());
 			break;
 
 		case 1: /*VdpPalette::BPP_16:*/
-			T_doCrazyEffect<uint16_t, 0xF800, 0x07C0, 0x001F,
-					0x0800, 0x0040, 0x0001>(fb->fb16());
+			T_doCrazyEffect<uint16_t, 5, 6, 5>(fb->fb16());
 			break;
 
 		case 2: /*VdpPalette::BPP_32:*/
 		default:
-			T_doCrazyEffect<uint32_t, CRAZY_MASK32_R, CRAZY_MASK32_G, CRAZY_MASK32_B,
-					CRAZY_ADD32_R, CRAZY_ADD32_G, CRAZY_ADD32_B>
-					(fb->fb32());
+			T_doCrazyEffect<uint32_t, 8, 8, 8>(fb->fb32());
 			break;
 	}
 }

@@ -30,7 +30,6 @@
 namespace LibGens {
 
 class MdFb;
-
 class CrazyEffect
 {
 	public:
@@ -48,8 +47,8 @@ class CrazyEffect
 		};
 
 		// Color mask property.
-		ColorMask colorMask(void);
-		void setColorMask(ColorMask newColorMask);
+		inline ColorMask colorMask(void) const;
+		inline void setColorMask(ColorMask newColorMask);
 
 		/**
 		 * Run the "Crazy Effect" on the MD screen.
@@ -59,15 +58,22 @@ class CrazyEffect
 		void run(MdFb *fb, ColorMask newColorMask);
 
 	private:
-		template<typename pixel, pixel Rmask, pixel Gmask, pixel Bmask,
-				  pixel Radd, pixel Gadd, pixel Badd>
-		void T_doCrazyEffect(pixel *screen);
+		/**
+		 * Do the "Crazy" effect.
+		 * @param pixel     [in]  Type of pixel.
+		 * @param RBits     [in]  Number of bits for Red.
+		 * @param GBits     [in]  Number of bits for Green.
+		 * @param BBits     [in]  Number of bits for Blue.
+		 * @param outScreen [out] Destination screen.
+		 */
+		template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
+		inline void T_doCrazyEffect(pixel *outScreen);
 
 		// Color mask.
 		ColorMask m_colorMask;
 };
 
-inline CrazyEffect::ColorMask CrazyEffect::colorMask(void)
+inline CrazyEffect::ColorMask CrazyEffect::colorMask(void) const
 	{ return m_colorMask; }
 
 inline void CrazyEffect::setColorMask(CrazyEffect::ColorMask newColorMask)
