@@ -283,10 +283,10 @@ void SdlHandler::end_audio(void)
 	m_audioDevice = 0;
 
 	// Free the buffers.
-	free(m_audioBuffer);
+	delete m_audioBuffer;
 	m_audioBuffer = nullptr;
 	m_sampleSize = 0;
-	free(m_segBuffer);
+	aligned_free(m_segBuffer);
 	m_segBuffer = nullptr;
 	m_segBufferLen = 0;
 	m_segBufferSamples = 0;
