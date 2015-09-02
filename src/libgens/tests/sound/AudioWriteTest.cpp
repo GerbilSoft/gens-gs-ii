@@ -158,7 +158,8 @@ INSTANTIATE_TEST_CASE_P(AudioWriteTest_NoFlags, AudioWriteTest,
 ));
 
 // NOTE: SoundMgr only implements MMX/SSE2 using GNU assembler.
-#if defined(__i386__) || defined(__amd64__)
+#if defined(__GNUC__) && \
+    (defined(__i386__) || defined(__amd64__))
 INSTANTIATE_TEST_CASE_P(AudioWriteTest_MMX, AudioWriteTest,
 	::testing::Values(AudioWriteTest_flags(MDP_CPUFLAG_X86_MMX, 0)
 ));
