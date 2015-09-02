@@ -30,6 +30,24 @@ IF(ENABLE_LTO)
 	SET(GENS_SHARED_LINKER_FLAGS_COMMON "${GENS_SHARED_LINKER_FLAGS_COMMON} -LTCG")
 ENDIF(ENABLE_LTO)
 
+# Check if CMAKE_SIZEOF_VOID_P is set correctly.
+IF(NOT CMAKE_SIZEOF_VOID_P)
+	# CMAKE_SIZEOF_VOID_P isn't set.
+	# Set it based on CMAKE_SYSTEM_PROCESSOR.
+	# FIXME: This won't work if we're cross-compiling, e.g. using
+	# the x86_amd64 or amd64_x86 toolchains.
+	STRING(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" arch)
+	IF(arch MATCHES "^x86_64$|^amd64$|^ia64$")
+		SET(CMAKE_SIZEOF_VOID_P 8)
+	ELSEIF(arch MATCHES "^(i.|x)86$")
+		SET(CMAKE_SIZEOF_VOID_P 4)
+	ELSE()
+		# Assume other CPUs are 32-bit.
+		SET(CMAKE_SIZEOF_VOID_P 4)
+	ENDIF()
+	UNSET(arch)
+ENDIF(NOT CMAKE_SIZEOF_VOID_P)
+
 # Debug/release flags.
 SET(GENS_C_FLAGS_DEBUG			"-Zi")
 SET(GENS_CXX_FLAGS_DEBUG		"-Zi")
