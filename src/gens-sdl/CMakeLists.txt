@@ -24,6 +24,7 @@ INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 # Include the OpenGL directory.
 # TODO: FIND_PACKAGE(OpenGL) here even though it's in the root CMakeLists.txt?
 INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${GLEW_INCLUDE_DIR})
 
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.gens-sdl.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.gens-sdl.h")
@@ -85,7 +86,11 @@ DO_SPLIT_DEBUG(gens-sdl)
 TARGET_LINK_LIBRARIES(gens-sdl
 	${SDL2_LIBRARY}
 	${OPENGL_gl_LIBRARY}
+	${GLEW_LIBRARY}
 	)
+
+# Set the compile definitions.
+ADD_DEFINITIONS(${GLEW_DEFINITIONS})
 
 # Compress the EXE.
 IF(COMPRESS_EXE)

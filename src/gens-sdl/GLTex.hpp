@@ -25,11 +25,8 @@
 // C includes. (C++ namespace)
 #include <climits>
 
-// OpenGL
-#ifdef _WIN32
-#include <windows.h>
-#endif
-#include <GL/gl.h>
+// OpenGL (GLEW)
+#include <GL/glew.h>
 
 namespace GensSdl {
 
@@ -115,6 +112,7 @@ class GLTex
 		inline double ratioH(void) const;
 
 	protected:
+		// TODO: Move to GLTexPrivate?
 		GLenum intformat;	// Internal format. (GL_RGB, GL_RGBA)
 		GLenum format;		// Texture format. (GL_RGB, GL_BGRA)
 		GLenum type;		// Texture type. (GL_UNSIGNED_BYTE, etc.)
@@ -122,6 +120,7 @@ class GLTex
 	public:
 		// TODO: Accessors.
 		// TODO: Size type?
+		// TODO: Move to GLTexPrivate?
 		int texW, texH;		// Texture size. (1x == 512x256 for pow2 textures.)
 		int texVisW, texVisH;	// Texture visible size. (1x == 320x240)
 

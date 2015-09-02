@@ -34,11 +34,8 @@ using LibGens::FastBlur;
 #include <climits>
 #include <cstdio>
 
-// OpenGL
-#ifdef _WIN32
-#include <windows.h>
-#endif
-#include <GL/gl.h>
+// OpenGL (GLEW)
+#include <GL/glew.h>
 
 // Onscreen Display.
 #include "OsdGL.hpp"
@@ -139,6 +136,21 @@ GLBackendPrivate::~GLBackendPrivate()
 void GLBackendPrivate::reallocTexture(void)
 {
 	// TODO: makeCurrent()?
+
+	// Initialize GLEW.
+	// TODO: Initialize this in the main program, not here?
+	// TODO: Multi-context?
+	static bool glew_initialized = false;
+	if (!glew_initialized) {
+		int ret = glewInit();
+		if (ret != GLEW_OK) {
+			// TODO: Error handling.
+			// Return an error code?
+			fprintf(stderr, "GLEW initialization failed: %d\n", ret);
+			//return ret;
+		}
+		glew_initialized = true;
+	}
 
 	MdFb *fb = q->m_fb;
 	if (!fb) {
