@@ -17,6 +17,8 @@ list (APPEND CMAKE_MODULE_PATH
 INCLUDE(CheckLibraryExists)
 
 # Split Debug macro.
+# Also sets the image version for Windows builds.
+INCLUDE(Win32ImageVersionLinkerFlags)
 MACRO(DO_SPLIT_DEBUG _TARGET)
 	# Split debug information.
 	INCLUDE(SetMSVCDebugPath)
@@ -25,6 +27,11 @@ MACRO(DO_SPLIT_DEBUG _TARGET)
 		INCLUDE(SplitDebugInformation)
 		SPLIT_DEBUG_INFORMATION(${_TARGET})
 	ENDIF(SPLIT_DEBUG)
+	# Set image version.
+	# Subprojects can override ${VERSION_MAJOR} and ${VERSION_MINOR}.
+	# FIXME: If minor version is e.g. "3", Windows interprets it as "03",
+	# so "1.3" will actually be "1.03".
+	WIN32_IMAGE_VERSION_LINKER_FLAGS(${VERSION_MAJOR} ${VERSION_MINOR})
 ENDMACRO(DO_SPLIT_DEBUG)
 
 # Testing functions.
