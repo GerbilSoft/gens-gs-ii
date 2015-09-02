@@ -126,11 +126,7 @@ GLBackendPrivate::GLBackendPrivate(GLBackend *q)
 	, prevStretchMode(VBackend::STRETCH_MAX)
 	, prevAspectRatioConstraint(true)
 	, osd(new OsdGL())
-{
-	// Clear GLTex.
-	// TODO: Make it a regular class?
-	memset(&tex, 0, sizeof(tex));
-}
+{ }
 
 GLBackendPrivate::~GLBackendPrivate()
 {
