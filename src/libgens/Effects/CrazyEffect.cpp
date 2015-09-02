@@ -37,12 +37,49 @@ namespace LibGens {
 
 // TODO: Private class.
 
+/**
+ * Get a random number in the range [0,0x7FFF].
+ * This uses the internal random number
+ * cache if it's available.
+ * @return Random number.
+ */
+unsigned int CrazyEffect::getRand(void)
+{
+	// TODO: Faster rand() implementation, e.g. Mersenne Twister?
+	unsigned int ret;
+#if RAND_MAX >= 0x3FFFFFFF
+	if (rand_cache <= 0x7FFF) {
+		// rand_cache is valid.
+		ret = rand_cache;
+		rand_cache = ~0;
+		return ret;
+	}
+#endif
+
+	// Get a random number.
+	ret = rand();
+#if RAND_MAX >= 0x3FFFFFFF
+	// Cache the high bits as a second random number.
+	rand_cache = (ret >> 15) & 0x7FFF;
+	ret &= 0x7FFF;
+#endif
+	return ret;
+}
+
+/**
+ * Adjust a pixel's color.
+ * @param pixel     [in] Type of pixel.
+ * @param add_shift [in] Shift value for the add value.
+ * @param px        [in] Pixel data.
+ * @param mask      [in] Pixel mask.
+ * @return Adjusted pixel color.
+ */
 template<typename pixel, uint8_t add_shift>
-static inline pixel adj_color(pixel px, pixel mask)
+inline pixel CrazyEffect::adj_color(pixel px, pixel mask)
 {
 	pixel add = 1 << add_shift;
 	px &= mask;
-	if ((rand() & 0x7FFF) > 0x2C00) {
+	if ((getRand() & 0x7FFF) > 0x2C00) {
 		if ((mask - add) <= px) {
 			px = mask;
 		} else {
@@ -124,6 +161,9 @@ inline void CrazyEffect::T_doCrazyEffect(pixel *outScreen)
 
 CrazyEffect::CrazyEffect()
 	: m_colorMask(CM_WHITE)
+#if RAND_MAX >= 0x3FFFFFFF
+	, rand_cache(~0)
+#endif
 { }
 
 /**

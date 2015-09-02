@@ -24,8 +24,11 @@
 #ifndef __LIBGENS_EFFECTS_CRAZYEFFECT_HPP__
 #define __LIBGENS_EFFECTS_CRAZYEFFECT_HPP__
 
-#include <stdint.h>
 #include "../macros/common.h"
+
+// C includes.
+#include <stdint.h>
+#include <stdlib.h>
 
 namespace LibGens {
 
@@ -71,6 +74,35 @@ class CrazyEffect
 
 		// Color mask.
 		ColorMask m_colorMask;
+
+		// TODO: Move this stuff to a private class.
+
+		/**
+		 * Get a random number in the range [0,0x7FFF].
+		 * This uses the internal random number
+		 * cache if it's available.
+		 * @return Random number.
+		 */
+		unsigned int getRand(void);
+
+		/**
+		 * Adjust a pixel's color.
+		 * @param pixel     [in] Type of pixel.
+		 * @param add_shift [in] Shift value for the add value.
+		 * @param px        [in] Pixel data.
+		 * @param mask      [in] Pixel mask.
+		 * @return Adjusted pixel color.
+		 */
+		template<typename pixel, uint8_t add_shift>
+		inline pixel adj_color(pixel px, pixel mask);
+
+#if RAND_MAX >= 0x3FFFFFFF
+		// Random number cache.
+		// glibc's RAND_MAX is 0x7FFFFFFF, so we can
+		// get two random numbers from [0,0x7FFF]
+		// with a single call to rand().
+		unsigned int rand_cache;
+#endif
 };
 
 inline CrazyEffect::ColorMask CrazyEffect::colorMask(void) const
