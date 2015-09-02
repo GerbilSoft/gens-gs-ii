@@ -41,6 +41,7 @@ namespace LibGens {
 #if 0
 // FIXME: SSE2 Fast Blur is generally slow due to
 // unaligned access requirements.
+// TODO: Try using 'pavgb'?
 
 /**
  * 32-bit color Fast Blur, SSE2-optimized.
@@ -152,7 +153,7 @@ void FastBlurPrivate::DoFastBlur_16_MMX(
 	// Blur 4px at a time.
 	// TODO: Figure out how to blur 8px at a time.
 	assert(pxCount % 4 == 0);
-	for (unsigned int i = (pxCount / 4); i != 0; i--) {
+	for (pxCount /= 4; pxCount > 0; pxCount--) {
 		__asm__ (
 			// Get source pixels.
 #ifdef DO_2FB
