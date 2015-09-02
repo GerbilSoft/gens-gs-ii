@@ -941,6 +941,8 @@ int run(void)
 			crazyEffect->run(crazyFb);
 			sdlHandler->update_video();
 			clks.frames++;
+			yield();
+			// TODO: Use the frameskip code to limit frames?
 			continue;
 		}
 
