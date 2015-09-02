@@ -34,11 +34,6 @@
 #include <cstdint>
 #include <cstring>
 
-// Mask constants.
-#define MASK_DIV2_15		((uint16_t)(0x3DEF))
-#define MASK_DIV2_16		((uint16_t)(0x7BCF))
-#define MASK_DIV2_32		((uint32_t)(0x007F7F7F))
-
 #if defined(__GNUC__) && (defined(__i386__) || defined(__amd64__))
 #define HAVE_MMX
 #endif
@@ -58,11 +53,27 @@ class FastBlurPrivate
 		FastBlurPrivate &operator=(const FastBlurPrivate &);
 
 	public:
-		template<typename pixel, pixel mask>
-		static inline void T_DoFastBlur(pixel *mdScreen, unsigned int pxCount);
+		// Mask constants.
+		static const uint16_t MASK_DIV2_15 = 0x3DEF;
+		static const uint16_t MASK_DIV2_16 = 0x7BCF;
 
-		template<typename pixel, pixel mask>
-		static inline void T_DoFastBlur(pixel *mdScreen, const pixel *outScreen, unsigned int pxCount);
+		static void DoFastBlur_16(
+			uint16_t* RESTRICT outScreen,
+			unsigned int pxCount,
+			uint16_t mask);
+		static void DoFastBlur_16(
+			uint16_t* RESTRICT outScreen,
+			const uint16_t* RESTRICT mdScreen,
+			unsigned int pxCount,
+			uint16_t mask);
+
+		static void DoFastBlur_32(
+			uint32_t* RESTRICT outScreen,
+			unsigned int pxCount);
+		static void DoFastBlur_32(
+			uint32_t* RESTRICT outScreen,
+			const uint32_t* RESTRICT mdScreen,
+			unsigned int pxCount);
 
 #ifdef HAVE_MMX
 		static const uint32_t MASK_DIV2_15_MMX[2];
@@ -107,9 +118,17 @@ const uint32_t FastBlurPrivate::MASK_DIV2_16_MMX[2] = {0x7BCF7BCF, 0x7BCF7BCF};
 
 }
 
-#ifdef HAVE_MMX
-// MMX/SSE2-optimized functions.
+// Generic versions.
 #define __IN_LIBGENS_FASTBLUR_CPP__
+#define DO_1FB
+#include "FastBlur.generic.inc.cpp"
+#undef DO_1FB
+#define DO_2FB
+#include "FastBlur.generic.inc.cpp"
+#undef DO_2FB
+
+// MMX/SSE2-optimized versions.
+#ifdef HAVE_MMX
 #define DO_1FB
 #include "FastBlur.x86.inc.cpp"
 #undef DO_1FB
@@ -119,56 +138,6 @@ const uint32_t FastBlurPrivate::MASK_DIV2_16_MMX[2] = {0x7BCF7BCF, 0x7BCF7BCF};
 #endif /* HAVE_MMX */
 
 namespace LibGens {
-
-/**
- * Apply a Fast Blur effect to the screen buffer.
- * @param mask MSB mask for pixel data.
- * @param outScreen Source and destination screen.
- * @param pxCount Pixel count.
- */
-template<typename pixel, pixel mask>
-inline void FastBlurPrivate::T_DoFastBlur(pixel *outScreen, unsigned int pxCount)
-{
-	pixel px = 0, px_prev = 0;
-
-	// Process the framebuffer.
-	for (unsigned int i = pxCount; i != 0; i--) {
-		// NOTE: This may lose some precision in the Red LSB on LE architectures.
-		px = (*outScreen >> 1) & mask;	// Get pixel.
-		px_prev += px;			// Blur with previous pixel.
-		*(outScreen - 1) = px_prev;	// Write new pixel.
-		px_prev = px;			// Save pixel.
-
-		// Increment the screen pointer.
-		outScreen++;
-	}
-}
-
-/**
- * Apply a Fast Blur effect to the screen buffer.
- * @param mask MSB mask for pixel data.
- * @param outScreen Destination screen.
- * @param mdScreen Source screen.
- * @param pxCount Pixel count.
- */
-template<typename pixel, pixel mask>
-inline void FastBlurPrivate::T_DoFastBlur(pixel *outScreen, const pixel *mdScreen, unsigned int pxCount)
-{
-	pixel px = 0, px_prev = 0;
-
-	// Process the framebuffer.
-	for (unsigned int i = pxCount; i != 0; i--) {
-		// NOTE: This may lose some precision in the Red LSB on LE architectures.
-		px = (*mdScreen >> 1) & mask;	// Get pixel.
-		px_prev += px;			// Blur with previous pixel.
-		*(outScreen - 1) = px_prev;	// Write new pixel.
-		px_prev = px;			// Save pixel.
-
-		// Increment the screen pointers.
-		outScreen++;
-		mdScreen++;
-	}
-}
 
 /**
  * Apply a Fast Blur effect to the screen buffer.
@@ -190,8 +159,9 @@ void FastBlur::DoFastBlur(MdFb* RESTRICT outScreen)
 			} else
 #endif /* HAVE_MMX */
 			{
-				FastBlurPrivate::T_DoFastBlur<uint16_t, MASK_DIV2_15>
-					(outScreen->fb16(), pxCount);
+				FastBlurPrivate::DoFastBlur_16(
+					outScreen->fb16(), pxCount,
+					FastBlurPrivate::MASK_DIV2_15);
 			}
 			break;
 
@@ -204,8 +174,9 @@ void FastBlur::DoFastBlur(MdFb* RESTRICT outScreen)
 			} else
 #endif /* HAVE_MMX */
 			{
-				FastBlurPrivate::T_DoFastBlur<uint16_t, MASK_DIV2_16>
-					(outScreen->fb16(), pxCount);
+				FastBlurPrivate::DoFastBlur_16(
+					outScreen->fb16(), pxCount,
+					FastBlurPrivate::MASK_DIV2_16);
 			}
 			break;
 
@@ -213,12 +184,13 @@ void FastBlur::DoFastBlur(MdFb* RESTRICT outScreen)
 		default:
 #ifdef HAVE_MMX
 			if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
-				FastBlurPrivate::DoFastBlur_32_MMX(outScreen->fb32(), pxCount);
+				FastBlurPrivate::DoFastBlur_32_MMX(
+					outScreen->fb32(), pxCount);
 			} else
 #endif /* HAVE_MMX */
 			{
-				FastBlurPrivate::T_DoFastBlur<uint32_t, MASK_DIV2_32>
-					(outScreen->fb32(), pxCount);
+				FastBlurPrivate::DoFastBlur_32(
+					outScreen->fb32(), pxCount);
 			}
 			break;
 	}
@@ -255,8 +227,9 @@ void FastBlur::DoFastBlur(MdFb* RESTRICT outScreen, const MdFb* RESTRICT mdScree
 			} else
 #endif /* HAVE_MMX */
 			{
-				FastBlurPrivate::T_DoFastBlur<uint16_t, MASK_DIV2_15>
-					(outScreen->fb16(), mdScreen->fb16(), pxCount);
+				FastBlurPrivate::DoFastBlur_16(
+					outScreen->fb16(), mdScreen->fb16(),
+					pxCount, FastBlurPrivate::MASK_DIV2_15);
 			}
 			break;
 
@@ -269,8 +242,9 @@ void FastBlur::DoFastBlur(MdFb* RESTRICT outScreen, const MdFb* RESTRICT mdScree
 			} else
 #endif /* HAVE_MMX */
 			{
-				FastBlurPrivate::T_DoFastBlur<uint16_t, MASK_DIV2_16>
-					(outScreen->fb16(), mdScreen->fb16(), pxCount);
+				FastBlurPrivate::DoFastBlur_16(
+					outScreen->fb16(), mdScreen->fb16(),
+					pxCount, FastBlurPrivate::MASK_DIV2_16);
 			}
 			break;
 
@@ -278,12 +252,13 @@ void FastBlur::DoFastBlur(MdFb* RESTRICT outScreen, const MdFb* RESTRICT mdScree
 		default:
 #ifdef HAVE_MMX
 			if (CPU_Flags & MDP_CPUFLAG_X86_MMX) {
-				FastBlurPrivate::DoFastBlur_32_MMX(outScreen->fb32(), mdScreen->fb32(), pxCount);
+				FastBlurPrivate::DoFastBlur_32_MMX(
+					outScreen->fb32(), mdScreen->fb32(), pxCount);
 			}
 #endif /* HAVE_MMX */
 			{
-				FastBlurPrivate::T_DoFastBlur<uint32_t, MASK_DIV2_32>
-					(outScreen->fb32(), mdScreen->fb32(), pxCount);
+				FastBlurPrivate::DoFastBlur_32(
+					outScreen->fb32(), mdScreen->fb32(), pxCount);
 			}
 			break;
 	}
