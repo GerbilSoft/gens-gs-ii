@@ -34,11 +34,17 @@ using LibGens::FastBlur;
 #include <climits>
 #include <cstdio>
 
+// OpenGL (GLEW)
+#include <GL/glew.h>
+
 // Onscreen Display.
 #include "OsdGL.hpp"
 
 // GL Texture wrpaper.
 #include "GLTex.hpp"
+
+// GL shaders.
+#include "GLShaderFastBlur.hpp"
 
 namespace GensSdl {
 
@@ -73,6 +79,9 @@ class GLBackendPrivate {
 
 		// Onscreen Display.
 		OsdGL *osd;
+
+		// GL shaders.
+		GLShaderFastBlur *fastBlurShader;
 
 	public:
 		/**
@@ -120,15 +129,13 @@ GLBackendPrivate::GLBackendPrivate(GLBackend *q)
 	, prevStretchMode(VBackend::STRETCH_MAX)
 	, prevAspectRatioConstraint(true)
 	, osd(new OsdGL())
-{
-	// Clear GLTex.
-	// TODO: Make it a regular class?
-	memset(&tex, 0, sizeof(tex));
-}
+	, fastBlurShader(new GLShaderFastBlur())
+{ }
 
 GLBackendPrivate::~GLBackendPrivate()
 {
 	delete osd;
+	delete fastBlurShader;
 }
 
 /**
@@ -137,6 +144,21 @@ GLBackendPrivate::~GLBackendPrivate()
 void GLBackendPrivate::reallocTexture(void)
 {
 	// TODO: makeCurrent()?
+
+	// Initialize GLEW.
+	// TODO: Initialize this in the main program, not here?
+	// TODO: Multi-context?
+	static bool glew_initialized = false;
+	if (!glew_initialized) {
+		int ret = glewInit();
+		if (ret != GLEW_OK) {
+			// TODO: Error handling.
+			// Return an error code?
+			fprintf(stderr, "GLEW initialization failed: %d\n", ret);
+			//return ret;
+		}
+		glew_initialized = true;
+	}
 
 	MdFb *fb = q->m_fb;
 	if (!fb) {
@@ -294,7 +316,7 @@ const MdFb *GLBackendPrivate::applySoftwareEffects(void)
 	MdFb *fb = q->m_fb;	// FB to use.
 	bool isIntFb = false;
 
-	if (q->m_fastBlur) {
+	if (q->m_fastBlur  && !fastBlurShader->isUsable()) {
 		// Make sure we have an internal framebuffer.
 		if (!q->m_int_fb) {
 			q->m_int_fb = new MdFb();
@@ -334,7 +356,10 @@ const MdFb *GLBackendPrivate::applySoftwareEffects(void)
  */
 void GLBackendPrivate::startShaderEffects(void)
 {
-	// TODO
+	if (q->m_fastBlur && fastBlurShader->isUsable()) {
+		// Enable the Fast Blur effect.
+		fastBlurShader->enable();
+	}
 }
 
 /**
@@ -342,7 +367,10 @@ void GLBackendPrivate::startShaderEffects(void)
  */
 void GLBackendPrivate::stopShaderEffects(void)
 {
-	// TODO
+	if (q->m_fastBlur && fastBlurShader->isUsable()) {
+		// Disable the Fast Blur effect.
+		fastBlurShader->disable();
+	}
 }
 
 /** GLBackend **/
@@ -526,6 +554,9 @@ void GLBackend::initGL(void)
 
 	// Initialize the OSD.
 	d->osd->init();
+
+	// Initialize the shaders.
+	d->fastBlurShader->init();
 }
 
 /**
@@ -535,6 +566,9 @@ void GLBackend::initGL(void)
 void GLBackend::endGL(void)
 {
 	// TODO: makeCurrent()?
+
+	// Shut down the shaders.
+	d->fastBlurShader->end();
 
 	// Shut down the OSD.
 	d->osd->end();

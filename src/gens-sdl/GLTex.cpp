@@ -25,6 +25,7 @@
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 
 // System byte order.
 #include "libcompat/byteorder.h"
@@ -35,19 +36,6 @@
 #define SDLGL_UNSIGNED_BYTE GL_UNSIGNED_INT_8_8_8_8_REV
 #else /* SYS_BYTEORDER == SYS_LIL_ENDIAN */
 #define SDLGL_UNSIGNED_BYTE GL_UNSIGNED_BYTE
-#endif
-
-// MSVC ships with *ancient* GL headers.
-// TODO: Use GLEW.
-#if !defined(GL_BGRA) && defined(GL_BGRA_EXT)
-#define GL_BGRA GL_BGRA_EXT
-#endif
-
-// NOTE: These constants are provided by OpenGL 1.2,
-// *not* GL_EXT_packed_pixels.
-#if defined(GL_UNSIGNED_SHORT_1_5_5_5_REV) && \
-    defined(GL_UNSIGNED_SHORT_5_6_5)
-#define GL_HEADER_HAS_GL_1_2_PACKED_PIXELS
 #endif
 
 namespace GensSdl {
@@ -76,42 +64,30 @@ GLTex::~GLTex()
  */
 int GLTex::alloc(Format format, int w, int h)
 {
-	// BIG COMMIT NOTE: Third parameter of glTexImage2D()
-	// is NOT number of components; it's internal format,
-	// which should be the same as format.
-
 	// Determine the internal texture format.
+	const char *texFormat;
 	switch (format) {
 		case FMT_UNKNOWN:
 		default:
 			// Unknown format.
 			dealloc();
 			return -EINVAL;
-#ifdef GL_HEADER_HAS_GL_1_2_PACKED_PIXELS
-		// TODO: Verify that OpenGL 1.2 is supported.
-		// TODO: GL_RGB5 seems to work as an internal format.
-		// https://www.opengl.org/registry/doc/glspec121_bookmarked.pdf
 		case FMT_XRGB1555:
-			// TODO: Store as GL_RGB5 internally?
+			// 15-bit color requires OpenGL 1.2 or GL_APPLE_packed_pixels.
+			// TODO: GL_RGB5 seems to work as an internal format.
+			// https://www.opengl.org/registry/doc/glspec121_bookmarked.pdf
 			this->intformat = GL_RGBA;
 			this->format = GL_BGRA;
 			this->type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
+			texFormat = "XRGB1555";
 			break;
 		case FMT_RGB565:
+			// 16-bit color requires OpenGL 1.2 or GL_APPLE_packed_pixels.
 			this->intformat = GL_RGB;
 			this->format = GL_RGB;
 			this->type = GL_UNSIGNED_SHORT_5_6_5;
+			texFormat = "RGB565";
 			break;
-#else /* !GL_HEADER_HAS_GL_1_2_PACKED_PIXELS */
-		case FMT_XRGB1555:
-		case FMT_RGB565:
-			// OpenGL 1.2 is required for 15-bit and 16-bit color.
-			// NOTE: GL_EXT_packed_pixels could work for 15-bit.
-			// NOTE: GL_APPLE_packed_pixels could work for 15-bit and 16-bit.
-			// TODO: Error code?
-			dealloc();
-			return -EINVAL;
-#endif /* GL_HEADER_HAS_GL_1_2_PACKED_PIXELS */
 		case FMT_XRGB8888:
 			// TODO: Verify that GL_BGRA is supported.
 			// Pretty much everything supports it,
@@ -119,6 +95,7 @@ int GLTex::alloc(Format format, int w, int h)
 			this->intformat = GL_RGBA;
 			this->format = GL_BGRA;
 			this->type = SDLGL_UNSIGNED_BYTE;
+			texFormat = "XRGB8888";
 			break;
 		case FMT_ALPHA8:
 			// TODO: Does GL_ALPHA8 work everywhere?
@@ -128,7 +105,44 @@ int GLTex::alloc(Format format, int w, int h)
 			// GL_ALPHA is single-component, so we probably
 			// shouldn't use SDLGL_UNSIGNED_BYTE.
 			this->type = GL_UNSIGNED_BYTE;
+			texFormat = "ALPHA8";
 			break;
+	}
+
+	// GL_BGRA isn't part of OpenGL 1.1.
+	// COMMIT NOTE: MSVC 2010 didn't complain when it had "this->format = GL_BGRA".
+	// Test again with /W4, and test newer versions?
+	if (this->format == GL_BGRA) {
+		// GL_BGRA requires either OpenGL 1.2 or GL_EXT_bgra.
+		if (!GLEW_VERSION_1_2 && !GLEW_EXT_bgra) {
+			fprintf(stderr, "WARNING: OpenGL 1.2 is not supported, and GL_EXT_bgra is missing.\n"
+				"Texture format %s will not work correctly.", texFormat);
+			dealloc();
+			this->intformat = 0;
+			this->format = 0;
+			this->type = 0;
+			return -EINVAL;
+		}
+	}
+
+	// 15-bit/16-bit color isn't part of OpenGL 1.1.
+	if (this->type == GL_UNSIGNED_SHORT_1_5_5_5_REV ||
+	    this->type == GL_UNSIGNED_SHORT_5_6_5) {
+		// Both 15-bit and 16-bit color require either OpenGL 1.2 or
+		// the GL_APPLE_packed_pixels extension.
+		// GL_EXT_packed_pixels has GL_UNSIGNED_SHORT_5_5_5_1_EXT,
+		// but not GL_UNSIGNED_SHORT_1_5_5_5_REV, and it doesn't
+		// have any 565 formats at all.
+		// TODO: Regenerate GLEW to have GL_APPLE_packed_pixels.
+		if (!GLEW_VERSION_1_2 /*&& !GLEW_APPLE_packed_pixels*/) {
+			fprintf(stderr, "WARNING: OpenGL 1.2 is not supported, and GL_APPLE_packed_pixels is missing.\n"
+				"Texture format %s will not work correctly.\n", texFormat);
+			dealloc();
+			this->intformat = 0;
+			this->format = 0;
+			this->type = 0;
+			return -EINVAL;
+		}
 	}
 
 	// Create and initialize a GL texture.

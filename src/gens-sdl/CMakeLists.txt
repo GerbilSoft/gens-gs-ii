@@ -24,6 +24,7 @@ INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 # Include the OpenGL directory.
 # TODO: FIND_PACKAGE(OpenGL) here even though it's in the root CMakeLists.txt?
 INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${GLEW_INCLUDE_DIR})
 
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.gens-sdl.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.gens-sdl.h")
@@ -71,12 +72,26 @@ SET(gens-sdl_OSD_H
 	OsdFont_C64.hpp
 	)
 
+# Shader sources.
+SET(gens-sdl_SHADER_SRCS
+	GLShader.cpp
+	GLShaderFastBlur.cpp
+	)
+
+# Shader headers.
+SET(gens-sdl_SHADER_H
+	GLShader.hpp
+	GLShaderFastBlur.hpp
+	)
+
 # Main target.
 ADD_EXECUTABLE(gens-sdl
 	${gens-sdl_SRCS}
 	${gens-sdl_H}
 	${gens-sdl_OSD_SRCS}
 	${gens-sdl_OSD_H}
+	${gens-sdl_SHADER_SRCS}
+	${gens-sdl_SHADER_H}
 	)
 TARGET_LINK_LIBRARIES(gens-sdl compat gens genskeys zomg)
 DO_SPLIT_DEBUG(gens-sdl)
@@ -85,7 +100,11 @@ DO_SPLIT_DEBUG(gens-sdl)
 TARGET_LINK_LIBRARIES(gens-sdl
 	${SDL2_LIBRARY}
 	${OPENGL_gl_LIBRARY}
+	${GLEW_LIBRARY}
 	)
+
+# Set the compile definitions.
+ADD_DEFINITIONS(${GLEW_DEFINITIONS})
 
 # Compress the EXE.
 IF(COMPRESS_EXE)
