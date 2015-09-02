@@ -50,13 +50,16 @@ int GLShader::end(void)
 	int ret = 0;
 	switch (m_shaderType) {
 		case ST_GL_ARB_FRAGMENT_PROGRAM:
-#ifdef ENABLE_ATI_TEXT_FRAGMENT_SHADER
-		case ST_GL_ATI_TEXT_FRAGMENT_SHADER:
-#endif
-			// Delete the ARB program.
-			// (Also used for ATI text fragment shaders.)
 			glDeleteProgramsARB(1, &m_shaderName);
 			break;
+
+#ifdef ENABLE_ATI_TEXT_FRAGMENT_SHADER
+		case ST_GL_ATI_TEXT_FRAGMENT_SHADER:
+			// GL_ATI_text_fragment_shader uses the same
+			// infrastructure as ARB programs.
+			glDeleteProgramsARB(1, &m_shaderName);
+			break;
+#endif /* ENABLE_ATI_TEXT_FRAGMENT_SHADER */
 
 		case ST_GL_ATI_FRAGMENT_SHADER:
 			glDeleteFragmentShaderATI(m_shaderName);
@@ -88,23 +91,18 @@ int GLShader::enable(void)
 	int ret = 0;
 	switch (m_shaderType) {
 		case ST_GL_ARB_FRAGMENT_PROGRAM:
+			glEnable(GL_FRAGMENT_PROGRAM_ARB);
+			glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, m_shaderName);
+			break;
+
 #ifdef ENABLE_ATI_TEXT_FRAGMENT_SHADER
 		case ST_GL_ATI_TEXT_FRAGMENT_SHADER:
-#endif /* ENABLE_ATI_TEXT_FRAGMENT_SHADER */
-		{
-#ifdef ENABLE_ATI_TEXT_FRAGMENT_SHADER
-			const GLenum prgType = (m_shaderType == ST_GL_ARB_FRAGMENT_PROGRAM
-						? GL_FRAGMENT_PROGRAM_ARB
-						: GL_TEXT_FRAGMENT_SHADER_ATI);
-#else /* !ENABLE_ATI_TEXT_FRAGMENT_SHADER */
-			const GLenum prgType = GL_FRAGMENT_PROGRAM_ARB;
-#endif /* ENABLE_ATI_TEXT_FRAGMENT_SHADER */
-
-			// Enable the shader.
-			glEnable(prgType);
-			glBindProgramARB(prgType, m_shaderName);
+			// GL_ATI_text_fragment_shader uses the same
+			// infrastructure as ARB programs.
+			glEnable(GL_TEXT_FRAGMENT_SHADER_ATI);
+			glBindProgramARB(GL_TEXT_FRAGMENT_SHADER_ATI, m_shaderName);
 			break;
-		}
+#endif /* ENABLE_ATI_TEXT_FRAGMENT_SHADER */
 
 		case ST_GL_ATI_FRAGMENT_SHADER:
 			glEnable(GL_FRAGMENT_SHADER_ATI);
@@ -136,21 +134,13 @@ int GLShader::disable(void)
 	int ret = 0;
 	switch (m_shaderType) {
 		case ST_GL_ARB_FRAGMENT_PROGRAM:
+			glDisable(GL_FRAGMENT_PROGRAM_ARB);
+			break;
+
 #ifdef ENABLE_ATI_TEXT_FRAGMENT_SHADER
 		case ST_GL_ATI_TEXT_FRAGMENT_SHADER:
-#endif /* ENABLE_ATI_TEXT_FRAGMENT_SHADER */
-		{
-#ifdef ENABLE_ATI_TEXT_FRAGMENT_SHADER
-			const GLenum prgType = (m_shaderType == ST_GL_ARB_FRAGMENT_PROGRAM
-						? GL_FRAGMENT_PROGRAM_ARB
-						: GL_TEXT_FRAGMENT_SHADER_ATI);
-#else /* !ENABLE_ATI_TEXT_FRAGMENT_SHADER */
-			const GLenum prgType = GL_FRAGMENT_PROGRAM_ARB;
-#endif /* ENABLE_ATI_TEXT_FRAGMENT_SHADER */
+			glDisable(GL_TEXT_FRAGMENT_SHADER_ATI);
 
-			// Disable the shader.
-			glDisable(prgType);
-#ifdef ENABLE_ATI_TEXT_FRAGMENT_SHADER
 			if (m_shaderType == ST_GL_ATI_TEXT_FRAGMENT_SHADER) {
 				// HACK: at least the Mac OS X 10.5 PPC Radeon drivers are broken and
 				// without this disable the texture units while the program is still
@@ -159,9 +149,8 @@ int GLShader::disable(void)
 				// NOTE: It doesn't seem to help any...
 				glFlush();
 			}
-#endif /* ENABLE_ATI_TEXT_FRAGMENT_SHADER */
 			break;
-		}
+#endif /* ENABLE_ATI_TEXT_FRAGMENT_SHADER */
 
 		case ST_GL_ATI_FRAGMENT_SHADER:
 			glDisable(GL_FRAGMENT_SHADER_ATI);
