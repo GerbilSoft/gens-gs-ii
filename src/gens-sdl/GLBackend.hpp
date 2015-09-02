@@ -25,12 +25,6 @@
 // C includes.
 #include <stdint.h>
 
-// OpenGL
-#ifdef _WIN32
-#include <windows.h>
-#endif
-#include <GL/gl.h>
-
 // Video Backend.
 #include "VBackend.hpp"
 // LibGens includes.

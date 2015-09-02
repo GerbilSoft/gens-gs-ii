@@ -34,6 +34,12 @@ using LibGens::FastBlur;
 #include <climits>
 #include <cstdio>
 
+// OpenGL
+#ifdef _WIN32
+#include <windows.h>
+#endif
+#include <GL/gl.h>
+
 // Onscreen Display.
 #include "OsdGL.hpp"
 
