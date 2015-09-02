@@ -44,6 +44,10 @@ using LibGens::Rom;
 using LibGens::MdFb;
 using LibGens::Timing;
 
+// "Crazy" Effect.
+#include "libgens/Effects/CrazyEffect.hpp"
+using LibGens::CrazyEffect;
+
 // Emulation Context.
 #include "libgens/EmuContext/EmuContext.hpp"
 #include "libgens/EmuContext/EmuContextFactory.hpp"
@@ -114,6 +118,10 @@ static bool isPico = false;
 // a struct containing all of the options.
 static const char *rom_filename = nullptr;
 static bool autoPause = false;
+// If true, don't emulate anything; just run the Crazy Effect.
+static bool runCrazyEffect = false;
+static MdFb *crazyFb = nullptr;
+static CrazyEffect *crazyEffect = nullptr;
 
 static KeyManager *keyManager = nullptr;
 // MD 6-button keyMap.
@@ -844,6 +852,19 @@ int run(void)
 		keyManager->setIoType(IoManager::VIRTPORT_2, IoManager::IOT_NONE);
 	}
 
+	if (runCrazyEffect) {
+		// Just run the Crazy Effect.
+		// TODO: If specified, run a completely different
+		// main loop that doesn't create an emulation context
+		// or initialize audio.
+		crazyFb = new MdFb();
+		crazyFb->setBpp(MdFb::BPP_32);
+		sdlHandler->set_video_source(crazyFb);
+
+		crazyEffect = new CrazyEffect();
+		crazyEffect->setColorMask(CrazyEffect::CM_WHITE);
+	}
+
 	while (running) {
 		SDL_Event event;
 		int ret;
@@ -911,6 +932,16 @@ int run(void)
 			char win_title[256];
 			snprintf(win_title, sizeof(win_title), "Gens/GS II [SDL] - %u fps", clks.fps);
 			sdlHandler->set_window_title(win_title);
+		}
+
+		if (crazyEffect) {
+			// "Crazy" Effect is enabled.
+			// Don't run emulation; instead, just apply
+			// the "Crazy" Effect to the framebuffer.
+			crazyEffect->run(crazyFb);
+			sdlHandler->update_video();
+			clks.frames++;
+			continue;
 		}
 
 		// Frameskip.
@@ -1003,6 +1034,13 @@ int run(void)
 	sdlHandler->end_audio();
 	sdlHandler->end_video();
 	//delete sdlHandler;
+
+	// If we were running the "Crazy" Effect,
+	// unreference its framebuffer.
+	if (crazyFb) {
+		crazyFb->unref();
+	}
+	delete crazyEffect;
 
 	// Shut. Down. EVERYTHING.
 	delete keyManager;
