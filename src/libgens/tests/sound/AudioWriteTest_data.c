@@ -22,6 +22,14 @@
 
 #include "AudioWriteTest_data.h"
 
+#ifdef _MSC_VER
+// MSVC complains that some values have a negative sign
+// but end up overflowing the data type, e.g. -0x80000000.
+// This is expected, so disable the warning.
+#pragma warning(push)
+#pragma warning(disable: 4146)
+#endif
+
 const int32_t AudioWriteTest_Input_L[800] = {
 	 0x00000000,  0x00003FFF,  0x00004000,  0x00007FFF,
 	 0x00008000,  0x0000BFFF,  0x0000C000,  0x0000FFFF,
@@ -836,3 +844,7 @@ const int16_t AudioWriteTest_Output_Mono_accurate[800] = {
 	-0x4429, -0x739D, -0x19FB,  0x01D6, -0x084C, -0x025A,  0x050F, -0x8000,
 	-0x1810,  0x5C0C, -0x12A8, -0x0A6F, -0x229F, -0x3CC6,  0x085B,  0x63A9
 };
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
