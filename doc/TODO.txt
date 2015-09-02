@@ -37,15 +37,7 @@ libzomg:
 - Rename ZomgBase to SaveBase so it doesn't get confused with the Zomg class.
 
 OpenGL (gens-sdl):
-- Check for GL 1.2 instead of checking for GL_EXT_packed_pixels.
-  - GL 1.2 has GL_EXT_packed_pixels plus 565.
-  - GL_EXT_packed_pixels doesn't have 565.
-  - GL_APPLE_packed_pixels has 565, but is obsoleted by GL 1.2.
-  - GL_EXT_bgra is also built into GL 1.2.
-    - Still needed for GL 1.1, i.e. Windows GDI renderer.
 - Aspect ratio constraint: Use integers?
-- Add Fast Blur using shaders. (hotkey F9)
-  - Currently available using SW rendering.
 
 Windows:
 - Set console code page to UTF-8.
