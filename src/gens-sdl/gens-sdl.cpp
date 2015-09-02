@@ -107,8 +107,13 @@ static SdlHandler *sdlHandler = nullptr;
 static VBackend *vBackend = nullptr;
 static Rom *rom = nullptr;
 static EmuContext *context = nullptr;
-static const char *rom_filename = nullptr;
 static bool isPico = false;
+
+/** Command line parameters. **/
+// TODO: Write a popt-based command line parser with
+// a struct containing all of the options.
+static const char *rom_filename = nullptr;
+static bool autoPause = false;
 
 static KeyManager *keyManager = nullptr;
 // MD 6-button keyMap.
@@ -201,7 +206,13 @@ static LibGens::Timing timing;
 
 // Emulation state.
 static bool running = true;
-static bool paused = false;
+static union {
+	struct {
+		uint8_t manual	: 1;	// Manual pause.
+		uint8_t focus	: 1;	// Auto pause when focus is lost.
+	};
+	uint8_t data;
+} paused;
 
 // Enable frameskip.
 static bool frameskip = true;
@@ -460,27 +471,50 @@ static void doStretchMode(void)
 }
 
 /**
- * Pause/unpause emulation.
+ * Common pause processing function.
+ * Called by doPause() and doAutoPause().
  */
-static void doPause(void)
+static void doPauseProcessing(void)
 {
-	paused = !paused;
-	vBackend->setPausedEffect(paused);
+	bool manual = paused.manual;
+	bool any = !!paused.data;
+	// TODO: Option to disable the Paused Effect?
+	// When enabled, it's only used for Manual Pause.
+	vBackend->setPausedEffect(manual);
 
 	// Reset the clocks and counters.
 	clks.reset();
 	// Pause audio.
-	sdlHandler->pause_audio(paused);
+	sdlHandler->pause_audio(any);
 	// Autosave SRAM/EEPROM.
 	// (TODO: Only if paused == true?)
 	context->autoSaveData(-1);
 
 	// Update the window title.
-	if (paused) {
+	if (manual) {
 		sdlHandler->set_window_title("Gens/GS II [SDL] [Paused]");
 	} else {
 		sdlHandler->set_window_title("Gens/GS II [SDL]");
 	}
+}
+
+/**
+ * Pause/unpause emulation.
+ */
+static void doPause(void)
+{
+	paused.manual = !paused.manual;
+	doPauseProcessing();
+}
+
+/**
+ * Pause/unpause emulation in response to window focus changes.
+ * @param lostFocus True if window lost focus; false if window gained focus.
+ */
+static void doAutoPause(bool lostFocus)
+{
+	paused.focus = lostFocus;
+	doPauseProcessing();
 }
 
 /**
@@ -664,6 +698,19 @@ static void processSdlEvent(const SDL_Event *event) {
 					// Tell the main loop to update video.
 					exposed = true;
 					break;
+				case SDL_WINDOWEVENT_FOCUS_LOST:
+					// If AutoPause is enabled, pause the emulator.
+					if (autoPause) {
+						doAutoPause(true);
+					}
+					break;
+				case SDL_WINDOWEVENT_FOCUS_GAINED:
+					// If AutoPause is enabled, unpause the emulator.
+					// TODO: Always run this, even if !autoPause?
+					if (autoPause) {
+						doAutoPause(false);
+					}
+					break;
 			}
 			break;
 
@@ -800,7 +847,7 @@ int run(void)
 	while (running) {
 		SDL_Event event;
 		int ret;
-		if (paused) {
+		if (paused.data) {
 			// Emulation is paused.
 			if (!vBackend->has_osd_messages()) {
 				// No OSD messages.
@@ -829,7 +876,7 @@ int run(void)
 		if (!running)
 			break;
 
-		if (paused) {
+		if (paused.data) {
 			// Emulation is paused.
 			// Only update video if the VBackend is dirty
 			// or the SDL window has been exposed.
