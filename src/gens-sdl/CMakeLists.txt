@@ -32,6 +32,8 @@ CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.gens-sdl.h.in" "${CMAKE_CURRE
 # Sources.
 SET(gens-sdl_SRCS
 	gens-sdl.cpp
+	EmuLoop.cpp
+	CrazyEffectLoop.cpp
 	SdlHandler.cpp
 	SdlHandler_scancode.cpp
 	RingBuffer.cpp
@@ -46,7 +48,9 @@ SET(gens-sdl_SRCS
 
 # Headers.
 SET(gens-sdl_H
-	gens-sdl.cpp
+	gens-sdl.hpp
+	EmuLoop.hpp
+	CrazyEffectLoop.hpp
 	SdlHandler.hpp
 	RingBuffer.hpp
 	Config.hpp
