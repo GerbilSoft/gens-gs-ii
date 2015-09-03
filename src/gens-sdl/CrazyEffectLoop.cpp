@@ -67,70 +67,113 @@ using LibGens::CrazyEffect;
 
 namespace GensSdl {
 
-static MdFb *crazyFb = nullptr;
-static CrazyEffect *crazyEffect = nullptr;
+class CrazyEffectLoopPrivate
+{
+	public:
+		CrazyEffectLoopPrivate();
+		~CrazyEffectLoopPrivate();
+
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add GensSdl-specific version of Q_DISABLE_COPY().
+		CrazyEffectLoopPrivate(const CrazyEffectLoopPrivate &);
+		CrazyEffectLoopPrivate &operator=(const CrazyEffectLoopPrivate &);
+
+	public:
+		MdFb *crazyFb;
+		CrazyEffect *crazyEffect;
+};
+
+/** CrazyEffectLoopPrivate **/
+
+CrazyEffectLoopPrivate::CrazyEffectLoopPrivate()
+	: crazyFb(nullptr)
+	, crazyEffect(nullptr)
+{ }
+
+CrazyEffectLoopPrivate::~CrazyEffectLoopPrivate()
+{
+	if (crazyFb) {
+		crazyFb->unref();
+		crazyFb = nullptr;
+	}
+	delete crazyEffect;
+}
+
+/** CrazyEffectLoop **/
+
+CrazyEffectLoop::CrazyEffectLoop()
+	: d(new CrazyEffectLoopPrivate())
+{ }
+
+CrazyEffectLoop::~CrazyEffectLoop()
+{
+	delete d;
+}
 
 /**
- * Run the "Crazy Effect" loop.
+ * Run the event loop.
+ * @param rom_filename ROM filename. [TODO: Replace with options struct?]
  * @return Exit code.
  */
-int CrazyEffectLoop(void)
+int CrazyEffectLoop::run(const char *rom_filename)
 {
+	// rom_filename isn't used here.
+	((void)rom_filename);
+
 	// TODO: Move common code back to gens-sdl?
 
 	// Initialize the SDL handlers.
-	sdlHandler = new SdlHandler();
-	if (sdlHandler->init_video() < 0)
+	m_sdlHandler = new SdlHandler();
+	if (m_sdlHandler->init_video() < 0)
 		return EXIT_FAILURE;
 	// No audio here.
-	//if (sdlHandler->init_audio() < 0)
+	//if (m_sdlHandler->init_audio() < 0)
 	//	return EXIT_FAILURE;
-	vBackend = sdlHandler->vBackend();
+	m_vBackend = m_sdlHandler->vBackend();
 
 	// Set the window title.
-	sdlHandler->set_window_title("Gens/GS II [SDL]");
+	m_sdlHandler->set_window_title("Gens/GS II [SDL]");
 
 	// Check for startup messages.
 	checkForStartupMessages();
 
 	// Start the frame timer.
 	// TODO: Region code?
-	clks.reset();
-
-	// Enable frameskip.
-	frameskip = true;
+	m_clks.reset();
 
 	// Create the "Crazy" Effect framebuffer.
 	// Image size defaults to the full framebuffer,
 	// so we don't have to worry about "stretch modes".
-	crazyFb = new MdFb();
-	crazyFb->setBpp(MdFb::BPP_32);
+	d->crazyFb = new MdFb();
+	d->crazyFb->setBpp(MdFb::BPP_32);
 	// Set the SDL video source.
-	sdlHandler->set_video_source(crazyFb);
+	m_sdlHandler->set_video_source(d->crazyFb);
 
 	// Create the "Crazy" Effect object.
-	crazyEffect = new CrazyEffect();
-	crazyEffect->setColorMask(CrazyEffect::CM_WHITE);
+	d->crazyEffect = new CrazyEffect();
+	d->crazyEffect->setColorMask(CrazyEffect::CM_WHITE);
 
 	// TODO: Move some more common stuff back to gens-sdl.cpp.
-	while (running) {
+	m_running = true;
+	while (m_running) {
 		SDL_Event event;
 		int ret;
-		if (paused.data) {
+		if (m_paused.data) {
 			// Emulation is paused.
-			if (!vBackend->has_osd_messages()) {
+			if (!m_vBackend->has_osd_messages()) {
 				// No OSD messages.
 				// Wait for an SDL event.
 				ret = SDL_WaitEvent(&event);
 				if (ret) {
-					processSdlEvent_common(&event);
+					processSdlEvent(&event);
 				}
 			}
 
 			// Process OSD messages.
-			vBackend->process_osd_messages();
+			m_vBackend->process_osd_messages();
 		}
-		if (!running)
+		if (!m_running)
 			break;
 
 		// Poll for SDL events, and wait for the queue
@@ -139,61 +182,64 @@ int CrazyEffectLoop(void)
 		do {
 			ret = SDL_PollEvent(&event);
 			if (ret) {
-				processSdlEvent_common(&event);
+				processSdlEvent(&event);
 			}
-		} while (running && ret != 0);
-		if (!running)
+		} while (m_running && ret != 0);
+		if (!m_running)
 			break;
 
-		if (paused.data) {
+		if (m_paused.data) {
 			// Emulation is paused.
 			// Only update video if the VBackend is dirty
 			// or the SDL window has been exposed.
-			sdlHandler->update_video_paused(exposed);
+			m_sdlHandler->update_video_paused(m_exposed);
 
 			// Don't run any frames.
 			continue;
 		}
 
 		// Clear the 'exposed' flag.
-		exposed = false;
+		m_exposed = false;
 
 		// New start time.
-		clks.new_clk = timing.getTime();
+		m_clks.new_clk = m_clks.timing.getTime();
 
 		// Update the FPS counter.
-		unsigned int fps_tmp = ((clks.new_clk - clks.fps_clk) & 0x3FFFFF);
+		unsigned int fps_tmp = ((m_clks.new_clk - m_clks.fps_clk) & 0x3FFFFF);
 		if (fps_tmp >= 1000000) {
 			// More than 1 second has passed.
-			clks.fps_clk = clks.new_clk;
+			m_clks.fps_clk = m_clks.new_clk;
 			// FIXME: Just use abs() here.
-			if (clks.frames_old > clks.frames) {
-				clks.fps = (clks.frames_old - clks.frames);
+			if (m_clks.frames_old > m_clks.frames) {
+				m_clks.fps = (m_clks.frames_old - m_clks.frames);
 			} else {
-				clks.fps = (clks.frames - clks.frames_old);
+				m_clks.fps = (m_clks.frames - m_clks.frames_old);
 			}
-			clks.frames_old = clks.frames;
+			m_clks.frames_old = m_clks.frames;
 
 			// Update the window title.
 			// TODO: Average the FPS over multiple seconds
 			// and/or quarter-seconds.
 			char win_title[256];
-			snprintf(win_title, sizeof(win_title), "Gens/GS II [SDL] - %u fps", clks.fps);
-			sdlHandler->set_window_title(win_title);
+			snprintf(win_title, sizeof(win_title), "Gens/GS II [SDL] - %u fps", m_clks.fps);
+			m_sdlHandler->set_window_title(win_title);
 		}
 
 		// Run the "Crazy" effect.
 		// TODO: Use the frameskip code to limit frames?
-		crazyEffect->run(crazyFb);
-		sdlHandler->update_video();
-		clks.frames++;
+		d->crazyEffect->run(d->crazyFb);
+		m_sdlHandler->update_video();
+		m_clks.frames++;
 		yield();
 		continue;
 	}
 
 	// Delete/unreference the "Crazy" Effect objects.
-	crazyFb->unref();
-	delete crazyEffect;
+	// TODO: Move out of the private class and into local scope?
+	d->crazyFb->unref();
+	d->crazyFb = nullptr;
+	delete d->crazyEffect;
+	d->crazyEffect = nullptr;
 
 	// Done running the "Crazy" Effect loop.
 	return 0;

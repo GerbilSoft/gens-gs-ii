@@ -22,13 +22,34 @@
 #ifndef __GENS_SDL_CRAZYEFFECTLOOP_HPP__
 #define __GENS_SDL_CRAZYEFFECTLOOP_HPP__
 
+#include "EventLoop.hpp"
+
 namespace GensSdl {
 
-/**
- * Run the "Crazy Effect" loop.
- * @return Exit code.
- */
-int CrazyEffectLoop(void);
+class CrazyEffectLoopPrivate;
+class CrazyEffectLoop : public EventLoop
+{
+	public:
+		CrazyEffectLoop();
+		virtual ~CrazyEffectLoop();
+
+	private:
+		friend class CrazyEffectLoopPrivate;
+		CrazyEffectLoopPrivate *const d;
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add GensSdl-specific version of Q_DISABLE_COPY().
+		CrazyEffectLoop(const CrazyEffectLoop &);
+		CrazyEffectLoop &operator=(const CrazyEffectLoop &);
+
+	public:
+		/**
+		 * Run the event loop.
+		 * @param rom_filename ROM filename. [TODO: Replace with options struct?]
+		 * @return Exit code.
+		 */
+		virtual int run(const char *rom_filename) final;
+};
 
 }
 

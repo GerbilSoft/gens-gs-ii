@@ -19,9 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-// TODO BEFORE COMMIT: Remove any more unnecessary includes.
-// Also, after commit, convert emulation loops into classes?
-
 // Reentrant functions.
 // MUST be included before everything else due to
 // _POSIX_SOURCE and _POSIX_C_SOURCE definitions.
@@ -87,16 +84,15 @@ using std::vector;
 
 namespace GensSdl {
 
-SdlHandler *sdlHandler = nullptr;
-VBackend *vBackend = nullptr;
-
 /** Command line parameters. **/
 // TODO: Write a popt-based command line parser with
 // a struct containing all of the options.
 static const char *rom_filename = nullptr;
-static bool autoPause = false;
 // If true, don't emulate anything; just run the Crazy Effect.
 static bool runCrazyEffect = false;
+
+// Event loop.
+static EventLoop *eventLoop = nullptr;
 
 // Startup OSD message queue.
 struct OsdStartup {
@@ -105,11 +101,6 @@ struct OsdStartup {
 	int param;
 };
 static vector<OsdStartup> startup_queue;
-
-// Last time the F1 message was displayed.
-// This is here to prevent the user from spamming
-// the display with the message.
-static uint64_t lastF1time = 0;
 
 /**
  * Onscreen Display handler.
@@ -157,8 +148,8 @@ static void gsdl_osd(OsdType osd_type, int param)
 	}
 
 	if (msg != nullptr) {
-		if (vBackend) {
-			vBackend->osd_printf(1500, msg, param);
+		if (eventLoop->m_vBackend) {
+			eventLoop->m_vBackend->osd_printf(1500, msg, param);
 		} else {
 			// SDL handler hasn't been created yet.
 			// Store the message for later.
@@ -181,233 +172,9 @@ void checkForStartupMessages(void)
 	if (!startup_queue.empty()) {
 		for (int i = 0; i < (int)startup_queue.size(); i++) {
 			const OsdStartup &startup = startup_queue.at(i);
-			vBackend->osd_printf(startup.duration, startup.msg, startup.param);
+			eventLoop->m_vBackend->osd_printf(startup.duration, startup.msg, startup.param);
 		}
 	}
-}
-
-// Timing object.
-LibGens::Timing timing;
-
-// Emulation state.
-bool running = true;
-paused_t paused;
-
-// Enable frameskip.
-bool frameskip = true;
-
-// Window has been exposed.
-// Video should be updated if emulation is paused.
-bool exposed = false;
-
-// Frameskip timers.
-clks_t clks;
-
-/**
- * Toggle Fast Blur.
- */
-static void doFastBlur(void)
-{
-	bool fastBlur = !vBackend->fastBlur();
-	vBackend->setFastBlur(fastBlur);
-
-	// Show an OSD message.
-	if (fastBlur) {
-		vBackend->osd_print(1500, "Fast Blur enabled.");
-	} else {
-		vBackend->osd_print(1500, "Fast Blur disabled.");
-	}
-}
-
-/**
- * Common pause processing function.
- * Called by doPause() and doAutoPause().
- */
-static void doPauseProcessing(void)
-{
-	bool manual = paused.manual;
-	bool any = !!paused.data;
-	// TODO: Option to disable the Paused Effect?
-	// When enabled, it's only used for Manual Pause.
-	vBackend->setPausedEffect(manual);
-
-	// Reset the clocks and counters.
-	clks.reset();
-	// Pause audio.
-	sdlHandler->pause_audio(any);
-
-	// Update the window title.
-	if (manual) {
-		sdlHandler->set_window_title("Gens/GS II [SDL] [Paused]");
-	} else {
-		sdlHandler->set_window_title("Gens/GS II [SDL]");
-	}
-}
-
-/**
- * Pause/unpause emulation.
- */
-static void doPause(void)
-{
-	paused.manual = !paused.manual;
-	doPauseProcessing();
-}
-
-/**
- * Pause/unpause emulation in response to window focus changes.
- * @param lostFocus True if window lost focus; false if window gained focus.
- */
-static void doAutoPause(bool lostFocus)
-{
-	paused.focus = lostFocus;
-	doPauseProcessing();
-}
-
-/**
- * Show the "About" message.
- */
-static void doAboutMessage(void)
-{
-       // TODO: OSD Gens logo as preview image, but with drop shadow disabled?
-       const uint64_t curTime = timing.getTime();
-       if (lastF1time > 0 && (lastF1time + 5000000 > curTime)) {
-               // Timer hasn't expired.
-               // Don't show the message.
-               return;
-       }
-
-       // Version string.
-       string ver_str;
-       ver_str.reserve(512);
-       ver_str = "Gens/GS II - SDL2 frontend\n";
-       ver_str += "Version " + string(LibGens::version);
-       if (LibGens::version_vcs) {
-               ver_str += " (" + string(LibGens::version_vcs) + ')';
-       }
-       ver_str += '\n';
-       if (LibGens::version_desc) {
-               ver_str += string(LibGens::version_desc) + '\n';
-       }
-#if !defined(GENS_ENABLE_EMULATION)
-	ver_str += "[NO-EMULATION BUILD]\n";
-#endif
-       ver_str += "(c) 2008-2015 by David Korth.";
-
-       // Show a new message.
-       vBackend->osd_print(5000, ver_str.c_str());
-
-       // Save the current time.
-       lastF1time = curTime;
-}
-
-/**
- * Process an SDL event.
- * EmuLoop processes SDL events first; if it ends up
- * with an event that it can't handle, it goes here.
- * @param event SDL event.
- * @return 0 if the event was handled; non-zero if it wasn't.
- */
-int processSdlEvent_common(const SDL_Event *event) {
-	// NOTE: Some keys are processed in specific event loops
-	// instead of here because they only apply if a ROM is loaded.
-	// gens-qt4 won't make a distinction, since it can run with
-	// both a ROM loaded and not loaded, and you can open and close
-	// ROMs without restarting the program, so it has to be able
-	// to switch modes while allowing options to be change both
-	// when a ROM is loaded and when no ROM is loaded.
-	// In essence, it combines both EmuLoop and CrazyEffectLoop
-	// while maintaining the state of various emulation options.
-
-	int ret = 0;
-	switch (event->type) {
-		case SDL_QUIT:
-			running = false;
-			break;
-
-		case SDL_KEYDOWN:
-			// SDL keycodes nearly match GensKey.
-			// TODO: Split out into a separate function?
-			// TODO: Check for "no modifiers" for some keys?
-			switch (event->key.keysym.sym) {
-				case SDLK_ESCAPE:
-					// Pause emulation.
-					doPause();
-					break;
-
-				case SDLK_RETURN:
-					// Check for Alt+Enter.
-					if ((event->key.keysym.mod & KMOD_ALT) &&
-					    !(event->key.keysym.mod & ~KMOD_ALT))
-					{
-						// Alt+Enter. Toggle fullscreen.
-						sdlHandler->toggle_fullscreen();
-					} else {
-						// Not Alt+Enter.
-						// We're not handling this event.
-						ret = 1;
-					}
-					break;
-
-				case SDLK_F1:
-					// Show the "About" message.
-					doAboutMessage();
-					break;
-
-				case SDLK_F9:
-					// Fast Blur.
-					doFastBlur();
-					break;
-
-				case SDLK_F12:
-					// FIXME: TEMPORARY KEY BINDING for debugging.
-					vBackend->setAspectRatioConstraint(!vBackend->aspectRatioConstraint());
-					break;
-
-				default:
-					// Event not handled.
-					ret = 1;
-					break;
-			}
-			break;
-
-		case SDL_WINDOWEVENT:
-			switch (event->window.event) {
-				case SDL_WINDOWEVENT_RESIZED:
-					// Resize the video renderer.
-					sdlHandler->resize_video(event->window.data1, event->window.data2);
-					break;
-				case SDL_WINDOWEVENT_EXPOSED:
-					// Window has been exposed.
-					// Tell the main loop to update video.
-					exposed = true;
-					break;
-				case SDL_WINDOWEVENT_FOCUS_LOST:
-					// If AutoPause is enabled, pause the emulator.
-					if (autoPause) {
-						doAutoPause(true);
-					}
-					break;
-				case SDL_WINDOWEVENT_FOCUS_GAINED:
-					// If AutoPause is enabled, unpause the emulator.
-					// TODO: Always run this, even if !autoPause?
-					if (autoPause) {
-						doAutoPause(false);
-					}
-					break;
-				default:
-					// Event not handled.
-					ret = 1;
-					break;
-			}
-			break;
-
-		default:
-			// Event not handled.
-			ret = 1;
-			break;
-	}
-
-	return ret;
 }
 
 /**
@@ -428,36 +195,20 @@ int run(void)
 	// Register the LibGens OSD handler.
 	lg_set_osd_fn(gsdl_osd);
 
-	int ret;
 	if (runCrazyEffect) {
 		// Run the Crazy Effect.
-		ret = CrazyEffectLoop();
+		GensSdl::eventLoop = new GensSdl::CrazyEffectLoop();
 	} else {
 		// Start the emulation loop.
-		ret = EmuLoop(rom_filename);
+		GensSdl::eventLoop = new GensSdl::EmuLoop();
 	}
-
-	// COMMIT CHECK: How many linebreaks were here?
-
-	// Pause audio and wait 50ms for SDL to catch up.
-	sdlHandler->pause_audio(true);
-	usleep(50000);
-
-	// NULL out the VBackend before shutting down SDL.
-	vBackend = nullptr;
+	int ret = 0;
+	if (GensSdl::eventLoop) {
+		ret = GensSdl::eventLoop->run(rom_filename);
+	}
 
 	// Unregister the LibGens OSD handler.
 	lg_set_osd_fn(nullptr);
-
-	if (sdlHandler) {
-		// NOTE: Deleting sdlHandler can cause crashes on Windows
-		// due to the timer callback trying to post the semaphore
-		// after it's been deleted.
-		// Shut down the SDL functions manually.
-		sdlHandler->end_audio();
-		sdlHandler->end_video();
-		//delete sdlHandler;
-	}
 
 	// ...and we're done here.
 	return ret;
