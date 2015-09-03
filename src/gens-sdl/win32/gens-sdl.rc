@@ -21,9 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-// Resource script for Gens/GS Win32
+// Resource script for Gens/GS II's basic SDL2 frontend.
 #include "gens-sdl.h"
-#include "winnt.rh"
+#include "winresrc.h"
 
 // git version
 #include "libgens/macros/git.h"
