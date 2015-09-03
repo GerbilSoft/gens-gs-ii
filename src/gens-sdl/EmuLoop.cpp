@@ -286,10 +286,10 @@ static void doSaveState(void)
 static void doStretchMode(void)
 {
 	// Change stretch mode parameters.
-	int stretchMode = (int)sdlHandler->vBackend()->stretchMode();
+	int stretchMode = (int)vBackend->stretchMode();
 	stretchMode++;
 	stretchMode &= 3;
-	sdlHandler->vBackend()->setStretchMode((VBackend::StretchMode_t)stretchMode);
+	vBackend->setStretchMode((VBackend::StretchMode_t)stretchMode);
 
 	// Show an OSD message.
 	const char *stretch;
