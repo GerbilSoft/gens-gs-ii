@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 // Resource script for Gens/GS II's basic SDL2 frontend.
+#include <config.gens-sdl.h>
 #include "gens-sdl.h"
 #include "winresrc.h"
 
@@ -38,9 +39,11 @@ IDI_SONIC_WAITING	ICON		"sonic_wait.ico"
 // Manifest.
 CREATEPROCESS_MANIFEST_RESOURCE_ID	RT_MANIFEST	"gens-sdl.exe.manifest"
 
-// TODO: Gens/GS version number.
-#define GENS_GS_VERSION "0.0.0 (Development Build)"
-#define GENS_VERSION_WIN32 0,0,0,0
+// TODO: Define "Development Build" as VERSION_DESC or something.
+// TODO: Update all version definitions to match libzomg.
+// Also update libgens, gens-qt4, etc. to match libzomg.
+#define GENS_GS_VERSION VERSION_STRING " (Development Build)"
+#define GENS_VERSION_WIN32 VERSION_MAJOR,VERSION_MINOR,VERSION_PATCH,VERSION_DEVEL
 
 #ifdef GENS_GIT_VERSION
 #define Win32_RC_FileVersion GENS_GS_VERSION "\r\n" GENS_GIT_VERSION
@@ -68,15 +71,15 @@ BEGIN
 		BEGIN
 			//VALUE "Comments", ""
 			//VALUE "CompanyName", ""
-			VALUE "FileDescription", "Gens/GS II " GENS_GS_VERSION ""
-			VALUE "FileVersion", "Gens/GS II " Win32_RC_FileVersion ""
-			VALUE "InternalName", "Gens/GS II"
+			VALUE "FileDescription", "Gens/GS II (Basic SDL2 frontend)"
+			VALUE "FileVersion", Win32_RC_FileVersion
+			VALUE "InternalName", "Gens/GS II (Basic SDL2 frontend)"
 			//VALUE "LegalCopyright", ""
 			//VALUE "LegalTrademarks", ""
 			//VALUE "OriginalFilename", ""
 			//VALUE "PrivateBuild", ""
-			VALUE "ProductName", "Gens/GS II"
-			VALUE "ProductVersion", "Gens/GS II " Win32_RC_FileVersion
+			VALUE "ProductName", "Gens/GS II (Basic SDL2 frontend)"
+			VALUE "ProductVersion", Win32_RC_FileVersion
 			//VALUE "SpecialBuild", ""
 		END
 	END
