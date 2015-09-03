@@ -1,10 +1,10 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * config.gens-sdl.hcd.in: GensSdl configuration. (source file)              *
+ * gens-qt4.h: Win32 resource script.                                      *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2015 by David Korth.                                 *
+ * Copyright (c) 2008-2010 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,18 +21,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_CONFIG_GENS_SDL_H__
-#define __GENS_QT4_CONFIG_GENS_SDL_H__
+#ifndef __GENS_QT4_RESOURCE_H__
+#define __GENS_QT4_RESOURCE_H__
 
-/* Define to 1 if CPU emulation code should be enabled. */
-#cmakedefine GENS_ENABLE_EMULATION 1
+// Icons,
+#define IDI_GENS_APP		0x0001
+#define IDI_GENS_APP_OLD	0x0002
+#define IDI_GENS_MD		0x0003
+#define IDI_SONIC		0x0004
+#define IDI_SONIC_WAITING	0x0005
 
-/* CMake version macros. */
-#define VERSION_MAJOR @VERSION_MAJOR@
-#define VERSION_MINOR @VERSION_MINOR@
-#define VERSION_PATCH @VERSION_PATCH@
-#define VERSION_DEVEL @VERSION_DEVEL@
-#define VERSION_STRING "@VERSION_STRING@"
-#define VERSION_STRING_WIN32 "@VERSION_STRING_WIN32@"
-
-#endif /* __GENS_QT4_CONFIG_H__ */
+#endif /* __GENS_QT4_RESOURCE_H__ */
