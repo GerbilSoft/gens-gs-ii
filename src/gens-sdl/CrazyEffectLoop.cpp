@@ -191,6 +191,14 @@ int CrazyEffectLoop::run(const char *rom_filename)
 	delete d->crazyEffect;
 	d->crazyEffect = nullptr;
 
+	// NOTE: Deleting sdlHandler can cause crashes on Windows
+	// due to the timer callback trying to post the semaphore
+	// after it's been deleted.
+	// Shut down the SDL functions manually.
+	// FIXME: We're not using audio here, so maybe it won't crash?
+	d->sdlHandler->end_video();
+	d->vBackend = nullptr;
+
 	// Done running the "Crazy" Effect loop.
 	return 0;
 }
