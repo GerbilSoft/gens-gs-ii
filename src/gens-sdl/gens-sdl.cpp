@@ -148,8 +148,9 @@ static void gsdl_osd(OsdType osd_type, int param)
 	}
 
 	if (msg != nullptr) {
-		if (eventLoop->m_vBackend) {
-			eventLoop->m_vBackend->osd_printf(1500, msg, param);
+		VBackend *vBackend = eventLoop->vBackend();
+		if (vBackend) {
+			vBackend->osd_printf(1500, msg, param);
 		} else {
 			// SDL handler hasn't been created yet.
 			// Store the message for later.
@@ -170,9 +171,10 @@ static void gsdl_osd(OsdType osd_type, int param)
 void checkForStartupMessages(void)
 {
 	if (!startup_queue.empty()) {
+		VBackend *vBackend = eventLoop->vBackend();
 		for (int i = 0; i < (int)startup_queue.size(); i++) {
 			const OsdStartup &startup = startup_queue.at(i);
-			eventLoop->m_vBackend->osd_printf(startup.duration, startup.msg, startup.param);
+			vBackend->osd_printf(startup.duration, startup.msg, startup.param);
 		}
 	}
 }

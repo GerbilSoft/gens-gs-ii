@@ -22,20 +22,30 @@
 #ifndef __GENS_SDL_EVENTLOOP_HPP__
 #define __GENS_SDL_EVENTLOOP_HPP__
 
-#include "libgens/Util/Timing.hpp"
 #include <SDL.h>
+
+// from qglobal.h (qt-4.8.6)
+// TODO: Move to a common header, along with implementations
+// of Q_DISABLE_COPY(), Q_D(), Q_Q(), etc.?
+#define EVENT_LOOP_DECLARE_PRIVATE(Class) \
+    inline Class##Private* d_func() { return reinterpret_cast<Class##Private *>(d_ptr); } \
+    inline const Class##Private* d_func() const { return reinterpret_cast<const Class##Private *>(d_ptr); } \
+    friend class Class##Private;
 
 namespace GensSdl {
 
-class SdlHandler;
 class VBackend;
 
+class EventLoopPrivate;
 class EventLoop
 {
 	public:
-		EventLoop();
+		EventLoop(EventLoopPrivate *d);
 		virtual ~EventLoop();
 
+	protected:
+		EventLoopPrivate *const d_ptr;
+		EVENT_LOOP_DECLARE_PRIVATE(EventLoop)
 	private:
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add GensSdl-specific version of Q_DISABLE_COPY().
@@ -50,6 +60,12 @@ class EventLoop
 		 */
 		virtual int run(const char *rom_filename) = 0;
 
+		/**
+		 * Get the VBackend.
+		 * @return VBackend.
+		 */
+		VBackend *vBackend(void) const;
+
 	protected:
 		/**
 		 * Process an SDL event.
@@ -57,99 +73,6 @@ class EventLoop
 		 * @return 0 if the event was handled; non-zero if it wasn't.
 		 */
 		virtual int processSdlEvent(const SDL_Event *event);
-
-		/**
-		 * Toggle Fast Blur.
-		 */
-		void doFastBlur(void);
-
-		/**
-		 * Common pause processing function.
-		 * Called by doPause() and doAutoPause().
-		 */
-		void doPauseProcessing(void);
-
-		/**
-		 * Pause/unpause emulation.
-		 */
-		void doPause(void);
-
-		/**
-		 * Pause/unpause emulation in response to window focus changes.
-		 * @param lostFocus True if window lost focus; false if window gained focus.
-		 */
-		void doAutoPause(bool lostFocus);
-
-		/**
-		 * Show the "About" message.
-		 */
-		void doAboutMessage(void);
-
-	protected:
-		// TODO: Move to a private class?
-		bool m_running;
-		bool m_frameskip;
-
-		union paused_t {
-			struct {
-				uint8_t manual	: 1;	// Manual pause.
-				uint8_t focus	: 1;	// Auto pause when focus is lost.
-			};
-			uint8_t data;
-		};
-		paused_t m_paused;
-
-		// Automatically pause when the window loses focus?
-		bool m_autoPause;
-
-		// Window has been exposed.
-		// Video should be updated if emulation is paused.
-		bool m_exposed;
-
-		class clks_t {
-			public:
-				// Reset frameskip timers.
-				void reset(void) {
-					start_clk = timing.getTime();
-					old_clk = start_clk;
-					fps_clk = start_clk;
-					fps_clk = start_clk;
-					new_clk = start_clk;
-					usec_frameskip = 0;
-
-					// Frame counter.
-					frames = 0;
-					frames_old = 0;
-					fps = 0;
-				}
-
-				// Timing object.
-				LibGens::Timing timing;
-
-				// Clocks.
-				uint64_t start_clk;
-				uint64_t old_clk;
-				uint64_t fps_clk;
-				uint64_t new_clk;
-				// Microsecond counter for frameskip.
-				uint64_t usec_frameskip;
-
-				// Frame counters.
-				unsigned int frames;
-				unsigned int frames_old;
-				unsigned int fps;	// TODO: float or double?
-		};
-		clks_t m_clks;
-
-		// Last time the F1 message was displayed.
-		// This is here to prevent the user from spamming
-		// the display with the message.
-		uint64_t m_lastF1time;
-
-	public:
-		// TODO: Make this protected.
-		SdlHandler *m_sdlHandler;
-		VBackend *m_vBackend;
 };
 
 }

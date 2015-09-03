@@ -51,6 +51,7 @@ SET(gens-sdl_SRCS
 SET(gens-sdl_H
 	gens-sdl.hpp
 	EventLoop.hpp
+	EventLoop_p.hpp
 	EmuLoop.hpp
 	CrazyEffectLoop.hpp
 	SdlHandler.hpp

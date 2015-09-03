@@ -64,40 +64,18 @@ using LibGensKeys::KeyManager;
 using LibZomg::ZomgBase;
 using LibZomg::Zomg;
 
-// OS-specific includes.
-#ifdef _WIN32
-// Windows
-#include <windows.h>
-// Win32 Unicode Translation Layer.
-// Needed for proper Unicode filename support on Windows.
-#include "libcompat/W32U/W32U_mini.h"
-#include "libcompat/W32U/W32U_argv.h"
-#else
-// Linux, Unix, Mac OS X
-#include <unistd.h>
-#endif
-
-// yield(), aka usleep(0) or Sleep(0)
-#ifdef _WIN32
-// Windows
-#define yield() do { Sleep(0); } while (0)
-#define usleep(usec) Sleep((DWORD)((usec) / 1000))
-#else
-// Linux, Unix, Mac OS X
-#define yield() do { usleep(0); } while (0)
-#endif
-
 // C++ includes.
 #include <string>
 using std::string;
 
+#include "EventLoop_p.hpp"
 namespace GensSdl {
 
-class EmuLoopPrivate
+class EmuLoopPrivate : public EventLoopPrivate
 {
 	public:
 		EmuLoopPrivate();
-		~EmuLoopPrivate();
+		virtual ~EmuLoopPrivate();
 
 	private:
 		// Q_DISABLE_COPY() equivalent.
@@ -137,7 +115,8 @@ const GensKey_t EmuLoopPrivate::keyMap_pico[] = {
 };
 
 EmuLoopPrivate::EmuLoopPrivate()
-	: rom(nullptr)
+	: EventLoopPrivate()
+	, rom(nullptr)
 	, isPico(false)
 	, frameskip(true)
 	, emuContext(nullptr)
@@ -155,13 +134,11 @@ EmuLoopPrivate::~EmuLoopPrivate()
 /** EmuLoop **/
 
 EmuLoop::EmuLoop()
-	: d(new EmuLoopPrivate())
+	: EventLoop(new EmuLoopPrivate())
 { }
 
 EmuLoop::~EmuLoop()
-{
-	delete d;
-}
+{ }
 
 /**
  * Process an SDL event.
@@ -169,6 +146,7 @@ EmuLoop::~EmuLoop()
  * @return 0 if the event was handled; non-zero if it wasn't.
  */
 int EmuLoop::processSdlEvent(const SDL_Event *event) {
+	EmuLoopPrivate *const d = d_func();
 	int ret = 0;
 	switch (event->type) {
 		case SDL_KEYDOWN:
@@ -181,11 +159,11 @@ int EmuLoop::processSdlEvent(const SDL_Event *event) {
 					if (event->key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
 						// Hard Reset.
 						d->emuContext->hardReset();
-						m_vBackend->osd_print(1500, "Hard Reset.");
+						d->vBackend->osd_print(1500, "Hard Reset.");
 					} else {
 						// Soft Reset.
 						d->emuContext->softReset();
-						m_vBackend->osd_print(1500, "Soft Reset.");
+						d->vBackend->osd_print(1500, "Soft Reset.");
 					}
 					break;
 
@@ -347,6 +325,7 @@ void EmuLoop::doSaveSlot(int saveSlot)
 	assert(saveSlot >= 0 && saveSlot <= 9);
 	if (saveSlot < 0 || saveSlot > 9)
 		return;
+	EmuLoopPrivate *const d = d_func();
 	d->saveSlot_selected = saveSlot;
 
 	// Metadata variables.
@@ -385,9 +364,9 @@ void EmuLoop::doSaveSlot(int saveSlot)
 	}
 
 	// Show an OSD message.
-	m_vBackend->osd_printf(1500, "Slot %d [%s]", saveSlot, slot_state.c_str());
+	d->vBackend->osd_printf(1500, "Slot %d [%s]", saveSlot, slot_state.c_str());
 	// If img_data.data is nullptr, this will hide the current image.
-	m_vBackend->osd_preview_image(1500, &img_data);
+	d->vBackend->osd_preview_image(1500, &img_data);
 	free(img_data.data);
 }
 
@@ -396,6 +375,7 @@ void EmuLoop::doSaveSlot(int saveSlot)
  */
 void EmuLoop::doLoadState(void)
 {
+	EmuLoopPrivate *const d = d_func();
 	assert(d->saveSlot_selected >= 0 && d->saveSlot_selected <= 9);
 	if (d->saveSlot_selected < 0 || d->saveSlot_selected > 9)
 		return;
@@ -404,17 +384,17 @@ void EmuLoop::doLoadState(void)
 	int ret = d->emuContext->zomgLoad(filename.c_str());
 	if (ret == 0) {
 		// State loaded.
-		m_vBackend->osd_printf(1500, "Slot %d loaded.", d->saveSlot_selected);
+		d->vBackend->osd_printf(1500, "Slot %d loaded.", d->saveSlot_selected);
 	} else {
 		// Error loading state.
 		if (ret == -ENOENT) {
 			// File not found.
-			m_vBackend->osd_printf(1500,
+			d->vBackend->osd_printf(1500,
 				"Slot %d is empty.",
 				d->saveSlot_selected);
 		} else {
 			// Other error.
-			m_vBackend->osd_printf(1500,
+			d->vBackend->osd_printf(1500,
 				"Error loading Slot %d:\n* %s",
 				d->saveSlot_selected, strerror(-ret));
 		}
@@ -426,6 +406,7 @@ void EmuLoop::doLoadState(void)
  */
 void EmuLoop::doSaveState(void)
 {
+	EmuLoopPrivate *const d = d_func();
 	assert(d->saveSlot_selected >= 0 && d->saveSlot_selected <= 9);
 	if (d->saveSlot_selected < 0 || d->saveSlot_selected > 9)
 		return;
@@ -434,12 +415,12 @@ void EmuLoop::doSaveState(void)
 	int ret = d->emuContext->zomgSave(filename.c_str());
 	if (ret == 0) {
 		// State saved.
-		m_vBackend->osd_printf(1500,
+		d->vBackend->osd_printf(1500,
 				"Slot %d saved.",
 				d->saveSlot_selected);
 	} else {
 		// Error saving state.
-		m_vBackend->osd_printf(1500,
+		d->vBackend->osd_printf(1500,
 				"Error saving Slot %d:\n* %s",
 				d->saveSlot_selected, strerror(-ret));
 	}
@@ -451,10 +432,11 @@ void EmuLoop::doSaveState(void)
 void EmuLoop::doStretchMode(void)
 {
 	// Change stretch mode parameters.
-	int stretchMode = (int)m_vBackend->stretchMode();
+	EmuLoopPrivate *const d = d_func();
+	int stretchMode = (int)d->vBackend->stretchMode();
 	stretchMode++;
 	stretchMode &= 3;
-	m_vBackend->setStretchMode((VBackend::StretchMode_t)stretchMode);
+	d->vBackend->setStretchMode((VBackend::StretchMode_t)stretchMode);
 
 	// Show an OSD message.
 	const char *stretch;
@@ -474,7 +456,7 @@ void EmuLoop::doStretchMode(void)
 			break;
 	}
 
-	m_vBackend->osd_printf(1500, "Stretch Mode set to %s.", stretch);
+	d->vBackend->osd_printf(1500, "Stretch Mode set to %s.", stretch);
 }
 
 /**
@@ -482,12 +464,13 @@ void EmuLoop::doStretchMode(void)
  */
 void EmuLoop::doScreenShot(void)
 {
+	EmuLoopPrivate *const d = d_func();
 	int ret = GensSdl::doScreenShot(d->emuContext->m_vdp->MD_Screen, d->rom);
 	if (ret >= 0) {
-		m_vBackend->osd_printf(1500,
+		d->vBackend->osd_printf(1500,
 			"Screenshot %d saved.", ret);
 	} else {
-		m_vBackend->osd_printf(1500,
+		d->vBackend->osd_printf(1500,
 			"Error saving screenshot:\n* %s", strerror(-ret));
 	}
 }
@@ -500,6 +483,7 @@ void EmuLoop::doScreenShot(void)
 int EmuLoop::run(const char *rom_filename)
 {
 	// Load the ROM image.
+	EmuLoopPrivate *const d = d_func();
 	d->rom = new Rom(rom_filename);
 	if (!d->rom->isOpen()) {
 		// Error opening the ROM.
@@ -551,15 +535,15 @@ int EmuLoop::run(const char *rom_filename)
 	}
 
 	// Initialize the SDL handlers.
-	m_sdlHandler = new SdlHandler();
-	if (m_sdlHandler->init_video() < 0)
+	d->sdlHandler = new SdlHandler();
+	if (d->sdlHandler->init_video() < 0)
 		return EXIT_FAILURE;
-	if (m_sdlHandler->init_audio() < 0)
+	if (d->sdlHandler->init_audio() < 0)
 		return EXIT_FAILURE;
-	m_vBackend = m_sdlHandler->vBackend();
+	d->vBackend = d->sdlHandler->vBackend();
 
 	// Set the window title.
-	m_sdlHandler->set_window_title("Gens/GS II [SDL]");
+	d->sdlHandler->set_window_title("Gens/GS II [SDL]");
 
 	// Check for startup messages.
 	checkForStartupMessages();
@@ -568,7 +552,7 @@ int EmuLoop::run(const char *rom_filename)
 	// TODO: Region code?
 	bool isPal = false;
 	const unsigned int usec_per_frame = (1000000 / (isPal ? 50 : 60));
-	m_clks.reset();
+	d->clks.reset();
 
 	// TODO: Close the ROM, or let EmuContext do it?
 
@@ -578,10 +562,10 @@ int EmuLoop::run(const char *rom_filename)
 	fb->setBpp(MdFb::BPP_32);
 
 	// Set the SDL video source.
-	m_sdlHandler->set_video_source(fb);
+	d->sdlHandler->set_video_source(fb);
 
 	// Start audio.
-	m_sdlHandler->pause_audio(false);
+	d->sdlHandler->pause_audio(false);
 
 	// Initialize the I/O Manager with a default key layout.
 	d->keyManager = new KeyManager();
@@ -599,13 +583,13 @@ int EmuLoop::run(const char *rom_filename)
 
 	// TODO: Move some more common stuff back to gens-sdl.cpp.
 	uint8_t old_paused = 0;
-	m_running = true;
-	while (m_running) {
+	d->running = true;
+	while (d->running) {
 		SDL_Event event;
 		int ret;
-		if (m_paused.data) {
+		if (d->paused.data) {
 			// Emulation is paused.
-			if (!m_vBackend->has_osd_messages()) {
+			if (!d->vBackend->has_osd_messages()) {
 				// No OSD messages.
 				// Wait for an SDL event.
 				ret = SDL_WaitEvent(&event);
@@ -615,9 +599,9 @@ int EmuLoop::run(const char *rom_filename)
 			}
 
 			// Process OSD messages.
-			m_vBackend->process_osd_messages();
+			d->vBackend->process_osd_messages();
 		}
-		if (!m_running)
+		if (!d->running)
 			break;
 
 		// Poll for SDL events, and wait for the queue
@@ -628,68 +612,68 @@ int EmuLoop::run(const char *rom_filename)
 			if (ret) {
 				processSdlEvent(&event);
 			}
-		} while (m_running && ret != 0);
-		if (!m_running)
+		} while (d->running && ret != 0);
+		if (!d->running)
 			break;
 
 		// Check if the 'paused' state was changed.
 		// If it was, autosave SRAM/EEPROM.
-		if (old_paused != m_paused.data) {
+		if (old_paused != d->paused.data) {
 			// 'paused' state was changed.
 			// (TODO: Only if paused == true?)
 			d->emuContext->autoSaveData(-1);
-			old_paused = m_paused.data;
+			old_paused = d->paused.data;
 		}
 
-		if (m_paused.data) {
+		if (d->paused.data) {
 			// Emulation is paused.
 			// Only update video if the VBackend is dirty
 			// or the SDL window has been exposed.
-			m_sdlHandler->update_video_paused(m_exposed);
+			d->sdlHandler->update_video_paused(d->exposed);
 
 			// Don't run any frames.
 			continue;
 		}
 
 		// Clear the 'exposed' flag.
-		m_exposed = false;
+		d->exposed = false;
 
 		// New start time.
-		m_clks.new_clk = m_clks.timing.getTime();
+		d->clks.new_clk = d->clks.timing.getTime();
 
 		// Update the FPS counter.
-		unsigned int fps_tmp = ((m_clks.new_clk - m_clks.fps_clk) & 0x3FFFFF);
+		unsigned int fps_tmp = ((d->clks.new_clk - d->clks.fps_clk) & 0x3FFFFF);
 		if (fps_tmp >= 1000000) {
 			// More than 1 second has passed.
-			m_clks.fps_clk = m_clks.new_clk;
+			d->clks.fps_clk = d->clks.new_clk;
 			// FIXME: Just use abs() here.
-			if (m_clks.frames_old > m_clks.frames) {
-				m_clks.fps = (m_clks.frames_old - m_clks.frames);
+			if (d->clks.frames_old > d->clks.frames) {
+				d->clks.fps = (d->clks.frames_old - d->clks.frames);
 			} else {
-				m_clks.fps = (m_clks.frames - m_clks.frames_old);
+				d->clks.fps = (d->clks.frames - d->clks.frames_old);
 			}
-			m_clks.frames_old = m_clks.frames;
+			d->clks.frames_old = d->clks.frames;
 
 			// Update the window title.
 			// TODO: Average the FPS over multiple seconds
 			// and/or quarter-seconds.
 			char win_title[256];
-			snprintf(win_title, sizeof(win_title), "Gens/GS II [SDL] - %u fps", m_clks.fps);
-			m_sdlHandler->set_window_title(win_title);
+			snprintf(win_title, sizeof(win_title), "Gens/GS II [SDL] - %u fps", d->clks.fps);
+			d->sdlHandler->set_window_title(win_title);
 		}
 
 		// Frameskip.
-		if (m_frameskip) {
+		if (d->frameskip) {
 			// Determine how many frames to run.
-			m_clks.usec_frameskip += ((m_clks.new_clk - m_clks.old_clk) & 0x3FFFFF); // no more than 4 secs
-			unsigned int frames_todo = (unsigned int)(m_clks.usec_frameskip / usec_per_frame);
-			m_clks.usec_frameskip %= usec_per_frame;
-			m_clks.old_clk = m_clks.new_clk;
+			d->clks.usec_frameskip += ((d->clks.new_clk - d->clks.old_clk) & 0x3FFFFF); // no more than 4 secs
+			unsigned int frames_todo = (unsigned int)(d->clks.usec_frameskip / usec_per_frame);
+			d->clks.usec_frameskip %= usec_per_frame;
+			d->clks.old_clk = d->clks.new_clk;
 
 			if (frames_todo == 0) {
 				// No frames to do yet.
 				// Wait until the next frame.
-				uint64_t usec_sleep = (usec_per_frame - m_clks.usec_frameskip);
+				uint64_t usec_sleep = (usec_per_frame - d->clks.usec_frameskip);
 				if (usec_sleep > 1000) {
 					// Never sleep for longer than the 50 Hz value
 					// so events are checked often enough.
@@ -701,10 +685,10 @@ int EmuLoop::run(const char *rom_filename)
 #ifdef _WIN32
 					// Win32: Use a yield() loop.
 					// FIXME: Doesn't work properly on VBox/WinXP...
-					uint64_t yield_end = m_clks.timing.getTime() + usec_sleep;
+					uint64_t yield_end = d->clks.timing.getTime() + usec_sleep;
 					do {
 						yield();
-					} while (yield_end > m_clks.timing.getTime());
+					} while (yield_end > d->clks.timing.getTime());
 #else /* !_WIN32 */
 					// Linux: Use usleep().
 					usleep(usec_sleep);
@@ -715,16 +699,16 @@ int EmuLoop::run(const char *rom_filename)
 				for (; frames_todo != 1; frames_todo--) {
 					// Run a frame without rendering.
 					d->emuContext->execFrameFast();
-					m_sdlHandler->update_audio();
+					d->sdlHandler->update_audio();
 				}
 				frames_todo = 0;
 
 				// Run a frame and render it.
 				d->emuContext->execFrame();
-				m_sdlHandler->update_audio();
-				m_sdlHandler->update_video();
+				d->sdlHandler->update_audio();
+				d->sdlHandler->update_video();
 				// Increment the frame counter.
-				m_clks.frames++;
+				d->clks.frames++;
 
 				// Autosave SRAM/EEPROM.
 				// TODO: EmuContext::execFrame() should probably do this itself...
@@ -733,10 +717,10 @@ int EmuLoop::run(const char *rom_filename)
 		} else {
 			// Run a frame and render it.
 			d->emuContext->execFrame();
-			m_sdlHandler->update_audio();
-			m_sdlHandler->update_video();
+			d->sdlHandler->update_audio();
+			d->sdlHandler->update_video();
 			// Increment the frame counter.
-			m_clks.frames++;
+			d->clks.frames++;
 
 			// Autosave SRAM/EEPROM.
 			// TODO: EmuContext::execFrame() should probably do this itself...
@@ -763,16 +747,16 @@ int EmuLoop::run(const char *rom_filename)
 	d->rom = nullptr;
 
 	// Pause audio and wait 50ms for SDL to catch up.
-	m_sdlHandler->pause_audio(true);
+	d->sdlHandler->pause_audio(true);
 	usleep(50000);
 
 	// NOTE: Deleting sdlHandler can cause crashes on Windows
 	// due to the timer callback trying to post the semaphore
 	// after it's been deleted.
 	// Shut down the SDL functions manually.
-	m_sdlHandler->end_audio();
-	m_sdlHandler->end_video();
-	m_vBackend = nullptr;
+	d->sdlHandler->end_audio();
+	d->sdlHandler->end_video();
+	d->vBackend = nullptr;
 
 	// Done running the emulation loop.
 	return 0;

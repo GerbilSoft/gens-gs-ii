@@ -39,8 +39,7 @@ class EmuLoop : public EventLoop
 		virtual ~EmuLoop();
 
 	private:
-		friend class EmuLoopPrivate;
-		EmuLoopPrivate *const d;
+		EVENT_LOOP_DECLARE_PRIVATE(EmuLoop)
 	private:
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add GensSdl-specific version of Q_DISABLE_COPY().

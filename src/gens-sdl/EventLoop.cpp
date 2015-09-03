@@ -40,170 +40,45 @@ using GensSdl::VBackend;
 #include "libgens/Util/MdFb.hpp"
 using LibGens::MdFb;
 
-// OS-specific includes.
-#ifdef _WIN32
-// Windows
-#include <windows.h>
-// Win32 Unicode Translation Layer.
-// Needed for proper Unicode filename support on Windows.
-#include "libcompat/W32U/W32U_mini.h"
-#include "libcompat/W32U/W32U_argv.h"
-#else
-// Linux, Unix, Mac OS X
-#include <unistd.h>
-#endif
-
-// yield(), aka usleep(0) or Sleep(0)
-#ifdef _WIN32
-// Windows
-#define yield() do { Sleep(0); } while (0)
-#define usleep(usec) Sleep((DWORD)((usec) / 1000))
-#else
-// Linux, Unix, Mac OS X
-#define yield() do { usleep(0); } while (0)
-#endif
-
 // C++ includes.
 #include <string>
 using std::string;
 
+#include "EventLoop_p.hpp"
 namespace GensSdl {
 
-EventLoop::EventLoop()
-	: m_running(false)
-	, m_autoPause(false)
-	, m_lastF1time(0)
+/** EventLoopPrivate **/
+
+EventLoopPrivate::EventLoopPrivate()
+	: sdlHandler(nullptr)
+	, vBackend(nullptr)
+	, running(false)
+	, frameskip(true)
+	, autoPause(false)
+	, exposed(false)
+	, lastF1time(0)
 {
-	m_paused.data = 0;
+	paused.data = 0;
 }
 
-EventLoop::~EventLoop()
+EventLoopPrivate::~EventLoopPrivate()
 {
-	// Shut down SDL.
-	// TODO
-}
-
-/**
- * Process an SDL event.
- * @param event SDL event.
- * @return 0 if the event was handled; non-zero if it wasn't.
- */
-int EventLoop::processSdlEvent(const SDL_Event *event) {
-	// NOTE: Some keys are processed in specific event loops
-	// instead of here because they only apply if a ROM is loaded.
-	// gens-qt4 won't make a distinction, since it can run with
-	// both a ROM loaded and not loaded, and you can open and close
-	// ROMs without restarting the program, so it has to be able
-	// to switch modes while allowing options to be change both
-	// when a ROM is loaded and when no ROM is loaded.
-	// In essence, it combines both EmuLoop and CrazyEffectLoop
-	// while maintaining the state of various emulation options.
-
-	int ret = 0;
-	switch (event->type) {
-		case SDL_QUIT:
-			m_running = false;
-			break;
-
-		case SDL_KEYDOWN:
-			// SDL keycodes nearly match GensKey.
-			// TODO: Split out into a separate function?
-			// TODO: Check for "no modifiers" for some keys?
-			switch (event->key.keysym.sym) {
-				case SDLK_ESCAPE:
-					// Pause emulation.
-					doPause();
-					break;
-
-				case SDLK_RETURN:
-					// Check for Alt+Enter.
-					if ((event->key.keysym.mod & KMOD_ALT) &&
-					    !(event->key.keysym.mod & ~KMOD_ALT))
-					{
-						// Alt+Enter. Toggle fullscreen.
-						m_sdlHandler->toggle_fullscreen();
-					} else {
-						// Not Alt+Enter.
-						// We're not handling this event.
-						ret = 1;
-					}
-					break;
-
-				case SDLK_F1:
-					// Show the "About" message.
-					doAboutMessage();
-					break;
-
-				case SDLK_F9:
-					// Fast Blur.
-					doFastBlur();
-					break;
-
-				case SDLK_F12:
-					// FIXME: TEMPORARY KEY BINDING for debugging.
-					m_vBackend->setAspectRatioConstraint(!m_vBackend->aspectRatioConstraint());
-					break;
-
-				default:
-					// Event not handled.
-					ret = 1;
-					break;
-			}
-			break;
-
-		case SDL_WINDOWEVENT:
-			switch (event->window.event) {
-				case SDL_WINDOWEVENT_RESIZED:
-					// Resize the video renderer.
-					m_sdlHandler->resize_video(event->window.data1, event->window.data2);
-					break;
-				case SDL_WINDOWEVENT_EXPOSED:
-					// Window has been exposed.
-					// Tell the main loop to update video.
-					m_exposed = true;
-					break;
-				case SDL_WINDOWEVENT_FOCUS_LOST:
-					// If AutoPause is enabled, pause the emulator.
-					if (m_autoPause) {
-						doAutoPause(true);
-					}
-					break;
-				case SDL_WINDOWEVENT_FOCUS_GAINED:
-					// If AutoPause is enabled, unpause the emulator.
-					// TODO: Always run this, even if !autoPause?
-					if (m_autoPause) {
-						doAutoPause(false);
-					}
-					break;
-				default:
-					// Event not handled.
-					ret = 1;
-					break;
-			}
-			break;
-
-		default:
-			// Event not handled.
-			ret = 1;
-			break;
-	}
-
-	return ret;
+	// TODO: Shut down SDL if it's still running?
 }
 
 /**
  * Toggle Fast Blur.
  */
-void EventLoop::doFastBlur(void)
+void EventLoopPrivate::doFastBlur(void)
 {
-	bool fastBlur = !m_vBackend->fastBlur();
-	m_vBackend->setFastBlur(fastBlur);
+	bool fastBlur = !vBackend->fastBlur();
+	vBackend->setFastBlur(fastBlur);
 
 	// Show an OSD message.
 	if (fastBlur) {
-		m_vBackend->osd_print(1500, "Fast Blur enabled.");
+		vBackend->osd_print(1500, "Fast Blur enabled.");
 	} else {
-		m_vBackend->osd_print(1500, "Fast Blur disabled.");
+		vBackend->osd_print(1500, "Fast Blur disabled.");
 	}
 }
 
@@ -211,33 +86,33 @@ void EventLoop::doFastBlur(void)
  * Common pause processing function.
  * Called by doPause() and doAutoPause().
  */
-void EventLoop::doPauseProcessing(void)
+void EventLoopPrivate::doPauseProcessing(void)
 {
-	bool manual = m_paused.manual;
-	bool any = !!m_paused.data;
+	bool manual = paused.manual;
+	bool any = !!paused.data;
 	// TODO: Option to disable the Paused Effect?
 	// When enabled, it's only used for Manual Pause.
-	m_vBackend->setPausedEffect(manual);
+	vBackend->setPausedEffect(manual);
 
 	// Reset the clocks and counters.
-	m_clks.reset();
+	clks.reset();
 	// Pause audio.
-	m_sdlHandler->pause_audio(any);
+	sdlHandler->pause_audio(any);
 
 	// Update the window title.
 	if (manual) {
-		m_sdlHandler->set_window_title("Gens/GS II [SDL] [Paused]");
+		sdlHandler->set_window_title("Gens/GS II [SDL] [Paused]");
 	} else {
-		m_sdlHandler->set_window_title("Gens/GS II [SDL]");
+		sdlHandler->set_window_title("Gens/GS II [SDL]");
 	}
 }
 
 /**
  * Pause/unpause emulation.
  */
-void EventLoop::doPause(void)
+void EventLoopPrivate::doPause(void)
 {
-	m_paused.manual = !m_paused.manual;
+	paused.manual = !paused.manual;
 	doPauseProcessing();
 }
 
@@ -245,20 +120,20 @@ void EventLoop::doPause(void)
  * Pause/unpause emulation in response to window focus changes.
  * @param lostFocus True if window lost focus; false if window gained focus.
  */
-void EventLoop::doAutoPause(bool lostFocus)
+void EventLoopPrivate::doAutoPause(bool lostFocus)
 {
-	m_paused.focus = lostFocus;
+	paused.focus = lostFocus;
 	doPauseProcessing();
 }
 
 /**
  * Show the "About" message.
  */
-void EventLoop::doAboutMessage(void)
+void EventLoopPrivate::doAboutMessage(void)
 {
        // TODO: OSD Gens logo as preview image, but with drop shadow disabled?
-       const uint64_t curTime = m_clks.timing.getTime();
-       if (m_lastF1time > 0 && (m_lastF1time + 5000000 > curTime)) {
+       const uint64_t curTime = clks.timing.getTime();
+       if (lastF1time > 0 && (lastF1time + 5000000 > curTime)) {
                // Timer hasn't expired.
                // Don't show the message.
                return;
@@ -282,10 +157,139 @@ void EventLoop::doAboutMessage(void)
 	ver_str += "(c) 2008-2015 by David Korth.";
 
        // Show a new message.
-       m_vBackend->osd_print(5000, ver_str.c_str());
+       vBackend->osd_print(5000, ver_str.c_str());
 
        // Save the current time.
-       m_lastF1time = curTime;
+       lastF1time = curTime;
+}
+
+/** EventLoop **/
+
+EventLoop::EventLoop(EventLoopPrivate *d)
+	: d_ptr(d)
+{ }
+
+EventLoop::~EventLoop()
+{
+	delete d_ptr;
+}
+
+/**
+ * Get the VBackend.
+ * @return VBackend.
+ */
+VBackend *EventLoop::vBackend(void) const
+{
+	return d_ptr->vBackend;
+}
+
+/**
+ * Process an SDL event.
+ * @param event SDL event.
+ * @return 0 if the event was handled; non-zero if it wasn't.
+ */
+int EventLoop::processSdlEvent(const SDL_Event *event)
+{
+	// NOTE: Some keys are processed in specific event loops
+	// instead of here because they only apply if a ROM is loaded.
+	// gens-qt4 won't make a distinction, since it can run with
+	// both a ROM loaded and not loaded, and you can open and close
+	// ROMs without restarting the program, so it has to be able
+	// to switch modes while allowing options to be change both
+	// when a ROM is loaded and when no ROM is loaded.
+	// In essence, it combines both EmuLoop and CrazyEffectLoop
+	// while maintaining the state of various emulation options.
+
+	int ret = 0;
+	switch (event->type) {
+		case SDL_QUIT:
+			d_ptr->running = false;
+			break;
+
+		case SDL_KEYDOWN:
+			// SDL keycodes nearly match GensKey.
+			// TODO: Split out into a separate function?
+			// TODO: Check for "no modifiers" for some keys?
+			switch (event->key.keysym.sym) {
+				case SDLK_ESCAPE:
+					// Pause emulation.
+					d_ptr->doPause();
+					break;
+
+				case SDLK_RETURN:
+					// Check for Alt+Enter.
+					if ((event->key.keysym.mod & KMOD_ALT) &&
+					    !(event->key.keysym.mod & ~KMOD_ALT))
+					{
+						// Alt+Enter. Toggle fullscreen.
+						d_ptr->sdlHandler->toggle_fullscreen();
+					} else {
+						// Not Alt+Enter.
+						// We're not handling this event.
+						ret = 1;
+					}
+					break;
+
+				case SDLK_F1:
+					// Show the "About" message.
+					d_ptr->doAboutMessage();
+					break;
+
+				case SDLK_F9:
+					// Fast Blur.
+					d_ptr->doFastBlur();
+					break;
+
+				case SDLK_F12:
+					// FIXME: TEMPORARY KEY BINDING for debugging.
+					d_ptr->vBackend->setAspectRatioConstraint(!d_ptr->vBackend->aspectRatioConstraint());
+					break;
+
+				default:
+					// Event not handled.
+					ret = 1;
+					break;
+			}
+			break;
+
+		case SDL_WINDOWEVENT:
+			switch (event->window.event) {
+				case SDL_WINDOWEVENT_RESIZED:
+					// Resize the video renderer.
+					d_ptr->sdlHandler->resize_video(event->window.data1, event->window.data2);
+					break;
+				case SDL_WINDOWEVENT_EXPOSED:
+					// Window has been exposed.
+					// Tell the main loop to update video.
+					d_ptr->exposed = true;
+					break;
+				case SDL_WINDOWEVENT_FOCUS_LOST:
+					// If AutoPause is enabled, pause the emulator.
+					if (d_ptr->autoPause) {
+						d_ptr->doAutoPause(true);
+					}
+					break;
+				case SDL_WINDOWEVENT_FOCUS_GAINED:
+					// If AutoPause is enabled, unpause the emulator.
+					// TODO: Always run this, even if !autoPause?
+					if (d_ptr->autoPause) {
+						d_ptr->doAutoPause(false);
+					}
+					break;
+				default:
+					// Event not handled.
+					ret = 1;
+					break;
+			}
+			break;
+
+		default:
+			// Event not handled.
+			ret = 1;
+			break;
+	}
+
+	return ret;
 }
 
 }

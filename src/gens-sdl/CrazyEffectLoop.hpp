@@ -34,8 +34,7 @@ class CrazyEffectLoop : public EventLoop
 		virtual ~CrazyEffectLoop();
 
 	private:
-		friend class CrazyEffectLoopPrivate;
-		CrazyEffectLoopPrivate *const d;
+		EVENT_LOOP_DECLARE_PRIVATE(CrazyEffectLoop)
 	private:
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add GensSdl-specific version of Q_DISABLE_COPY().
