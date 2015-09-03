@@ -1,6 +1,6 @@
 /***************************************************************************
- * gens-qt4: Gens Qt4 UI.                                                  *
- * gens-qt4.rc: Win32 resource script.                                     *
+ * gens-sdl: Gens/GS II basic SDL frontend.                                *
+ * gens-sdl.rc: Win32 resource script.                                     *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,9 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-// Resource script for Gens/GS II's Qt4 frontend.
-#include <config.gens-qt4.h>
-#include "gens-qt4.h"
+// Resource script for Gens/GS II's basic SDL2 frontend.
+#include <config.gens-sdl.h>
+#include "gens-sdl.h"
 #include "winresrc.h"
 
 // git version
@@ -37,11 +37,11 @@ IDI_SONIC		ICON		"sonic.ico"
 IDI_SONIC_WAITING	ICON		"sonic_wait.ico"
 
 // Manifest.
-CREATEPROCESS_MANIFEST_RESOURCE_ID	RT_MANIFEST	"gens-qt4.exe.manifest"
+CREATEPROCESS_MANIFEST_RESOURCE_ID	RT_MANIFEST	"gens-sdl.exe.manifest"
 
 // TODO: Define "Development Build" as VERSION_DESC or something.
 // TODO: Update all version definitions to match libzomg.
-// Also update libgens, etc. to match libzomg.
+// Also update libgens, gens-qt4, etc. to match libzomg.
 #define GENS_GS_VERSION VERSION_STRING " (Development Build)"
 #define GENS_VERSION_WIN32 VERSION_MAJOR,VERSION_MINOR,VERSION_PATCH,VERSION_DEVEL
 
@@ -71,14 +71,14 @@ BEGIN
 		BEGIN
 			//VALUE "Comments", ""
 			//VALUE "CompanyName", ""
-			VALUE "FileDescription", "Gens/GS II (Qt4 frontend)"
+			VALUE "FileDescription", "Gens/GS II (Basic SDL2 frontend)"
 			VALUE "FileVersion", Win32_RC_FileVersion
-			VALUE "InternalName", "Gens/GS II (Qt4 frontend)"
+			VALUE "InternalName", "Gens/GS II (Basic SDL2 frontend)"
 			//VALUE "LegalCopyright", ""
 			//VALUE "LegalTrademarks", ""
 			//VALUE "OriginalFilename", ""
 			//VALUE "PrivateBuild", ""
-			VALUE "ProductName", "Gens/GS II (Qt4 frontend)"
+			VALUE "ProductName", "Gens/GS II (Basic SDL2 frontend)"
 			VALUE "ProductVersion", Win32_RC_FileVersion
 			//VALUE "SpecialBuild", ""
 		END

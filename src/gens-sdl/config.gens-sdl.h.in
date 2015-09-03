@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-qt4: Gens Qt4 UI.                                                  *
- * config.gens-sdl.h.in: GensSdl configuration. (source file)              *
+ * config.gens-sdl.hcd.in: GensSdl configuration. (source file)              *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -26,5 +26,13 @@
 
 /* Define to 1 if CPU emulation code should be enabled. */
 #cmakedefine GENS_ENABLE_EMULATION 1
+
+/* CMake version macros. */
+#define VERSION_MAJOR @VERSION_MAJOR@
+#define VERSION_MINOR @VERSION_MINOR@
+#define VERSION_PATCH @VERSION_PATCH@
+#define VERSION_DEVEL @VERSION_DEVEL@
+#define VERSION_STRING "@VERSION_STRING@"
+#define VERSION_STRING_WIN32 "@VERSION_STRING_WIN32@"
 
 #endif /* __GENS_QT4_CONFIG_H__ */

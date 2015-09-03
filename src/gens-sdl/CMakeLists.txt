@@ -84,6 +84,13 @@ SET(gens-sdl_SHADER_H
 	GLShaderFastBlur.hpp
 	)
 
+# Win32 resources.
+IF(WIN32)
+	SET(gens-sdl_PLATFORM_SRCS
+		win32/gens-sdl.rc
+		)
+ENDIF(WIN32)
+
 # Main target.
 ADD_EXECUTABLE(gens-sdl
 	${gens-sdl_SRCS}
@@ -92,6 +99,7 @@ ADD_EXECUTABLE(gens-sdl
 	${gens-sdl_OSD_H}
 	${gens-sdl_SHADER_SRCS}
 	${gens-sdl_SHADER_H}
+	${gens-sdl_PLATFORM_SRCS}
 	)
 TARGET_LINK_LIBRARIES(gens-sdl compat gens genskeys zomg)
 DO_SPLIT_DEBUG(gens-sdl)

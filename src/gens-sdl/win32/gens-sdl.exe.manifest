@@ -2,12 +2,12 @@
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
 	<assemblyIdentity
 		type="win32"
-		name="Gens/GS II (Qt4 frontend)"
+		name="Gens/GS II (Basic SDL2 frontend)"
 		version="0.0.0.1"
 		processorArchitecture="x86"
 	/>
 
-	<description>Gens/GS II (Qt4 frontend)</description>
+	<description>Gens/GS II (Basic SDL2 frontend)</description>
 
 	<!-- Common Controls 6. Needed for visual styles on XP and later. -->
 	<dependency>
