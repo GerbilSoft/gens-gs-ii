@@ -21,9 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-// Resource script for Gens/GS Win32
+// Resource script for Gens/GS II's Qt4 frontend.
+#include <config.gens-qt4.h>
 #include "gens-qt4.h"
-#include "winnt.rh"
+#include "winresrc.h"
 
 // git version
 #include "libgens/macros/git.h"
@@ -38,9 +39,11 @@ IDI_SONIC_WAITING	ICON		"sonic_wait.ico"
 // Manifest.
 CREATEPROCESS_MANIFEST_RESOURCE_ID	RT_MANIFEST	"gens-qt4.exe.manifest"
 
-// TODO: Gens/GS version number.
-#define GENS_GS_VERSION "0.0.0 (Development Build)"
-#define GENS_VERSION_WIN32 0,0,0,0
+// TODO: Define "Development Build" as VERSION_DESC or something.
+// TODO: Update all version definitions to match libzomg.
+// Also update libgens, etc. to match libzomg.
+#define GENS_GS_VERSION VERSION_STRING " (Development Build)"
+#define GENS_VERSION_WIN32 VERSION_MAJOR,VERSION_MINOR,VERSION_PATCH,VERSION_DEVEL
 
 #ifdef GENS_GIT_VERSION
 #define Win32_RC_FileVersion GENS_GS_VERSION "\r\n" GENS_GIT_VERSION
@@ -66,18 +69,18 @@ BEGIN
 	BEGIN
 		BLOCK "040904b0"
 		BEGIN
-			//VALUE "Comments", "\0"
-			//VALUE "CompanyName", "\0"
-			VALUE "FileDescription", "Gens/GS II " GENS_GS_VERSION "\0"
-			VALUE "FileVersion", "Gens/GS II " Win32_RC_FileVersion "\0"
-			VALUE "InternalName", "Gens/GS II\0"
-			//VALUE "LegalCopyright", "\0"
-			//VALUE "LegalTrademarks", "\0"
-			//VALUE "OriginalFilename", "\0"
-			//VALUE "PrivateBuild", "\0"
-			VALUE "ProductName", "Gens/GS II\0"
-			VALUE "ProductVersion", "Gens/GS II " Win32_RC_FileVersion "\0"
-			//VALUE "SpecialBuild", "\0"
+			//VALUE "Comments", ""
+			//VALUE "CompanyName", ""
+			VALUE "FileDescription", "Gens/GS II (Qt4 frontend)"
+			VALUE "FileVersion", Win32_RC_FileVersion
+			VALUE "InternalName", "Gens/GS II (Qt4 frontend)"
+			//VALUE "LegalCopyright", ""
+			//VALUE "LegalTrademarks", ""
+			//VALUE "OriginalFilename", ""
+			//VALUE "PrivateBuild", ""
+			VALUE "ProductName", "Gens/GS II (Qt4 frontend)"
+			VALUE "ProductVersion", Win32_RC_FileVersion
+			//VALUE "SpecialBuild", ""
 		END
 	END
 	BLOCK "VarFileInfo"

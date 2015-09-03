@@ -54,4 +54,12 @@
 /* Define to 1 if QtDBus is available. */
 #cmakedefine QT_QTDBUS_FOUND 1
 
+/* CMake version macros. */
+#define VERSION_MAJOR @VERSION_MAJOR@
+#define VERSION_MINOR @VERSION_MINOR@
+#define VERSION_PATCH @VERSION_PATCH@
+#define VERSION_DEVEL @VERSION_DEVEL@
+#define VERSION_STRING "@VERSION_STRING@"
+#define VERSION_STRING_WIN32 "@VERSION_STRING_WIN32@"
+
 #endif /* __GENS_QT4_CONFIG_H__ */
