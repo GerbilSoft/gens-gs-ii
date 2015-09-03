@@ -73,6 +73,14 @@ class EventLoop
 		 * @return 0 if the event was handled; non-zero if it wasn't.
 		 */
 		virtual int processSdlEvent(const SDL_Event *event);
+
+		/**
+		 * Process the SDL event queue.
+		 * If emulation is paused and the OSD message,
+		 * list is empty, SDL_WaitEvent() will be used
+		 * to wait for the next event.
+		 */
+		void processSdlEventQueue(void);
 };
 
 }

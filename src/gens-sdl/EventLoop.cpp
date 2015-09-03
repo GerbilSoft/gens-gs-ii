@@ -292,4 +292,54 @@ int EventLoop::processSdlEvent(const SDL_Event *event)
 	return ret;
 }
 
+/**
+ * Process the SDL event queue.
+ * If emulation is paused and the OSD message,
+ * list is empty, SDL_WaitEvent() will be used
+ * to wait for the next event.
+ */
+void EventLoop::processSdlEventQueue(void)
+{
+	SDL_Event event;
+	int ret;
+	if (d_ptr->paused.data) {
+		// Emulation is paused.
+		if (!d_ptr->vBackend->has_osd_messages()) {
+			// No OSD messages.
+			// Wait for an SDL event.
+			ret = SDL_WaitEvent(&event);
+			if (ret) {
+				processSdlEvent(&event);
+			}
+		}
+
+		// Process OSD messages.
+		d_ptr->vBackend->process_osd_messages();
+	}
+	if (!d_ptr->running)
+		return;
+
+	// Poll for SDL events, and wait for the queue
+	// to empty. This ensures that we don't end up
+	// only processing one event per frame.
+	do {
+		ret = SDL_PollEvent(&event);
+		if (ret) {
+			processSdlEvent(&event);
+		}
+	} while (d_ptr->running && ret != 0);
+	if (!d_ptr->running)
+		return;
+
+	if (d_ptr->paused.data) {
+		// Emulation is paused.
+		// Only update video if the VBackend is dirty
+		// or the SDL window has been exposed.
+		d_ptr->sdlHandler->update_video_paused(d_ptr->exposed);
+	}
+
+	// Clear the 'exposed' flag.
+	d_ptr->exposed = false;
+}
+
 }

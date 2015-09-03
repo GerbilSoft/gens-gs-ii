@@ -97,6 +97,11 @@ class EmuLoopPrivate : public EventLoopPrivate
 		// Keymaps.
 		static const GensKey_t keyMap_md[];
 		static const GensKey_t keyMap_pico[];
+
+		// Last 'paused' value.
+		// Used to determine if SRAM/EEPROM
+		// should be autosaved.
+		paused_t last_paused;
 };
 
 /** EmuLoopPrivate **/
@@ -122,7 +127,9 @@ EmuLoopPrivate::EmuLoopPrivate()
 	, emuContext(nullptr)
 	, keyManager(nullptr)
 	, saveSlot_selected(0)
-{ }
+{
+	last_paused.data = 0;
+}
 
 EmuLoopPrivate::~EmuLoopPrivate()
 {
@@ -582,61 +589,35 @@ int EmuLoop::run(const char *rom_filename)
 	}
 
 	// TODO: Move some more common stuff back to gens-sdl.cpp.
-	uint8_t old_paused = 0;
 	d->running = true;
+	d->paused.data = 0;
+	d->last_paused.data = 0;
 	while (d->running) {
-		SDL_Event event;
-		int ret;
-		if (d->paused.data) {
-			// Emulation is paused.
-			if (!d->vBackend->has_osd_messages()) {
-				// No OSD messages.
-				// Wait for an SDL event.
-				ret = SDL_WaitEvent(&event);
-				if (ret) {
-					processSdlEvent(&event);
-				}
-			}
-
-			// Process OSD messages.
-			d->vBackend->process_osd_messages();
+		// Process the SDL event queue.
+		processSdlEventQueue();
+		if (!d->running) {
+			// Emulation has stopped.
+			break;
 		}
-		if (!d->running)
-			break;
-
-		// Poll for SDL events, and wait for the queue
-		// to empty. This ensures that we don't end up
-		// only processing one event per frame.
-		do {
-			ret = SDL_PollEvent(&event);
-			if (ret) {
-				processSdlEvent(&event);
-			}
-		} while (d->running && ret != 0);
-		if (!d->running)
-			break;
 
 		// Check if the 'paused' state was changed.
 		// If it was, autosave SRAM/EEPROM.
-		if (old_paused != d->paused.data) {
+		if (d->last_paused.data != d->paused.data) {
 			// 'paused' state was changed.
 			// (TODO: Only if paused == true?)
+			// TODO: Evaluate both fields as boolean,
+			// so switching from manual to manual+auto
+			// or vice-versa doesn't trigger an autosave?
 			d->emuContext->autoSaveData(-1);
-			old_paused = d->paused.data;
+			d->last_paused.data = d->paused.data;
 		}
 
 		if (d->paused.data) {
 			// Emulation is paused.
-			// Only update video if the VBackend is dirty
-			// or the SDL window has been exposed.
-			d->sdlHandler->update_video_paused(d->exposed);
-
 			// Don't run any frames.
+			// TODO: Wait for what would be the next frame?
 			continue;
 		}
-
-		// Clear the 'exposed' flag.
-		d->exposed = false;
 
 		// New start time.
 		d->clks.new_clk = d->clks.timing.getTime();

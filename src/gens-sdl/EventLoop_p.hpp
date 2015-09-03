@@ -110,8 +110,9 @@ class EventLoopPrivate
 				uint8_t focus	: 1;	// Auto pause when focus is lost.
 			};
 			uint8_t data;
+			// TODO: Add assign/copy constructors and operator==()?
 		};
-		paused_t paused;
+		paused_t paused;	// Current 'paused' value.
 
 		// Automatically pause when the window loses focus?
 		bool autoPause;

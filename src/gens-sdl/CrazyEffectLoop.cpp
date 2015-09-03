@@ -134,49 +134,22 @@ int CrazyEffectLoop::run(const char *rom_filename)
 	// TODO: Move some more common stuff back to gens-sdl.cpp.
 	d->running = true;
 	while (d->running) {
-		SDL_Event event;
-		int ret;
-		if (d->paused.data) {
-			// Emulation is paused.
-			if (!d->vBackend->has_osd_messages()) {
-				// No OSD messages.
-				// Wait for an SDL event.
-				ret = SDL_WaitEvent(&event);
-				if (ret) {
-					processSdlEvent(&event);
-				}
-			}
-
-			// Process OSD messages.
-			d->vBackend->process_osd_messages();
+		// Process the SDL event queue.
+		processSdlEventQueue();
+		if (!d->running) {
+			// Emulation has stopped.
+			break;
 		}
-		if (!d->running)
+		if (!d->running) {
+			// Emulation has stopped.
 			break;
-
-		// Poll for SDL events, and wait for the queue
-		// to empty. This ensures that we don't end up
-		// only processing one event per frame.
-		do {
-			ret = SDL_PollEvent(&event);
-			if (ret) {
-				processSdlEvent(&event);
-			}
-		} while (d->running && ret != 0);
-		if (!d->running)
-			break;
-
+		}
 		if (d->paused.data) {
 			// Emulation is paused.
-			// Only update video if the VBackend is dirty
-			// or the SDL window has been exposed.
-			d->sdlHandler->update_video_paused(d->exposed);
-
 			// Don't run any frames.
+			// TODO: Wait for what would be the next frame?
 			continue;
 		}
-
-		// Clear the 'exposed' flag.
-		d->exposed = false;
 
 		// New start time.
 		d->clks.new_clk = d->clks.timing.getTime();
