@@ -135,7 +135,7 @@ if(NOT MINGW)
     )
 endif()
 
-if(CMAKE_COMPILER_IS_GNUCC)
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
 	# Gens/GS II: cmake-2.8.4 is required for nasm.
 	cmake_minimum_required(VERSION 2.8.4)
 	if(ASM686)
