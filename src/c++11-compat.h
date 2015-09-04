@@ -34,7 +34,9 @@
 
 /** Compiler-specific headers. **/
 
-#if defined(__GNUC__)
+#if defined(__clang__)
+#include "c++11-compat.clang.h"
+#elif defined(__GNUC__)
 #include "c++11-compat.gcc.h"
 #elif defined(_MSC_VER)
 #include "c++11-compat.msvc.h"
