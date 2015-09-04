@@ -21,8 +21,7 @@
 #ifndef __CXX11_COMPAT_H__
 #define __CXX11_COMPAT_H__
 
-#if !defined(__cplusplus)
-
+#ifndef __cplusplus
 /**
  * We're compiling C code.
  * Provide replacements for C++ 2011 functionality.
@@ -31,72 +30,16 @@
 #define CXX11_COMPAT_OVERRIDE
 #define CXX11_COMPAT_CHARTYPES
 #define CXX11_COMPAT_STATIC_ASSERT
+#endif /* !__cplusplus */
 
-#else
+/** Compiler-specific headers. **/
 
 #if defined(__GNUC__)
-
-/* Some versions of gcc implement parts of C++11, but not all of it. */
-
-/* For gcc-4.7+, make sure we're compiling with -std=c++11 or -std=gnu++11. */
-/* Older versions didn't set the correct value for __cplusplus. */
-#if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))
-#if __cplusplus < 201103L
-#error Please compile with -std=c++11 or -std=gnu++11.
-#endif /* __cplusplus */
-#endif /* __GNUC__ */
-
-/* Explicit virtual override: Added in gcc-4.7. */
-#if (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 7))
-#define CXX11_COMPAT_OVERRIDE
-#endif
-
-/* nullptr: Added in gcc-4.6 */
-#if (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 6))
-#define CXX11_COMPAT_NULLPTR
-#endif
-
-/* New character types: Added in gcc-4.4 */
-#if (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 4))
-#define CXX11_COMPAT_CHARTYPES
-#endif
-
-/* Static assertions: Added in gcc-4.3 (first version to support C++11) */
-#if (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 3))
-#define CXX11_COMPAT_STATIC_ASSERT
-#endif
-
+#include "c++11-compat.gcc.h"
 #elif defined(_MSC_VER)
-
-#if (_MSC_VER < 1900)
-/**
- * MSVC 2015 (14.0) added support for Unicode character types.
- * (char16_t, char32_t, related string types)
- */
-#define CXX11_COMPAT_CHARTYPES
-#endif
-
-#if (_MSC_VER < 1700)
-/**
- * MSVC 2010 (10.0) does support override, but not final.
- * However, it has a "sealed" keyword that works almost
- * the same way as final.
- */
-#define final sealed
-#endif
-
-#if (_MSC_VER < 1600)
-/**
- * MSVC 2008 (9.0) and older: No C++ 2011 support at all.
- * Probably won't compile at all due to lack of stdint.h.
- */
-#define CXX11_COMPAT_NULLPTR
-#define CXX11_COMPAT_OVERRIDE
-#define CXX11_COMPAT_STATIC_ASSERT
-#endif
-
-#endif /* compiler-specific */
-
+#include "c++11-compat.msvc.h"
+#else
+#error Unknown compiler, please update c++11-compat.h.
 #endif
 
 /* nullptr: Represents a NULL pointer. NULL == 0 */
@@ -116,7 +59,6 @@ typedef uint16_t char16_t;
 typedef uint32_t char32_t;
 
 #ifdef __cplusplus
-
 #include <string>
 namespace std {
 	typedef basic_string<char16_t> u16string;
@@ -143,22 +85,6 @@ namespace std {
 # else
 #  define __func__ "<unknown>"
 # endif
-#endif
-
-/**
- * Older versions of MSVC aren't C99-compliant, but they
- * do have equivalent functions with different names.
- */
-#ifdef _MSC_VER
-#include "msvc-c99-compat.h"
-#endif
-
-/**
- * MSVC doesn't have typeof(), but as of MSVC 2010,
- * it has decltype(), which is essentially the same thing.
- */
-#ifdef _MSC_VER
-#define typeof(x) decltype(x)
 #endif
 
 #endif /* __CXX11_COMPAT_H__ */

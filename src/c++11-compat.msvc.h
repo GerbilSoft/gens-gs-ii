@@ -1,5 +1,5 @@
 /***************************************************************************
- * msvc-c99-compat.h: MSVC C99 compatibility header.                       *
+ * c++11-compat.msvc.h: C++ 2011 compatibility header. (MSVC)              *
  *                                                                         *
  * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
@@ -18,8 +18,54 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __MSVC_C99_COMPAT_H__
-#define __MSVC_C99_COMPAT_H__
+#ifndef __CXX11_COMPAT_MSVC_H__
+#define __CXX11_COMPAT_MSVC_H__
+
+#ifndef _MSC_VER
+#error c++11-compat.msvc.h should only be included in MSVC builds.
+#endif
+
+/** C++ 2011 **/
+
+#ifdef __cplusplus
+
+/**
+ * Enable compatibility for C++ 2011 features that aren't
+ * present in older versions of MSVC.
+ *
+ * These are all automatically enabled when compiling C code.
+ */
+
+#if (_MSC_VER < 1900)
+/**
+ * MSVC 2015 (14.0) added support for Unicode character types.
+ * (char16_t, char32_t, related string types)
+ */
+#define CXX11_COMPAT_CHARTYPES
+#endif
+
+#if (_MSC_VER < 1700)
+/**
+ * MSVC 2010 (10.0) does support override, but not final.
+ * However, it has a "sealed" keyword that works almost
+ * the same way as final.
+ */
+#define final sealed
+#endif
+
+#if (_MSC_VER < 1600)
+/**
+ * MSVC 2008 (9.0) and older: No C++ 2011 support at all.
+ * Probably won't compile at all due to lack of stdint.h.
+ */
+#define CXX11_COMPAT_NULLPTR
+#define CXX11_COMPAT_OVERRIDE
+#define CXX11_COMPAT_STATIC_ASSERT
+#endif
+
+#endif /* __cplusplus */
+
+/** C99 **/
 
 /**
  * C library functions that have different names in MSVCRT
@@ -28,10 +74,6 @@
  * Note that later versions of MSVC (esp. 2013 and 2015)
  * have added more C99 functionality, since C99 is included
  */
-
-#ifndef _MSC_VER
-#error msvc-c99-compat.h should only be included in MSVC builds.
-#endif
 
 /** snprintf(), vsnprintf() **/
 
@@ -64,5 +106,14 @@
 #define strtoll(nptr, endptr, base)  _strtoi64(nptr, endptr, base)
 #define strtoull(nptr, endptr, base) _strtoui64(nptr, endptr, base)
 #endif /* _MSC_VER < 1800 */
+
+/**
+ * MSVC doesn't have typeof(), but as of MSVC 2010,
+ * it has decltype(), which is essentially the same thing.
+ * TODO: Handle older versions.
+ * Possible option for C++:
+ * - http://www.nedproductions.biz/blog/implementing-typeof-in-microsofts-c-compiler
+ */
+#define typeof(x) decltype(x)
 
 #endif /* __MSVC_C99_COMPAT_H__ */
