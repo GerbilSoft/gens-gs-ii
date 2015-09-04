@@ -23,8 +23,8 @@
 
 // Resource script for Gens/GS II's Qt4 frontend.
 #include <config.gens-qt4.h>
+#include <windows.h>
 #include "gens-qt4.h"
-#include "winresrc.h"
 
 // git version
 #include "libgens/macros/git.h"

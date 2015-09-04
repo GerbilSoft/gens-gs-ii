@@ -23,8 +23,8 @@
 
 // Resource script for Gens/GS II's basic SDL2 frontend.
 #include <config.gens-sdl.h>
+#include <windows.h>
 #include "gens-sdl.h"
-#include "winresrc.h"
 
 // git version
 #include "libgens/macros/git.h"
