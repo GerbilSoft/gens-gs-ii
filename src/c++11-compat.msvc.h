@@ -116,4 +116,4 @@
  */
 #define typeof(x) decltype(x)
 
-#endif /* __MSVC_C99_COMPAT_H__ */
+#endif /* __CXX11_COMPAT_MSVC_H__ */
