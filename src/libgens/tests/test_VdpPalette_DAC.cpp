@@ -450,5 +450,10 @@ int main(int argc, char *argv[])
 
 	LibGens::Tests::Test_VdpPalette_DAC vdpTest(argv[1]);
 	int ret = vdpTest.exec();
-	return ((ret == 0) ? ret : vdpTest.testsFailed())
+	if (ret != 0) {
+		if (vdpTest.testsFailed() > 0) {
+			ret = vdpTest.testsFailed();
+		}
+	}
+	return ret;
 }
