@@ -372,7 +372,7 @@ int main(int argc, char *argv[])
         }
 #endif /* _WIN32 */
 
-	// TODO: Add a popt alias context?
+	// Initialize the popt context.
 	optCon = poptGetContext(NULL, argc, (const char**)argv, optionsTable, 0);
 	poptSetOtherOptionHelp(optCon, "<pcm_file>");
 	if (argc < 2) {
@@ -381,9 +381,13 @@ int main(int argc, char *argv[])
 	}
 
 	// popt: Alias '-h' to '-?'.
+	// NOTE: help_argv must be free()able, so it
+	// can't be static or allocated on the stack.
 	{
-		const char *help_argv[2] = {"-?", NULL};
+		const char **help_argv = (const char**)malloc(sizeof(const char*) * 2);
 		struct poptAlias help_alias = {NULL, 'h', 1, help_argv};
+		help_argv[0] = "-?";
+		help_argv[1] = 0;
 		poptAddAlias(optCon, help_alias, 0);
 	}
 
