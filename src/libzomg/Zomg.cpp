@@ -98,7 +98,7 @@ int ZomgPrivate::initZomgLoad(const char *filename)
 	// TODO: Check for "CreationTime" in ZOMG.ini, and use it
 	// if it's available.
 #ifdef _WIN32
-	struct _stat64 buf;
+	struct _stati64 buf;
 #else
 	struct stat buf;
 #endif

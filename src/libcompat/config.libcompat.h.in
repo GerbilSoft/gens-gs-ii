@@ -34,11 +34,14 @@
 /* Define to 1 if you have the `getpwuid_r` function. */
 #cmakedefine HAVE_GETPWUID_R 1
 
+/* Define to 1 if you have the `_stati64` function. */
+#cmakedefine HAVE__STATI64 1
+
 /* Define to 1 if you have the `_fseeki64` function. */
-#cmakedefine HAVE_FSEEKI64 1
+#cmakedefine HAVE__FSEEKI64 1
 
 /* Define to 1 if you have the `_ftelli64` function. */
-#cmakedefine HAVE_FTELLI64 1
+#cmakedefine HAVE__FTELLI64 1
 
 /* Define to 1 if you have the MSVC-specific `_aligned_malloc` function. */
 #cmakedefine HAVE_MSVC_ALIGNED_MALLOC 1

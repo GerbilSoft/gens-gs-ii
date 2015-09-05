@@ -521,7 +521,7 @@ uint32_t DcRar::CheckExtPrg(const char *extprg, ExtPrgInfo *prg_info)
 		return -1;
 
 	// Make sure that this is a regular file.
-	struct _stat64 st_buf;
+	struct _stati64 st_buf;
 	if (stat(extprg, &st_buf) != 0)
 		return -4;
 	if (!S_ISREG(st_buf.st_mode))

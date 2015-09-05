@@ -73,18 +73,28 @@ FILE *W32U_fopen(const char *filename, const char *mode);
 // TODO: Use _fseeki64() and _ftelli64() on MinGW-w64 to avoid
 // use of wrapper functions?
 #ifdef _MSC_VER
-#ifdef HAVE_FSEEKI64
+#ifndef HAVE__STATI64
+#pragma message("MSVC is missing _stati64(); files larger than 2 GB may not be handled correctly.")
+#define _stati64 stat
+#endif
+#ifdef HAVE__FSEEKI64
 #define fseeko(stream, offset, origin) _fseeki64(stream, offset, origin)
 #else /* !HAVE_FSEEKI64 */
-#pragma message("MSVC is missing _fseeki64(), files larger than 2 GB may not be handled correctly.")
+#pragma message("MSVC is missing _fseeki64(); files larger than 2 GB may not be handled correctly.")
 #define fseeko(stream, offset, origin) fseek(stream, (int)offset, origin)
 #endif /* HAVE_FSEEKI64 */
-#ifdef HAVE_FTELLI64
+#ifdef HAVE__FTELLI64
 #define ftello(stream) _ftelli64(stream)
 #else /* !HAVE_FTELLI64 */
-#pragma message("MSVC is missing _ftelli64(), files larger than 2 GB may not be handled correctly.")
+#pragma message("MSVC is missing _ftelli64(); files larger than 2 GB may not be handled correctly.")
 #define ftello(stream) (__int64)ftell(stream)
 #endif /* HAVE_FTELLI64 */
+
+#if _MSC_VER >= 1400 && _USE_32BIT_TIME_T
+/* MSVC 2005 defaults to 64-bit time_t, but this can be overridden. */
+/* We don't want it to be overridden. */
+#error 32-bit time_t is enabled, please undefine _USE_32BIT_TIME_T.
+#endif
 #endif /* _MSC_VER */
 
 /** access() **/
@@ -134,13 +144,13 @@ int W32U_mkdir(const char *path);
 // non-underscore versions for compatibility.
 
 // FIXME: How do we handle struct stat?
-// For now, the caller will have to ensure it uses struct _stat64.
+// For now, the caller will have to ensure it uses struct _stati64.
 
 // Redefine stat() as W32U_stat64().
 #ifdef stat
 #undef stat
 #endif
-#define stat(pathname, buf) W32U_stat64(pathname, buf)
+#define stat(pathname, buf) W32U_stati64(pathname, buf)
 
 /**
  * Get file status.
@@ -148,7 +158,7 @@ int W32U_mkdir(const char *path);
  * @param buf Stat buffer.
  * @return 0 on success; -1 on error.
  */
-int W32U_stat64(const char *pathname, struct _stat64 *buf);
+int W32U_stati64(const char *pathname, struct _stati64 *buf);
 
 #ifdef __cplusplus
 }

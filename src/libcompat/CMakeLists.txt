@@ -51,8 +51,9 @@ CHECK_FUNCTION_EXISTS_OR_INLINE(localtime_s "time.h" "time_t tm; localtime_s(&tm
 CHECK_FUNCTION_EXISTS(getpwuid_r HAVE_GETPWUID_R)
 # NOTE: These should either both be present or both be absent.
 # We'll test for both of them anyway.
-CHECK_FUNCTION_EXISTS(_fseeki64 HAVE_FSEEKI64)
-CHECK_FUNCTION_EXISTS(_ftelli64 HAVE_FTELLI64)
+CHECK_FUNCTION_EXISTS(_stati64 HAVE__STATI64)
+CHECK_FUNCTION_EXISTS(_fseeki64 HAVE__FSEEKI64)
+CHECK_FUNCTION_EXISTS(_ftelli64 HAVE__FTELLI64)
 
 # aligned_malloc.h
 # NOTE: MinGW-w64 only has _aligned_malloc().

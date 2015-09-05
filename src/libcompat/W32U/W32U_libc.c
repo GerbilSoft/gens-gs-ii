@@ -225,14 +225,14 @@ fail:
 }
 
 /**
- * Internal implementation of _wstat64().
- * MSVCRT's _wstat64() fails if the filename contains '?' or '*',
+ * Internal implementation of _wstati64().
+ * MSVCRT's _wstati64() fails if the filename contains '?' or '*',
  * which breaks long filename support, e.g. \\?\.
  * @param pathname Pathname.
  * @param buf Stat buffer.
  * @return 0 on success; -1 on error.
  */
-static int W32U_wstat64(const wchar_t *pathname, struct _stat64 *buffer)
+static int W32U_wstati64(const wchar_t *pathname, struct _stati64 *buffer)
 {
 	int fd, ret;
 
@@ -261,7 +261,7 @@ static int W32U_wstat64(const wchar_t *pathname, struct _stat64 *buffer)
  * @param buf Stat buffer.
  * @return 0 on success; -1 on error.
  */
-int W32U_stat64(const char *pathname, struct _stat64 *buf)
+int W32U_stati64(const char *pathname, struct _stati64 *buf)
 {
 	wchar_t *pathnameW;
 	int ret = -1;
@@ -301,10 +301,10 @@ int W32U_stat64(const char *pathname, struct _stat64 *buf)
 
 	if (W32U_IsUnicode()) {
 		// Unicode version.
-		// NOTE: MSVCRT's _wstat64() fails if the filename
+		// NOTE: MSVCRT's _wstati64() fails if the filename
 		// contains '?' or '*', which breaks long filename
 		// support, e.g. \\?\.
-		ret = W32U_wstat64(pathnameW, buf);
+		ret = W32U_wstati64(pathnameW, buf);
 		errno_ret = errno;
 	} else {
 #ifdef ENABLE_ANSI_WINDOWS
@@ -318,7 +318,7 @@ int W32U_stat64(const char *pathname, struct _stat64 *buf)
 		}
 
 		// Get the file status.
-		ret = _stat64(pathnameA, buf);
+		ret = _stati64(pathnameA, buf);
 #else /* !ENABLE_ANSI_WINDOWS */
 		// ANSI is not supported in this build.
 		// TODO: Fail earlier to avoid an alloc()?
