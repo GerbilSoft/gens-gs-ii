@@ -44,6 +44,20 @@ uint32_t CPU_Flags = 0;
 // Full CPU name. (NULL-terminated)
 static char CPU_FullName[64] = {0};
 
+#ifdef _MSC_VER
+#define inline __inline
+#endif
+
+/**
+ * Is this system a "Virtual Wii" on Wii U?
+ * @return True if this is vWii; false if this is real Wii.
+ */
+static inline bool isWiiU(void)
+{
+        // Reference: https://github.com/FIX94/Nintendont/blob/master/loader/source/global.c
+        return ( (*(vu32*)(0xCD8005A0) >> 16 ) == 0xCAFE );
+}
+
 /**
  * Get the CPU flags.
  * Stores the CPU flags in the global variable CPU_Flags.
@@ -87,9 +101,11 @@ const char *LibCompat_GetCPUFullName(void)
 		// - Broadway == 87102
 		// - Gekko == 83410
 #if defined(HW_RVL)
-		const char cpu_name[] = "PowerPC 750CL \"Broadway\"";
+		static const char cpu_name_wup[] = "PowerPC 750CL \"Espresso\"";
+		static const char cpu_name_rvl[] = "PowerPC 750CL \"Broadway\"";
+		const char *cpu_name = (isWiiU() ? cpu_name_wup : cpu_name_rvl);
 #elif defined(HW_DOL)
-		const char cpu_name[] = = "PowerPC 750CXe \"Gekko\"";
+		static const char cpu_name[] = "PowerPC 750CXe \"Gekko\"";
 #endif
 
 		// FIXME: There should be a way to retrieve the
