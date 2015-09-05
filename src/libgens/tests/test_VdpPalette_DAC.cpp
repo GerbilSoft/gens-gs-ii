@@ -30,10 +30,10 @@
 #include <cstdlib>
 #include <cerrno>
 #include <cstring>
-using namespace std;
 
 // C++ includes.
 #include <string>
+using std::string;
 
 namespace LibGens { namespace Tests {
 

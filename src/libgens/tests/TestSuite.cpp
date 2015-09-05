@@ -32,7 +32,8 @@
 #include <sstream>
 #include <string>
 #include <iomanip>
-using namespace std;
+using std::string;
+using std::ostringstream;
 
 #ifdef _WIN32
 #include <windows.h>
@@ -214,16 +215,16 @@ bool TestSuite::assertEquals_hex(const char *test, T expected, T actual)
 	}
 
 	// Convert the expected value to a string.
-	stringstream ss;
-	ss << std::hex << std::uppercase << std::setfill('0') << std::setw(sizeof(T)*2);
-	ss << expected;
-	string exp_str = ss.str();
+	ostringstream oss;
+	oss << std::hex << std::uppercase << std::setfill('0') << std::setw(sizeof(T)*2);
+	oss << expected;
+	string exp_str = oss.str();
 
 	// Convert the actual value to a string.
-	ss.str("");
-	ss << std::hex << std::uppercase << std::setfill('0') << std::setw(sizeof(T)*2);
-	ss << actual;
-	string act_str = ss.str();
+	oss.str("");
+	oss << std::hex << std::uppercase << std::setfill('0') << std::setw(sizeof(T)*2);
+	oss << actual;
+	string act_str = oss.str();
 
 	fprintf(m_f_out, "%s: expected %s, got %s\n", test, exp_str.c_str(), act_str.c_str());
 	return (expected == actual);
@@ -253,26 +254,25 @@ bool TestSuite::assertEquals(const char *test, T expected, T actual)
 {
 	m_tests_total++;
 	m_section_total++;
-	
-	if (expected == actual)
+
+	if (expected == actual) {
 		PrintPass();
-	else
-	{
+	} else {
 		m_tests_failed++;
 		m_section_failed++;
 		PrintFail();
 	}
-	
+
 	// Convert the expected value to a string.
-	stringstream ss;
-	ss << expected;
-	string exp_str = ss.str();
-	
+	ostringstream oss;
+	oss << expected;
+	string exp_str = oss.str();
+
 	// Convert the actual value to a string.
-	ss.str("");
-	ss << actual;
-	string act_str = ss.str();
-	
+	oss.str("");
+	oss << actual;
+	string act_str = oss.str();
+
 	fprintf(m_f_out, "%s: expected %s, got %s\n", test, exp_str.c_str(), act_str.c_str());
 	return (expected == actual);
 }
