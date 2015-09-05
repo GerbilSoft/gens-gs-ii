@@ -44,6 +44,8 @@ class SdlGLBackend : public GLBackend {
 		virtual ~SdlGLBackend();
 
 	private:
+		typedef GLBackend super;
+	private:
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add GensSdl-specific version of Q_DISABLE_COPY().
 		SdlGLBackend(const SdlGLBackend &);

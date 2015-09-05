@@ -37,6 +37,13 @@ class GLShader
 		GLShader();
 		virtual ~GLShader();
 
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add GensSdl-specific version of Q_DISABLE_COPY().
+		GLShader(const GLShader &);
+		GLShader &operator=(const GLShader &);
+
+	public:
 		/**
 		 * Initialize the shader.
 		 * This must be run from within a valid GL context!

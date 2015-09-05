@@ -42,6 +42,8 @@ class SdlSWBackend : public VBackend {
 		virtual ~SdlSWBackend();
 
 	private:
+		typedef VBackend super;
+	private:
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add GensSdl-specific version of Q_DISABLE_COPY().
 		SdlSWBackend(const SdlSWBackend &);

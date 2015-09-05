@@ -29,6 +29,17 @@ namespace GensSdl {
 class GLShaderFastBlur : public GLShader
 {
 	public:
+		GLShaderFastBlur() : super() { }
+
+	private:
+		typedef GLShader super;
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add GensSdl-specific version of Q_DISABLE_COPY().
+		GLShaderFastBlur(const GLShaderFastBlur &);
+		GLShaderFastBlur &operator=(const GLShaderFastBlur &);
+
+	public:
 		/**
 		 * Initialize the shader.
 		 * This must be run from within a valid GL context!

@@ -40,7 +40,8 @@ using LibGens::MdFb;
 namespace GensSdl {
 
 SdlGLBackend::SdlGLBackend()
-	: m_window(nullptr)
+	: super()
+	, m_window(nullptr)
 	, m_glContext(nullptr)
 {
 	// Initialize the SDL window.
@@ -99,7 +100,7 @@ void SdlGLBackend::set_window_title(const char *title)
 void SdlGLBackend::update(bool fb_dirty)
 {
 	// Run the GLBackend update first.
-	GLBackend::update(fb_dirty);
+	super::update(fb_dirty);
 
 	// Swap the GL buffers.
 	SDL_GL_SwapWindow(m_window);

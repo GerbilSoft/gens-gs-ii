@@ -39,6 +39,7 @@ class GLBackend : public VBackend {
 		virtual ~GLBackend();
 
 	private:
+		typedef VBackend super;
 		friend class GLBackendPrivate;
 		GLBackendPrivate *const d;
 	private:
