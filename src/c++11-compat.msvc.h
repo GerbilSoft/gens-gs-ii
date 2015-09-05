@@ -49,8 +49,13 @@
  * MSVC 2010 (10.0) does support override, but not final.
  * However, it has a "sealed" keyword that works almost
  * the same way as final.
+ *
+ * 'sealed' is available starting with MSVC 2005 (8.0).
+ * TODO: Verify MSVC 2002 and 2003.
  */
+#if (_MSC_VER >= 1400)
 #define final sealed
+#endif
 #endif
 
 #if (_MSC_VER < 1600)
@@ -81,7 +86,16 @@
  * MSVC 2015 (14.0) supports snprintf() and vsnprintf().
  * Older versions have them prefixed with underscores.
  */
-#if _MSC_VER < 1900
+#if _MSC_VER < 1400
+/**
+ * MSVC 2005 added support for variadic macros. *
+ * https://msdn.microsoft.com/en-US/library/ms177415(v=vs.80).aspx
+ * TODO: Verify MSVC 2002 and 2003.
+ */
+#define snprintf _snprintf
+#define vsnprintf _vsnprintf
+#elif _MSC_VER < 1900
+/* MSVC 2005 - 2013: variadic macros supported, but no snprintf(). */
 #define snprintf(str, size, format, ...) _snprintf(str, size, format, __VA_ARGS__)
 #define vsnprintf(str, size, format, ap) _vsnprintf(str, size, format, ap)
 #endif /* _MSC_VER < 1900 */

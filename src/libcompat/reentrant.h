@@ -38,10 +38,10 @@ extern "C" {
 #endif
 
 #ifndef HAVE_LOCALTIME_R
-#ifdef _WIN32
+#ifdef HAVE_LOCALTIME_S
 /**
- * MinGW-w64's localtime_r() wrapper.
- * Uses MSVCRT's localtime_s().
+ * localtime_r() wrapper using MSVCRT's localtime_s().
+ * Based on MinGW-w64's localtime_r() wrapper.
  */
 static __forceinline struct tm *__cdecl localtime_r(const time_t *_Time, struct tm *_Tm)
 {

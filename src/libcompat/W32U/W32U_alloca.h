@@ -34,6 +34,7 @@
 // C includes.
 #include <string.h>
 #include <ctype.h>
+#include <wchar.h>
 
 #ifdef _MSC_VER
 // MSVC: _alloca() is in malloc.h.
@@ -148,13 +149,14 @@
  */
 #define WtoA_filename(str) do { \
 	const wchar_t *WtoA_src = str##W; \
+	int cbMbs; \
 	/* Check if the path is absolute. */ \
 	/* NOTE: Only checking for backslashes here. */ \
 	if (!memcmp(str##W, L"\\\\?\\", 4*sizeof(*str##W))) { \
 		/* Path is absolute. */ \
 		WtoA_src += 4; \
 	} \
-	int cbMbs = WideCharToMultiByte(CP_ACP, 0, WtoA_src, -1, NULL, 0, NULL, NULL); \
+	cbMbs = WideCharToMultiByte(CP_ACP, 0, WtoA_src, -1, NULL, 0, NULL, NULL); \
 	if (cbMbs > 0) { \
 		str##A = alloca(cbMbs * sizeof(*str##A)); \
 		WideCharToMultiByte(CP_ACP, 0, WtoA_src, -1, str##A, cbMbs, NULL, NULL); \

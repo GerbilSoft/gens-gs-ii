@@ -72,7 +72,10 @@ namespace std {
 /* Explicit override/final. */
 #ifdef CXX11_COMPAT_OVERRIDE
 #define override
+/* final may be defined as 'sealed' on older MSVC */
+#ifndef final
 #define final
+#endif
 #endif
 
 /** Other compatibility stuff. **/

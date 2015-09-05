@@ -83,7 +83,9 @@
 #define CPUID_EXT_PROC_BRAND_STRING_2		((uint32_t)(0x80000003))
 #define CPUID_EXT_PROC_BRAND_STRING_3		((uint32_t)(0x80000004))
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && _MSC_VER >= 1400
+// __cpuid() was added in MSVC 2005.
+// (TODO: Check MSVC 2002 and 2003?)
 #include <intrin.h>
 #endif
 
@@ -109,8 +111,8 @@
 		);						\
 	} while (0)
 #endif
-#elif defined(_MSC_VER)
-// CPUID macro for MSVC.
+#elif defined(_MSC_VER) && MSC_VER >= 1400
+// CPUID macro for MSVC 2005+
 #define CPUID(level, a, b, c, d) do {				\
 	int cpuInfo[4];						\
 	__cpuid(cpuInfo, (level));				\
@@ -118,6 +120,16 @@
 	(b) = cpuInfo[1];					\
 	(c) = cpuInfo[2];					\
 	(d) = cpuInfo[3];					\
+} while (0)
+#elif defined(_MSC_VER) && MSC_VER < 1400 && defined(_M_IX86)
+// CPUID macro for old MSVC that doesn't support intrinsics.
+// (TODO: Check MSVC 2002 and 2003?)
+#define CPUID(level, a, b, c, d) do {				\
+	__asm	cpuid						\
+	__asm	mov	a, eax					\
+	__asm	mov	b, ebx					\
+	__asm	mov	c, ecx					\
+	__asm	mov	d, edx					\
 } while (0)
 #else
 #error Missing 'cpuid' asm implementation for this compiler.

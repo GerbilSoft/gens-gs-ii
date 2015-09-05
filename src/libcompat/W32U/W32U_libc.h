@@ -76,13 +76,13 @@ FILE *W32U_fopen(const char *filename, const char *mode);
 #ifdef HAVE_FSEEKI64
 #define fseeko(stream, offset, origin) _fseeki64(stream, offset, origin)
 #else /* !HAVE_FSEEKI64 */
-#warning MSVC is missing _fseeki64(), files over 2 GB may not be handled correctly
+#pragma message("MSVC is missing _fseeki64(), files larger than 2 GB may not be handled correctly.")
 #define fseeko(stream, offset, origin) fseek(stream, (int)offset, origin)
 #endif /* HAVE_FSEEKI64 */
 #ifdef HAVE_FTELLI64
 #define ftello(stream) _ftelli64(stream)
 #else /* !HAVE_FTELLI64 */
-#warning MSVC is missing _ftelli64(), files over 2 GB may not be handled correctly
+#pragma message("MSVC is missing _ftelli64(), files larger than 2 GB may not be handled correctly.")
 #define ftello(stream) (__int64)ftell(stream)
 #endif /* HAVE_FTELLI64 */
 #endif /* _MSC_VER */
