@@ -38,18 +38,6 @@ ENDIF(NOT WIN32)
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.libgenstext.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.libgenstext.h")
 
-# Test system byteorder.
-# TODO: Universal Binary support; detect PDP endian.
-INCLUDE(TestBigEndian)
-TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
-IF(IS_BIG_ENDIAN)
-	SET(GENSTEXT_BYTEORDER "GENSTEXT_BIG_ENDIAN")
-ELSE(IS_BIG_ENDIAN)
-	SET(GENSTEXT_BYTEORDER "GENSTEXT_LIL_ENDIAN")
-ENDIF(IS_BIG_ENDIAN)
-UNSET(IS_BIG_ENDIAN)
-CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/byteorder.h.in" "${CMAKE_CURRENT_BINARY_DIR}/byteorder.h")
-
 # Sources.
 SET(libgenstext_SRCS
 	Encoding.cpp
