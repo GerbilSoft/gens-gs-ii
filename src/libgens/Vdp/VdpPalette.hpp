@@ -24,7 +24,11 @@
 #ifndef __LIBGENS_MD_VDPPALETTE_HPP__
 #define __LIBGENS_MD_VDPPALETTE_HPP__
 
+// C includes.
 #include <stdint.h>
+
+// C includes. (C++ namespace)
+#include <cassert>
 
 #include "VdpTypes.hpp"
 // ColorDepth is in MdFb.
@@ -103,6 +107,36 @@ class VdpPalette
 		 * TODO: Endianness? Assuming host-endian for now.
 		 */
 		void writeCRam_16(uint8_t address, uint16_t data);
+
+		/** 32X CRam functions. **/
+
+		/**
+		 * Read 8-bit data from 32X CRam.
+		 * @param address 32X CRam address.
+		 * @return 32X CRam data. (8-bit)
+		 */
+		uint8_t readCRam32X_8(uint16_t address) const;
+
+		/**
+		 * Read 16-bit data from 32X CRam.
+		 * @param address 32X CRam address. (Must be 16-bit aligned!)
+		 * @return 32X CRam data. (16-bit)
+		 */
+		uint16_t readCRam32X_16(uint16_t address) const;
+
+		/**
+		 * Write 8-bit data to 32X CRam.
+		 * @param address 32X CRam address.
+		 * @param data 32X CRam data. (8-bit)
+		 */
+		void writeCRam32X_8(uint16_t address, uint8_t data);
+
+		/**
+		 * Write 16-bit data to 32X CRam.
+		 * @param address 32X CRam address. (Must be 16-bit aligned!)
+		 * @param data 32X CRam data. (16-bit)
+		 */
+		void writeCRam32X_16(uint16_t address, uint16_t data);
 
 		/** Properties. **/
 
@@ -261,6 +295,8 @@ inline uint8_t VdpPalette::readCRam_8(uint8_t address) const
  */
 inline uint16_t VdpPalette::readCRam_16(uint8_t address) const
 {
+	assert((address & 1) == 0);
+
 	address &= cram_addr_mask;
 	return m_cram.u16[address >> 1];
 }
@@ -288,8 +324,70 @@ inline void VdpPalette::writeCRam_8(uint8_t address, uint8_t data)
  */
 inline void VdpPalette::writeCRam_16(uint8_t address, uint16_t data)
 {
+	assert((address & 1) == 0);
+
 	address &= cram_addr_mask;
 	m_cram.u16[address >> 1] = data;
+	// TODO: Per-color dirty flag?
+	m_dirty.active = true;
+}
+
+/** 32X CRam functions. **/
+
+/**
+ * Read 8-bit data from 32X CRam.
+ * @param address 32X CRam address.
+ * @return 32X CRam data. (8-bit)
+ */
+inline uint8_t VdpPalette::readCRam32X_8(uint16_t address) const
+{
+	assert(address < 0x200);
+
+	address &= 0x1FF;
+	return m_cram32X.u8[address ^ U16DATA_U8_INVERT];
+}
+
+/**
+ * Read 16-bit data from 32X CRam.
+ * @param address 32X CRam address. (Must be 16-bit aligned!)
+ * @return 32X CRam data. (16-bit)
+ */
+inline uint16_t VdpPalette::readCRam32X_16(uint16_t address) const
+{
+	assert(address < 0x200);
+	assert((address & 1) == 0);
+
+	address &= 0x1FF;
+	return m_cram32X.u16[address >> 1];
+}
+
+/**
+ * Write 8-bit data to 32X CRam.
+ * @param address 32X CRam address.
+ * @param data 32X CRam data. (8-bit)
+ */
+inline void VdpPalette::writeCRam32X_8(uint16_t address, uint8_t data)
+{
+	assert(address < 0x200);
+
+	address &= 0x1FF;
+	m_cram32X.u8[address ^ U16DATA_U8_INVERT] = data;
+	// TODO: Per-color dirty flag?
+	m_dirty.active = true;
+}
+
+/**
+ * Write 16-bit data to 32X CRam.
+ * @param address 32X CRam address. (Must be 16-bit aligned!)
+ * @param data 32X CRam data. (16-bit)
+ */
+inline void VdpPalette::writeCRam32X_16(uint16_t address, uint16_t data)
+{
+	assert(address < 0x200);
+	assert((address & 1) == 0);
+
+	address &= 0x1FF;
+	m_cram32X.u16[address >> 1] = data;
 	// TODO: Per-color dirty flag?
 	m_dirty.active = true;
 }

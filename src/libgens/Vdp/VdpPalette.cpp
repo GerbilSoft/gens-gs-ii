@@ -120,7 +120,8 @@ VdpPalette::~VdpPalette()
 void VdpPalette::reset(void)
 {
 	// Clear CRam.
-	memset(&m_cram, 0x00, sizeof(m_cram));
+	memset(&m_cram, 0, sizeof(m_cram));
+	memset(&m_cram32X, 0, sizeof(m_cram32X));
 
 	// Mark the active palette as dirty.
 	m_dirty.active = true;
