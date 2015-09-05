@@ -3,9 +3,6 @@ Gens/GS II TODO List
 Technical Preview 1:
 
 Infrastructure:
-- MSVC: Use /W3 or /W4; fix all warnings.
-  - Probably just /W3...
-  - cmake appears to set /W3 by default?
 - CMake: Add RelWithDebInfo, MinSizeRel configurations.
 - Use z_crc_t in all places where CRCs are used.
   - Need to check zlib for z_crc_t; if not found, fall back.
@@ -20,6 +17,11 @@ Infrastructure:
   more than just "No SRAM". (e.g. different/no checksum algorithms)
 - localtime_r():
   - Call tzset() before using this function. (manpage says it may be necessary)
+- Create and use 'typedef super' in all C++ classes.
+- x86 asm: Always use __asm__ __volatile__ for 'emms' instructions.
+- Remove automatic GPL printout from libgens startup.
+  - Just print out libgens version information.
+  - GPL can be printed using various options.
 
 Sega Pico:
 - Add pen support.
@@ -37,9 +39,19 @@ OpenGL (gens-sdl):
 - Aspect ratio constraint: Use integers?
 
 Windows:
+- MSVC: Use /W3 or /W4; fix all warnings.
+  - Probably just /W3...
+  - cmake appears to set /W3 by default?
 - Set console code page to UTF-8.
 - Win7 PC with NV: gens-sdl has a frame of whiteness on startup...
   - XP VM: frame of garbage instead
+- W32U_alloca.h: Add reference:
+  - https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247%28v=vs.85%29.aspx
+- W32U_mini.c: Use GetVersionEx() instead of GetModuleHandleW().
+  - KernelEx implements GetModuleHandleW().
+- aligned_malloc(): Return with an error if alignment is 0
+- MinGW: Define __MINGW_MSVC_COMPAT_WARNINGS
+  - See _mingw_mac.h.
 
 ================================================================
 
@@ -53,6 +65,8 @@ Infrastructure:
   - Also check for headers, reentrant functions, etc.
 - Remove all Decompressors in favor of using libarchive.
   - Write a simple C++ wrapper around libarchive with a similar interface as Decompressor.
+- Add compile-time options to disable 15, 16, and/or 32-bit color selectively.
+  - e.g. disable 32-bit on Wii.
 
 System emulation:
 - Consolidate various options into hardware sets:
