@@ -1,14 +1,10 @@
 # Win32-specific CFLAGS/CXXFLAGS.
 # For MinGW compilers.
 
-# Basic platform flags:
+# Basic platform flags for gcc:
 # - wchar_t is short.
-# - Enable strict type checking in the Windows headers.
-# - Set minimum Windows version to Windows 2000. (Windows NT 5.0)
-# - Define WIN32_LEAN_AND_MEAN to reduce the number of Windows headers included.
-# - Define NOMINMAX to disable the MIN() and MAX() macros.
 # - Enable MSVC 2005 compatibility. (In MinGW-w64 v4.0.2, this enables 64-bit time_t.)
-SET(GENS_C_FLAGS_WIN32 "-fshort-wchar -DSTRICT -DWIN32_LEAN_AND_MEAN -DNOMINMAX -D__MINGW_USE_VC2005_COMPAT")
+SET(GENS_C_FLAGS_WIN32 "${GENS_C_FLAGS_WIN32} -D__MINGW_USE_VC2005_COMPAT")
 
 # Subsystem and minimum Windows version:
 # - If 32-bit and ANSI Windows support is enabled: 4.00
@@ -100,7 +96,7 @@ SET(CMAKE_RC_COMPILE_OBJECT
 
 # Append the CFLAGS and LDFLAGS.
 SET(GENS_C_FLAGS_COMMON			"${GENS_C_FLAGS_COMMON} ${GENS_C_FLAGS_WIN32}")
-SET(GENS_CXX_FLAGS_COMMON		"${GENS_CXX_FLAGS_COMMON} ${GENS_C_FLAGS_WIN32}")
+SET(GENS_CXX_FLAGS_COMMON		"${GENS_CXX_FLAGS_COMMON} ${GENS_C_FLAGS_WIN32} ${GENS_CXX_FLAGS_WIN32}")
 SET(GENS_EXE_LINKER_FLAGS_COMMON	"${GENS_EXE_LINKER_FLAGS_COMMON} ${GENS_EXE_LINKER_FLAGS_WIN32}")
 SET(GENS_SHARED_LINKER_FLAGS_COMMON	"${GENS_SHARED_LINKER_FLAGS_COMMON} ${GENS_SHARED_LINKER_FLAGS_WIN32}")
 

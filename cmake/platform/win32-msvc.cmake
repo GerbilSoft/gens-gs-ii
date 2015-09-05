@@ -1,12 +1,9 @@
 # Win32-specific CFLAGS/CXXFLAGS.
 # For Microsoft Visual C++ compilers.
 
-# Basic platform flags:
+# Basic platform flags for MSVC:
 # - wchar_t should be a distinct type.
-# - Enable strict type checking in the Windows headers.
-# - Define WIN32_LEAN_AND_MEAN to reduce the number of Windows headers included.
-# - Define NOMINMAX to disable the MIN() and MAX() macros.
-SET(GENS_C_FLAGS_WIN32 "-Zc:wchar_t -DSTRICT -DWIN32_LEAN_AND_MEAN -DNOMINMAX")
+SET(GENS_C_FLAGS_WIN32 "${GENS_C_FLAGS_WIN32} -Zc:wchar_t")
 
 # Disable ANSI Windows support if:
 # - We're building for 64-bit.
@@ -60,7 +57,7 @@ ENDIF(CMAKE_BUILD_TYPE MATCHES ^release)
 
 # Append the CFLAGS and LDFLAGS.
 SET(GENS_C_FLAGS_COMMON			"${GENS_C_FLAGS_COMMON} ${GENS_C_FLAGS_WIN32}")
-SET(GENS_CXX_FLAGS_COMMON		"${GENS_CXX_FLAGS_COMMON} ${GENS_C_FLAGS_WIN32}")
+SET(GENS_CXX_FLAGS_COMMON		"${GENS_CXX_FLAGS_COMMON} ${GENS_C_FLAGS_WIN32} ${GENS_CXX_FLAGS_WIN32}")
 SET(GENS_EXE_LINKER_FLAGS_COMMON	"${GENS_EXE_LINKER_FLAGS_COMMON} ${GENS_EXE_LINKER_FLAGS_WIN32}")
 SET(GENS_SHARED_LINKER_FLAGS_COMMON	"${GENS_SHARED_LINKER_FLAGS_COMMON} ${GENS_EXE_LINKER_FLAGS_WIN32}")
 
