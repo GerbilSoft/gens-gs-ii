@@ -43,8 +43,10 @@
 #include "zomg_md_tmss_reg.h"
 #include "zomg_eeprom.h"
 
+// C includes.
+#include <stdint.h>
+
 // C includes. (C++ namespace)
-#include <cstdint>
 #include <cstring>
 #include <cassert>
 #include <cstdlib>

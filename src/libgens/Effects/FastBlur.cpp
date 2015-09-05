@@ -27,11 +27,11 @@
 
 // C includes.
 #include <stdlib.h>
+#include <stdint.h>
 
 // C includes. (C++ namespace)
 #include <cassert>
 #include <cmath>
-#include <cstdint>
 #include <cstring>
 
 #if defined(__GNUC__) && (defined(__i386__) || defined(__amd64__) || defined(__x86_64__))
