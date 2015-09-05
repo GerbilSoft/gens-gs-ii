@@ -13,15 +13,15 @@ INCLUDE_DIRECTORIES(${GTEST_INCLUDE_DIR})
 # Some tests use ZLIB.
 ADD_DEFINITIONS(${ZLIB_DEFINITIONS})
 
+# popt
+INCLUDE_DIRECTORIES(${POPT_INCLUDE_DIR})
+
 # TestSuite base sources.
 SET(TESTSUITE_BASE_SRC
 	TestSuite.cpp
 	)
 
-# FIXME: Fix this test so it works on MSVC.
-IF(NOT MSVC)
-
-# VdpPalette test programs
+# VdpPalette test programs.
 
 # test_VdpPalette_DAC_generate runs on the build system,
 # not the host system.
@@ -33,6 +33,7 @@ IF(CMAKE_CROSSCOMPILING)
 ELSE(CMAKE_CROSSCOMPILING)
 	# Not cross-compiling.
 	ADD_EXECUTABLE(test_VdpPalette_DAC_generate test_VdpPalette_DAC_generate.c)
+	TARGET_LINK_LIBRARIES(test_VdpPalette_DAC_generate ${POPT_LIBRARY})
 	DO_SPLIT_DEBUG(test_VdpPalette_DAC_generate)
 
 	# Export these executables for cross-compiling.
@@ -71,7 +72,6 @@ ADD_TEST(NAME test_VdpPalette_DAC_GG
 	COMMAND test_VdpPalette_DAC PalTest_GG.txt)
 ADD_TEST(NAME test_VdpPalette_DAC_SMS
 	COMMAND test_VdpPalette_DAC PalTest_SMS.txt)
-ENDIF(NOT MSVC)
 
 # Sprite Masking & Overflow Test ROM.
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
