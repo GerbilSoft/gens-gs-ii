@@ -309,8 +309,6 @@ int main(int argc, char *argv[])
 						"Options:\n"
 						"  -p, --palmode[=PAL]        set the palette mode for the data file.\n"
 						"                               `md', `32x', `sms', `gg', `tms9918'\n"
-						"  -c, --csm[=CSM]            set the color scaling method for MD palettes.\n"
-						"                               `raw', `full', `full+sh'\n"
 						"  -h, --help                 display this help and exit\n"
 						"\n"
 						"Exit status:\n"
