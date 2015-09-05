@@ -431,10 +431,15 @@ int main(int argc, char *argv[])
 
 	// Get the input filename.
 	pcm_filename = poptGetArg(optCon);
-	if (pcm_filename == NULL || poptPeekArg(optCon) != NULL) {
-		// Either the input filename wasn't specified,
-		// or too many filenames were specified.
+	if (pcm_filename == NULL) {
+		// No input filename specified.
 		fprintf(stderr, "%s: no filename specified\n"
+			"Try `%s --help` for more information.\n",
+			argv[0], argv[0]);
+		return EXIT_FAILURE;
+	} else if (poptPeekArg(optCon) != NULL) {
+		// Too many parameters specified.
+		fprintf(stderr, "%s: too many parameters specified\n"
 			"Try `%s --help` for more information.\n",
 			argv[0], argv[0]);
 		return EXIT_FAILURE;
