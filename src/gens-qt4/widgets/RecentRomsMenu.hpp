@@ -43,6 +43,7 @@ class RecentRomsMenu : public QMenu
 		virtual ~RecentRomsMenu();
 
 	private:
+		typedef QMenu super;
 		RecentRomsMenuPrivate *const d_ptr;
 		Q_DECLARE_PRIVATE(RecentRomsMenu)
 	private:

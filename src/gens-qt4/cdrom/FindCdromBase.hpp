@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * FindCdromBase.hpp: Find CD-ROM drives: OS-specific base class.          *
  *                                                                         *
- * Copyright (c) 2011-2014 by David Korth.                                 *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -27,8 +27,7 @@
 #include <QtCore/QStringList>
 #include <QtGui/QIcon>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class FindCdromBase : public QObject
 {
@@ -38,6 +37,12 @@ class FindCdromBase : public QObject
 		FindCdromBase(QObject *parent = 0);
 		virtual ~FindCdromBase();
 
+	private:
+		typedef QObject super;
+	private:
+		Q_DISABLE_COPY(FindCdromBase)
+
+	public:
 		/**
 		 * Determine if this CD-ROM backend is usable.
 		 * @return True if this CD-ROM backend is usable; false if not.

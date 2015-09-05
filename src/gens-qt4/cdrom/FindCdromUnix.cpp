@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                     *
  * FindCdromUnix.cpp: Find CD-ROM drives: UNIX fallback.                      *
  *                                                                            *
- * Copyright (c) 2011-2013 by David Korth.                                    *
+ * Copyright (c) 2011-2015 by David Korth.                                    *
  *                                                                            *
  * This program is free software; you can redistribute it and/or modify       *
  * it under the terms of the GNU General Public License as published by       *
@@ -38,9 +38,7 @@
 #include <QtCore/QDir>
 #include <QtCore/QStringList>
 
-
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class FindCdromUnixPrivate
 {
@@ -71,7 +69,7 @@ const char *const FindCdromUnixPrivate::UnixDevNames[] =
  ****************************/
 
 FindCdromUnix::FindCdromUnix(QObject *parent)
-	: FindCdromBase(parent)
+	: super(parent)
 { }
 
 /**

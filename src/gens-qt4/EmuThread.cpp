@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -24,10 +24,10 @@
 #include "EmuThread.hpp"
 #include "gqt4_main.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
-EmuThread::EmuThread()
+EmuThread::EmuThread(QObject *parent)
+	: super(parent)
 {
 	m_stop = false;
 	m_doFastFrame = false;

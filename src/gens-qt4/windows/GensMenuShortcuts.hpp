@@ -49,10 +49,11 @@ class GensMenuShortcuts : public QObject
 		virtual ~GensMenuShortcuts();
 
 	private:
+		typedef QObject super;
 		GensMenuShortcutsPrivate *const d_ptr;
-		Q_DECLARE_PRIVATE(GensMenuShortcuts);
+		Q_DECLARE_PRIVATE(GensMenuShortcuts)
 	private:
-		Q_DISABLE_COPY(GensMenuShortcuts);
+		Q_DISABLE_COPY(GensMenuShortcuts)
 
 	public:
 		/**

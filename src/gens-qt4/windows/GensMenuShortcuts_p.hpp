@@ -49,7 +49,7 @@ class GensMenuShortcutsPrivate
 		GensMenuShortcuts *const q_ptr;
 		Q_DECLARE_PUBLIC(GensMenuShortcuts)
 	private:
-		Q_DISABLE_COPY(GensMenuShortcutsPrivate);
+		Q_DISABLE_COPY(GensMenuShortcutsPrivate)
 
 	public:
 		/**

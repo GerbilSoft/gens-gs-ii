@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * FindCdromUDisks.cpp: Find CD-ROM drives: UDisks1 version.               *
  *                                                                         *
- * Copyright (c) 2011-2013 by David Korth.                                 *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -44,8 +44,7 @@ using std::auto_ptr;
 // LOG_MSG() subsystem.
 #include "libgens/macros/log_msg.h"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class FindCdromUDisksPrivate
 {
@@ -77,7 +76,7 @@ FindCdromUDisksPrivate::~FindCdromUDisksPrivate()
 
 
 FindCdromUDisks::FindCdromUDisks(QObject *parent)
-	: FindCdromBase(parent)
+	: super(parent)
 	, d(new FindCdromUDisksPrivate(this))
 {
 	// Connect to UDisks over D-BUS.

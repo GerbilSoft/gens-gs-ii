@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -37,8 +37,7 @@ class QVBoxLayout;
 // Key Handler.
 #include "Input/KeyHandlerQt.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class GensQGLWidgetPrivate;
 
@@ -50,25 +49,30 @@ class GensQGLWidget : public GLBackend
 		GensQGLWidget(QWidget *parent = 0, KeyHandlerQt *keyHandler = 0);
 		virtual ~GensQGLWidget();
 		
+	private:
+		typedef GLBackend super;
+		friend class GensQGLWidgetPrivate;
+		GensQGLWidgetPrivate *d;
+	private:
+		Q_DISABLE_COPY(GensQGLWidget)
+
+	public:
 		void vbUpdate_int(void);
-		
+
 		/**
-		 * sizeHint(): Qt size hint.
+		 * Qt size hint.
 		 * TODO: Return something other than 320x240 depending on renderer?
 		 * @return Preferred widget size.
 		 */
 		QSize sizeHint(void) const { return QSize(320, 240); }
-	
+
 	protected slots:
 		void fastBlur_changed_slot(const QVariant &newFastBlur);		// bool
 		void bilinearFilter_changed_slot(const QVariant &newBilinearFilter);	// bool
 		void pauseTint_changed_slot(const QVariant &newPauseTint);		// bool
-	
+
 	private:
-		friend class GensQGLWidgetPrivate;
-		GensQGLWidgetPrivate *d;
-		Q_DISABLE_COPY(GensQGLWidget);
-		
+		// TODO: Move to a private class?
 		QVBoxLayout *m_layout;
 };
 

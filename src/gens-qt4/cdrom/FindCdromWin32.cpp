@@ -56,7 +56,7 @@ class FindCdromWin32Private
 	private:
 		FindCdromWin32Private() { }
 		~FindCdromWin32Private() { }
-		Q_DISABLE_COPY(FindCdromWin32Private);
+		Q_DISABLE_COPY(FindCdromWin32Private)
 
 	public:
 		static HICON GetShilIcon(int iIcon, int iImageList);
@@ -116,7 +116,7 @@ HICON FindCdromWin32Private::GetShilIcon(int iIcon, int iImageList)
 /** FindCdromWin32 **/
 
 FindCdromWin32::FindCdromWin32(QObject *parent)
-	: FindCdromBase(parent)
+	: super(parent)
 { }
 
 /**

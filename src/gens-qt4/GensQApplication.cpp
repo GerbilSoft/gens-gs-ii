@@ -176,21 +176,21 @@ void GensQApplicationPrivate::setGensTranslation(const QString &locale)
  *******************************/
 
 GensQApplication::GensQApplication(int &argc, char **argv)
-	: QApplication(argc, argv)
+	: super(argc, argv)
 	, d(new GensQApplicationPrivate(this))
 {
 	d->gqaInit();
 }
 
 GensQApplication::GensQApplication(int &argc, char **argv, bool GUIenabled)
-	: QApplication(argc, argv, GUIenabled)
+	: super(argc, argv, GUIenabled)
 	, d(new GensQApplicationPrivate(this))
 {
 	d->gqaInit();
 }
 
 GensQApplication::GensQApplication(int &argc, char **argv, Type type)
-	: QApplication(argc, argv, type)
+	: super(argc, argv, type)
 	, d(new GensQApplicationPrivate(this))
 {
 	d->gqaInit();
@@ -296,7 +296,7 @@ QIcon GensQApplication::StandardIcon(QStyle::StandardPixmap standardIcon,
 				const QStyleOption *option,
 				const QWidget *widget)
 {
-	QStyle *style = QApplication::style();
+	QStyle *style = super::style();
 	QIcon icon;
 	const char *xdg_icon = nullptr;
 

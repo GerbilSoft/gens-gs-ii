@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * FindCdromWin32.hpp: Find CD-ROM drives: Win32 version.                  *
  *                                                                         *
- * Copyright (c) 2011-2014 by David Korth.                                 *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -24,8 +24,7 @@
 
 #include "FindCdromBase.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class FindCdromWin32 : public FindCdromBase
 {
@@ -35,7 +34,9 @@ class FindCdromWin32 : public FindCdromBase
 		FindCdromWin32(QObject *parent = 0);
 
 	private:
-		Q_DISABLE_COPY(FindCdromWin32);
+		typedef FindCdromBase super;
+	private:
+		Q_DISABLE_COPY(FindCdromWin32)
 
 	public:
 		/**

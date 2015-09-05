@@ -73,7 +73,7 @@ class ConfigStorePrivate
 
 	private:
 		ConfigStore *const q_ptr;
-		Q_DECLARE_PUBLIC(ConfigStore);
+		Q_DECLARE_PUBLIC(ConfigStore)
 	private:
 		Q_DISABLE_COPY(ConfigStorePrivate)
 
@@ -288,7 +288,7 @@ void ConfigStorePrivate::InvokeQtMethod(QObject *object, int method_idx, const Q
 /** ConfigStore **/
 
 ConfigStore::ConfigStore(QObject *parent)
-	: QObject(parent)
+	: super(parent)
 	, d_ptr(new ConfigStorePrivate(this))
 {
 	// Initialize defaults and load user settings.

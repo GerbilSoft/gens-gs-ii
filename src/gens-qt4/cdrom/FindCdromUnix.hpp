@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * FindCdromUnix.hpp: Find CD-ROM drives: UNIX fallback.                   *
  *                                                                         *
- * Copyright (c) 2011-2013 by David Korth.                                 *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -24,8 +24,7 @@
 
 #include "FindCdromBase.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class FindCdromUnix : public FindCdromBase
 {
@@ -35,7 +34,9 @@ class FindCdromUnix : public FindCdromBase
 		FindCdromUnix(QObject *parent = 0);
 
 	private:
-		Q_DISABLE_COPY(FindCdromUnix);
+		typedef FindCdromBase super;
+	private:
+		Q_DISABLE_COPY(FindCdromUnix)
 
 	public:
 		/**

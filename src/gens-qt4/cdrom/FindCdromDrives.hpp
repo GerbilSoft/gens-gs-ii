@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * FindCdromDrives.hpp: Find CD-ROM drives: Manager class.                 *
  *                                                                         *
- * Copyright (c) 2011-2014 by David Korth.                                 *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -33,9 +33,7 @@
 #include <QtCore/QStringList>
 #include <QtGui/QIcon>
 
-
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class FindCdromDrivesPrivate;
 
@@ -48,10 +46,11 @@ class FindCdromDrives : public QObject
 		~FindCdromDrives();
 
 	private:
+		typedef QObject super;
 		FindCdromDrivesPrivate *const d_ptr;
-		Q_DECLARE_PRIVATE(FindCdromDrives);
+		Q_DECLARE_PRIVATE(FindCdromDrives)
 	private:
-		Q_DISABLE_COPY(FindCdromDrives);
+		Q_DISABLE_COPY(FindCdromDrives)
 
 	public:
 		/**

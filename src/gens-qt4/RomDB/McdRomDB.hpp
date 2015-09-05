@@ -31,7 +31,8 @@
 
 namespace GensQt4 {
 
-class McdRomDB : public QObject {
+class McdRomDB : public QObject
+{
 	Q_OBJECT
 
 	// Static class.
@@ -42,7 +43,9 @@ class McdRomDB : public QObject {
 		~McdRomDB();
 
 	private:
-		Q_DISABLE_COPY(McdRomDB);
+		typedef QObject super;
+	private:
+		Q_DISABLE_COPY(McdRomDB)
 
 	public:
 		// Region codes.

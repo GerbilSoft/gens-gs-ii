@@ -48,6 +48,14 @@ class GensQApplication : public QApplication
 		GensQApplication(int &argc, char **argv, Type type);
 		virtual ~GensQApplication();
 
+	private:
+		typedef QApplication super;
+		friend class GensQApplicationPrivate;
+		GensQApplicationPrivate *const d;
+	private:
+		Q_DISABLE_COPY(GensQApplication)
+
+	public:
 		/**
 		 * Check if the current thread is the GUI thread.
 		 * @return True if it is; false if it isn't.
@@ -106,11 +114,6 @@ class GensQApplication : public QApplication
 #endif /* HAVE_SIGACTION */
 	
 	private:
-		friend class GensQApplicationPrivate;
-		GensQApplicationPrivate *const d;
-
-		Q_DISABLE_COPY(GensQApplication)
-
 #ifdef Q_OS_WIN32
 		/**
 		 * Set the Qt font to match the system font.

@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -28,40 +28,51 @@
 #include <QtCore/QWaitCondition>
 #include <QtCore/QMutex>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class EmuThread : public QThread
 {
 	Q_OBJECT
-	
+
 	public:
-		EmuThread();
+		EmuThread(QObject *parent = 0);
 		~EmuThread();
-		
-		inline bool isStopRequested(void)
-		{
-			m_mutex.lock();
-			bool ret = m_stop;
-			m_mutex.unlock();
-			return ret;
-		}
-	
+
+	private:
+		typedef QThread super;
+	private:
+		Q_DISABLE_COPY(EmuThread)
+
+	public:
+		inline bool isStopRequested(void);
+
 	signals:
 		void frameDone(bool wasFastFrame);
-	
+
 	public slots:
 		void resume(bool doFastFrame = false);
 		void stop(void);
-	
+
 	protected:
 		void run(void);
 		QWaitCondition m_wait;
 		QMutex m_mutex;
-		
+
 		bool m_stop;
 		bool m_doFastFrame;
 };
+
+/**
+ * Check if a stop is requested.
+ * @return True if a stop is requested; false otherwise.
+ */
+inline bool EmuThread::isStopRequested(void)
+{
+	m_mutex.lock();
+	bool ret = m_stop;
+	m_mutex.unlock();
+	return ret;
+}
 
 }
 

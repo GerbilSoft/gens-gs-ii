@@ -128,7 +128,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nC
 namespace GensQt4 {
 
 /**
- * winEventFilter(): Win32 event filter.
+ * Win32 event filter.
  * @param msg Win32 message.
  * @param result Return value for the window procedure.
  * @return True if we're handling the message; false if we should let Qt handle the message.
@@ -153,7 +153,7 @@ bool GensQApplication::winEventFilter(MSG *msg, long *result)
 }
 
 /**
- * SetFont_Win32(): Set the Qt font to match the system font.
+ * Set the Qt font to match the system font.
  */
 void GensQApplication::SetFont_Win32(void)
 {
@@ -189,7 +189,7 @@ void GensQApplication::SetFont_Win32(void)
 			nFontSize, -1, ncm.lfMessageFont.lfItalic);
 
 	// Set the Qt application font.
-	QApplication::setFont(qAppFont);
+	super::setFont(qAppFont);
 }
 
 }

@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville                       *
  * Copyright (c) 2003-2004 by Stéphane Akhoun                              *
- * Copyright (c) 2008-2009 by David Korth                                  *
+ * Copyright (c) 2008-2015 by David Korth                                  *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -34,8 +34,10 @@
 // LibGens includes
 #include "libgens/Util/gens_siginfo.h"
 
-namespace GensQt4
-{
+// Q_DISABLE_COPY()
+#include <QtCore/qglobal.h>
+
+namespace GensQt4 {
 
 // Forward declaration of GensQApplication.
 class GensQApplication;
@@ -45,12 +47,14 @@ class SigHandler
 	public:
 		static void Init(void);
 		static void End(void);
-	
+
 	private:
 		// Static class; prevent instantiation.
 		SigHandler() { }
 		~SigHandler() { }
-		
+	private:
+		Q_DISABLE_COPY(SigHandler)
+
 #ifdef HAVE_SIGACTION
 		static const gens_signal_t *GetSigInfo(int signum, int si_code);
 		static void SignalHandler(int signum, siginfo_t *info, void *context);

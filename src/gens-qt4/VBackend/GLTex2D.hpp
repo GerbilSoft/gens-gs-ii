@@ -54,8 +54,7 @@
 // Qt includes.
 #include <QtGui/QImage>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class GLTex2D
 {
@@ -64,44 +63,47 @@ class GLTex2D
 		GLTex2D(const QImage& img);
 		~GLTex2D();
 		
+	private:
+		Q_DISABLE_COPY(GLTex2D)
+
+	public:
 		void setImage(const QImage& img);
-		
+
 		inline GLuint tex(void) const
 			{ return m_tex; }
-		
+
 		// Pow2-adjusted image size.
 		inline GLdouble pow2_w(void) const
 			{ return m_pow2_w; }
 		inline GLdouble pow2_h(void) const
 			{ return m_pow2_h; }
-		
+
 		// Original image size.
 		inline int img_w(void) const
 			{ return m_img_w; }
 		inline int img_h(void) const
 			{ return m_img_h; }
-	
+
 	private:
 		GLuint m_tex;
-		
+
 		// Pow2-adjusted image size.
 		GLdouble m_pow2_w;
 		GLdouble m_pow2_h;
-		
+
 		// Original image size.
 		int m_img_w;
 		int m_img_h;
-		
+
 		// Image format.
 		GLenum m_format;
 		GLenum m_type;
 		int m_components;
-		
+
 		// Find the next highest power of two. (signed integers)
 		// http://en.wikipedia.org/wiki/Power_of_two#Algorithm_to_find_the_next-highest_power_of_two
 		template <class T>
-		static inline T next_pow2s(T k)
-		{
+		static inline T next_pow2s(T k) {
 			k--;
 			for (int i = 1; i < (int)(sizeof(T)*CHAR_BIT); i <<= 1)
 				k = k | k >> i;

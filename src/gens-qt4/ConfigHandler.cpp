@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * ConfigHandler.hpp: General configuration signal handler.                *
  *                                                                         *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -29,11 +29,10 @@
 #include <QtCore/QString>
 #include <QtCore/QVariant>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 ConfigHandler::ConfigHandler(QObject *parent)
-	: QObject(parent)
+	: super(parent)
 {
 	// Initialize the external programs.
 	extprgUnRAR_changed_slot(gqt4_cfg->get(QLatin1String("External_Programs/UnRAR")));

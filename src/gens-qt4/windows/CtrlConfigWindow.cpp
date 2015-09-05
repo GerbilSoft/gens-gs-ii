@@ -531,7 +531,7 @@ IoManager::IoType_t CtrlConfigWindowPrivate::cboDeviceIoType(int index)
  * Initialize the Controller Configuration window.
  */
 CtrlConfigWindow::CtrlConfigWindow(QWidget *parent)
-	: QMainWindow(parent,
+	: super(parent,
 		Qt::Dialog |
 		Qt::WindowTitleHint |
 		Qt::WindowSystemMenuHint |
@@ -676,12 +676,12 @@ void CtrlConfigWindow::keyPressEvent(QKeyEvent *event)
 
 			default:
 				// Pass the event to the base class.
-				this->QMainWindow::keyPressEvent(event);
+				super::keyPressEvent(event);
 				return;
 		}
 	} else {
 		// Pass the event to the base class.
-		this->QMainWindow::keyPressEvent(event);
+		super::keyPressEvent(event);
 	}
 }
 
@@ -707,7 +707,7 @@ void CtrlConfigWindow::changeEvent(QEvent *event)
 	}
 
 	// Pass the event to the base class.
-	this->QMainWindow::changeEvent(event);
+	super::changeEvent(event);
 }
 
 

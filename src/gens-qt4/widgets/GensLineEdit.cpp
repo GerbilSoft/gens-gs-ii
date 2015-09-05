@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * GensQLineEdit.hpp: QLineEdit class with indicator icon.                 *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * Based on Lineedit with a clear button.                                  *
  * http://labs.qt.nokia.com/2007/06/06/lineedit-with-a-clear-button/       *
@@ -27,11 +27,10 @@
 #include <QtGui/QLabel>
 #include <QtGui/QStyle>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 GensLineEdit::GensLineEdit(QWidget *parent)
-	: QLineEdit(parent)
+	: super(parent)
 {
 	m_label = new QLabel(this);
 	m_label->setMinimumSize(18, 16);

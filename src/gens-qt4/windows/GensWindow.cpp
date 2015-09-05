@@ -173,8 +173,8 @@ void GensWindowPrivate::checkIdleThread(void)
 /**
  * Initialize the Gens window.
  */
-GensWindow::GensWindow()
-	: QMainWindow()
+GensWindow::GensWindow(QWidget *parent, Qt::WindowFlags flags)
+	: super(parent, flags)
 	, d_ptr(new GensWindowPrivate(this))
 {
 	Q_D(GensWindow);
@@ -385,7 +385,7 @@ void GensWindow::changeEvent(QEvent *event)
 	}
 
 	// Pass the event to the base class.
-	QMainWindow::changeEvent(event);
+	super::changeEvent(event);
 }
 
 /**

@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * GLShaderPaused.cpp: OpenGL Shader. (Paused Effect)                      *
  *                                                                         *
- * Copyright (c) 2010-2011 by David Korth.                                 *
+ * Copyright (c) 2010-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -27,8 +27,7 @@
 // C includes.
 #include <string.h>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 #ifdef HAVE_GLEW
 /** Shaders. **/
@@ -77,12 +76,12 @@ void GLShaderPaused::init()
 {
 #ifdef HAVE_GLEW
 	GLenum err;
-	
+
 	if (GLEW_ARB_fragment_program || GLEW_VERSION_2_0)
 	{
 		// GL_ARB_fragment_program is supported.
 		// Load the Paused effect fragment program.
-		
+
 		// TODO: Check for errors!
 		glGenProgramsARB(1, &m_ARB_program);
 		glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, m_ARB_program);
@@ -90,24 +89,20 @@ void GLShaderPaused::init()
 		glProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB,
 					strlen(ms_GL_ARB_fragment_program),
 					ms_GL_ARB_fragment_program);
-		
+
 		err = glGetError();
-		if (err == GL_NO_ERROR)
-		{
+		if (err == GL_NO_ERROR) {
 			// Fragment program loaded.
 			setShaderType(ST_GL_ARB_FRAGMENT_PROGRAM);
-		}
-		else
-		{
+		} else {
 			// An error occured while loading the fragment program.
 			// TODO: Remove the extra newline at the end of err_str.
 			const char *err_str = (const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB);
 			LOG_MSG(video, LOG_MSG_LEVEL_ERROR,
 				"Error creating Paused effect ARB FP: %s", (err_str ? err_str : "(unknown)"));
-			
+
 			// Delete the fragment program.
-			if (m_ARB_program > 0)
-			{
+			if (m_ARB_program > 0) {
 				glDeleteProgramsARB(1, &m_ARB_program);
 				m_ARB_program = 0;
 				setShaderType(ST_NONE);
@@ -121,7 +116,7 @@ void GLShaderPaused::init()
 		// Load the fragment shaders.
 		// TODO: Combine with ARB fragment programs code above.
 		// The code is the same, but it uses different values and strings.
-		
+
 		// Load the Paused effect fragment shader.
 		// TODO: Check for errors!
 		glGenProgramsARB(1, &m_ARB_program);
@@ -130,24 +125,20 @@ void GLShaderPaused::init()
 		glProgramStringARB(GL_TEXT_FRAGMENT_SHADER_ATI, GL_PROGRAM_FORMAT_ASCII_ARB,
 					strlen(ms_GL_ATI_text_fragment_shader),
 					ms_GL_ATI_text_fragment_shader);
-		
+
 		err = glGetError();
-		if (err == GL_NO_ERROR)
-		{
+		if (err == GL_NO_ERROR) {
 			// Fragment program loaded.
 			setShaderType(ST_GL_ATI_TEXT_FRAGMENT_SHADER);
-		}
-		else
-		{
+		} else {
 			// An error occured while loading the fragment program.
 			// TODO: Remove the extra newline at the end of err_str.
 			const char *err_str = (const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB);
 			LOG_MSG(video, LOG_MSG_LEVEL_ERROR,
 				"Error creating Paused effect ATI TEXT FS: %s", (err_str ? err_str : "(unknown)"));
-			
+
 			// Delete the fragment program.
-			if (m_ARB_program > 0)
-			{
+			if (m_ARB_program > 0) {
 				glDeleteProgramsARB(1, &m_ARB_program);
 				m_ARB_program = 0;
 				setShaderType(ST_NONE);
@@ -161,28 +152,28 @@ void GLShaderPaused::init()
 		m_ATI_fragment_shader = glGenFragmentShadersATI(1);
 		glBindFragmentShaderATI(m_ATI_fragment_shader);
 		glBeginFragmentShaderATI();
-		
+
 		// Constants.
 		static const float RGBtoGrayscale[4] = {0.299f, 0.587f, 0.114f, 0.0f};
 		glSetFragmentShaderConstantATI(GL_CON_0_ATI, RGBtoGrayscale);
-		
+
 		// SampleMap r0, t0.str;
 		glSampleMapATI(GL_REG_0_ATI, GL_TEXTURE0_ARB, GL_SWIZZLE_STR_ATI);
-		
+
 		// DOT3 r0.rgb, r0, c0;
 		glColorFragmentOp2ATI(GL_DOT3_ATI,
 				GL_REG_0_ATI, (GL_RED_BIT_ATI | GL_GREEN_BIT_ATI | GL_BLUE_BIT_ATI), GL_NONE,
 				GL_REG_0_ATI, GL_NONE, GL_NONE,
 				GL_CON_0_ATI, GL_NONE, GL_NONE);
-		
+
 		// ADD r0.b.sat, r0.b, r0.b;
 		glColorFragmentOp2ATI(GL_ADD_ATI,
 				GL_REG_0_ATI, GL_BLUE_BIT_ATI, GL_SATURATE_BIT_ATI,
 				GL_REG_0_ATI, GL_BLUE_BIT_ATI, GL_NONE,
 				GL_REG_0_ATI, GL_BLUE_BIT_ATI, GL_NONE);
-		
+
 		glEndFragmentShaderATI();
-		
+
 		// Set the shader type.
 		setShaderType(ST_GL_ATI_FRAGMENT_SHADER);
 	}
@@ -190,5 +181,3 @@ void GLShaderPaused::init()
 }
 
 }
-
-

@@ -46,7 +46,7 @@ using LibGens::MdFb;
 namespace GensQt4 {
 
 VBackend::VBackend(QWidget *parent, KeyHandlerQt *keyHandler)
-	: QWidget(parent)
+	: super(parent)
 
 	// No source framebuffer initially.
 	, m_srcFb(nullptr)

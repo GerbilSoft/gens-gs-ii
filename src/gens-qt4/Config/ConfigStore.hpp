@@ -56,6 +56,7 @@ class ConfigStore : public QObject
 		~ConfigStore();
 
 	private:
+		typedef QObject super;
 		ConfigStorePrivate *const d_ptr;
 		Q_DECLARE_PRIVATE(ConfigStore)
 	private:

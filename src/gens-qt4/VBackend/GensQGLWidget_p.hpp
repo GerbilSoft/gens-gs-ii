@@ -5,7 +5,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -37,17 +37,24 @@ namespace GensQt4
 class GensQGLWidgetPrivate : public QGLWidget
 {
 	Q_OBJECT
-	
+
 	public:
 		GensQGLWidgetPrivate(GensQGLWidget *q);
-	
+
+	private:
+		typedef QGLWidget super;
+	private:
+		friend class GensQGLWidget;
+		GensQGLWidget *const q;
+		Q_DISABLE_COPY(GensQGLWidgetPrivate)
+
 	protected:
 		// Keyboard handler functions.
 		void keyPressEvent(QKeyEvent *event)
 			{ q->m_keyHandler->keyPressEvent(event); }
 		void keyReleaseEvent(QKeyEvent *event)
 			{ q->m_keyHandler->keyReleaseEvent(event); }
-		
+
 		// Mouse handler functions.
 		void mouseMoveEvent(QMouseEvent *event)
 			{ q->m_keyHandler->mouseMoveEvent(event); }
@@ -55,19 +62,15 @@ class GensQGLWidgetPrivate : public QGLWidget
 			{ q->m_keyHandler->mousePressEvent(event); }
 		void mouseReleaseEvent(QMouseEvent *event)
 			{ q->m_keyHandler->mouseReleaseEvent(event); }
-		
+
 		// QGLWidget protected functions.
 		void initializeGL(void);
 		void resizeGL(int width, int height);
 		void paintGL(void);
-	
-	private:
-		GensQGLWidget *q;
-		Q_DISABLE_COPY(GensQGLWidgetPrivate);
 };
 
 inline GensQGLWidgetPrivate::GensQGLWidgetPrivate(GensQGLWidget *q)
-	: QGLWidget(QGLFormat(QGL::NoAlphaChannel | QGL::NoDepthBuffer), q)
+	: super(QGLFormat(QGL::NoAlphaChannel | QGL::NoDepthBuffer), q)
 	, q(q)
 {
 	// Accept keyboard focus.

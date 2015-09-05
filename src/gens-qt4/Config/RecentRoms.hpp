@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -32,11 +32,9 @@ class QSettings;
 // LibGens includes.
 #include "libgens/Rom.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
-struct RecentRom_t
-{
+struct RecentRom_t {
 	QString filename;	// ROM filename.
 	QString z_filename;	// Internal filename for multi-file archives.
 	LibGens::Rom::MDP_SYSTEM_ID sysId;	// System ID.
@@ -49,6 +47,8 @@ class RecentRoms : public QObject
 	public:
 		RecentRoms(QObject *parent = 0);
 
+	private:
+		typedef QObject super;
 	private:
 		Q_DISABLE_COPY(RecentRoms)
 
@@ -99,6 +99,7 @@ class RecentRoms : public QObject
 		void updated(void);
 
 	protected:
+		// TODO: Move to a private class?
 		QList<RecentRom_t> m_lstRoms;
 };
 

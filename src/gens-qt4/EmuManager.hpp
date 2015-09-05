@@ -55,6 +55,12 @@ class EmuManager : public QObject
 		EmuManager(QObject *parent = 0, VBackend *vBackend = 0);
 		~EmuManager();
 
+	private:
+		typedef QObject super;
+	private:
+		Q_DISABLE_COPY(EmuManager)
+
+	public:
 		int openRom(void);
 		int openRom(const QString &filename, const QString &z_filename = QString());
 		int loadRom(LibGens::Rom *rom);

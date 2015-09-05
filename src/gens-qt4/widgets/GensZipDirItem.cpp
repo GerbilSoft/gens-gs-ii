@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * GensZipDirItem.cpp: Zip Directory tree item.                            *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -23,8 +23,7 @@
 
 #include "GensZipDirItem.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 GensZipDirItem::GensZipDirItem(GensZipDirItem *parent)
 {
@@ -104,7 +103,7 @@ bool GensZipDirItem::setData(int column, const QVariant& value)
 }
 
 /**
- * sort(): Sort the data item.
+ * Sort the data item.
  * @param column Column to sort by.
  * @param order Sort order.
  */
@@ -113,10 +112,11 @@ void GensZipDirItem::sort(int column, Qt::SortOrder order)
 	// Sort the child items.
 	// NOTE: We're ignoring the column argument for now.
 	// We're always sorting by display filename.
-	if (order == Qt::AscendingOrder)
+	if (order == Qt::AscendingOrder) {
 		qSort(m_childItems.begin(), m_childItems.end(), SortFilenameLessThan);
-	else
+	} else {
 		qSort(m_childItems.begin(), m_childItems.end(), SortFilenameGreaterThan);
+	}
 
 	// Sort child items of child items.
 	foreach (GensZipDirItem *item, m_childItems)

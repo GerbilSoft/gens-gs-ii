@@ -146,7 +146,7 @@ void GensMenuShortcutsPrivate::addAction(QAction* action)
 /** GensMenuShortcuts **/
 
 GensMenuShortcuts::GensMenuShortcuts(QObject *parent)
-	: QObject(parent)
+	: super(parent)
 	, d_ptr(new GensMenuShortcutsPrivate(this))
 { }
 

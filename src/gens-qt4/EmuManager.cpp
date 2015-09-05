@@ -77,7 +77,7 @@ using LibGens::EmuContextFactory;
 namespace GensQt4 {
 
 EmuManager::EmuManager(QObject *parent, VBackend *vBackend)
-	: QObject(parent)
+	: super(parent)
 	, m_keyManager(nullptr)
 	, m_vBackend(vBackend)
 	, m_romClosedFb(nullptr)

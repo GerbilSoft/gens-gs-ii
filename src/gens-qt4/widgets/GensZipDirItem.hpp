@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * GensZipDirItem.hpp: Zip Directory tree item.                            *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -34,32 +34,35 @@
 // TODO: Use MDP's mdp_z_entry_t instead of LibGens::Decompressor.
 #include "libgens/Decompressor/Decompressor.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class GensZipDirItem
 {
 	public:
 		GensZipDirItem(GensZipDirItem *parent = 0);
 		~GensZipDirItem();
-		
+
+	private:
+		Q_DISABLE_COPY(GensZipDirItem)
+
+	public:
 		GensZipDirItem *child(int number)
 			{ return m_childItems.value(number); }
 		int childCount(void) const
 			{ return m_childItems.size(); }
 		int childNumber(void) const;
-		
+
 		int columnCount(void) const
 			{ return 3; }	// Three data columns. (Icon is separate.)
 		QVariant data(int column) const;
-		
+
 		GensZipDirItem *parent(void)
 			{ return m_parentItem; }
-		
+
 		bool insertChildren(int position, int count, int columns);
 		bool removeChildren(int position, int count);
 		bool setData(int column, const QVariant& value);
-		
+
 		const QIcon& icon(void) const
 			{ return m_itemData.icon; }
 		bool setIcon(const QIcon& icon)
@@ -67,37 +70,38 @@ class GensZipDirItem
 			m_itemData.icon = icon;
 			return true;
 		}
-		
+
 		const mdp_z_entry_t *getZEntry(void) const
 			{ return m_itemData.z_entry; }
 		void setZEntry(const mdp_z_entry_t *z_entry)
 			{ m_itemData.z_entry = z_entry; }
-		
+
 		void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
-	
+
 	protected:
-		struct zdata
-		{
+		// TODO: Move to a private class?
+		struct zdata {
 			QString disp_filename;
 			QString full_filename;
 			int filesize;
 			QIcon icon;
-			
+
 			const mdp_z_entry_t *z_entry;
 		};
-		
+
 		QList<GensZipDirItem*> m_childItems;
 		GensZipDirItem *m_parentItem;
 		zdata m_itemData;
-		
+
 		static inline bool SortFilenameLessThan(const GensZipDirItem *z1, const GensZipDirItem *z2)
 		{
 			// If one item is a directory and one isn't, the directory comes first.
-			if (z1->childCount() && !z2->childCount())
+			if (z1->childCount() && !z2->childCount()) {
 				return true;
-			else if (!z1->childCount() && z2->childCount())
+			} else if (!z1->childCount() && z2->childCount()) {
 				return false;
-			
+			}
+
 			// Both are directories, or both are files.
 #if defined(Q_OS_WIN32) || defined(Q_OS_MAC)
 			return (z1->data(0).toString().toLower() < z2->data(0).toString().toLower());
@@ -105,15 +109,16 @@ class GensZipDirItem
 			return (z1->data(0).toString() < z2->data(0).toString());
 #endif
 		}
-		
+
 		static inline bool SortFilenameGreaterThan(const GensZipDirItem *z1, const GensZipDirItem *z2)
 		{
 			// If one item is a directory and one isn't, the directory comes last.
-			if (z1->childCount() && !z2->childCount())
+			if (z1->childCount() && !z2->childCount()) {
 				return false;
-			else if (!z1->childCount() && z2->childCount())
+			} else if (!z1->childCount() && z2->childCount()) {
 				return true;
-			
+			}
+
 			// Both are directories, or both are files.
 #if defined(Q_OS_WIN32) || defined(Q_OS_MAC)
 			return (z1->data(0).toString().toLower() > z2->data(0).toString().toLower());

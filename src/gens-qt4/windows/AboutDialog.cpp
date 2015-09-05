@@ -700,7 +700,7 @@ QString AboutDialogPrivate::GetSysCodePageInfo(void)
  * Initialize the About Dialog.
  */
 AboutDialog::AboutDialog(QWidget *parent)
-	: QDialog(parent,
+	: super(parent,
 		Qt::Dialog |
 		Qt::WindowTitleHint |
 		Qt::WindowSystemMenuHint |
@@ -779,7 +779,7 @@ void AboutDialog::changeEvent(QEvent *event)
 	}
 
 	// Pass the event to the base class.
-	QDialog::changeEvent(event);
+	super::changeEvent(event);
 }
 
 }

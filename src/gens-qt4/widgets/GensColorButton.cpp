@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * GensColorButton.cpp: QButton class with background color support.       *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -21,29 +21,27 @@
 
 #include "GensColorButton.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 // Stylesheet for QPushButton background color.
 const char *GensColorButton::ms_sCssBtnColors =
 	"QPushButton { background-color: %1; color: %2; }";
 
 /**
- * setBgColor(): Set the background color.
+ * Set the background color.
  * @param newBgColor New background color. (If an invalid color is specified, unsets the background color.)
  */
 void GensColorButton::setBgColor(const QColor& newBgColor)
 {
 	if (m_bgColor == newBgColor || (!m_bgColor.isValid() && !newBgColor.isValid()))
 		return;
-	
+
 	m_bgColor = newBgColor;
-	if (!m_bgColor.isValid())
-	{
+	if (!m_bgColor.isValid()) {
 		this->setStyleSheet(QString());
 		return;
 	}
-	
+
 	// Create a stylesheet with the new background color.
 	QColor colorText = TextColor_For_BgColor(m_bgColor);
 	this->setStyleSheet(QString::fromLatin1(ms_sCssBtnColors)

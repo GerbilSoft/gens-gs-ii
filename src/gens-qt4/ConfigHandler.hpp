@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * ConfigHandler.hpp: General configuration signal handler.                *
  *                                                                         *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -28,8 +28,7 @@
 // PathConfig.
 #include "Config/PathConfig.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 // General configuration signal handler.
 class ConfigHandler : public QObject
@@ -38,7 +37,12 @@ class ConfigHandler : public QObject
 	
 	public:
 		ConfigHandler(QObject *parent = 0);
-	
+
+	private:
+		typedef QObject super;
+	private:
+		Q_DISABLE_COPY(ConfigHandler)
+
 	public slots:
 		void extprgUnRAR_changed_slot(const QVariant &extprgUnRAR);
 

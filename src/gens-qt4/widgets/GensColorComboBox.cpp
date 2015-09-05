@@ -3,7 +3,7 @@
  * GensColorComboBox.cpp: QComboBox class with color support.              *
  * Adds convenience functions to add color selection entries.              *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -25,11 +25,10 @@
 // Qt includes.
 #include <QtGui/QPainter>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 /**
- * addItem(): Add an item to the GensColorComboBox.
+ * Add an item to the GensColorComboBox.
  * @param color Color.
  * @param text Text.
  */
@@ -40,31 +39,29 @@ void GensColorComboBox::addItem(const QColor& color, const QString& text)
 	QSize size = this->iconSize();
 	QPixmap pxm(size);
 	pxm.fill(color);
-	
+
 	// Draw a black rectangle outline.
 	// TODO: Use a darkened version of the color like Mac OS X's NSColorWell?
 	QPainter painter(&pxm);
 	painter.setPen(QColor(Qt::black));
 	painter.drawRect(0, 0, size.width()-1, size.height()-1);
-	
+
 	// Convert the QPixmap to a QIcon and add the item.
 	QIcon icon(pxm);
-	this->QComboBox::addItem(icon, text, color);
+	super::addItem(icon, text, color);
 }
 
-
 /**
- * addItem(): Add an item to the GensColorComboBox.
+ * Add an item to the GensColorComboBox.
  * @param color Standard color.
  */
 void GensColorComboBox::addItem(Qt::GlobalColor color)
 {
 	QString text;
-	
+
 	// http://doc.qt.nokia.com/4.7/qt.html#GlobalColor-enum
 	// TODO: Add options for VGA colors instead of Qt standard colors?
-	switch (color)
-	{
+	switch (color) {
 		case Qt::white:		text = tr("White"); break;
 		case Qt::black:		text = tr("Black"); break;
 		case Qt::red:		text = tr("Red"); break;
@@ -86,14 +83,14 @@ void GensColorComboBox::addItem(Qt::GlobalColor color)
 		default:
 			break;
 	}
-	
+
 	QColor qcolor(color);
 	addItem(color, text);
 }
 
 
 /**
- * itemColor(): Get the color of the specified item.
+ * Get the color of the specified item.
  * @param i Item index.
  * @return QColor, or invalid QColor on error.
  */
@@ -101,11 +98,11 @@ QColor GensColorComboBox::itemColor(int i)
 {
 	if (i < 0 || i >= this->count())
 		return QColor();
-	
+
 	QVariant data = this->itemData(i);
 	if (!data.isValid())
 		return QColor();
-	
+
 	return data.value<QColor>();
 }
 

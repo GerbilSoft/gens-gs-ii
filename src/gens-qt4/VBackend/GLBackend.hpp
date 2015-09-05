@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -22,12 +22,12 @@
  ***************************************************************************/
 
 /**
- * GLCommon is intended to be used as a private member
+ * GLBackend is intended to be used as a private member
  * of a class that inherits from VBackend.
  */
 
-#ifndef __GENS_QT4_VBACKEND_GLCOMMON_HPP__
-#define __GENS_QT4_VBACKEND_GLCOMMON_HPP__
+#ifndef __GENS_QT4_VBACKEND_GLBACKEND_HPP__
+#define __GENS_QT4_VBACKEND_GLBACKEND_HPP__
 
 #include <gens-qt4/config.gens-qt4.h>
 
@@ -52,8 +52,7 @@
 #include <QtGui/QWidget>
 #include <QtGui/QColor>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class GLBackend : public VBackend
 {
@@ -63,6 +62,12 @@ class GLBackend : public VBackend
 		GLBackend(QWidget *parent, KeyHandlerQt *keyHandler = 0);
 		virtual ~GLBackend();
 
+	private:
+		typedef VBackend super;
+	private:
+		Q_DISABLE_COPY(GLBackend)
+
+	public:
 #ifdef HAVE_GLEW
 		/**
 		 * Get a list of the OpenGL extensions in use.
@@ -208,4 +213,4 @@ inline void GLBackend::glb_setColor(const QColor& color)
 
 }
 
-#endif /* __GENS_QT4_VBACKEND_GLCOMMON_HPP__ */
+#endif /* __GENS_QT4_VBACKEND_GLBACKEND_HPP__ */

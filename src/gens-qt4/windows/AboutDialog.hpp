@@ -41,6 +41,7 @@ class AboutDialog : public QDialog
 		virtual ~AboutDialog();
 
 	private:
+		typedef QDialog super;
 		AboutDialogPrivate *const d_ptr;
 		Q_DECLARE_PRIVATE(AboutDialog)
 	private:

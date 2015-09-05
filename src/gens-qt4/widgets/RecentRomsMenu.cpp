@@ -192,7 +192,7 @@ void RecentRomsMenuPrivate::update(void)
 /** RecentRomsMenu **/
 
 RecentRomsMenu::RecentRomsMenu(QWidget* parent, const RecentRoms* recentRoms)
-	: QMenu(parent)
+	: super(parent)
 	, d_ptr(new RecentRomsMenuPrivate(this, recentRoms))
 {
 	// Initialize RecentRomsMenuPrivate.
@@ -201,7 +201,7 @@ RecentRomsMenu::RecentRomsMenu(QWidget* parent, const RecentRoms* recentRoms)
 }
 
 RecentRomsMenu::RecentRomsMenu(const QString &title, QWidget *parent, const RecentRoms *recentRoms)
-	: QMenu(title, parent)
+	: super(title, parent)
 	, d_ptr(new RecentRomsMenuPrivate(this, recentRoms))
 {
 	// Initialize RecentRomsMenuPrivate.

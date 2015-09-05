@@ -54,7 +54,7 @@ namespace GensQt4 {
  * NOTE: This class does NOT delete keyManager on shutdown!
  */
 KeyHandlerQt::KeyHandlerQt(QObject *parent, LibGensKeys::KeyManager *keyManager)
-	: QObject(parent)
+	: super(parent)
 	, m_keyManager(keyManager)
 { }
 

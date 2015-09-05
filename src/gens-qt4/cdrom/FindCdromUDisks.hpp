@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * FindCdromUDisks.hpp: Find CD-ROM drives: UDisks1 version.               *
  *                                                                         *
- * Copyright (c) 2011-2013 by David Korth.                                 *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -27,8 +27,7 @@
 // QtDBus includes.
 #include <QtDBus/QDBusObjectPath>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class FindCdromUDisksPrivate;
 
@@ -41,8 +40,10 @@ class FindCdromUDisks : public FindCdromBase
 		virtual ~FindCdromUDisks();
 
 	private:
+		typedef FindCdromBase super;
 		friend class FindCdromUDisksPrivate;
 		FindCdromUDisksPrivate *const d;
+	private:
 		Q_DISABLE_COPY(FindCdromUDisks)
 
 	public:

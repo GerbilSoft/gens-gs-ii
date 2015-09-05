@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -29,8 +29,7 @@
 #include <QtCore/QString>
 #include <QtCore/QSettings>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class PathConfigPrivate;
 
@@ -43,6 +42,7 @@ class PathConfig : public QObject
 		virtual ~PathConfig();
 	
 	private:
+		typedef QObject super;
 		PathConfigPrivate *const d_ptr;
 		Q_DECLARE_PRIVATE(PathConfig)
 	private:
@@ -72,8 +72,7 @@ class PathConfig : public QObject
 		 * Configuration path.
 		 * TODO: Add support for plugin configuration paths.
 		 */
-		enum ConfigPath
-		{
+		enum ConfigPath {
 			GCPATH_CONFIG		= 0,	// Same as cfgPath.
 			GCPATH_SAVESTATES	= 1,	// Savestates.
 			GCPATH_SRAM		= 2,	// Cartridge SRAM.

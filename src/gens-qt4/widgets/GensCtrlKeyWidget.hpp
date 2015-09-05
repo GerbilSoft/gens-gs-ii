@@ -6,7 +6,7 @@
  * Copyright (c) 1998 Mark Donohoe <donohoe@kde.org>                       *
  * Copyright (c) 2001 Ellis Whitehead <ellis@kde.org>                      *
  * Copyright (c) 2007 Andreas Hartmetz <ahartmetz@gmail.com>               *
- * Copyright (c) 2011-2014 by David Korth.                                 *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -33,8 +33,7 @@
 #include <QtGui/QWidget>
 class QLabel;
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class GensCtrlKeyWidgetPrivate;
 
@@ -47,6 +46,7 @@ class GensCtrlKeyWidget : public QWidget
 		virtual ~GensCtrlKeyWidget();
 
 	private:
+		typedef QWidget super;
 		GensCtrlKeyWidgetPrivate *const d_ptr;
 		Q_DECLARE_PRIVATE(GensCtrlKeyWidget)
 	private:
@@ -64,7 +64,7 @@ class GensCtrlKeyWidget : public QWidget
 		/**
 		 * Return the currently selected GensKey_t.
 		 */
-		GensKey_t key() const;
+		GensKey_t key(void) const;
 
 	signals:
 		void keyChanged(GensKey_t key);

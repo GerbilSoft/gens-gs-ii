@@ -4,7 +4,7 @@
  *                                                                            *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                         *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                                *
- * Copyright (c) 2008-2014 by David Korth.                                    *
+ * Copyright (c) 2008-2015 by David Korth.                                    *
  *                                                                            *
  * This program is free software; you can redistribute it and/or modify       *
  * it under the terms of the GNU General Public License as published by       *
@@ -54,7 +54,7 @@ namespace GensQt4 {
  * Initialize the General Configuration window.
  */
 GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
-	: QMainWindow(parent,
+	: super(parent,
 		Qt::Dialog |
 		Qt::WindowTitleHint |
 		Qt::WindowSystemMenuHint |
@@ -259,12 +259,12 @@ void GeneralConfigWindow::keyPressEvent(QKeyEvent *event)
 
 				default:
 					// Pass the event to the base class.
-					this->QMainWindow::keyPressEvent(event);
+					super::keyPressEvent(event);
 					return;
 			}
 		} else {
 			// Pass the event to the base class.
-			this->QMainWindow::keyPressEvent(event);
+			super::keyPressEvent(event);
 		}
 	} else {
 		// Changes are applied immediately.
@@ -296,7 +296,7 @@ void GeneralConfigWindow::changeEvent(QEvent *event)
 	}
 
 	// Pass the event to the base class.
-	QMainWindow::changeEvent(event);
+	super::changeEvent(event);
 }
 
 /**

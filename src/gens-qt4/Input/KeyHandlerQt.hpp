@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2010 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -40,11 +40,17 @@ namespace GensQt4 {
 class KeyHandlerQt : public QObject
 {
 	Q_OBJECT
-	
+
 	public:
 		KeyHandlerQt(QObject *parent = 0, LibGensKeys::KeyManager *keyManager = 0);
 		~KeyHandlerQt();
 
+	private:
+		typedef QObject super;
+	private:
+		Q_DISABLE_COPY(KeyHandlerQt)
+
+	public:
 		LibGensKeys::KeyManager *keyManager(void) const;
 		void setKeyManager(LibGensKeys::KeyManager *keyManager);
 
@@ -53,7 +59,7 @@ class KeyHandlerQt : public QObject
 		static GensKey_t NativeModifierToKeyVal(QKeyEvent *event);
 
 		/**
-		 * KeyValMToQtKey(): Convert a GensKey_t to a Qt key value, with GensKey modifiers.
+		 * Convert a GensKey_t to a Qt key value, with GensKey modifiers.
 		 * @param keyM Gens keycode, with modifiers.
 		 * @return Qt key value, or 0 on error.
 		 */
@@ -69,6 +75,8 @@ class KeyHandlerQt : public QObject
 		void mouseReleaseEvent(QMouseEvent *event);
 
 	private:
+		// TODO: Move to a private class?
+
 		// Key Manager.
 		LibGensKeys::KeyManager *m_keyManager;
 

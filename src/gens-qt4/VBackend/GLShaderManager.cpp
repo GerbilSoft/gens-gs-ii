@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * GLShaderManager.cpp: OpenGL Shader Manager.                             *
  *                                                                         *
- * Copyright (c) 2010-2011 by David Korth.                                 *
+ * Copyright (c) 2010-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -27,14 +27,12 @@
 // C includes.
 #include <string.h>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 GLShaderManager::GLShaderManager()
 {
 	m_init = false;
 }
-
 
 GLShaderManager::~GLShaderManager()
 {
@@ -42,37 +40,35 @@ GLShaderManager::~GLShaderManager()
 		end();
 }
 
-
 /**
- * init(): Initialize the GL Shader Manager.
+ * Initialize the GL Shader Manager.
  * This must be run from within a valid GL context!
  */
 void GLShaderManager::init(void)
 {
 #ifdef HAVE_GLEW
 	// NOTE: GLEW must have been initialized previously.
-	
+
 	// Initialize shaders.
 	m_shader_paused.init();
 	m_shader_fastBlur.init();
 #endif /* HAVE_GLEW */
-	
+
 	// OpenGL Shader Manager is initialized.
 	m_init = true;
 }
 
-
 /**
- * end(): Shut down the GL Shader Manager.
+ * Shut down the GL Shader Manager.
  * This must be run from within a valid GL context!
  */
 void GLShaderManager::end(void)
 {
 	if (!m_init)
 		return;
-	
+
 	// Shut down the OpenGL Shader Manager.
-	
+
 #ifdef HAVE_GLEW
 	// Shut down the shaders.
 	m_shader_paused.end();
@@ -80,10 +76,9 @@ void GLShaderManager::end(void)
 #endif /* HAVE_GLEW */
 }
 
-
 #ifdef HAVE_GLEW
 /**
- * GLExtsInUse(): Get a list of the OpenGL extensions in use.
+ * Get a list of the OpenGL extensions in use.
  * @return List of OpenGL extensions in use.
  */
 QStringList GLShaderManager::GLExtsInUse(void)
@@ -98,17 +93,17 @@ QStringList GLShaderManager::GLExtsInUse(void)
 #endif
 	else if (GLEW_ATI_fragment_shader)
 		exts.append(QLatin1String("GL_ATI_fragment_shader"));
-	
+
 	// TODO: Other GL extensions.
 #if 0
 	if (GLEW_ARB_vertex_program)
 		exts.append(QLatin1String("GL_ARB_vertex_program"));
-	
+
 	if (GLEW_ARB_vertex_shader)
 		exts.append(QLatin1String("GL_ARB_vertex_shader"));
 	else if (GLEW_EXT_vertex_shader)
 		exts.append(QLatin1String("GL_EXT_vertex_shader"));
-	
+
 	if (GLEW_ARB_fragment_shader)
 		exts.append(QLatin1String("GL_ARB_fragment_shader"));
 	if (GLEW_ARB_fragment_shader)
@@ -118,19 +113,17 @@ QStringList GLShaderManager::GLExtsInUse(void)
 	if (GLEW_ARB_shader_objects)
 		exts.append(QLatin1String("GL_ARB_shader_objects"));
 #endif
-	
+
 	// Return the list of extensions.
 	return exts;
 }
 #endif /* HAVE_GLEW */
 
-
 /** Set Shader functions. **/
-
 
 #ifdef HAVE_GLEW
 /**
- * setPaused(): Set the Paused shader.
+ * Set the Paused shader.
  * @param enabled True to enable; false to disable.
  */
 void GLShaderManager::setPaused(bool newEnabled)
@@ -142,9 +135,8 @@ void GLShaderManager::setPaused(bool newEnabled)
 		m_shader_paused.disable();
 }
 
-
 /**
- * setFastBlur(): Set the Fast Blur shader.
+ * Set the Fast Blur shader.
  * @param enabled True to enable; false to disable.
  */
 void GLShaderManager::setFastBlur(bool newEnabled)

@@ -252,7 +252,7 @@ void GensCtrlKeyWidgetPrivate::updateShortcutDisplay(void)
  ********************************/
 
 GensCtrlKeyWidget::GensCtrlKeyWidget(QWidget *parent, QLabel *label)
-	: QWidget(parent)
+	: super(parent)
 	, d_ptr(new GensCtrlKeyWidgetPrivate(this, label))
 {
 	// Initialize the private members.
@@ -297,7 +297,7 @@ void GensCtrlKeyWidget::changeEvent(QEvent *event)
 	}
 
 	// Pass the event to the base class.
-	this->QWidget::changeEvent(event);
+	super::changeEvent(event);
 }
 
 /**
@@ -362,12 +362,11 @@ void GensCtrlKeyWidget::labelDestroyed(void)
 	d->lblDisplay = nullptr;
 }
 
-
 /**
  * Return the currently selected GensKey_t.
  * @return Currently selected GensKey_t.
  */
-GensKey_t GensCtrlKeyWidget::key() const
+GensKey_t GensCtrlKeyWidget::key(void) const
 {
 	Q_D(const GensCtrlKeyWidget);
 	return d->gensKey;

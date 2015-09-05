@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -31,8 +31,7 @@
 // TODO: Use MDP's mdp_z_entry_t instead of LibGens::Decompressor.
 #include "libgens/Decompressor/Decompressor.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class ZipSelectDialogPrivate;
 
@@ -45,6 +44,7 @@ class ZipSelectDialog : public QDialog
 		virtual ~ZipSelectDialog();
 
 	private:
+		typedef QDialog super;
 		ZipSelectDialogPrivate *const d_ptr;
 		Q_DECLARE_PRIVATE(ZipSelectDialog)
 	private:

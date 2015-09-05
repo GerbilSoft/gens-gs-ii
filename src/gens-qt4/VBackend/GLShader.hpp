@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * GLShader.hpp: OpenGL Shader. (Base Class)                               *
  *                                                                         *
- * Copyright (c) 2010-2011 by David Korth.                                 *
+ * Copyright (c) 2010-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -29,45 +29,50 @@
 #include <GL/glew.h>
 #endif
 
+// Q_DISABLE_COPY()
+#include <QtCore/qglobal.h>
+
 // Disabled for now due to problems with Mac OS X 10.5.7 PPC.
 // (Radeon 9000 series video card)
 //#define ENABLE_ATI_TEXT_FRAGMENT_SHADER
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class GLShader
 {
 	public:
 		GLShader();
 		virtual ~GLShader();
-		
+
+	private:
+		Q_DISABLE_COPY(GLShader)
+
+	public:
 		/**
-		 * init(): Initialize the shader.
+		 * Initialize the shader.
 		 * This must be run from within a valid GL context!
 		 */
 		virtual void init(void) = 0;
-		
+
 		/**
-		 * end(): Shut down the shader.
+		 * Shut down the shader.
 		 * This must be run from within a valid GL context!
 		 */
 		virtual void end(void);
-		
+
 		/** TODO: Separate enable() / disable(), or a single setEnabled()? **/
-		
+
 		/**
-		 * enable(): Enable the shader.
+		 * Enable the shader.
 		 */
 		virtual void enable(void);
-		
+
 		/**
-		 * disable(): Disable the shader.
+		 * Disable the shader.
 		 */
 		void disable(void);
-		
-		enum GLShaderType
-		{
+
+		enum GLShaderType {
 			ST_NONE				= 0,
 			ST_GL_ARB_FRAGMENT_PROGRAM,
 			ST_GL_ATI_FRAGMENT_SHADER,
@@ -77,34 +82,34 @@ class GLShader
 			
 			ST_MAX
 		};
-		
+
 		/**
-		 * shaderType(): Determine the type of shader.
+		 * Determine the type of shader.
 		 * @return Shader type.
 		 */
 		GLShaderType shaderType(void) const
 			{ return m_shaderType; }
-	
+
 	protected:
 		/** Shader type. **/
 		void setShaderType(GLShaderType newShaderType)
 			{ m_shaderType = newShaderType; }
-		
+
 #ifdef HAVE_GLEW
 		/** OpenGL shader variables. **/
 		// (GLEW is required.)
-		
+
 		/**
 		 * m_ARB_program: ID of either GL_ARB_vertex_program or GL_ARB_fragment_program.
 		 */
 		GLuint m_ARB_program;
-		
+
 		/**
 		 * m_ATI_fragment_shader: ID of GL_ATI_fragment_shader.
 		 */
 		GLuint m_ATI_fragment_shader;
 #endif /* HAVE_GLEW */
-	
+
 	private:
 		/** Shader type. **/
 		GLShaderType m_shaderType;

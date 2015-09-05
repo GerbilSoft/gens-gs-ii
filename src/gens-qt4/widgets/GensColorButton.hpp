@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * GensColorButton.hpp: QButton class with background color support.       *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -25,8 +25,7 @@
 #include <QtGui/QPushButton>
 #include <QtGui/QColor>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class GensColorButton : public QPushButton
 {
@@ -35,41 +34,49 @@ class GensColorButton : public QPushButton
 	
 	public:
 		GensColorButton(QWidget *parent = 0)
-			: QPushButton(parent) { }
+			: super(parent) { }
 		GensColorButton(const QString& text, QWidget *parent = 0)
-			: QPushButton(text, parent) { }
+			: super(text, parent) { }
 		GensColorButton(const QIcon& icon, const QString& text, QWidget *parent = 0)
-			: QPushButton(icon, text, parent) { }
-		
+			: super(icon, text, parent) { }
+
+	private:
+		typedef QPushButton super;
+	private:
+		Q_DISABLE_COPY(GensColorButton)
+
+	public:
 		/**
-		 * bgColor(): Get the current background color.
+		 * Get the current background color.
 		 * @return Background color.
 		 */
 		QColor bgColor(void);
-		
+
 		/**
-		 * setBgColor(): Set the background color.
+		 * Set the background color.
 		 * @param newBgColor New background color. (If an invalid color is specified, unsets the background color.)
 		 */
 		void setBgColor(const QColor& newBgColor);
-		
+
 		/**
-		 * unsetBgColor(): Unset the background color.
+		 * Unset the background color.
 		 */
 		void unsetBgColor(void);
 	
 	protected:
+		// TODO: Move to a private class?
+
 		/**
-		 * TextColor_For_BgColor(): Get the text color for a given background color.
+		 * Get the text color for a given background color.
 		 * If the luminance is < 128, this returns white.
 		 * Otherwise, this returns black.
 		 * @return Text color for the given background color.
 		 */
 		static QColor TextColor_For_BgColor(const QColor& color);
-		
+
 		// Stylesheet for QPushButton background color.
 		static const char *ms_sCssBtnColors;
-		
+
 		QColor m_bgColor;
 };
 

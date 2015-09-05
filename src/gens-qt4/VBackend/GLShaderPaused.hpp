@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * GLShaderPaused.hpp: OpenGL Shader. (Paused Effect)                      *
  *                                                                         *
- * Copyright (c) 2010-2011 by David Korth.                                 *
+ * Copyright (c) 2010-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -26,18 +26,25 @@
 
 #include "GLShader.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class GLShaderPaused : public GLShader
 {
 	public:
+		GLShaderPaused() { }
+
+	private:
+		typedef GLShader super;
+	private:
+		Q_DISABLE_COPY(GLShaderPaused)
+
+	public:
 		/**
-		 * init(): Initialize the shader.
+		 * Initialize the shader.
 		 * This must be run from within a valid GL context!
 		 */
 		void init(void);
-	
+
 	private:
 		/** Shaders. **/
 #ifdef HAVE_GLEW

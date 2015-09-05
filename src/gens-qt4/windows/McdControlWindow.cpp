@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2014 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -37,8 +37,7 @@
 #include "cdrom/FindCdromDrives.hpp"
 
 #include "ui_McdControlWindow.h"
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class McdControlWindowPrivate
 {
@@ -146,7 +145,9 @@ void McdControlWindowPrivate::addDriveEntry(const QString &deviceName, int index
  * Initialize the General Configuration window.
  */
 McdControlWindow::McdControlWindow(QWidget *parent)
-	: QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint)
+	: super(parent,
+		Qt::WindowTitleHint |
+		Qt::WindowSystemMenuHint)
 	, d_ptr(new McdControlWindowPrivate(this))
 {
 	Q_D(McdControlWindow);
@@ -214,7 +215,7 @@ void McdControlWindow::changeEvent(QEvent *event)
 	}
 
 	// Pass the event to the base class.
-	QDialog::changeEvent(event);
+	super::changeEvent(event);
 }
 
 /**

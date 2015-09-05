@@ -38,7 +38,7 @@ class McdRomDBPrivate
 		~McdRomDBPrivate() { }
 
 	private:
-		Q_DISABLE_COPY(McdRomDBPrivate);
+		Q_DISABLE_COPY(McdRomDBPrivate)
 
 	public:
 		/**

@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2012 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -26,17 +26,17 @@
 // ARRAY_SIZE(x)
 #include "libgens/macros/common.h"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 FpsManager::FpsManager(QObject *parent)
-	: QObject(parent)
+	: super(parent)
 	, m_fpsAvg(0.0)
 	, m_fpsPtr(0)
 {
 	// Reset the FPS array.
-	for (int i = 0; i < ARRAY_SIZE(m_fps); i++)
+	for (int i = 0; i < ARRAY_SIZE(m_fps); i++) {
 		m_fps[i] = -1.0;
+	}
 }
 
 /**
@@ -49,8 +49,9 @@ void FpsManager::reset(void)
 	m_fpsPtr = 0;
 
 	// Reset the FPS array.
-	for (int i = 0; i < ARRAY_SIZE(m_fps); i++)
+	for (int i = 0; i < ARRAY_SIZE(m_fps); i++) {
 		m_fps[i] = -1.0;
+	}
 
 	// Average FPS has been updated.
 	emit updated(m_fpsAvg);
@@ -75,10 +76,11 @@ void FpsManager::push(double fps)
 		}
 	}
 
-	if (count <= 0)
+	if (count <= 0) {
 		m_fpsAvg = 0.0;
-	else
+	} else {
 		m_fpsAvg = (sum / (double)count);
+	}
 
 	// Average FPS has been updated.
 	emit updated(m_fpsAvg);

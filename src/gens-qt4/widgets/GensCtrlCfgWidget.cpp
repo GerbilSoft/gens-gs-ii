@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * GensCtrlCfgWidget.hpp: Controller configuration widget.                 *
  *                                                                         *
- * Copyright (c) 2011-2014 by David Korth.                                 *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -48,8 +48,7 @@ using LibGens::IoManager;
 // Controller configuration.
 #include "Config/CtrlConfig.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class GensCtrlCfgWidgetPrivate
 {
@@ -393,7 +392,7 @@ void GensCtrlCfgWidgetPrivate::clearAllButtons(void)
  ********************************/
 
 GensCtrlCfgWidget::GensCtrlCfgWidget(QWidget* parent)
-	: QWidget(parent)
+	: super(parent)
 	, d_ptr(new GensCtrlCfgWidgetPrivate(this))
 {
 	// Initialize the private members.

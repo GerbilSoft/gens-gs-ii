@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -33,8 +33,7 @@
 // LOG_MSG() subsystem.
 #include "libgens/macros/log_msg.h"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 GLTex2D::GLTex2D()
 {
@@ -54,24 +53,21 @@ GLTex2D::GLTex2D(const QImage& img)
 	m_pow2_h = 0.0;
 	m_img_w = 0;
 	m_img_h = 0;
-	
+
 	// Set the image.
 	setImage(img);
 }
 
-
 GLTex2D::~GLTex2D()
 {
-	if (m_tex > 0)
-	{
+	if (m_tex > 0) {
 		glDeleteTextures(1, &m_tex);
 		m_tex = 0;
 	}
 }
 
-
 /**
- * setImage(): Set the texture image from a QImage.
+ * Set the texture image from a QImage.
  * @param img QImage.
  */
 void GLTex2D::setImage(const QImage& img)

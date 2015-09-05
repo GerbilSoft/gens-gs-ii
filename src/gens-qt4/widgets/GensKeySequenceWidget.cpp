@@ -6,7 +6,7 @@
  * Copyright (c) 1998 Mark Donohoe <donohoe@kde.org>                       *
  * Copyright (c) 2001 Ellis Whitehead <ellis@kde.org>                      *
  * Copyright (c) 2007 Andreas Hartmetz <ahartmetz@gmail.com>               *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -41,9 +41,7 @@
 // GensQApplication::IconFromTheme()
 #include "../GensQApplication.hpp"
 
-
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class GensKeySequenceWidgetPrivate
 {
@@ -321,7 +319,7 @@ void GensKeySequenceWidgetPrivate::updateShortcutDisplay(void)
  ************************************/
 
 GensKeySequenceWidget::GensKeySequenceWidget(QWidget *parent)
-	: QWidget(parent)
+	: super(parent)
 	, d_ptr(new GensKeySequenceWidgetPrivate(this))
 {
 	// Initialize the private members.
@@ -359,7 +357,7 @@ void GensKeySequenceWidget::changeEvent(QEvent *event)
 	}
 
 	// Pass the event to the base class.
-	this->QWidget::changeEvent(event);
+	super::changeEvent(event);
 }
 
 /**

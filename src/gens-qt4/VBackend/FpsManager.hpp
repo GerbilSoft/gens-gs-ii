@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2012 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -26,45 +26,47 @@
 
 #include <QtCore/QObject>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class FpsManager : public QObject
 {
 	Q_OBJECT
-	
+
 	public:
 		FpsManager(QObject *parent = 0);
-	
+
 	private:
-		Q_DISABLE_COPY(FpsManager);
-	
+		typedef QObject super;
+	private:
+		Q_DISABLE_COPY(FpsManager)
+
 	public:
 		/**
 		 * Reset the FPS manager.
 		 */
 		void reset(void);
-		
+
 		/**
 		 * Push an FPS value.
 		 * @param fps FPS value.
 		 */
 		void push(double fps);
-		
+
 		/**
 		 * Get the current average FPS.
 		 * @return Current average FPS.
 		 */
 		double get(void);
-	
+
 	signals:
 		/**
 		 * The FPS manager has been updated.
 		 * @param fps New average FPS.
 		 */
 		void updated(double fps);
-	
+
 	private:
+		// TODO: Make this a private class?
 		double m_fps[8];
 		double m_fpsAvg;	// Average fps.
 		int m_fpsPtr;		// Pointer to next fps slot to use.

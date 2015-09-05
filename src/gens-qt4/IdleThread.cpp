@@ -33,7 +33,7 @@
 namespace GensQt4 {
 
 IdleThread::IdleThread(QObject *parent)
-	: QThread(parent)
+	: super(parent)
 {
 	m_stop = false;
 

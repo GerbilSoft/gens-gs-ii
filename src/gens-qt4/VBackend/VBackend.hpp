@@ -76,12 +76,17 @@ class VBackend : public QWidget
 		VBackend(QWidget *parent = 0, KeyHandlerQt *keyHandler = 0);
 		virtual ~VBackend();
 
+	private:
+		typedef QWidget super;
+	private:
+		Q_DISABLE_COPY(VBackend)
+
+	public:
 		void setVbDirty(void)
 			{ m_vbDirty = true; }
 		void setMdScreenDirty(void)
 			{ m_mdScreenDirty = true; }
 
-	// Video Backend update function.
 	public:
 		/**
 		 * Video Backend update function.

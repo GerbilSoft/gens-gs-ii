@@ -47,6 +47,7 @@ class CtrlConfigWindow : public QMainWindow
 		virtual ~CtrlConfigWindow();
 
 	private:
+		typedef QMainWindow super;
 		CtrlConfigWindowPrivate *const d_ptr;
 		Q_DECLARE_PRIVATE(CtrlConfigWindow)
 	private:

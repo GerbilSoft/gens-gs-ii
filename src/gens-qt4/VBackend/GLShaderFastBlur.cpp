@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * GLShaderFastBlur.cpp: OpenGL Shader. (Fast Blur)                        *
  *                                                                         *
- * Copyright (c) 2010-2011 by David Korth.                                 *
+ * Copyright (c) 2010-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -27,8 +27,7 @@
 // C includes.
 #include <string.h>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 #ifdef HAVE_GLEW
 /** Shaders. **/
@@ -56,12 +55,11 @@ void GLShaderFastBlur::init()
 {
 #ifdef HAVE_GLEW
 	GLenum err;
-	
-	if (GLEW_ARB_fragment_program || GLEW_VERSION_2_0)
-	{
+
+	if (GLEW_ARB_fragment_program || GLEW_VERSION_2_0) {
 		// GL_ARB_fragment_program is supported.
 		// Load the Paused effect fragment program.
-		
+
 		// TODO: Check for errors!
 		glGenProgramsARB(1, &m_ARB_program);
 		glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, m_ARB_program);
@@ -69,24 +67,20 @@ void GLShaderFastBlur::init()
 		glProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB,
 					strlen(ms_GL_ARB_fragment_program),
 					ms_GL_ARB_fragment_program);
-		
+
 		err = glGetError();
-		if (err == GL_NO_ERROR)
-		{
+		if (err == GL_NO_ERROR) {
 			// Fragment program loaded.
 			setShaderType(ST_GL_ARB_FRAGMENT_PROGRAM);
-		}
-		else
-		{
+		} else {
 			// An error occured while loading the fragment program.
 			// TODO: Remove the extra newline at the end of err_str.
 			const char *err_str = (const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB);
 			LOG_MSG(video, LOG_MSG_LEVEL_ERROR,
 				"Error creating Fast Blur effect ARB FP: %s", (err_str ? err_str : "(unknown)"));
-			
+
 			// Delete the fragment program.
-			if (m_ARB_program > 0)
-			{
+			if (m_ARB_program > 0) {
 				glDeleteProgramsARB(1, &m_ARB_program);
 				m_ARB_program = 0;
 				setShaderType(ST_NONE);
@@ -98,7 +92,7 @@ void GLShaderFastBlur::init()
 
 
 /**
- * enable(): Enable the shader.
+ * Enable the shader.
  */
 void GLShaderFastBlur::enable(void)
 {
@@ -106,7 +100,7 @@ void GLShaderFastBlur::enable(void)
 		return;
 	if (m_ARB_program <= 0)
 		return;
-	
+
 	// Enable the shader.
 	// TODO: Get texture width for the parameter!
 	glEnable(GL_FRAGMENT_PROGRAM_ARB);

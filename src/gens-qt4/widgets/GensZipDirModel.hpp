@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * GensZipDirModel.hpp: Zip Directory tree model.                          *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -34,8 +34,7 @@
 // GensZipDirItem.
 #include "GensZipDirItem.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class GensZipDirModelPrivate;
 
@@ -48,6 +47,7 @@ class GensZipDirModel : public QAbstractItemModel
 		virtual ~GensZipDirModel();
 
 	private:
+		typedef QAbstractItemModel super;
 		GensZipDirModelPrivate *const d_ptr;
 		Q_DECLARE_PRIVATE(GensZipDirModel)
 	private:

@@ -56,7 +56,7 @@ namespace GensQt4 {
  * Initialize the common OpenGL backend.
  */
 GLBackend::GLBackend(QWidget *parent, KeyHandlerQt *keyHandler)
-	: VBackend(parent, keyHandler)
+	: super(parent, keyHandler)
 	
 	// TODO: Have GensQGLWidget set the window size.
 	, m_winSize(320, 240)
@@ -1053,7 +1053,7 @@ void GLBackend::glb_clearPreviewTex(void)
 void GLBackend::osd_show_preview(int duration, const QImage& img)
 {
 	// Call the base function first.
-	VBackend::osd_show_preview(duration, img);
+	super::osd_show_preview(duration, img);
 
 	// Delete the preview texture to force a refresh.
 	glb_clearPreviewTex();
@@ -1169,7 +1169,7 @@ void GLBackend::bilinearFilter_changed_slot(const QVariant &newBilinearFilter)
 	}
 
 	// Call VBackend's bilinearFilter_changed_slot().
-	VBackend::bilinearFilter_changed_slot(newBilinearFilter);
+	super::bilinearFilter_changed_slot(newBilinearFilter);
 }
 
 
@@ -1189,7 +1189,7 @@ void GLBackend::pauseTint_changed_slot(const QVariant &newPauseTint)
 	}
 
 	// Call VBackend's pauseTint_changed_slot().
-	VBackend::pauseTint_changed_slot(newPauseTint);
+	super::pauseTint_changed_slot(newPauseTint);
 }
 
 
@@ -1214,7 +1214,7 @@ void GLBackend::stretchMode_changed_slot(const QVariant &newStretchMode)
 	recalcStretchRectF(stretch);
 
 	// Call VBackend's stretchMode_changed_slot().
-	VBackend::stretchMode_changed_slot(newStretchMode);
+	super::stretchMode_changed_slot(newStretchMode);
 }
 
 }

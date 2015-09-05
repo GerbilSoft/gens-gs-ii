@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * GLShaderManager.hpp: OpenGL Shader Manager.                             *
  *                                                                         *
- * Copyright (c) 2010-2011 by David Korth.                                 *
+ * Copyright (c) 2010-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -36,38 +36,41 @@
 #include "GLShaderPaused.hpp"
 #include "GLShaderFastBlur.hpp"
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class GLShaderManager
 {
 	public:
 		GLShaderManager();
 		~GLShaderManager();
-		
+
+	private:
+		Q_DISABLE_COPY(GLShaderManager)
+
+	public:
 		/**
-		 * init(): Initialize the GL Shader Manager.
+		 * Initialize the GL Shader Manager.
 		 * This must be run from within a valid GL context!
 		 */
 		void init(void);
-		
+
 		/**
-		 * end(): Shut down the GL Shader Manager.
+		 * Shut down the GL Shader Manager.
 		 * This must be run from within a valid GL context!
 		 */
 		void end(void);
-		
+
 		inline bool isInit(void) const
 			{ return m_init; }
-		
+
 #ifdef HAVE_GLEW
 		/**
-		 * GLExtsInUse(): Get a list of the OpenGL extensions in use.
+		 * Get a list of the OpenGL extensions in use.
 		 * @return List of OpenGL extensions in use.
 		 */
 		static QStringList GLExtsInUse(void);
 #endif /* HAVE_GLEW */
-		
+
 		/** Query available shaders. **/
 #ifdef HAVE_GLEW
 		inline bool hasPaused(void) const
@@ -80,7 +83,7 @@ class GLShaderManager
 		inline bool hasFastBlur(void) const
 			{ return false; }
 #endif /* HAVE_GLEW */
-		
+
 		/** Set Shader functions. **/
 #ifdef HAVE_GLEW
 		void setPaused(bool enabled);
@@ -96,10 +99,10 @@ class GLShaderManager
 		void setFastBlur(bool enabled)
 			{ ((void)enabled); }
 #endif /* HAVE_GLEW */
-	
+
 	protected:
 		bool m_init;	// True if the GL Shader Manager is initialized.
-		
+
 #ifdef HAVE_GLEW
 		/** OpenGL shaders. **/
 		GLShaderPaused m_shader_paused;

@@ -2,7 +2,7 @@
  * gens-qt4: Gens Qt4 UI.                                                  *
  * GensQLineEdit.hpp: QLineEdit class with indicator icon.                 *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * Based on Lineedit with a clear button.                                  *
  * http://labs.qt.nokia.com/2007/06/06/lineedit-with-a-clear-button/       *
@@ -31,40 +31,47 @@
 class QLabel;
 class QFocusEvent;
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class GensLineEdit : public QLineEdit
 {
 	Q_OBJECT
-	
+
 	Q_PROPERTY(QIcon icon READ icon WRITE setIcon)
-	
+
 	public:
 		GensLineEdit(QWidget *parent = 0);
-		
+
+	private:
+		typedef QLineEdit super;
+	private:
+		Q_DISABLE_COPY(GensLineEdit)
+
+	public:
 		QIcon icon(void) const { return m_icon; }
 		void setIcon(const QIcon& icon);
-	
+
 	signals:
 		void focusIn(void);
 		void focusOut(void);
-	
+
 	protected:
 		void resizeEvent(QResizeEvent *);
-		
+
 		void focusInEvent(QFocusEvent *event)
 		{
 			this->QLineEdit::focusInEvent(event);
 			emit focusIn();
 		}
+
 		void focusOutEvent(QFocusEvent *event)
 		{
 			this->QLineEdit::focusOutEvent(event);
 			emit focusOut();
 		}
-	
+
 	private:
+		// TODO: Move to a private class?
 		QLabel *m_label;
 		QIcon m_icon;
 };

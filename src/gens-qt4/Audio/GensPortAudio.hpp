@@ -46,6 +46,10 @@ class GensPortAudio : public ABackend
 		GensPortAudio();
 		~GensPortAudio();
 
+	private:
+		typedef ABackend super;
+
+	public:
 		inline bool isOpen(void) const { return m_open; }
 
 		void open(void);

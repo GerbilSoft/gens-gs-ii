@@ -3,7 +3,7 @@
  * GensColorComboBox.hpp: QComboBox class with color support.              *
  * Adds convenience functions to add color selection entries.              *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -26,8 +26,7 @@
 #include <QtGui/QComboBox>
 #include <QtGui/QColor>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class GensColorComboBox : public QComboBox
 {
@@ -35,11 +34,17 @@ class GensColorComboBox : public QComboBox
 	
 	public:
 		GensColorComboBox(QWidget *parent = 0)
-			: QComboBox(parent) { }
-		
+			: super(parent) { }
+
+	private:
+		typedef QComboBox super;
+	private:
+		Q_DISABLE_COPY(GensColorComboBox)
+
+	public:
 		void addItem(const QColor& color, const QString& text);
 		void addItem(Qt::GlobalColor color);
-		
+
 		QColor itemColor(int i);
 };
 

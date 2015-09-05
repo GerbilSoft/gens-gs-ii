@@ -6,7 +6,7 @@
  * Copyright (c) 1998 Mark Donohoe <donohoe@kde.org>                       *
  * Copyright (c) 2001 Ellis Whitehead <ellis@kde.org>                      *
  * Copyright (c) 2007 Andreas Hartmetz <ahartmetz@gmail.com>               *
- * Copyright (c) 2011-2014 by David Korth.                                 *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -29,8 +29,7 @@
 #include <QtGui/QWidget>
 #include <QtGui/QKeySequence>
 
-namespace GensQt4
-{
+namespace GensQt4 {
 
 class GensKeySequenceWidgetPrivate;
 
@@ -43,6 +42,7 @@ class GensKeySequenceWidget : public QWidget
 		virtual ~GensKeySequenceWidget();
 
 	private:
+		typedef QWidget super;
 		GensKeySequenceWidgetPrivate *const d_ptr;
 		Q_DECLARE_PRIVATE(GensKeySequenceWidget)
 	private:
