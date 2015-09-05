@@ -114,12 +114,12 @@ void Test_VdpPalette_DAC::assertCRam(int lineNum, int bpp, uint16_t cram, uint32
 
 	// Assertion failed.
 	assertFail(NULL);
-	PrintFail(stderr);
+	PrintFail();
 	if (bpp <= 16) {
-		fprintf(stderr, "Line %d, rgb%d: [%04X] expected %04X, got %04X\n",
+		fprintf(m_f_out, "Line %d, rgb%d: [%04X] expected %04X, got %04X\n",
 			lineNum, bpp, cram, expected, actual);
 	} else {
-		fprintf(stderr, "Line %d, rgb%d: [%04X] expected %06X, got %06X\n",
+		fprintf(m_f_out, "Line %d, rgb%d: [%04X] expected %06X, got %06X\n",
 			lineNum, bpp, cram, expected, actual);
 	}
 }
@@ -130,12 +130,12 @@ void Test_VdpPalette_DAC::assertCRam(int lineNum, int bpp, uint16_t cram, uint32
  */
 int Test_VdpPalette_DAC::exec(void)
 {
-	fprintf(stderr, "LibGens: VdpPalette DAC test suite.\n\n");
+	fprintf(m_f_out, "LibGens: VdpPalette DAC test suite.\n\n");
 
 	// Open the file.
 	FILE *f = fopen(m_filename.c_str(), "r");
 	if (!f) {
-		fprintf(stderr, "Error opening '%s': %s\n",
+		fprintf(m_f_out, "Error opening '%s': %s\n",
 			m_filename.c_str(), strerror(errno));
 		return -1;
 	}
@@ -206,20 +206,20 @@ int Test_VdpPalette_DAC::exec(void)
 			token = strtok(NULL, ":");
 			int header_version;
 			if (parse_number(token, 16, &header_version) != 0) {
-				PrintFail(stderr);
-				fprintf(stderr, "Invalid file header.\n");
+				PrintFail();
+				fprintf(m_f_out, "Invalid file header.\n");
 				goto fail;
 			}
 
 			if (header_version != PALTEST_VERSION) {
-				PrintFail(stderr);
-				fprintf(stderr, "Incorrect PalTest version. (expected %04X; found %04X) [FATAL]\n",
+				PrintFail();
+				fprintf(m_f_out, "Incorrect PalTest version. (expected %04X; found %04X) [FATAL]\n",
 					header_version, PALTEST_VERSION);
 				goto fail;
 			}
 
 			// Header is valid.
-			fprintf(stderr, "Processing file: '%s'\n\n",
+			fprintf(m_f_out, "Processing file: '%s'\n\n",
 				m_filename.c_str());
 			isInit = true;
 		} else if (!strcasecmp(token, PALTEST_CMD_PALMODE)) {
@@ -245,8 +245,8 @@ int Test_VdpPalette_DAC::exec(void)
 				palMode = VdpPalette::PALMODE_TMS9918;
 			*/
 			else {
-				PrintFail(stderr);
-				fprintf(stderr, "Unsupported PalMode: '%s'\n", token);
+				PrintFail();
+				fprintf(m_f_out, "Unsupported PalMode: '%s'\n", token);
 				goto fail;
 			}
 
@@ -280,7 +280,7 @@ int Test_VdpPalette_DAC::exec(void)
 			}
 
 			// Print the selected palette mode.
-			fprintf(stderr, "Selected PalMode: '%s'\n", palMode_str);
+			fprintf(m_f_out, "Selected PalMode: '%s'\n", palMode_str);
 
 			// Set the palette mode.
 			vdp15->setPalMode(palMode);
@@ -306,8 +306,8 @@ int Test_VdpPalette_DAC::exec(void)
 			else if (!strcasecmp(token, PALTEST_SHMODE_HIGHLIGHT))
 				shMode = 0x80;
 			else {
-				PrintFail(stderr);
-				fprintf(stderr, "Unsupported SHMode: '%s'\n", token);
+				PrintFail();
+				fprintf(m_f_out, "Unsupported SHMode: '%s'\n", token);
 				goto fail;
 			}
 
@@ -326,11 +326,11 @@ int Test_VdpPalette_DAC::exec(void)
 			}
 
 			// Print the selected Shadow/Highlight mode.
-			fprintf(stderr, "Selected SHMode: '%s'\n", shMode_str);
+			fprintf(m_f_out, "Selected SHMode: '%s'\n", shMode_str);
 			if (palMode != VdpPalette::PALMODE_MD) {
 				// ColorScale is only supported with MD palettes.
-				PrintWarn(stderr);
-				fprintf(stderr, "SHMode has no effect with PalMode '%s'.\n", palMode_str);
+				PrintWarn();
+				fprintf(m_f_out, "SHMode has no effect with PalMode '%s'.\n", palMode_str);
 			}
 
 			// Set the Shadow/Highlight mode.
@@ -354,32 +354,32 @@ int Test_VdpPalette_DAC::exec(void)
 			token = strtok(NULL, ":");
 			if (!token || parse_number(token, 16, &cram) != 0) {
 				assertFail(NULL);
-				PrintFail(stderr);
-				fprintf(stderr, "Line %d, ColorEntry: Invalid CRAM field: '%s'.\n",
+				PrintFail();
+				fprintf(m_f_out, "Line %d, ColorEntry: Invalid CRAM field: '%s'.\n",
 					lineNum, (token ? token : "(null)"));
 				continue;
 			}
 			token = strtok(NULL, ":");
 			if (!token || parse_number(token, 16, &rgb15) != 0) {
 				assertFail(NULL);
-				PrintFail(stderr);
-				fprintf(stderr, "Line %d, ColorEntry: Invalid RGB15 field: '%s'.\n",
+				PrintFail();
+				fprintf(m_f_out, "Line %d, ColorEntry: Invalid RGB15 field: '%s'.\n",
 					lineNum, (token ? token : "(null)"));
 				continue;
 			}
 			token = strtok(NULL, ":");
 			if (!token || parse_number(token, 16, &rgb16) != 0) {
 				assertFail(NULL);
-				PrintFail(stderr);
-				fprintf(stderr, "Line %d, ColorEntry: Invalid RGB16 field: '%s'.\n",
+				PrintFail();
+				fprintf(m_f_out, "Line %d, ColorEntry: Invalid RGB16 field: '%s'.\n",
 					lineNum, (token ? token : "(null)"));
 				continue;
 			}
 			token = strtok(NULL, ":");
 			if (!token || parse_number(token, 16, &rgb32) != 0) {
 				assertFail(NULL);
-				PrintFail(stderr);
-				fprintf(stderr, "Line %d, ColorEntry: Invalid RGB32 field: '%s'.\n",
+				PrintFail();
+				fprintf(m_f_out, "Line %d, ColorEntry: Invalid RGB32 field: '%s'.\n",
 					lineNum, (token ? token : "(null)"));
 				continue;
 			}
@@ -425,8 +425,8 @@ int Test_VdpPalette_DAC::exec(void)
 	return testsFailed();
 
 no_magic:
-	PrintFail(stderr);	// TODO: [FATAL] instead of [FAIL].
-	fprintf(stderr, "'%s': PalTest version line is missing.\n", m_filename.c_str());
+	PrintFail();	// TODO: [FATAL] instead of [FAIL].
+	fprintf(m_f_out, "'%s': PalTest version line is missing.\n", m_filename.c_str());
 fail:
 	fclose(f);
 
@@ -441,13 +441,12 @@ fail:
 
 int main(int argc, char *argv[])
 {
-	if (argc < 2)
-	{
+	if (argc < 2) {
 		// No filename was specified.
 		fprintf(stderr, "Specify a filename to test.\n");
 		return EXIT_FAILURE;
 	}
-	
+
 	LibGens::Tests::Test_VdpPalette_DAC vdpTest(argv[1]);
 	int ret = vdpTest.exec();
 	return ((ret == 0) ? ret : vdpTest.testsFailed());

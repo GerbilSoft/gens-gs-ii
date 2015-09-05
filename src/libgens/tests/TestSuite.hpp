@@ -2,7 +2,7 @@
  * libgens/tests: Gens Emulation Library. (Test Suite)                     *
  * TestSuite.hpp: Test Suite base class.                                   *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -18,6 +18,9 @@
  * with this program; if not, write to the Free Software Foundation, Inc., *
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
+
+// DEPRECATED: All tests deriving from TestSuite should be
+// rewritten to use Google Test.
 
 #ifndef __LIBGENS_TESTS_TESTSUITE_HPP__
 #define __LIBGENS_TESTS_TESTSUITE_HPP__
@@ -45,57 +48,57 @@ class TestSuite
 {
 	public:
 		TestSuite();
-		
+
 		/**
 		 * Execute the test suite.
 		 * @return 0 on success; negative on fatal error; positive if tests failed.
 		 */
 		virtual int exec(void) = 0;
-		
+
 		/**
 		 * Get the number of passed tests.
 		 */
 		int testsPassed(void) const;
-		
+
 		/**
 		 * Get the number of failed tests.
 		 */
 		int testsFailed(void) const;
-		
+
 		/**
 		 * Get the total number of tests.
 		 */
 		int testsTotal(void) const;
-	
+
 	protected:
 		/**
 		 * Start a new test section.
 		 */
 		void newSection(void);
-		
+
 		/**
 		 * Print the test results and indicate the tests are completed.
 		 */
 		void testsCompleted(void);
-		
-		static void PrintFail(FILE *f);
-		static void PrintWarn(FILE *f);
-		static void PrintPass(FILE *f);
-		static void PrintInfo(FILE *f);
-		static void PrintUnknown(FILE *f);
-		
+
+		void PrintFail(void);
+		void PrintWarn(void);
+		void PrintPass(void);
+		void PrintInfo(void);
+		void PrintUnknown(void);
+
 		/**
 		 * Internal function to indicate a test passed.
 		 * @param expr Stringified expression, or NULL if nothing should be printed.
 		 */
 		void assertPass(const char *expr);
-		
+
 		/**
 		 * Internal function to indicate a test failed.
 		 * @param expr Stringified expression, or NULL if nothing should be printed.
 		 */
 		void assertFail(const char *expr);
-		
+
 		/**
 		 * Check two hex values for equality.
 		 * @param test Test name.
@@ -104,7 +107,7 @@ class TestSuite
 		 */
 		template<typename T>
 		bool assertEquals_hex(const char *test, T expected, T actual);
-		
+
 		/**
 		 * Check two values for equality.
 		 * @param test Test name.
@@ -113,17 +116,20 @@ class TestSuite
 		 */
 		template<typename T>
 		bool assertEquals(const char *test, T expected, T actual);
-	
+
 	private:
 		/** All tests. **/
-		
 		int m_tests_total;	// Total number of tests executed.
 		int m_tests_failed;	// Total number of tests failed.
-		
+
 		/** Test section. **/
-		
 		int m_section_total;	// Number of tests executed in this section.
 		int m_section_failed;	// Number of tests failed in this section.
+
+		/** Output stream. **/
+		bool m_is_color;	// Does m_f_out support color?
+	protected:
+		FILE *m_f_out;		// Accessible by subclasses.
 };
 
 /**

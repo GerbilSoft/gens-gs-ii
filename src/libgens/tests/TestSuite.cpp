@@ -2,7 +2,7 @@
  * libgens/tests: Gens Emulation Library. (Test Suite)                     *
  * TestSuite.cpp: Test Suite base class.                                   *
  *                                                                         *
- * Copyright (c) 2011 by David Korth.                                      *
+ * Copyright (c) 2011-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -19,16 +19,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+// DEPRECATED: All tests deriving from TestSuite should be
+// rewritten to use Google Test.
+
 #include "TestSuite.hpp"
 
 // C includes. (C++ namespace)
 #include <cstdio>
-using namespace std;
+#include <cstring>
 
 // C++ includes.
 #include <sstream>
 #include <string>
 #include <iomanip>
+using namespace std;
+
+#ifdef _WIN32
+#include <windows.h>
+#include <io.h>
+#define isatty(fileno) _isatty(fileno)
+#define fileno(stream) _fileno(stream)
+#else
+#include <unistd.h>
+#endif
 
 namespace LibGens {
 namespace Tests {
@@ -38,25 +51,54 @@ TestSuite::TestSuite()
 	, m_tests_failed(0)
 	, m_section_total(0)
 	, m_section_failed(0)
-{ }
+	, m_is_color(false)
+	, m_f_out(NULL)
+{
+	// Initialize the output stream.
+	m_f_out = stderr;
 
+	// Check if the output stream supports color.
+	// (Based on Google Test.)
+	if (isatty(fileno(m_f_out))) {
+		// Output stream is a terminal.
+#ifdef _WIN32
+		// Always use color on Windows.
+		m_is_color = true;
+#else /* !_WIN32 */
+		// On Unix/Linux, check the terminal
+		// to see if it actually supports color.
+		const char *const term = getenv("TERM");
+		if (term) {
+			if (!strcmp(term, "xterm") ||
+			    !strcmp(term, "xterm-color") ||
+			    !strcmp(term, "xterm-256color") ||
+			    !strcmp(term, "screen") ||
+			    !strcmp(term, "screen-256color") ||
+			    !strcmp(term, "linux") ||
+			    !strcmp(term, "cygwin"))
+			{
+				// Terminal supports color.
+				m_is_color = true;
+			}
+		}
+#endif /* _WIN32 */
+	}
+}
 
 /**
  * Start a new test section.
  */
 void TestSuite::newSection(void)
 {
-	if (m_section_total > 0)
-	{
-		fprintf(stderr, "Section complete. %d/%d tests passed.\n\n",
+	if (m_section_total > 0) {
+		fprintf(m_f_out, "Section complete. %d/%d tests passed.\n\n",
 			(m_section_total - m_section_failed), m_section_total);
 	}
-	
+
 	// Reset the section counters.
 	m_section_failed = 0;
 	m_section_total = 0;
 }
-
 
 /**
  * Print the test results and indicate the tests are completed.
@@ -64,42 +106,59 @@ void TestSuite::newSection(void)
 void TestSuite::testsCompleted(void)
 {
 	newSection();
-	fprintf(stderr, "Tests complete. %d/%d tests passed.\n",
+	fprintf(m_f_out, "Tests complete. %d/%d tests passed.\n",
 		(m_tests_total - m_tests_failed), m_tests_total);
 }
 
 
 // Colorization functions.
+// TODO: Switch to fputs()?
 #ifndef _WIN32
 // ANSI escape sequences.
-#define ANSI_ESC_COLOR(x)	"\x1B[01;3" #x "m"
-#define ANSI_ESC_END		"\x1B[00m"
-void TestSuite::PrintFail(FILE *f)
-	{ fprintf(f, "[" ANSI_ESC_COLOR(1) "FAIL" ANSI_ESC_END "] "); }
-void TestSuite::PrintWarn(FILE *f)
-	{ fprintf(f, "[" ANSI_ESC_COLOR(3) "WARN" ANSI_ESC_END "] "); }
-void TestSuite::PrintPass(FILE *f)
-	{ fprintf(f, "[" ANSI_ESC_COLOR(2) "PASS" ANSI_ESC_END "] "); }
-void TestSuite::PrintInfo(FILE *f)
-	{ fprintf(f, "[" ANSI_ESC_COLOR(5) "INFO" ANSI_ESC_END "] "); }
-void TestSuite::PrintUnknown(FILE *f)
-	{ fprintf(f, "[" ANSI_ESC_COLOR(3) "UNKNOWN" ANSI_ESC_END "] "); }
-#undef ANSI_ESC_COLOR
-#undef ANSI_ESC_END
+#define PrintMsg(fn, str, color) \
+void TestSuite::Print##fn(void) \
+{ \
+	if (m_is_color) { \
+		fprintf(m_f_out, "[\x1B[01;3" #color "m" str "\x1B[00m" "] "); \
+	} else { \
+		fprintf(m_f_out, "[" str "] "); \
+	} \
+}
+PrintMsg(Fail, "FAIL", 1)
+PrintMsg(Warn, "WARN", 3)
+PrintMsg(Pass, "PASS", 2)
+PrintMsg(Info, "INFO", 5)
+PrintMsg(Unknown, "UNKNOWN", 3)
 #else /* _WIN32 */
-// TODO: Add Win32 support.
-void TestSuite::PrintFail(FILE *f)
-	{ fprintf(f, "[FAIL] "); }
-void TestSuite::PrintWarn(FILE *f)
-	{ fprintf(f, "[WARN] "); }
-void TestSuite::PrintPass(FILE *f)
-	{ fprintf(f, "[PASS] "); }
-void TestSuite::PrintInfo(FILE *f)
-	{ fprintf(f, "[INFO] "); }
-void TestSuite::PrintUnknown(FILE *f)
-	{ fprintf(f, "[UNKNOWN] "); }
+#define PrintMsg(fn, str, color) \
+void TestSuite::Print##fn(void) \
+{ \
+	if (m_is_color) { \
+		fprintf(m_f_out, "["); \
+		const HANDLE stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE); \
+		/* Get the current text color. */ \
+		CONSOLE_SCREEN_BUFFER_INFO buffer_info; \
+		GetConsoleScreenBufferInfo(stdout_handle, &buffer_info); \
+		const WORD old_color_attrs = buffer_info.wAttributes; \
+		/* Flush the stream buffers to prevent issues when changing attributes. */ \
+		fflush(stdout); \
+		fflush(stderr); \
+		SetConsoleTextAttribute(stdout_handle, color | FOREGROUND_INTENSITY); \
+		fprintf(m_f_out, "%s", str); \
+		fflush(m_f_out); \
+		SetConsoleTextAttribute(stdout_handle, old_color_attrs); \
+		fprintf(m_f_out, "] "); \
+	} else { \
+		fprintf(m_f_out, "[" str "] "); \
+	} \
+}
+// NOTE: RGB bits are inverted compared to ANSI terminals.
+PrintMsg(Fail, "FAIL", FOREGROUND_RED)
+PrintMsg(Warn, "WARN", FOREGROUND_RED | FOREGROUND_GREEN)
+PrintMsg(Pass, "PASS", FOREGROUND_GREEN)
+PrintMsg(Info, "INFO", FOREGROUND_RED | FOREGROUND_BLUE)
+PrintMsg(Unknown, "UNKNOWN", FOREGROUND_RED | FOREGROUND_GREEN)
 #endif /* _WIN32 */
-
 
 /**
  * Internal function to indicate a test passed.
@@ -109,14 +168,12 @@ void TestSuite::assertPass(const char *expr)
 {
 	m_tests_total++;
 	m_section_total++;
-	
-	if (expr)
-	{
-		PrintPass(stderr);
-		fprintf(stderr, "Test `%s' passed.\n", expr);
+
+	if (expr) {
+		PrintPass();
+		fprintf(m_f_out, "Test `%s' passed.\n", expr);
 	}
 }
-
 
 /**
  * Internal function to indicate a test failed.
@@ -128,14 +185,12 @@ void TestSuite::assertFail(const char *expr)
 	m_tests_failed++;
 	m_section_total++;
 	m_section_failed++;
-	
-	if (expr)
-	{
-		PrintFail(stderr);
-		fprintf(stderr, "Test `%s' failed.\n", expr);
+
+	if (expr) {
+		PrintFail();
+		fprintf(m_f_out, "Test `%s' failed.\n", expr);
 	}
 }
-
 
 /**
  * Check two hex values for equality.
@@ -149,29 +204,28 @@ bool TestSuite::assertEquals_hex(const char *test, T expected, T actual)
 {
 	m_tests_total++;
 	m_section_total++;
-	
-	if (expected == actual)
-		PrintPass(stderr);
-	else
-	{
+
+	if (expected == actual) {
+		PrintPass();
+	} else {
 		m_tests_failed++;
 		m_section_failed++;
-		PrintFail(stderr);
+		PrintFail();
 	}
-	
+
 	// Convert the expected value to a string.
 	stringstream ss;
 	ss << std::hex << std::uppercase << std::setfill('0') << std::setw(sizeof(T)*2);
 	ss << expected;
 	string exp_str = ss.str();
-	
+
 	// Convert the actual value to a string.
 	ss.str("");
 	ss << std::hex << std::uppercase << std::setfill('0') << std::setw(sizeof(T)*2);
 	ss << actual;
 	string act_str = ss.str();
-	
-	fprintf(stderr, "%s: expected %s, got %s\n", test, exp_str.c_str(), act_str.c_str());
+
+	fprintf(m_f_out, "%s: expected %s, got %s\n", test, exp_str.c_str(), act_str.c_str());
 	return (expected == actual);
 }
 
@@ -201,12 +255,12 @@ bool TestSuite::assertEquals(const char *test, T expected, T actual)
 	m_section_total++;
 	
 	if (expected == actual)
-		PrintPass(stderr);
+		PrintPass();
 	else
 	{
 		m_tests_failed++;
 		m_section_failed++;
-		PrintFail(stderr);
+		PrintFail();
 	}
 	
 	// Convert the expected value to a string.
@@ -219,7 +273,7 @@ bool TestSuite::assertEquals(const char *test, T expected, T actual)
 	ss << actual;
 	string act_str = ss.str();
 	
-	fprintf(stderr, "%s: expected %s, got %s\n", test, exp_str.c_str(), act_str.c_str());
+	fprintf(m_f_out, "%s: expected %s, got %s\n", test, exp_str.c_str(), act_str.c_str());
 	return (expected == actual);
 }
 
