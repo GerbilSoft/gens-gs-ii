@@ -355,7 +355,7 @@ int main(int argc, char *argv[])
 			"Maximum length to dump, in bytes. (default = entire file)", "LEN"},
 		{"rate",   'r', POPT_ARG_INT, (int*)&sample_rate, 0,
 			"Sample rate. (default = 32552 Hz)", "RATE"},
-		{"output", 'o', POPT_ARG_STRING, out_filename, 0,
+		{"output", 'o', POPT_ARG_STRING, &out_filename, 0,
 			"Output filename. (default = pcm_file.wav)", "FILENAME"},
 		{NULL, 0, POPT_ARG_INCLUDE_TABLE, helpOptionsTable, 0,
 			"Help options:", NULL},
@@ -454,6 +454,9 @@ int main(int argc, char *argv[])
 	// Open the output file.
 	if (out_filename) {
 		// Output filename specified.
+		// NOTE: out_filename is a pointer to argv,
+		// so duplicate it to prevent issues.
+		out_filename = strdup(out_filename);
 		f_wav = fopen(out_filename, "wb");
 	} else {
 		// Output filename not specified.
