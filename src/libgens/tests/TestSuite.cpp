@@ -84,6 +84,11 @@ TestSuite::TestSuite()
 		}
 #endif /* _WIN32 */
 	}
+
+	// On POSIX-compliant systems, isatty() sets errno to
+	// either EINVAL or ENOTTY if the specified fd is not
+	// a TTY. Clear errno to prevent issues elsewhere.
+	errno = 0;
 }
 
 /**

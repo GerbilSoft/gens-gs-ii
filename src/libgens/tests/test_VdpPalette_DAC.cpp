@@ -48,6 +48,7 @@ template<typename T>
 static inline int parse_number(const char *str, int base, T *pRet)
 {
 	char *endptr;
+	errno = 0;
 	long ret = strtol(str, &endptr, base);
 
 	if (errno != 0 || endptr == str || *endptr != 0x00) {
@@ -449,5 +450,5 @@ int main(int argc, char *argv[])
 
 	LibGens::Tests::Test_VdpPalette_DAC vdpTest(argv[1]);
 	int ret = vdpTest.exec();
-	return ((ret == 0) ? ret : vdpTest.testsFailed());
+	return ((ret == 0) ? ret : vdpTest.testsFailed())
 }
