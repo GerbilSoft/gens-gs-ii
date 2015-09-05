@@ -231,21 +231,19 @@ int Test_VdpPalette_DAC::exec(void)
 			// Palette mode.
 			// Format: PalMode:(string)mode
 			token = strtok(NULL, ":");
-			if (!strcasecmp(token, PALTEST_PALMODE_MD))
+			if (!strcasecmp(token, PALTEST_PALMODE_MD)) {
 				palMode = VdpPalette::PALMODE_MD;
-			/* TODO
-			else if (!strcasecmp(token, PALTEST_PALMODE_32X))
+			} else if (!strcasecmp(token, PALTEST_PALMODE_32X)) {
 				palMode = VdpPalette::PALMODE_32X;
-			*/
-			else if (!strcasecmp(token, PALTEST_PALMODE_SMS))
+			} else if (!strcasecmp(token, PALTEST_PALMODE_SMS)) {
 				palMode = VdpPalette::PALMODE_SMS;
-			else if (!strcasecmp(token, PALTEST_PALMODE_GG))
+			} else if (!strcasecmp(token, PALTEST_PALMODE_GG)) {
 				palMode = VdpPalette::PALMODE_GG;
 			/* TODO
-			else if (!strcasecmp(token, PALTEST_PALMODE_TMS9918))
+			} else if (!strcasecmp(token, PALTEST_PALMODE_TMS9918)) {
 				palMode = VdpPalette::PALMODE_TMS9918;
 			*/
-			else {
+			} else {
 				PrintFail();
 				fprintf(m_f_out, "Unsupported PalMode: '%s'\n", token);
 				goto fail;
@@ -259,11 +257,10 @@ int Test_VdpPalette_DAC::exec(void)
 					palMode_str = PALTEST_PALMODE_MD;
 					m5m4bits = 3;	// Mode 5
 					break;
-				/* TODO
 				case VdpPalette::PALMODE_32X:
 					palMode_str = PALTEST_PALMODE_32X;
+					m5m4bits = 3;	// Mode 5
 					break;
-				*/
 				case VdpPalette::PALMODE_SMS:
 					palMode_str = PALTEST_PALMODE_SMS;
 					m5m4bits = 1;	// Mode 4
@@ -347,8 +344,10 @@ int Test_VdpPalette_DAC::exec(void)
 			// rgb15 and rgb16 are both 16-bit.
 			// rgb32 is 32-bit.
 
-			uint16_t cram, rgb15, rgb16;
-			uint32_t rgb32;
+			// NOTE: Initializing values to 0xCC to work around
+			// gcc compiler warnings.
+			uint16_t cram = 0xCCCC, rgb15 = 0xCCCC, rgb16 = 0xCCCC;
+			uint32_t rgb32 = 0xCCCCCCCC;
 
 			// Parse the data.
 			// TODO: Move validation into a common assertion function.
@@ -392,16 +391,25 @@ int Test_VdpPalette_DAC::exec(void)
 					: 0x01
 					);
 
-			if (palMode == VdpPalette::PALMODE_SMS) {
-				// SMS. Write 8-bit data to CRam.
-				vdp15->writeCRam_8(0x01, (uint8_t)cram);
-				vdp16->writeCRam_8(0x01, (uint8_t)cram);
-				vdp32->writeCRam_8(0x01, (uint8_t)cram);
-			} else {
-				// Other system. Write 16-bit data to CRam.
-				vdp15->writeCRam_16(0x02, cram);
-				vdp16->writeCRam_16(0x02, cram);
-				vdp32->writeCRam_16(0x02, cram);
+			switch (palMode) {
+				case VdpPalette::PALMODE_SMS:
+					// SMS. Write 8-bit data to CRam.
+					vdp15->writeCRam_8(0x01, (uint8_t)cram);
+					vdp16->writeCRam_8(0x01, (uint8_t)cram);
+					vdp32->writeCRam_8(0x01, (uint8_t)cram);
+					break;
+				case VdpPalette::PALMODE_32X:
+					// 32X. Write to 32X CRam.
+					vdp15->writeCRam32X_16(0x02, cram);
+					vdp16->writeCRam32X_16(0x02, cram);
+					vdp32->writeCRam32X_16(0x02, cram);
+					break;
+				default:
+					// Other system. Write 16-bit data to CRam.
+					vdp15->writeCRam_16(0x02, cram);
+					vdp16->writeCRam_16(0x02, cram);
+					vdp32->writeCRam_16(0x02, cram);
+					break;
 			}
 
 			// Update the VdpPalette objects.
@@ -410,9 +418,17 @@ int Test_VdpPalette_DAC::exec(void)
 			vdp32->update();
 
 			// Verify the RGB values.
-			assertCRam(lineNum, 15, cram, rgb15, vdp15->m_palActive.u16[pal_entry]);
-			assertCRam(lineNum, 16, cram, rgb16, vdp16->m_palActive.u16[pal_entry]);
-			assertCRam(lineNum, 32, cram, rgb32, vdp32->m_palActive.u32[pal_entry]);
+			if (palMode == VdpPalette::PALMODE_32X) {
+				// 32X palette.
+				assertCRam(lineNum, 15, cram, rgb15, vdp15->m_palActive32X.u16[pal_entry]);
+				assertCRam(lineNum, 16, cram, rgb16, vdp16->m_palActive32X.u16[pal_entry]);
+				assertCRam(lineNum, 32, cram, rgb32, vdp32->m_palActive32X.u32[pal_entry]);
+			} else {
+				// Standard palette.
+				assertCRam(lineNum, 15, cram, rgb15, vdp15->m_palActive.u16[pal_entry]);
+				assertCRam(lineNum, 16, cram, rgb16, vdp16->m_palActive.u16[pal_entry]);
+				assertCRam(lineNum, 32, cram, rgb32, vdp32->m_palActive.u32[pal_entry]);
+			}
 		} else {
 			// Ignore this line.
 		}

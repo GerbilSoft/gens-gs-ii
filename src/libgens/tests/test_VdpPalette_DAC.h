@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -49,10 +49,12 @@ extern "C" {
 #define PALTEST_SHMODE_HIGHLIGHT "Highlight"
 
 // Palette modes.
-#define PALTEST_CMD_PALMODE "PalMode"
-#define PALTEST_PALMODE_MD "MD"
-#define PALTEST_PALMODE_SMS "SMS"
-#define PALTEST_PALMODE_GG "GG"
+#define PALTEST_CMD_PALMODE		"PalMode"
+#define PALTEST_PALMODE_MD		"MD"
+#define PALTEST_PALMODE_SMS		"SMS"
+#define PALTEST_PALMODE_GG		"GG"
+#define PALTEST_PALMODE_32X		"32X"
+#define PALTEST_PALMODE_TMS9918A	"TMS9918A"
 
 // Color entry.
 #define PALTEST_CMD_COLORENTRY "C"

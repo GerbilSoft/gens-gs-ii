@@ -57,6 +57,8 @@ ADD_TEST(NAME test_VdpPalette_DAC_generate_SMS
 	COMMAND test_VdpPalette_DAC_generate --palmode SMS PalTest_SMS.txt)
 ADD_TEST(NAME test_VdpPalette_DAC_generate_GG
 	COMMAND test_VdpPalette_DAC_generate --palmode GG PalTest_GG.txt)
+ADD_TEST(NAME test_VdpPalette_DAC_generate_32X
+	COMMAND test_VdpPalette_DAC_generate --palmode 32X PalTest_32X.txt)
 
 # Test the VDP DAC.
 ADD_TEST(NAME test_VdpPalette_DAC_MD
@@ -65,6 +67,8 @@ ADD_TEST(NAME test_VdpPalette_DAC_GG
 	COMMAND test_VdpPalette_DAC PalTest_GG.txt)
 ADD_TEST(NAME test_VdpPalette_DAC_SMS
 	COMMAND test_VdpPalette_DAC PalTest_SMS.txt)
+ADD_TEST(NAME test_VdpPalette_DAC_32X
+	COMMAND test_VdpPalette_DAC PalTest_32X.txt)
 
 # Sprite Masking & Overflow Test ROM.
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})

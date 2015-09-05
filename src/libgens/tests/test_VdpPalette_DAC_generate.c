@@ -22,10 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-/**
- * TODO:
- * - Add 32X and TMS9918 functions.
- */
+/** TODO: Add TMS9918 functions. **/
 
 #include "test_VdpPalette_DAC.h"
 
@@ -63,6 +60,11 @@ typedef enum {
 
 // TODO: Combine these functions together.
 
+/**
+ * Write palette test information for Sega Mega Drive.
+ * This includes shadow and highlight variants.
+ * @param filename Output filename.
+ */
 static int write_paltype_md(const char *filename)
 {
 	static const uint8_t PalComponent_MD[16] =
@@ -172,6 +174,10 @@ static int write_paltype_md(const char *filename)
 	return 0;
 }
 
+/**
+ * Write palette test information for Sega Master System.
+ * @param filename Output filename.
+ */
 static int write_paltype_sms(const char *filename)
 {
 	static const uint8_t PalComponent_SMS[4] = {0x00, 0x55, 0xAA, 0xFF};
@@ -214,6 +220,10 @@ static int write_paltype_sms(const char *filename)
 	return 0;
 }
 
+/**
+ * Write palette test information for Sega Game Gear.
+ * @param filename Output filename.
+ */
 static int write_paltype_gg(const char *filename)
 {
 	unsigned int i;
@@ -232,6 +242,7 @@ static int write_paltype_gg(const char *filename)
 	fprintf(f, "\n");
 	for (i = 0x0000; i <= 0xFFFF; i++) {
 		// Get the Game Gear color components.
+		// Game Gear uses XBGR4444.
 		uint8_t r, g, b;
 		uint16_t rgb555, rgb565;
 		uint32_t rgb888;
@@ -239,6 +250,56 @@ static int write_paltype_gg(const char *filename)
 		r = (i & 0x00F);	r |= (r << 4);
 		g = ((i >> 4) & 0x00F);	g |= (g << 4);
 		b = ((i >> 8) & 0x00F);	b |= (b << 4);
+
+		// Calculate the scaled RGB colors.
+		rgb555 = ((r & 0xF8) << 7) | ((g & 0xF8) << 2) | (b >> 3);
+		rgb565 = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
+		rgb888 = (r << 16) | (g << 8) | b;
+
+		// Write the palette entry.
+		// Format: C:[CRAM]:[RGB555]:[RGB565]:[RGB888]
+		// - CRAM: Color RAM value. (16-bit for MD)
+		// - RGB555: 15-bit RGB value.
+		// - RGB565: 16-bit RGB value.
+		// - RGB888: 32-bit RGB value.
+		fprintf(f, "C:%04X:%04X:%04X:%06X\n",
+			i, rgb555, rgb565, rgb888);
+	}
+
+	fclose(f);
+	return 0;
+}
+
+/**
+ * Write palette test information for Sega 32X.
+ * @param filename Output filename.
+ */
+static int write_paltype_32x(const char *filename)
+{
+	unsigned int i;
+
+	FILE *f = fopen(filename, "w");
+	if (!f) {
+		fprintf(stderr, "Error opening file '%s': %s\n", filename, strerror(errno));
+		return -1;
+	}
+
+	// Write the file header.
+	fprintf(f, "%s:%04X\n", PALTEST_MAGIC, PALTEST_VERSION);
+	fprintf(f, "PalMode:%s\n", PALTEST_PALMODE_32X);
+
+	// Write the palette.
+	fprintf(f, "\n");
+	for (i = 0x0000; i <= 0xFFFF; i++) {
+		// Get the 32X color components.
+		// 32X uses XBGR1555.
+		uint8_t r, g, b;
+		uint16_t rgb555, rgb565;
+		uint32_t rgb888;
+
+		r = ((i << 3) & 0xF8);  r |= (r >> 5);
+		g = ((i >> 2) & 0xF8);  g |= (g >> 5);
+		b = ((i >> 7) & 0xF8);  b |= (b >> 5);
 
 		// Calculate the scaled RGB colors.
 		rgb555 = ((r & 0xF8) << 7) | ((g & 0xF8) << 2) | (b >> 3);
@@ -395,15 +456,17 @@ int main(int argc, char *argv[])
 		// argument was specified, usage information
 		// was printed. This isn't needed, since the
 		// user can use the help options.
-		if (!strcasecmp(pal_mode_str, "MD")) {
+		if (!strcasecmp(pal_mode_str, PALTEST_PALMODE_MD)) {
 			palMode = PALMODE_MD;
-		} else if (!strcasecmp(pal_mode_str, "32X")) {
+		} else if (!strcasecmp(pal_mode_str, PALTEST_PALMODE_32X)) {
 			palMode = PALMODE_32X;
-		} else if (!strcasecmp(pal_mode_str, "SMS")) {
+		} else if (!strcasecmp(pal_mode_str, PALTEST_PALMODE_SMS)) {
 			palMode = PALMODE_SMS;
-		} else if (!strcasecmp(pal_mode_str, "GG")) {
+		} else if (!strcasecmp(pal_mode_str, PALTEST_PALMODE_GG)) {
 			palMode = PALMODE_GG;
-		} else if (!strcasecmp(pal_mode_str, "TMS9918")) {
+		} else if (!strcasecmp(pal_mode_str, PALTEST_PALMODE_TMS9918A) ||
+			   !strcasecmp(pal_mode_str, "TMS9918"))
+		{
 			palMode = PALMODE_TMS9918A;
 		} else {
 			// Invalid palette mode.
@@ -448,11 +511,12 @@ int main(int argc, char *argv[])
 			ret = write_paltype_gg(out_filename);
 			break;
 		case PALMODE_32X:
+			ret = write_paltype_32x(out_filename);
+			break;
 		case PALMODE_TMS9918A:
 		default:
 			// Unsupported right now.
-			fprintf(stderr, "%s: error: palette mode '%s' isn't supported yet.\n",
-				argv[0], (palMode == PALMODE_32X ? "32X" : "TMS9918"));
+			fprintf(stderr, "%s: error: palette mode 'tms9918' isn't supported yet.\n", argv[0]);
 			return EXIT_FAILURE;
 	}
 
