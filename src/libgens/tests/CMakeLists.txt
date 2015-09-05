@@ -50,20 +50,13 @@ ADD_EXECUTABLE(test_VdpPalette_DAC
 TARGET_LINK_LIBRARIES(test_VdpPalette_DAC gens)
 DO_SPLIT_DEBUG(test_VdpPalette_DAC)
 
-# NOTE: $<TARGET_FILE:gcbanner> is preferred,
-# but this doesn't seem to work on Ubuntu 10.04.
-# (cmake_2.8.0-5ubuntu1_i386)
-GET_PROPERTY(TEST_VDPPALETTE_DAC_GENERATE_EXE
-	TARGET test_VdpPalette_DAC_generate
-	PROPERTY LOCATION)
-
 # Generate the test files.
 ADD_TEST(NAME test_VdpPalette_DAC_generate_MD
-	COMMAND "${TEST_VDPPALETTE_DAC_GENERATE_EXE}" --palmode MD PalTest_MD.txt)
+	COMMAND test_VdpPalette_DAC_generate --palmode MD PalTest_MD.txt)
 ADD_TEST(NAME test_VdpPalette_DAC_generate_SMS
-	COMMAND "${TEST_VDPPALETTE_DAC_GENERATE_EXE}" --palmode SMS PalTest_SMS.txt)
+	COMMAND test_VdpPalette_DAC_generate --palmode SMS PalTest_SMS.txt)
 ADD_TEST(NAME test_VdpPalette_DAC_generate_GG
-	COMMAND "${TEST_VDPPALETTE_DAC_GENERATE_EXE}" --palmode GG PalTest_GG.txt)
+	COMMAND test_VdpPalette_DAC_generate --palmode GG PalTest_GG.txt)
 
 # Test the VDP DAC.
 ADD_TEST(NAME test_VdpPalette_DAC_MD
