@@ -267,6 +267,31 @@ int W32U_stat64(const char *pathname, struct _stat64 *buf)
 	int ret = -1;
 	int errno_ret = 0;
 
+	/**
+	 * All versions of MSVCRT prior to MSVC 2015's UCRT
+	 * have a bug where it will blindly access pathname[1]
+	 * without checking if pathname[0] is not NULL.
+	 * This can cause an out-of-bounds memory access if
+	 * pathname[0] is the last byte of a page, and the
+	 * next page isn't allocated.
+	 *
+	 * References:
+	 * - http://blogs.msdn.com/b/vcblog/archive/2014/06/18/crt-features-fixes-and-breaking-changes-in-visual-studio-14-ctp1.aspx
+	 * - http://connect.microsoft.com/VisualStudio/feedback/details/796796/msvcrt-stat-actually-stat64i32-blindly-refers-to-2nd-char-of-string-parameter
+	 * - https://github.com/dynamorio/drmemory/issues/1298#c1
+	 */
+	if (!pathname || !buf) {
+		// NOTE: MSVCRT would normally crash here.
+		// We're going to set errno = EFAULT and return,
+		// which is what glibc does.
+		errno = EFAULT;
+		return -1;
+	} else if (pathname && !pathname[0]) {
+		// pathname is a valid string, but it's empty.
+		errno = ENOENT;
+		return -1;
+	}
+
 	// Convert the arguments from UTF-8 to UTF-16.
 	UtoW_filename(pathname);
 	if (!pathnameW) {
