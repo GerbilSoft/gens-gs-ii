@@ -48,37 +48,37 @@ class EmuMD : public EmuContext
 		 * Perform a soft reset.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int softReset(void);
+		virtual int softReset(void) final;
 
 		/**
 		 * Perform a hard reset.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int hardReset(void);
+		virtual int hardReset(void) final;
 
 		/**
 		 * Set the region code.
 		 * @param region Region code.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int setRegion(SysVersion::RegionCode_t region);
+		virtual int setRegion(SysVersion::RegionCode_t region) final;
 
 		/**
 		 * Save SRam/EEPRom.
 		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
 		 */
-		int saveData(void) final;
+		virtual int saveData(void) final;
 
 		/**
 		 * AutoSave SRam/EEPRom.
 		 * @param frames Number of frames elapsed, or -1 for paused. (force autosave)
 		 * @return 1 if SRam was saved; 2 if EEPRom was saved; 0 if nothing was saved. (TODO: Enum?)
 		 */
-		int autoSaveData(int framesElapsed) final;
+		virtual int autoSaveData(int framesElapsed) final;
 
 		/** Frame execution functions. **/
-		void execFrame(void);
-		void execFrameFast(void);
+		virtual void execFrame(void) final;
+		virtual void execFrameFast(void) final;
 
 		/**
 		 * Load the current state from a ZOMG file.
@@ -86,7 +86,7 @@ class EmuMD : public EmuContext
 		 * @return 0 on success; non-zero on error.
 		 * TODO: Error code constants.
 		 */
-		virtual int zomgLoad(const char *filename) override;
+		virtual int zomgLoad(const char *filename) final;
 
 		/**
 		 * Save the current state to a ZOMG file.
@@ -94,7 +94,7 @@ class EmuMD : public EmuContext
 		 * @return 0 on success; non-zero on error.
 		 * TODO: Error code constants.
 		 */
-		virtual int zomgSave(const char *filename) const override;
+		virtual int zomgSave(const char *filename) const final;
 
 	protected:
 		/**
