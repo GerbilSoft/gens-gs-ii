@@ -61,39 +61,6 @@ class EmuLoop : public EventLoop
 		 * @return 0 if the event was handled; non-zero if it wasn't.
 		 */
 		virtual int processSdlEvent(const SDL_Event *event) final;
-
-		/**
-		 * Get the modification time string for the specified save file.
-		 * @param zomg Save file.
-		 * @return String contianing the mtime, or an error message if invalid.
-		 */
-		std::string getSaveSlot_mtime(const LibZomg::ZomgBase *zomg);
-
-		/**
-		 * Save slot selection.
-		 * @param saveSlot Save slot. (0-9)
-		 */
-		void doSaveSlot(int saveSlot);
-
-		/**
-		 * Load the state in the selected slot.
-		 */
-		void doLoadState(void);
-
-		/**
-		 * Save the state in the selected slot.
-		 */
-		void doSaveState(void);
-
-		/**
-		 * Change stretch mode parameters.
-		 */
-		void doStretchMode(void);
-
-		/**
-		 * Take a screenshot.
-		 */
-		void doScreenShot(void);
 };
 
 }

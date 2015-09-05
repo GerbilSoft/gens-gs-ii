@@ -102,6 +102,39 @@ class EmuLoopPrivate : public EventLoopPrivate
 		// Used to determine if SRAM/EEPROM
 		// should be autosaved.
 		paused_t last_paused;
+
+		/**
+		 * Get the modification time string for the specified save file.
+		 * @param zomg Save file.
+		 * @return String contianing the mtime, or an error message if invalid.
+		 */
+		static std::string getSaveSlot_mtime(const LibZomg::ZomgBase *zomg);
+
+		/**
+		 * Save slot selection.
+		 * @param saveSlot Save slot. (0-9)
+		 */
+		void doSaveSlot(int saveSlot);
+
+		/**
+		 * Load the state in the selected slot.
+		 */
+		void doLoadState(void);
+
+		/**
+		 * Save the state in the selected slot.
+		 */
+		void doSaveState(void);
+
+		/**
+		 * Change stretch mode parameters.
+		 */
+		void doStretchMode(void);
+
+		/**
+		 * Take a screenshot.
+		 */
+		void doScreenShot(void);
 };
 
 /** EmuLoopPrivate **/
@@ -138,134 +171,12 @@ EmuLoopPrivate::~EmuLoopPrivate()
 	delete keyManager;
 }
 
-/** EmuLoop **/
-
-EmuLoop::EmuLoop()
-	: EventLoop(new EmuLoopPrivate())
-{ }
-
-EmuLoop::~EmuLoop()
-{ }
-
-/**
- * Process an SDL event.
- * @param event SDL event.
- * @return 0 if the event was handled; non-zero if it wasn't.
- */
-int EmuLoop::processSdlEvent(const SDL_Event *event) {
-	EmuLoopPrivate *const d = d_func();
-	int ret = 0;
-	switch (event->type) {
-		case SDL_KEYDOWN:
-			// SDL keycodes nearly match GensKey.
-			// TODO: Split out into a separate function?
-			// TODO: Check for "no modifiers" for some keys?
-			switch (event->key.keysym.sym) {
-				case SDLK_TAB:
-					// Check for Shift.
-					if (event->key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
-						// Hard Reset.
-						d->emuContext->hardReset();
-						d->vBackend->osd_print(1500, "Hard Reset.");
-					} else {
-						// Soft Reset.
-						d->emuContext->softReset();
-						d->vBackend->osd_print(1500, "Soft Reset.");
-					}
-					break;
-
-				case SDLK_BACKSPACE:
-					if (event->key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
-						// Take a screenshot.
-						doScreenShot();
-					}
-					break;
-
-				case SDLK_F2:
-					// NOTE: This is handled here instead of in the generic
-					// processSdlEvent_common() because stretch functionality
-					// isn't used in CrazyEffectLoop.
-					if (event->key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
-						// Change stretch mode parameters.
-						doStretchMode();
-					} else {
-						// Not handling this event.
-						ret = 1;
-					}
-					break;
-
-				case SDLK_0: case SDLK_1:
-				case SDLK_2: case SDLK_3:
-				case SDLK_4: case SDLK_5:
-				case SDLK_6: case SDLK_7:
-				case SDLK_8: case SDLK_9:
-					// Save slot selection.
-					doSaveSlot(event->key.keysym.sym - SDLK_0);
-					break;
-
-				case SDLK_F5:
-					// Save state.
-					doSaveState();
-					break;
-
-				case SDLK_F6: {
-					// Previous save slot.
-					int saveSlot  = ((d->saveSlot_selected + 9) % 10);
-					doSaveSlot(saveSlot);
-					break;
-				}
-
-				case SDLK_F7: {
-					// Next save slot.
-					int saveSlot  = ((d->saveSlot_selected + 1) % 10);
-					doSaveSlot(saveSlot);
-					break;
-				}
-
-				case SDLK_F8:
-					// Load state.
-					doLoadState();
-					break;
-
-				default: {
-					// Check if the base class event handler will handle this.
-					int ret = EventLoop::processSdlEvent(event);
-					if (ret != 0) {
-						// Not handled.
-						// Send the key to the KeyManager.
-						d->keyManager->keyDown(SdlHandler::scancodeToGensKey(event->key.keysym.scancode));
-						break;
-					}
-					break;
-				}
-			}
-			break;
-
-		case SDL_KEYUP:
-			// SDL keycodes nearly match GensKey.
-			d->keyManager->keyUp(SdlHandler::scancodeToGensKey(event->key.keysym.scancode));
-			break;
-
-		default:
-			// Event not handled.
-			ret = 1;
-			break;
-	}
-
-	if (ret != 0) {
-		// Event wasn't handled.
-		// Try the base class.
-		ret = EventLoop::processSdlEvent(event);
-	}
-	return ret;
-}
-
 /**
  * Get the modification time string for the specified save file.
  * @param zomg Save file.
  * @return String contianing the mtime, or an error message if invalid.
  */
-string EmuLoop::getSaveSlot_mtime(const ZomgBase *zomg)
+string EmuLoopPrivate::getSaveSlot_mtime(const ZomgBase *zomg)
 {
 	// TODO: This function can probably be optimized more...
 
@@ -327,13 +238,12 @@ convert:
  * Save slot selection.
  * @param saveSlot Save slot. (0-9)
  */
-void EmuLoop::doSaveSlot(int saveSlot)
+void EmuLoopPrivate::doSaveSlot(int saveSlot)
 {
 	assert(saveSlot >= 0 && saveSlot <= 9);
 	if (saveSlot < 0 || saveSlot > 9)
 		return;
-	EmuLoopPrivate *const d = d_func();
-	d->saveSlot_selected = saveSlot;
+	saveSlot_selected = saveSlot;
 
 	// Metadata variables.
 	string slot_state;
@@ -342,7 +252,7 @@ void EmuLoop::doSaveSlot(int saveSlot)
 
 	// Check if the specified savestate exists.
 	// TODO: R_OK or just F_OK?
-	string filename = getSavestateFilename(d->rom, saveSlot);
+	string filename = getSavestateFilename(rom, saveSlot);
 	if (!access(filename.c_str(), F_OK)) {
 		// Savestate exists.
 		// Load some file information.
@@ -371,39 +281,38 @@ void EmuLoop::doSaveSlot(int saveSlot)
 	}
 
 	// Show an OSD message.
-	d->vBackend->osd_printf(1500, "Slot %d [%s]", saveSlot, slot_state.c_str());
+	vBackend->osd_printf(1500, "Slot %d [%s]", saveSlot, slot_state.c_str());
 	// If img_data.data is nullptr, this will hide the current image.
-	d->vBackend->osd_preview_image(1500, &img_data);
+	vBackend->osd_preview_image(1500, &img_data);
 	free(img_data.data);
 }
 
 /**
  * Load the state in the selected slot.
  */
-void EmuLoop::doLoadState(void)
+void EmuLoopPrivate::doLoadState(void)
 {
-	EmuLoopPrivate *const d = d_func();
-	assert(d->saveSlot_selected >= 0 && d->saveSlot_selected <= 9);
-	if (d->saveSlot_selected < 0 || d->saveSlot_selected > 9)
+	assert(saveSlot_selected >= 0 && saveSlot_selected <= 9);
+	if (saveSlot_selected < 0 || saveSlot_selected > 9)
 		return;
 
-	string filename = getSavestateFilename(d->rom, d->saveSlot_selected);
-	int ret = d->emuContext->zomgLoad(filename.c_str());
+	string filename = getSavestateFilename(rom, saveSlot_selected);
+	int ret = emuContext->zomgLoad(filename.c_str());
 	if (ret == 0) {
 		// State loaded.
-		d->vBackend->osd_printf(1500, "Slot %d loaded.", d->saveSlot_selected);
+		vBackend->osd_printf(1500, "Slot %d loaded.", saveSlot_selected);
 	} else {
 		// Error loading state.
 		if (ret == -ENOENT) {
 			// File not found.
-			d->vBackend->osd_printf(1500,
+			vBackend->osd_printf(1500,
 				"Slot %d is empty.",
-				d->saveSlot_selected);
+				saveSlot_selected);
 		} else {
 			// Other error.
-			d->vBackend->osd_printf(1500,
+			vBackend->osd_printf(1500,
 				"Error loading Slot %d:\n* %s",
-				d->saveSlot_selected, strerror(-ret));
+				saveSlot_selected, strerror(-ret));
 		}
 	}
 }
@@ -411,39 +320,37 @@ void EmuLoop::doLoadState(void)
 /**
  * Save the state in the selected slot.
  */
-void EmuLoop::doSaveState(void)
+void EmuLoopPrivate::doSaveState(void)
 {
-	EmuLoopPrivate *const d = d_func();
-	assert(d->saveSlot_selected >= 0 && d->saveSlot_selected <= 9);
-	if (d->saveSlot_selected < 0 || d->saveSlot_selected > 9)
+	assert(saveSlot_selected >= 0 && saveSlot_selected <= 9);
+	if (saveSlot_selected < 0 || saveSlot_selected > 9)
 		return;
 
-	string filename = getSavestateFilename(d->rom, d->saveSlot_selected);
-	int ret = d->emuContext->zomgSave(filename.c_str());
+	string filename = getSavestateFilename(rom, saveSlot_selected);
+	int ret = emuContext->zomgSave(filename.c_str());
 	if (ret == 0) {
 		// State saved.
-		d->vBackend->osd_printf(1500,
+		vBackend->osd_printf(1500,
 				"Slot %d saved.",
-				d->saveSlot_selected);
+				saveSlot_selected);
 	} else {
 		// Error saving state.
-		d->vBackend->osd_printf(1500,
+		vBackend->osd_printf(1500,
 				"Error saving Slot %d:\n* %s",
-				d->saveSlot_selected, strerror(-ret));
+				saveSlot_selected, strerror(-ret));
 	}
 }
 
 /**
  * Change stretch mode parameters.
  */
-void EmuLoop::doStretchMode(void)
+void EmuLoopPrivate::doStretchMode(void)
 {
 	// Change stretch mode parameters.
-	EmuLoopPrivate *const d = d_func();
-	int stretchMode = (int)d->vBackend->stretchMode();
+	int stretchMode = (int)vBackend->stretchMode();
 	stretchMode++;
 	stretchMode &= 3;
-	d->vBackend->setStretchMode((VBackend::StretchMode_t)stretchMode);
+	vBackend->setStretchMode((VBackend::StretchMode_t)stretchMode);
 
 	// Show an OSD message.
 	const char *stretch;
@@ -463,23 +370,144 @@ void EmuLoop::doStretchMode(void)
 			break;
 	}
 
-	d->vBackend->osd_printf(1500, "Stretch Mode set to %s.", stretch);
+	vBackend->osd_printf(1500, "Stretch Mode set to %s.", stretch);
 }
 
 /**
  * Take a screenshot.
  */
-void EmuLoop::doScreenShot(void)
+void EmuLoopPrivate::doScreenShot(void)
 {
-	EmuLoopPrivate *const d = d_func();
-	int ret = GensSdl::doScreenShot(d->emuContext->m_vdp->MD_Screen, d->rom);
+	int ret = GensSdl::doScreenShot(emuContext->m_vdp->MD_Screen, rom);
 	if (ret >= 0) {
-		d->vBackend->osd_printf(1500,
+		vBackend->osd_printf(1500,
 			"Screenshot %d saved.", ret);
 	} else {
-		d->vBackend->osd_printf(1500,
+		vBackend->osd_printf(1500,
 			"Error saving screenshot:\n* %s", strerror(-ret));
 	}
+}
+
+/** EmuLoop **/
+
+EmuLoop::EmuLoop()
+	: EventLoop(new EmuLoopPrivate())
+{ }
+
+EmuLoop::~EmuLoop()
+{ }
+
+/**
+ * Process an SDL event.
+ * @param event SDL event.
+ * @return 0 if the event was handled; non-zero if it wasn't.
+ */
+int EmuLoop::processSdlEvent(const SDL_Event *event) {
+	EmuLoopPrivate *const d = d_func();
+	int ret = 0;
+	switch (event->type) {
+		case SDL_KEYDOWN:
+			// SDL keycodes nearly match GensKey.
+			// TODO: Split out into a separate function?
+			// TODO: Check for "no modifiers" for some keys?
+			switch (event->key.keysym.sym) {
+				case SDLK_TAB:
+					// Check for Shift.
+					if (event->key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
+						// Hard Reset.
+						d->emuContext->hardReset();
+						d->vBackend->osd_print(1500, "Hard Reset.");
+					} else {
+						// Soft Reset.
+						d->emuContext->softReset();
+						d->vBackend->osd_print(1500, "Soft Reset.");
+					}
+					break;
+
+				case SDLK_BACKSPACE:
+					if (event->key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
+						// Take a screenshot.
+						d->doScreenShot();
+					}
+					break;
+
+				case SDLK_F2:
+					// NOTE: This is handled here instead of in the generic
+					// processSdlEvent_common() because stretch functionality
+					// isn't used in CrazyEffectLoop.
+					if (event->key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) {
+						// Change stretch mode parameters.
+						d->doStretchMode();
+					} else {
+						// Not handling this event.
+						ret = 1;
+					}
+					break;
+
+				case SDLK_0: case SDLK_1:
+				case SDLK_2: case SDLK_3:
+				case SDLK_4: case SDLK_5:
+				case SDLK_6: case SDLK_7:
+				case SDLK_8: case SDLK_9:
+					// Save slot selection.
+					d->doSaveSlot(event->key.keysym.sym - SDLK_0);
+					break;
+
+				case SDLK_F5:
+					// Save state.
+					d->doSaveState();
+					break;
+
+				case SDLK_F6: {
+					// Previous save slot.
+					int saveSlot  = ((d->saveSlot_selected + 9) % 10);
+					d->doSaveSlot(saveSlot);
+					break;
+				}
+
+				case SDLK_F7: {
+					// Next save slot.
+					int saveSlot  = ((d->saveSlot_selected + 1) % 10);
+					d->doSaveSlot(saveSlot);
+					break;
+				}
+
+				case SDLK_F8:
+					// Load state.
+					d->doLoadState();
+					break;
+
+				default: {
+					// Check if the base class event handler will handle this.
+					int ret = EventLoop::processSdlEvent(event);
+					if (ret != 0) {
+						// Not handled.
+						// Send the key to the KeyManager.
+						d->keyManager->keyDown(SdlHandler::scancodeToGensKey(event->key.keysym.scancode));
+						break;
+					}
+					break;
+				}
+			}
+			break;
+
+		case SDL_KEYUP:
+			// SDL keycodes nearly match GensKey.
+			d->keyManager->keyUp(SdlHandler::scancodeToGensKey(event->key.keysym.scancode));
+			break;
+
+		default:
+			// Event not handled.
+			ret = 1;
+			break;
+	}
+
+	if (ret != 0) {
+		// Event wasn't handled.
+		// Try the base class.
+		ret = EventLoop::processSdlEvent(event);
+	}
+	return ret;
 }
 
 /**
