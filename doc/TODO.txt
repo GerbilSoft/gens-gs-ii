@@ -18,7 +18,6 @@ Infrastructure:
 - localtime_r():
   - Call tzset() before using this function. (manpage says it may be necessary)
 - Create and use 'typedef super' in all C++ classes.
-- x86 asm: Always use __asm__ __volatile__ for 'emms' instructions.
 - Remove automatic GPL printout from libgens startup.
   - Just print out libgens version information.
   - GPL can be printed using various options.

@@ -233,7 +233,7 @@ void SoundMgrPrivate::writeStereo_MMX(int16_t *dest, int samples)
 	}
 
 	// Reset the FPU state.
-	__asm__ ("emms");
+	__asm__ __volatile__ ("emms");
 
 	// If the buffer size isn't a multiple of 4 samples,
 	// write the remaining samples normally.
@@ -286,7 +286,7 @@ void SoundMgrPrivate::writeMono_MMX(int16_t *dest, int samples)
 	}
 
 	// Reset the FPU state.
-	__asm__ ("emms");
+	__asm__ __volatile__ ("emms");
 
 	// If the buffer size isn't a multiple of 4 samples,
 	// write the remaining samples normally.
