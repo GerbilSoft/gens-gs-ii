@@ -48,12 +48,15 @@
 // test_VdpPalette_generate_DAC.c won't link to LibGens.
 
 // Palette mode. [VdpPalette::PalMode_t]
+// NOTE: This matches VdpPalette's definition,
+// but the ordering in this file matches the
+// order in which the palette modes were added.
 typedef enum {
-	PALMODE_MD,
-	PALMODE_32X,
+	PALMODE_TMS9918A,
 	PALMODE_SMS,
 	PALMODE_GG,
-	PALMODE_TMS9918,
+	PALMODE_MD,
+	PALMODE_32X,
 	
 	PALMODE_MAX
 } PalMode_t;
@@ -401,7 +404,7 @@ int main(int argc, char *argv[])
 		} else if (!strcasecmp(pal_mode_str, "GG")) {
 			palMode = PALMODE_GG;
 		} else if (!strcasecmp(pal_mode_str, "TMS9918")) {
-			palMode = PALMODE_TMS9918;
+			palMode = PALMODE_TMS9918A;
 		} else {
 			// Invalid palette mode.
 			// TODO: Distinguish between long and short opts?
@@ -445,7 +448,7 @@ int main(int argc, char *argv[])
 			ret = write_paltype_gg(out_filename);
 			break;
 		case PALMODE_32X:
-		case PALMODE_TMS9918:
+		case PALMODE_TMS9918A:
 		default:
 			// Unsupported right now.
 			fprintf(stderr, "%s: error: palette mode '%s' isn't supported yet.\n",
