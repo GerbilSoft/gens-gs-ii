@@ -60,6 +60,13 @@ class CrazyEffectPrivate
 		} rng_state;
 
 		/**
+		 * RNG cache.
+		 * If 0, new random numbers
+		 * need to be generated.
+		 */
+		uint64_t rng_cache;
+
+		/**
 		 * Get a random number in the range [0,0x7FFF].
 		 * This uses the internal random number
 		 * cache if it's available.
@@ -92,6 +99,7 @@ class CrazyEffectPrivate
 
 CrazyEffectPrivate::CrazyEffectPrivate()
 	: colorMask(CrazyEffect::CM_WHITE)
+	, rng_cache(0)
 {
 	// Initialize the RNG state.
 	// FIXME: Move this srand() call somewhere else.
@@ -116,16 +124,29 @@ CrazyEffectPrivate::CrazyEffectPrivate()
  */
 unsigned int CrazyEffectPrivate::getRand(void)
 {
-	uint64_t x = rng_state.q[0];
-	uint64_t const y = rng_state.q[1];
-	rng_state.q[0] = y;
-	x ^= x << 23; // a
-	x ^= x >> 17; // b
-	x ^= y ^ (y >> 26); // c
-	rng_state.q[1] = x;
+	if (rng_cache == 0) {
+		// Generate new random numbers.
+		uint64_t x = rng_state.q[0];
+		uint64_t const y = rng_state.q[1];
+		rng_state.q[0] = y;
+		x ^= x << 23; // a
+		x ^= x >> 17; // b
+		x ^= y ^ (y >> 26); // c
+		rng_state.q[1] = x;
+		rng_cache = x + y;
+	}
 
-	// TODO: Cache upper bits?
-	return (x + y) & 0x7FFF;
+	// Random number is the lower 15 bits.
+	const unsigned int ret = rng_cache & 0x7FFF;
+
+	// Shift the cache.
+	// NOTE: Shifting 16 bits to prevent issues.
+	// If we only shifted 15 bits, we'd have
+	// 4 bits left over after 4 cycles.
+	rng_cache >>= 16;
+
+	// Return the value.
+	return ret;
 }
 
 /**
