@@ -26,6 +26,13 @@
 #include <cassert>
 
 #include <SDL.h>
+#include <SDL_syswm.h>
+
+// Windows icon.
+#ifdef _WIN32
+#include <windows.h>
+#include "win32/gens-sdl.h"
+#endif
 
 namespace GensSdl {
 
@@ -39,6 +46,21 @@ SdlSWBackend::SdlSWBackend()
 				SDL_WINDOWPOS_UNDEFINED,
 				SDL_WINDOWPOS_UNDEFINED,
 				320, 240, SDL_WINDOW_RESIZABLE);
+
+	// TODO: Split icon setting into a common function?
+#ifdef _WIN32
+	// Set the window icon.
+	HICON hIcon = LoadIcon(GetModuleHandleA(nullptr), MAKEINTRESOURCE(IDI_GENS_APP));
+	if (hIcon) {
+		SDL_SysWMinfo info;
+		SDL_VERSION(&info.version);
+		if (SDL_GetWindowWMInfo(m_window, &info)) {
+			SetClassLongPtr(info.info.win.window, GCL_HICON, (LONG_PTR)hIcon);
+		}
+	}
+#else
+	// TODO: Non-Windows icon.
+#endif
 
 	// Create a renderer.
 	// TODO: Parameter for enabling/disabling VSync?

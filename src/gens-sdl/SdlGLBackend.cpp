@@ -29,12 +29,21 @@ using LibGens::MdFb;
 // System byte order.
 #include "libcompat/byteorder.h"
 
+#include <SDL.h>
+#include <SDL_syswm.h>
+
 // GL_UNSIGNED_INT_8_8_8_8_REV is needed for native byte-order on PowerPC.
 // When used with GL_BGRA, it's effectively the same as GL_ARGB.
 #if SYS_BYTEORDER == SYS_BIG_ENDIAN
 #define SDLGL_UNSIGNED_BYTE GL_UNSIGNED_INT_8_8_8_8_REV
 #else /* SYS_BYTEORDER == SYS_LIL_ENDIAN */
 #define SDLGL_UNSIGNED_BYTE GL_UNSIGNED_BYTE
+#endif
+
+// Windows icon.
+#ifdef _WIN32
+#include <windows.h>
+#include "win32/gens-sdl.h"
 #endif
 
 namespace GensSdl {
@@ -61,6 +70,21 @@ SdlGLBackend::SdlGLBackend()
 		SDL_WINDOWPOS_UNDEFINED,
 		m_winW, m_winH,
 		SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+
+	// TODO: Split icon setting into a common function?
+#ifdef _WIN32
+	// Set the window icon.
+	HICON hIcon = LoadIcon(GetModuleHandleA(nullptr), MAKEINTRESOURCE(IDI_GENS_APP));
+	if (hIcon) {
+		SDL_SysWMinfo info;
+		SDL_VERSION(&info.version);
+		if (SDL_GetWindowWMInfo(m_window, &info)) {
+			SetClassLongPtr(info.info.win.window, GCL_HICON, (LONG_PTR)hIcon);
+		}
+	}
+#else
+	// TODO: Non-Windows icon.
+#endif
 
 	// Create the OpenGL context.
 	m_glContext = SDL_GL_CreateContext(m_window);
