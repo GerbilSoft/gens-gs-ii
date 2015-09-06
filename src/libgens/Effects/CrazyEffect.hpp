@@ -33,11 +33,24 @@
 namespace LibGens {
 
 class MdFb;
+
+class CrazyEffectPrivate;
 class CrazyEffect
 {
 	public:
 		CrazyEffect();
+		~CrazyEffect();
 
+	private:
+		friend class CrazyEffectPrivate;
+		CrazyEffectPrivate *const d;
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		CrazyEffect(const CrazyEffect &);
+		CrazyEffect &operator=(const CrazyEffect &);
+
+	public:
 		enum ColorMask {
 			CM_BLACK	= 0,
 			CM_BLUE		= 1,
@@ -50,74 +63,20 @@ class CrazyEffect
 		};
 
 		// Color mask property.
-		inline ColorMask colorMask(void) const;
-		inline void setColorMask(ColorMask newColorMask);
+		ColorMask colorMask(void) const;
+		void setColorMask(ColorMask colorMask);
 
 		/**
 		 * Run the "Crazy Effect" on the MD screen.
 		 * @param fb MdFb to apply the effect to. 
 		 */
 		void run(MdFb *fb);
-		void run(MdFb *fb, ColorMask newColorMask);
-
-	private:
-		/**
-		 * Do the "Crazy" effect.
-		 * @param pixel     [in]  Type of pixel.
-		 * @param RBits     [in]  Number of bits for Red.
-		 * @param GBits     [in]  Number of bits for Green.
-		 * @param BBits     [in]  Number of bits for Blue.
-		 * @param outScreen [out] Destination screen.
-		 */
-		template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
-		inline void T_doCrazyEffect(pixel *outScreen);
-
-		// Color mask.
-		ColorMask m_colorMask;
-
-		// TODO: Move this stuff to a private class.
-
-		/**
-		 * Get a random number in the range [0,0x7FFF].
-		 * This uses the internal random number
-		 * cache if it's available.
-		 * @return Random number.
-		 */
-		unsigned int getRand(void);
-
-		/**
-		 * Adjust a pixel's color.
-		 * @param pixel     [in] Type of pixel.
-		 * @param add_shift [in] Shift value for the add value.
-		 * @param px        [in] Pixel data.
-		 * @param mask      [in] Pixel mask.
-		 * @return Adjusted pixel color.
-		 */
-		template<typename pixel, uint8_t add_shift>
-		inline pixel adj_color(pixel px, pixel mask);
-
-		// Xorshift+ RNG state.
-		union {
-			uint32_t d[4];
-			uint64_t q[2];
-		} rng_state;
+		inline void run(MdFb *fb, ColorMask colorMask);
 };
 
-inline CrazyEffect::ColorMask CrazyEffect::colorMask(void) const
-	{ return m_colorMask; }
-
-inline void CrazyEffect::setColorMask(CrazyEffect::ColorMask newColorMask)
+inline void CrazyEffect::run(MdFb *fb, ColorMask colorMask)
 {
-	if (newColorMask < CM_BLACK || newColorMask > CM_WHITE)
-		return;
-	
-	m_colorMask = newColorMask;
-}
-
-
-inline void CrazyEffect::run(MdFb *fb, ColorMask newColorMask)
-{
-	setColorMask(newColorMask);
+	setColorMask(colorMask);
 	run(fb);
 }
 

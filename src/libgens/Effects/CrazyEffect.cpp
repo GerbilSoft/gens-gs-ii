@@ -36,7 +36,77 @@
 
 namespace LibGens {
 
-// TODO: Private class.
+class CrazyEffectPrivate
+{
+	public:
+		CrazyEffectPrivate();
+
+	private:
+		friend class CrazyEffect;
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		CrazyEffectPrivate(const CrazyEffectPrivate &);
+		CrazyEffectPrivate &operator=(const CrazyEffectPrivate &);
+
+	public:
+		// Color mask.
+		CrazyEffect::ColorMask colorMask;
+
+		// Xorshift+ RNG state.
+		union {
+			uint32_t d[4];
+			uint64_t q[2];
+		} rng_state;
+
+		/**
+		 * Get a random number in the range [0,0x7FFF].
+		 * This uses the internal random number
+		 * cache if it's available.
+		 * @return Random number.
+		 */
+		unsigned int getRand(void);
+
+		/**
+		 * Adjust a pixel's color.
+		 * @param pixel     [in] Type of pixel.
+		 * @param add_shift [in] Shift value for the add value.
+		 * @param px        [in] Pixel data.
+		 * @param mask      [in] Pixel mask.
+		 * @return Adjusted pixel color.
+		 */
+		template<typename pixel, uint8_t add_shift>
+		inline pixel adj_color(pixel px, pixel mask);
+
+		/**
+		 * Do the "Crazy" effect.
+		 * @param pixel     [in]  Type of pixel.
+		 * @param RBits     [in]  Number of bits for Red.
+		 * @param GBits     [in]  Number of bits for Green.
+		 * @param BBits     [in]  Number of bits for Blue.
+		 * @param outScreen [out] Destination screen.
+		 */
+		template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
+		inline void T_doCrazyEffect(pixel *outScreen);
+};
+
+CrazyEffectPrivate::CrazyEffectPrivate()
+	: colorMask(CrazyEffect::CM_WHITE)
+{
+	// Initialize the RNG state.
+	// FIXME: Move this srand() call somewhere else.
+	srand((unsigned int)time(nullptr));
+
+	// RAND_MAX is at least 0x7FFF, so we need to
+	// call rand() multiple times. We'll use xor
+	// instead of simple assignment so systems where
+	// RAND_MAX > 0x7FFF get an extra bit of randomness.
+	for (int i = 0; i < 4; i++) {
+		rng_state.d[i]  =  rand();
+		rng_state.d[i] ^= (rand() << 15);
+		rng_state.d[i] ^= (rand() << 30);
+	}
+}
 
 /**
  * Get a random number in the range [0,0x7FFF].
@@ -44,7 +114,7 @@ namespace LibGens {
  * - https://en.wikipedia.org/wiki/Xorshift#Xorshift.2B
  * @return Random number.
  */
-unsigned int CrazyEffect::getRand(void)
+unsigned int CrazyEffectPrivate::getRand(void)
 {
 	uint64_t x = rng_state.q[0];
 	uint64_t const y = rng_state.q[1];
@@ -67,7 +137,7 @@ unsigned int CrazyEffect::getRand(void)
  * @return Adjusted pixel color.
  */
 template<typename pixel, uint8_t add_shift>
-inline pixel CrazyEffect::adj_color(pixel px, pixel mask)
+inline pixel CrazyEffectPrivate::adj_color(pixel px, pixel mask)
 {
 	pixel add = 1 << add_shift;
 	px &= mask;
@@ -96,9 +166,9 @@ inline pixel CrazyEffect::adj_color(pixel px, pixel mask)
  * @param outScreen [out] Destination screen.
  */
 template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
-inline void CrazyEffect::T_doCrazyEffect(pixel *outScreen)
+inline void CrazyEffectPrivate::T_doCrazyEffect(pixel *outScreen)
 {
-	if (m_colorMask == CM_BLACK) {
+	if (colorMask == CrazyEffect::CM_BLACK) {
 		// Intro effect color is black.
 		// Simply clear the screen.
 		memset(outScreen, 0x00, 336*240*sizeof(pixel));
@@ -126,15 +196,15 @@ inline void CrazyEffect::T_doCrazyEffect(pixel *outScreen)
 		RB = ((pl & RBmask) + (pp & RBmask)) >> 1;
 		G = ((pl & Gmask) + (pp & Gmask)) >> 1;
 
-		if (m_colorMask & CM_RED) {
+		if (colorMask & CrazyEffect::CM_RED) {
 			// Red channel.
 			r = adj_color<pixel, (RBits-5)+GBits+BBits>(RB, Rmask);
 		}
-		if (m_colorMask & CM_GREEN) {
+		if (colorMask & CrazyEffect::CM_GREEN) {
 			// Green channel.
 			g = adj_color<pixel, (GBits-5)+BBits>(G, Gmask);
 		}
-		if (m_colorMask & CM_BLUE) {
+		if (colorMask & CrazyEffect::CM_BLUE) {
 			// Blue channel.
 			b = adj_color<pixel, (BBits-5)>(RB, Bmask);
 		}
@@ -152,21 +222,25 @@ inline void CrazyEffect::T_doCrazyEffect(pixel *outScreen)
 /** CrazyEffect **/
 
 CrazyEffect::CrazyEffect()
-	: m_colorMask(CM_WHITE)
-{
-	// Initialize the RNG state.
-	// FIXME: Move this srand() call somewhere else.
-	srand((unsigned int)time(nullptr));
+	: d(new CrazyEffectPrivate())
+{ }
 
-	// RAND_MAX is at least 0x7FFF, so we need to
-	// call rand() multiple times. We'll use xor
-	// instead of simple assignment so systems where
-	// RAND_MAX > 0x7FFF get an extra bit of randomness.
-	for (int i = 0; i < 4; i++) {
-		rng_state.d[i]  =  rand();
-		rng_state.d[i] ^= (rand() << 15);
-		rng_state.d[i] ^= (rand() << 30);
-	}
+CrazyEffect::~CrazyEffect()
+{
+	delete d;
+}
+
+CrazyEffect::ColorMask CrazyEffect::colorMask(void) const
+{
+	return d->colorMask;
+}
+
+void CrazyEffect::setColorMask(ColorMask colorMask)
+{
+	if (colorMask < CM_BLACK || colorMask > CM_WHITE)
+		return;
+
+	d->colorMask = colorMask;
 }
 
 /**
@@ -178,16 +252,16 @@ void CrazyEffect::run(MdFb *fb)
 	// FIXME: Add a bpp value to fb.
 	switch (2 /*fb.bpp()*/) {
 		case 0: /*VdpPalette::BPP_15:*/
-			T_doCrazyEffect<uint16_t, 5, 5, 5>(fb->fb16());
+			d->T_doCrazyEffect<uint16_t, 5, 5, 5>(fb->fb16());
 			break;
 
 		case 1: /*VdpPalette::BPP_16:*/
-			T_doCrazyEffect<uint16_t, 5, 6, 5>(fb->fb16());
+			d->T_doCrazyEffect<uint16_t, 5, 6, 5>(fb->fb16());
 			break;
 
 		case 2: /*VdpPalette::BPP_32:*/
 		default:
-			T_doCrazyEffect<uint32_t, 8, 8, 8>(fb->fb32());
+			d->T_doCrazyEffect<uint32_t, 8, 8, 8>(fb->fb32());
 			break;
 	}
 }
