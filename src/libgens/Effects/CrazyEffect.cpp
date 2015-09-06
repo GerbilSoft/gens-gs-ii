@@ -92,9 +92,13 @@ class CrazyEffectPrivate
 		 * @param GBits     [in]  Number of bits for Green.
 		 * @param BBits     [in]  Number of bits for Blue.
 		 * @param outScreen [out] Destination screen.
+		 * @param pxCount   [in]  Pixel count.
+		 * @param pxPitch   [in]  Row length, in pixels.
 		 */
 		template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
-		inline void T_doCrazyEffect(pixel *outScreen);
+		inline void T_doCrazyEffect(pixel *outScreen,
+			unsigned int pxCount,
+			unsigned int pxPitch);
 };
 
 CrazyEffectPrivate::CrazyEffectPrivate()
@@ -185,14 +189,19 @@ inline pixel CrazyEffectPrivate::adj_color(pixel px, pixel mask)
  * @param GBits     [in]  Number of bits for Green.
  * @param BBits     [in]  Number of bits for Blue.
  * @param outScreen [out] Destination screen.
+ * @param pxCount   [in]  Pixel count.
+ * @param pxPitch   [in]  Row length, in pixels.
  */
 template<typename pixel, uint8_t RBits, uint8_t GBits, uint8_t BBits>
-inline void CrazyEffectPrivate::T_doCrazyEffect(pixel *outScreen)
+inline void CrazyEffectPrivate::T_doCrazyEffect(
+	pixel *outScreen,
+	unsigned int pxCount,
+	unsigned int pxPitch)
 {
 	if (colorMask == CrazyEffect::CM_BLACK) {
 		// Intro effect color is black.
 		// Simply clear the screen.
-		memset(outScreen, 0x00, 336*240*sizeof(pixel));
+		memset(outScreen, 0, pxCount * sizeof(pixel));
 		return;
 	}
 
@@ -203,12 +212,16 @@ inline void CrazyEffectPrivate::T_doCrazyEffect(pixel *outScreen)
 	pixel r = 0, g = 0, b = 0;
 	pixel RB, G;
 
-	pixel *pix = &outScreen[336*240 - 1];
-	pixel *prev_l = pix - 336;
+	pixel *pix = &outScreen[pxCount - 1];
+	pixel *prev_l = pix - pxPitch;
 	pixel *prev_p = pix - 1;
 
+	// NOTE: This effect manipulates pixels outside of the
+	// visible image area, i.e. the border between the
+	// visible image width and the row pitch.
+
 	// TODO: Unroll the last-line/last-pixel code.
-	for (unsigned int i = 336*240; i != 0; i--) {
+	for (unsigned int i = pxCount; i != 0; i--) {
 		pixel pl, pp;
 		pl = (prev_l >= outScreen ? *prev_l : 0);
 		pp = (prev_p >= outScreen ? *prev_p : 0);
@@ -270,19 +283,20 @@ void CrazyEffect::setColorMask(ColorMask colorMask)
  */
 void CrazyEffect::run(MdFb *fb)
 {
-	// FIXME: Add a bpp value to fb.
-	switch (2 /*fb.bpp()*/) {
-		case 0: /*VdpPalette::BPP_15:*/
-			d->T_doCrazyEffect<uint16_t, 5, 5, 5>(fb->fb16());
+	const unsigned int pxCount = (fb->pxPitch() * fb->numLines());
+	switch (fb->bpp()) {
+		case MdFb::BPP_15:
+			d->T_doCrazyEffect<uint16_t, 5, 5, 5>(
+				fb->fb16(), pxCount, fb->pxPitch());
 			break;
-
-		case 1: /*VdpPalette::BPP_16:*/
-			d->T_doCrazyEffect<uint16_t, 5, 6, 5>(fb->fb16());
+		case MdFb::BPP_16:
+			d->T_doCrazyEffect<uint16_t, 5, 6, 5>(
+				fb->fb16(), pxCount, fb->pxPitch());
 			break;
-
-		case 2: /*VdpPalette::BPP_32:*/
+		case MdFb::BPP_32:
 		default:
-			d->T_doCrazyEffect<uint32_t, 8, 8, 8>(fb->fb32());
+			d->T_doCrazyEffect<uint32_t, 8, 8, 8>(
+				fb->fb32(), pxCount, fb->pxPitch());
 			break;
 	}
 }
