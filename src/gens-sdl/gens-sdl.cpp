@@ -39,9 +39,6 @@ using GensSdl::VBackend;
 // LibGens
 #include "libgens/lg_main.hpp"
 #include "libgens/lg_osd.h"
-#include "libgens/Util/MdFb.hpp"
-using LibGens::MdFb;
-using LibGens::Timing;
 
 // Main event loops.
 #include "EmuLoop.hpp"
@@ -60,21 +57,9 @@ using LibGens::Timing;
 #include <unistd.h>
 #endif
 
-// yield(), aka usleep(0) or Sleep(0)
-#ifdef _WIN32
-// Windows
-#define yield() do { Sleep(0); } while (0)
-#define usleep(usec) Sleep((DWORD)((usec) / 1000))
-#else
-// Linux, Unix, Mac OS X
-#define yield() do { usleep(0); } while (0)
-#endif
-
 // C includes. (C++ namespace)
 #include <cstdio>
 #include <cstdlib>
-#include <cassert>
-#include <cerrno>
 
 // C++ includes.
 #include <string>
@@ -184,13 +169,6 @@ void checkForStartupMessages(void)
  */
 int run(void)
 {
-#ifdef _WIN32
-	// Reference: http://sdl.beuc.net/sdl.wiki/FAQ_Console
-	// TODO: Set console as UTF-8.
-	freopen("CON", "w", stdout);
-	freopen("CON", "w", stderr);
-#endif /* _WIN32 */
-
 	// Initialize LibGens.
 	LibGens::Init();
 
