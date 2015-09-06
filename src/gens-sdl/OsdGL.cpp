@@ -767,7 +767,6 @@ bool OsdGL::processMessages(void)
  * Add a message to the OSD queue.
  * @param duration Duration for the message to appear, in milliseconds.
  * @param msg Message. (UTF-8)
- * TODO: printf() function.
  */
 void OsdGL::print(unsigned int duration, const char *msg)
 {
@@ -782,10 +781,29 @@ void OsdGL::print(unsigned int duration, const char *msg)
 	// each line if this message has multiple lines.
 	const uint64_t endTime = d->timer.getTime() + (duration * 1000);
 
-	// Check for newlines.
+	// Number of characters per line.
+	// 2 characters margin on the sides.
+	const int line_w = (320 / d->font->w) - 2;
+
+	// Check for newlines and/or text wrapping.
+	// TODO: Actual word wrapping instead of just text wrapping.
 	const char *start = msg;
 	while (start != nullptr) {
-		const char *delim = strchr(start, '\n');
+		// Look for either line_w characters or a newline.
+		// TODO: Optimize this.
+		const char *delim = start;
+		bool isNL = false;
+		for (int i = 0; i < line_w; i++, delim++) {
+			if (*delim == 0) {
+				// End of the message.
+				delim = nullptr;
+				break;
+			} else if (*delim == '\n') {
+				// Newline.
+				isNL = true;
+				break;
+			}
+		}
 		
 		OsdGLPrivate::OsdMessage *osdMsg = new OsdGLPrivate::OsdMessage();
 
@@ -797,9 +815,13 @@ void OsdGL::print(unsigned int duration, const char *msg)
 			// Newline found.
 			osdMsg->msg = d->utf8ToInternal(start, (delim - start));
 		}
-		start = (delim ? delim + 1 : nullptr);
+		if (delim) {
+			start = (isNL ? delim + 1 : delim);
+		} else {
+			start = nullptr;
+		}
 
-		// Check if the end of the string is '\r'
+		// Check if the end of the string is '\r'.
 		if (!osdMsg->msg.empty() &&
 		    osdMsg->msg.at(osdMsg->msg.size() - 1) == '\r')
 		{
