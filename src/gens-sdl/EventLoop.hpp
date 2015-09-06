@@ -81,6 +81,32 @@ class EventLoop
 		 * to wait for the next event.
 		 */
 		void processSdlEventQueue(void);
+
+	protected:
+		// TODO: Move to EventLoopPrivate?
+
+		/**
+		 * Run a frame.
+		 * This function handles frameskip timing.
+		 * Call this function from run().
+		 */
+		void runFrame(void);
+
+		/**
+		 * Run a normal frame.
+		 * This function is called by runFrame(),
+		 * and should be handled by running a full
+		 * frame with video and audio updates.
+		 */
+		virtual void runFullFrame(void) = 0;
+
+		/**
+		 * Run a fast frame.
+		 * This function is called by runFrame() if the
+		 * system is lagging a bit, and should be handled
+		 * by running a frame with audio updates only.
+		 */
+		virtual void runFastFrame(void) = 0;
 };
 
 }

@@ -125,6 +125,7 @@ class EventLoopPrivate
 			public:
 				// Reset frameskip timers.
 				void reset(void) {
+					// TODO: Reset timing's base?
 					start_clk = timing.getTime();
 					old_clk = start_clk;
 					fps_clk = start_clk;
@@ -160,6 +161,16 @@ class EventLoopPrivate
 		// This is here to prevent the user from spamming
 		// the display with the message.
 		uint64_t lastF1time;
+
+		// Microseconds per frame.
+		unsigned int usec_per_frame;
+
+		/**
+		 * Set frame timing.
+		 * This resets the frameskip timers.
+		 * @param framerate Frame rate, e.g. 50 or 60.
+		 */
+		void setFrameTiming(int framerate);
 };
 
 }

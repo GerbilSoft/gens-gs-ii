@@ -115,9 +115,12 @@ int CrazyEffectLoop::run(const char *rom_filename)
 	// Check for startup messages.
 	checkForStartupMessages();
 
-	// Start the frame timer.
-	// TODO: Region code?
-	d->clks.reset();
+	// Set frame timing.
+	// NOTE: Always running the "Crazy Effect" at 60 fps.
+	// TODO: Maybe 50 to compensate for dropout?
+	d->setFrameTiming(60);
+	// Disable frameskip for the "Crazy Effect".
+	d->frameskip = false;
 
 	// Create the "Crazy" Effect framebuffer.
 	// Image size defaults to the full framebuffer,
@@ -151,35 +154,9 @@ int CrazyEffectLoop::run(const char *rom_filename)
 			continue;
 		}
 
-		// New start time.
-		d->clks.new_clk = d->clks.timing.getTime();
-
-		// Update the FPS counter.
-		unsigned int fps_tmp = ((d->clks.new_clk - d->clks.fps_clk) & 0x3FFFFF);
-		if (fps_tmp >= 1000000) {
-			// More than 1 second has passed.
-			d->clks.fps_clk = d->clks.new_clk;
-			// FIXME: Just use abs() here.
-			if (d->clks.frames_old > d->clks.frames) {
-				d->clks.fps = (d->clks.frames_old - d->clks.frames);
-			} else {
-				d->clks.fps = (d->clks.frames - d->clks.frames_old);
-			}
-			d->clks.frames_old = d->clks.frames;
-
-			// Update the window title.
-			// TODO: Average the FPS over multiple seconds
-			// and/or quarter-seconds.
-			char win_title[256];
-			snprintf(win_title, sizeof(win_title), "Gens/GS II [SDL] - %u fps", d->clks.fps);
-			d->sdlHandler->set_window_title(win_title);
-		}
-
-		// Run the "Crazy" effect.
-		// TODO: Use the frameskip code to limit frames?
-		d->crazyEffect->run(d->crazyFb);
-		d->sdlHandler->update_video();
-		d->clks.frames++;
+		// Run a frame.
+		// EventLoop::runFrame() handles frameskip timing.
+		runFrame();
 		yield();
 		continue;
 	}
@@ -201,6 +178,31 @@ int CrazyEffectLoop::run(const char *rom_filename)
 
 	// Done running the "Crazy" Effect loop.
 	return 0;
+}
+
+/**
+ * Run a normal frame.
+ * This function is called by runFrame(),
+ * and should be handled by running a full
+ * frame with video and audio updates.
+ */
+void CrazyEffectLoop::runFullFrame(void)
+{
+	CrazyEffectLoopPrivate *const d = d_func();
+	d->crazyEffect->run(d->crazyFb);
+}
+
+/**
+ * Run a fast frame.
+ * This function is called by runFrame() if the
+ * system is lagging a bit, and should be handled
+ * by running a frame with audio updates only.
+ */
+void CrazyEffectLoop::runFastFrame(void)
+{
+	// No fast frames here.
+	// Run the full frame version.
+	runFullFrame();
 }
 
 }

@@ -583,11 +583,10 @@ int EmuLoop::run(const char *rom_filename)
 	// Check for startup messages.
 	checkForStartupMessages();
 
-	// Start the frame timer.
+	// Set frame timing.
 	// TODO: Region code?
 	bool isPal = false;
-	const unsigned int usec_per_frame = (1000000 / (isPal ? 50 : 60));
-	d->clks.reset();
+	d->setFrameTiming(isPal ? 50 : 60);
 
 	// TODO: Close the ROM, or let EmuContext do it?
 
@@ -647,94 +646,13 @@ int EmuLoop::run(const char *rom_filename)
 			continue;
 		}
 
-		// New start time.
-		d->clks.new_clk = d->clks.timing.getTime();
+		// Run a frame.
+		// EventLoop::runFrame() handles frameskip timing.
+		runFrame();
 
-		// Update the FPS counter.
-		unsigned int fps_tmp = ((d->clks.new_clk - d->clks.fps_clk) & 0x3FFFFF);
-		if (fps_tmp >= 1000000) {
-			// More than 1 second has passed.
-			d->clks.fps_clk = d->clks.new_clk;
-			// FIXME: Just use abs() here.
-			if (d->clks.frames_old > d->clks.frames) {
-				d->clks.fps = (d->clks.frames_old - d->clks.frames);
-			} else {
-				d->clks.fps = (d->clks.frames - d->clks.frames_old);
-			}
-			d->clks.frames_old = d->clks.frames;
-
-			// Update the window title.
-			// TODO: Average the FPS over multiple seconds
-			// and/or quarter-seconds.
-			char win_title[256];
-			snprintf(win_title, sizeof(win_title), "Gens/GS II [SDL] - %u fps", d->clks.fps);
-			d->sdlHandler->set_window_title(win_title);
-		}
-
-		// Frameskip.
-		if (d->frameskip) {
-			// Determine how many frames to run.
-			d->clks.usec_frameskip += ((d->clks.new_clk - d->clks.old_clk) & 0x3FFFFF); // no more than 4 secs
-			unsigned int frames_todo = (unsigned int)(d->clks.usec_frameskip / usec_per_frame);
-			d->clks.usec_frameskip %= usec_per_frame;
-			d->clks.old_clk = d->clks.new_clk;
-
-			if (frames_todo == 0) {
-				// No frames to do yet.
-				// Wait until the next frame.
-				uint64_t usec_sleep = (usec_per_frame - d->clks.usec_frameskip);
-				if (usec_sleep > 1000) {
-					// Never sleep for longer than the 50 Hz value
-					// so events are checked often enough.
-					if (usec_sleep > (1000000 / 50)) {
-						usec_sleep = (1000000 / 50);
-					}
-					usec_sleep -= 1000;
-
-#ifdef _WIN32
-					// Win32: Use a yield() loop.
-					// FIXME: Doesn't work properly on VBox/WinXP...
-					uint64_t yield_end = d->clks.timing.getTime() + usec_sleep;
-					do {
-						yield();
-					} while (yield_end > d->clks.timing.getTime());
-#else /* !_WIN32 */
-					// Linux: Use usleep().
-					usleep(usec_sleep);
-#endif /* _WIN32 */
-				}
-			} else {
-				// Draw frames.
-				for (; frames_todo != 1; frames_todo--) {
-					// Run a frame without rendering.
-					d->emuContext->execFrameFast();
-					d->sdlHandler->update_audio();
-				}
-				frames_todo = 0;
-
-				// Run a frame and render it.
-				d->emuContext->execFrame();
-				d->sdlHandler->update_audio();
-				d->sdlHandler->update_video();
-				// Increment the frame counter.
-				d->clks.frames++;
-
-				// Autosave SRAM/EEPROM.
-				// TODO: EmuContext::execFrame() should probably do this itself...
-				d->emuContext->autoSaveData(1);
-			}
-		} else {
-			// Run a frame and render it.
-			d->emuContext->execFrame();
-			d->sdlHandler->update_audio();
-			d->sdlHandler->update_video();
-			// Increment the frame counter.
-			d->clks.frames++;
-
-			// Autosave SRAM/EEPROM.
-			// TODO: EmuContext::execFrame() should probably do this itself...
-			d->emuContext->autoSaveData(1);
-		}
+		// Autosave SRAM/EEPROM.
+		// TODO: EmuContext::execFrame() should probably do this itself...
+		d->emuContext->autoSaveData(1);
 
 		// Update the I/O manager.
 		d->keyManager->updateIoManager(d->emuContext->m_ioManager);
@@ -769,6 +687,30 @@ int EmuLoop::run(const char *rom_filename)
 
 	// Done running the emulation loop.
 	return 0;
+}
+
+/**
+ * Run a normal frame.
+ * This function is called by runFrame(),
+ * and should be handled by running a full
+ * frame with video and audio updates.
+ */
+void EmuLoop::runFullFrame(void)
+{
+	EmuLoopPrivate *const d = d_func();
+	d->emuContext->execFrame();
+}
+
+/**
+ * Run a fast frame.
+ * This function is called by runFrame() if the
+ * system is lagging a bit, and should be handled
+ * by running a frame with audio updates only.
+ */
+void EmuLoop::runFastFrame(void)
+{
+	EmuLoopPrivate *const d = d_func();
+	d->emuContext->execFrameFast();
 }
 
 }

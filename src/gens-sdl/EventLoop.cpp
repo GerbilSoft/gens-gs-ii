@@ -57,8 +57,12 @@ EventLoopPrivate::EventLoopPrivate()
 	, autoPause(false)
 	, exposed(false)
 	, lastF1time(0)
+	, usec_per_frame(0)
 {
 	paused.data = 0;
+
+	// Default to 60 fps.
+	setFrameTiming(60);
 }
 
 EventLoopPrivate::~EventLoopPrivate()
@@ -161,6 +165,17 @@ void EventLoopPrivate::doAboutMessage(void)
 
        // Save the current time.
        lastF1time = curTime;
+}
+
+/**
+ * Set frame timing.
+ * This resets the frameskip timers.
+ * @param framerate Frame rate, e.g. 50 or 60.
+ */
+void EventLoopPrivate::setFrameTiming(int framerate)
+{
+	usec_per_frame = (1000000 / framerate);
+	clks.reset();
 }
 
 /** EventLoop **/
@@ -340,6 +355,95 @@ void EventLoop::processSdlEventQueue(void)
 
 	// Clear the 'exposed' flag.
 	d_ptr->exposed = false;
+}
+
+/**
+ * Run a frame.
+ * This function handles frameskip timing.
+ * Call this function from run().
+ */
+void EventLoop::runFrame(void)
+{
+	// New start time.
+	d_ptr->clks.new_clk = d_ptr->clks.timing.getTime();
+
+	// Update the FPS counter.
+	unsigned int fps_tmp = ((d_ptr->clks.new_clk - d_ptr->clks.fps_clk) & 0x3FFFFF);
+	if (fps_tmp >= 1000000) {
+		// More than 1 second has passed.
+		d_ptr->clks.fps_clk = d_ptr->clks.new_clk;
+		// FIXME: Just use abs() here.
+		if (d_ptr->clks.frames_old > d_ptr->clks.frames) {
+			d_ptr->clks.fps = (d_ptr->clks.frames_old - d_ptr->clks.frames);
+		} else {
+			d_ptr->clks.fps = (d_ptr->clks.frames - d_ptr->clks.frames_old);
+		}
+		d_ptr->clks.frames_old = d_ptr->clks.frames;
+
+		// Update the window title.
+		// TODO: Average the FPS over multiple seconds
+		// and/or quarter-seconds.
+		char win_title[256];
+		snprintf(win_title, sizeof(win_title), "Gens/GS II [SDL] - %u fps", d_ptr->clks.fps);
+		d_ptr->sdlHandler->set_window_title(win_title);
+	}
+
+	// Frameskip.
+	if (d_ptr->frameskip) {
+		// Determine how many frames to run.
+		d_ptr->clks.usec_frameskip += ((d_ptr->clks.new_clk - d_ptr->clks.old_clk) & 0x3FFFFF); // no more than 4 secs
+		unsigned int frames_todo = (unsigned int)(d_ptr->clks.usec_frameskip / d_ptr->usec_per_frame);
+		d_ptr->clks.usec_frameskip %= d_ptr->usec_per_frame;
+		d_ptr->clks.old_clk = d_ptr->clks.new_clk;
+
+		if (frames_todo == 0) {
+			// No frames to do yet.
+			// Wait until the next frame.
+			uint64_t usec_sleep = (d_ptr->usec_per_frame - d_ptr->clks.usec_frameskip);
+			if (usec_sleep > 1000) {
+				// Never sleep for longer than the 50 Hz value
+				// so events are checked often enough.
+				if (usec_sleep > (1000000 / 50)) {
+					usec_sleep = (1000000 / 50);
+				}
+				usec_sleep -= 1000;
+
+#ifdef _WIN32
+				// Win32: Use a yield() loop.
+				// FIXME: Doesn't work properly on VBox/WinXP...
+				uint64_t yield_end = d_ptr->clks.timing.getTime() + usec_sleep;
+				do {
+					yield();
+				} while (yield_end > d_ptr->clks.timing.getTime());
+#else /* !_WIN32 */
+				// Linux: Use usleep().
+				usleep(usec_sleep);
+#endif /* _WIN32 */
+			}
+		} else {
+			// Draw frames.
+			for (; frames_todo != 1; frames_todo--) {
+				// Run a frame without rendering.
+				runFastFrame();
+				d_ptr->sdlHandler->update_audio();
+			}
+			frames_todo = 0;
+
+			// Run a frame and render it.
+			runFullFrame();
+			d_ptr->sdlHandler->update_audio();
+			d_ptr->sdlHandler->update_video();
+			// Increment the frame counter.
+			d_ptr->clks.frames++;
+		}
+	} else {
+		// Run a frame and render it.
+		runFullFrame();
+		d_ptr->sdlHandler->update_audio();
+		d_ptr->sdlHandler->update_video();
+		// Increment the frame counter.
+		d_ptr->clks.frames++;
+	}
 }
 
 }

@@ -61,6 +61,25 @@ class EmuLoop : public EventLoop
 		 * @return 0 if the event was handled; non-zero if it wasn't.
 		 */
 		virtual int processSdlEvent(const SDL_Event *event) final;
+
+	protected:
+		// TODO: Move to EmuLoopPrivate?
+
+		/**
+		 * Run a normal frame.
+		 * This function is called by runFrame(),
+		 * and should be handled by running a full
+		 * frame with video and audio updates.
+		 */
+		virtual void runFullFrame(void) final;
+
+		/**
+		 * Run a fast frame.
+		 * This function is called by runFrame() if the
+		 * system is lagging a bit, and should be handled
+		 * by running a frame with audio updates only.
+		 */
+		virtual void runFastFrame(void) final;
 };
 
 }
