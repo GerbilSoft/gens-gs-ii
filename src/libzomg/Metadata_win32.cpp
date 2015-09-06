@@ -350,8 +350,35 @@ static string getOSVersion(void)
 				case VER_PLATFORM_WIN32_WINDOWS:
 					// Ignore the high word of the build number.
 					dwBuildNumber &= 0xFFFF;
-					// TODO: 95/98/98SE/Me?
-					oss << "Windows 9x";
+					if (osVersionInfo.dwMajorVersion == 4) {
+						// Check if this is a specific version of 9x.
+						switch (osVersionInfo.dwMinorVersion) {
+							case 0:
+								// Windows 95.
+								// TODO: OSR versions?
+								oss << "Windows 95";
+								break;
+							case 10:
+								// Windows 98.
+								oss << "Windows 98";
+								if (dwBuildNumber == 2222) {
+									// Windows 98SE.
+									oss << "SE";
+								}
+								break;
+							case 90:
+								// Windows Me.
+								oss << "Windows Me";
+								break;
+							default:
+								// Unknown...
+								oss << "Windows 9x";
+								break;
+						}
+					} else {
+						// Unknown...
+						oss << "Windows 9x";
+					}
 					break;
 				case VER_PLATFORM_WIN32_NT:
 				default:
@@ -408,9 +435,9 @@ static string getOSVersion(void)
 	// We're casting it to plain old unsigned int
 	// to eliminate some warnings.
 	snprintf(spver, sizeof(spver), " (%u.%u.%u)",
-		osVersionInfo.dwMajorVersion,
-		osVersionInfo.dwMinorVersion,
-		dwBuildNumber);
+		(unsigned int)osVersionInfo.dwMajorVersion,
+		(unsigned int)osVersionInfo.dwMinorVersion,
+		(unsigned int)dwBuildNumber);
 	oss << string(spver);
 
 	// Return the OS version.
