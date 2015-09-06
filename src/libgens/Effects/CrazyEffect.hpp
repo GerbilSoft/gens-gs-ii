@@ -96,13 +96,11 @@ class CrazyEffect
 		template<typename pixel, uint8_t add_shift>
 		inline pixel adj_color(pixel px, pixel mask);
 
-#if RAND_MAX >= 0x3FFFFFFF
-		// Random number cache.
-		// glibc's RAND_MAX is 0x7FFFFFFF, so we can
-		// get two random numbers from [0,0x7FFF]
-		// with a single call to rand().
-		unsigned int rand_cache;
-#endif
+		// Xorshift+ RNG state.
+		union {
+			uint32_t d[4];
+			uint64_t q[2];
+		} rng_state;
 };
 
 inline CrazyEffect::ColorMask CrazyEffect::colorMask(void) const

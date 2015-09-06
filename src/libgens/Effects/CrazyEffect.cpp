@@ -32,6 +32,7 @@
 #include <cmath>
 #include <cstring>
 #include <cstdio>
+#include <ctime>
 
 namespace LibGens {
 
@@ -39,31 +40,22 @@ namespace LibGens {
 
 /**
  * Get a random number in the range [0,0x7FFF].
- * This uses the internal random number
- * cache if it's available.
+ * Based on Xorshift+:
+ * - https://en.wikipedia.org/wiki/Xorshift#Xorshift.2B
  * @return Random number.
  */
 unsigned int CrazyEffect::getRand(void)
 {
-	// TODO: Faster rand() implementation, e.g. Mersenne Twister?
-	unsigned int ret;
-#if RAND_MAX >= 0x3FFFFFFF
-	if (rand_cache <= 0x7FFF) {
-		// rand_cache is valid.
-		ret = rand_cache;
-		rand_cache = ~0;
-		return ret;
-	}
-#endif
+	uint64_t x = rng_state.q[0];
+	uint64_t const y = rng_state.q[1];
+	rng_state.q[0] = y;
+	x ^= x << 23; // a
+	x ^= x >> 17; // b
+	x ^= y ^ (y >> 26); // c
+	rng_state.q[1] = x;
 
-	// Get a random number.
-	ret = rand();
-#if RAND_MAX >= 0x3FFFFFFF
-	// Cache the high bits as a second random number.
-	rand_cache = (ret >> 15) & 0x7FFF;
-	ret &= 0x7FFF;
-#endif
-	return ret;
+	// TODO: Cache upper bits?
+	return (x + y) & 0x7FFF;
 }
 
 /**
@@ -79,7 +71,7 @@ inline pixel CrazyEffect::adj_color(pixel px, pixel mask)
 {
 	pixel add = 1 << add_shift;
 	px &= mask;
-	if ((getRand() & 0x7FFF) > 0x2C00) {
+	if (getRand() > 0x2C00) {
 		if ((mask - add) <= px) {
 			px = mask;
 		} else {
@@ -161,10 +153,21 @@ inline void CrazyEffect::T_doCrazyEffect(pixel *outScreen)
 
 CrazyEffect::CrazyEffect()
 	: m_colorMask(CM_WHITE)
-#if RAND_MAX >= 0x3FFFFFFF
-	, rand_cache(~0)
-#endif
-{ }
+{
+	// Initialize the RNG state.
+	// FIXME: Move this srand() call somewhere else.
+	srand((unsigned int)time(nullptr));
+
+	// RAND_MAX is at least 0x7FFF, so we need to
+	// call rand() multiple times. We'll use xor
+	// instead of simple assignment so systems where
+	// RAND_MAX > 0x7FFF get an extra bit of randomness.
+	for (int i = 0; i < 4; i++) {
+		rng_state.d[i]  =  rand();
+		rng_state.d[i] ^= (rand() << 15);
+		rng_state.d[i] ^= (rand() << 30);
+	}
+}
 
 /**
  * Run the "Crazy" effect.
