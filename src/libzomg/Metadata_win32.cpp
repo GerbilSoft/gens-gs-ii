@@ -141,6 +141,12 @@ static string getUserName_unicode(void)
 		}
 	}
 
+	// Remove any trailing NULL characters.
+	if (username[cchUsername-1] == 0) {
+		// Found a trailing NULL characters.
+		cchUsername--;
+	}
+
 	if (cchUsername > 0) {
 		// Try to convert from UTF-16 to UTF-8.
 		// FIXME: If this fails, do a naive low-byte conversion?
@@ -180,6 +186,12 @@ static string getUserName_ansi(void)
 		// Error retrieving username.
 		// TODO: Check Registered Owner in the registry?
 		cbUsername = 0;
+	}
+
+	// Remove any trailing NULL bytes.
+	if (username[cbUsername-1] == 0) {
+		// Found a trailing NULL byte.
+		cbUsername--;
 	}
 
 	if (cbUsername > 0) {
