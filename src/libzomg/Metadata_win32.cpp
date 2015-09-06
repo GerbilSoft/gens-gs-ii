@@ -317,6 +317,14 @@ static string getOSVersion(void)
 			return os8;
 	}
 
+	// Build number is a bit screwy on Win9x.
+	// The low 16 bits map to the correct number;
+	// the high 16 bits are something else entirely.
+	// On Win98SE (build 2222), the build number is:
+	// - 67766446 (0x040A08AE)
+	// This translates to 0x040A (1,034) and 0x08AE (2,222).
+	DWORD dwBuildNumber = osVersionInfo.dwBuildNumber;
+
 	// Check if the product name is available in the registry.
 	//reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v ProductName
 	HKEY hKey;
@@ -336,9 +344,13 @@ static string getOSVersion(void)
 			switch (osVersionInfo.dwPlatformId) {
 				case VER_PLATFORM_WIN32s:
 					// Yeah, right, like this is ever going to happen...
+					dwBuildNumber &= 0xFFFF;
 					oss << "Windows 3.1";
 					break;
 				case VER_PLATFORM_WIN32_WINDOWS:
+					// Ignore the high word of the build number.
+					dwBuildNumber &= 0xFFFF;
+					// TODO: 95/98/98SE/Me?
 					oss << "Windows 9x";
 					break;
 				case VER_PLATFORM_WIN32_NT:
@@ -398,7 +410,7 @@ static string getOSVersion(void)
 	snprintf(spver, sizeof(spver), " (%u.%u.%u)",
 		osVersionInfo.dwMajorVersion,
 		osVersionInfo.dwMinorVersion,
-		osVersionInfo.dwBuildNumber);
+		dwBuildNumber);
 	oss << string(spver);
 
 	// Return the OS version.
