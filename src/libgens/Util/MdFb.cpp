@@ -86,4 +86,38 @@ void MdFb::reinitFb(void) {
 	}
 }
 
+/** Convenience functions. **/
+
+/**
+ * Convert a bpp value to a ColorDepth enum item.
+ * @param bpp bpp value.
+ * @return ColorDepth enum item, or BPP_MAX on error.
+ */
+MdFb::ColorDepth MdFb::bppToColorDepth(int bpp)
+{
+	switch (bpp) {
+		case 15:	return BPP_15;
+		case 16:	return BPP_16;
+		case 32:	return BPP_32;
+		default:	break;
+	}
+	return BPP_MAX;
+}
+
+/**
+ * Convert a ColorDepth enum item to a bpp value.
+ * @param colorDepth ColorDepth enum item.
+ * @return bpp value, or 0 on error.
+ */
+int MdFb::colorDepthToBpp(ColorDepth colorDepth)
+{
+	switch (colorDepth) {
+		case BPP_15:	return 15;
+		case BPP_16:	return 16;
+		case BPP_32:	return 32;
+		default:	break;
+	}
+	return 0;
+}
+
 }

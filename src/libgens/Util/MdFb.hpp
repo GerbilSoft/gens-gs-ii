@@ -141,6 +141,22 @@ class MdFb
 		void setImgXStart(int imgXStart);
 		void setImgYStart(int imgYStart);
 
+		/** Convenience functions. **/
+
+		/**
+		 * Convert a bpp value to a ColorDepth enum item.
+		 * @param bpp bpp value.
+		 * @return ColorDepth enum item, or BPP_MAX on error.
+		 */
+		static ColorDepth bppToColorDepth(int bpp);
+
+		/**
+		 * Convert a ColorDepth enum item to a bpp value.
+		 * @param colorDepth ColorDepth enum item.
+		 * @return bpp value, or 0 on error.
+		 */
+		static int colorDepthToBpp(ColorDepth colorDepth);
+
 	private:
 		/**
 		 * Number of visible pixels per line.
