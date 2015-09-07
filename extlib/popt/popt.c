@@ -217,7 +217,7 @@ poptContext poptGetContext(const char * name, int argc, const char ** argv,
     con->execAbsolute = 1;
     con->arg_strip = NULL;
 
-    if (getenv("POSIXLY_CORRECT") || getenv("POSIX_ME_HARDER"))
+    if (secure_getenv("POSIXLY_CORRECT") || secure_getenv("POSIX_ME_HARDER"))
 	con->flags |= POPT_CONTEXT_POSIXMEHARDER;
 
     if (name)
@@ -463,7 +463,7 @@ const char * findProgramPath(/*@null@*/ const char * argv0)
     if (strchr(argv0, '/'))
 	return xstrdup(argv0);
 
-    if ((path = getenv("PATH")) == NULL || (path = xstrdup(path)) == NULL)
+    if ((path = secure_getenv("PATH")) == NULL || (path = xstrdup(path)) == NULL)
 	return NULL;
 
     /* The return buffer in t is big enough for any path. */

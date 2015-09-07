@@ -556,7 +556,7 @@ int poptReadDefaultConfig(poptContext con, /*@unused@*/ UNUSED(int useEnv))
 #endif
 
     /* Gens/GS II: TODO: Add Windows support. */
-    if ((home = getenv("HOME"))) {
+    if ((home = secure_getenv("HOME"))) {
 	char * fn = malloc(strlen(home) + 20);
 	if (fn != NULL) {
 	    (void) stpcpy(stpcpy(fn, home), "/.popt");

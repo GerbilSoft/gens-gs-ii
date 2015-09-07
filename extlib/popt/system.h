@@ -1,10 +1,9 @@
 /**
  * \file popt/system.h
  */
+#pragma once
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #ifdef _MSC_VER
 /* Gens/GS II: MSVC doesn't support 'inline' in C mode. */
@@ -14,6 +13,15 @@
 #define S_ISREG(m) (((m) & _S_IFMT) == _S_IFREG)
 #endif
 #endif /* _MSC_VER */
+
+/* Gens/GS II: Only use GCC visibility if it's supported. */
+/* TODO: 4.2.0 minimum, or older? */
+#if !defined(_WIN32) && \
+    defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2))
+#ifndef HAVE_GCC_VISIBILITY
+#define HAVE_GCC_VISIBILITY 1
+#endif
+#endif
 
 #if defined (__GLIBC__) && defined(__LCLINT__)
 /*@-declundef@*/
@@ -88,6 +96,9 @@ typedef long ssize_t;
 #include <libc.h>
 #endif
 
+#ifdef HAVE_GCC_VISIBILITY
+#pragma GCC visibility push(hidden)
+#endif
 /*@-incondefs@*/
 /*@mayexit@*/ /*@only@*/ /*@out@*/ /*@unused@*/
 void * xmalloc (size_t size)
@@ -123,6 +134,10 @@ static inline char * stpcpy (char *dest, const char * src) {
 }
 #endif
 
+#ifdef HAVE_GCC_VISIBILITY
+#pragma GCC visibility pop
+#endif
+
 /* Memory allocation via macro defs to get meaningful locations from mtrace() */
 #if defined(HAVE_MCHECK_H) && defined(__GNUC__)
 #define	vmefail()	(fprintf(stderr, "virtual memory exhausted.\n"), exit(EXIT_FAILURE), NULL)
@@ -137,10 +152,16 @@ static inline char * stpcpy (char *dest, const char * src) {
 #define	xstrdup(_str)	strdup(_str)
 #endif  /* defined(HAVE_MCHECK_H) && defined(__GNUC__) */
 
-#if defined(HAVE_SECURE_GETENV) && !defined(__LCLINT__)
-#define	getenv(_s)	secure_getenv(_s)
-#elif defined(HAVE___SECURE_GETENV) && !defined(__LCLINT__)
-#define	getenv(_s)	__secure_getenv(_s)
+#ifndef HAVE_SECURE_GETENV
+#  ifdef HAVE___SECURE_GETENV
+#    define secure_getenv __secure_getenv
+#  else
+/* Gens/GS II: FIXME: Implement secure_getenv() for non-GNU systems.
+#    error neither secure_getenv nor __secure_getenv is available
+*/
+#    pragma message("WARNING: secure_getenv() is unavailable; please implement a replacement.")
+#    define secure_getenv(_s) getenv(_s)
+#  endif
 #endif
 
 #if !defined(__GNUC__) && !defined(__attribute__)
