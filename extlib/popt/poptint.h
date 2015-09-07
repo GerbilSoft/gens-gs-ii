@@ -132,6 +132,7 @@ struct poptContext_s {
 /*@owned@*/ /*@null@*/
     poptItem execs;
     int numExecs;
+    char * execFail;
 /*@only@*/ /*@null@*/
     poptArgv finalArgv;
     int finalArgvCount;
