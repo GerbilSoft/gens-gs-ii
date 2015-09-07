@@ -33,7 +33,7 @@ namespace GensSdl {
 class GLBackendPrivate;
 class GLBackend : public VBackend {
 	public:
-		GLBackend(LibGens::MdFb::ColorDepth bpp);
+		GLBackend();
 		virtual ~GLBackend();
 
 	private:

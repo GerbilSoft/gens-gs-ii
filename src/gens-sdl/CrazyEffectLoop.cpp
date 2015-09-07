@@ -107,7 +107,7 @@ int CrazyEffectLoop::run(const Options *options)
 
 	// Initialize the SDL handlers.
 	d->sdlHandler = new SdlHandler();
-	if (d->sdlHandler->init_video(options->bpp()) < 0)
+	if (d->sdlHandler->init_video() < 0)
 		return EXIT_FAILURE;
 	// No audio here.
 	//if (d->sdlHandler->init_audio() < 0)

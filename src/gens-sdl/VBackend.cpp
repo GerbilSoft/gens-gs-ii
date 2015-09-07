@@ -29,12 +29,11 @@ using LibGens::MdFb;
 
 namespace GensSdl {
 
-VBackend::VBackend(MdFb::ColorDepth bpp)
+VBackend::VBackend()
 	: m_dirty(true)
 	, m_fullscreen(false)
 	, m_fb(nullptr)
 	, m_int_fb(nullptr)
-	, m_bpp(bpp)
 	, m_stretchMode(STRETCH_H)
 	, m_aspectRatioConstraint(true)
 	, m_pausedEffect(false)

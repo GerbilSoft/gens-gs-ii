@@ -36,13 +36,16 @@ namespace LibGens {
 
 namespace GensSdl {
 
+class SdlSWBackendPrivate;
 class SdlSWBackend : public VBackend {
 	public:
-		SdlSWBackend(LibGens::MdFb::ColorDepth bpp);
+		SdlSWBackend();
 		virtual ~SdlSWBackend();
 
 	private:
 		typedef VBackend super;
+		friend class SdlSWBackendPrivate;
+		SdlSWBackendPrivate *const d;
 	private:
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add GensSdl-specific version of Q_DISABLE_COPY().
@@ -81,12 +84,6 @@ class SdlSWBackend : public VBackend {
 		 * Toggle fullscreen.
 		 */
 		virtual void toggle_fullscreen(void) final;
-
-	private:
-		// Screen context.
-		SDL_Window *m_window;
-		SDL_Renderer *m_renderer;
-		SDL_Texture *m_texture;
 };
 
 }

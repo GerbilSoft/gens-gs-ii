@@ -63,10 +63,9 @@ class SdlHandler {
 		/**
 		 * Initialize SDL video.
 		 * TODO: Parameter for GL rendering.
-		 * @param bpp Color depth.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int init_video(LibGens::MdFb::ColorDepth bpp);
+		int init_video(void);
 
 		/**
 		 * Shut down SDL video.

@@ -49,8 +49,8 @@ using LibGens::MdFb;
 
 namespace GensSdl {
 
-SdlGLBackend::SdlGLBackend(MdFb::ColorDepth bpp)
-	: super(bpp)
+SdlGLBackend::SdlGLBackend()
+	: super()
 	, m_window(nullptr)
 	, m_glContext(nullptr)
 {

@@ -376,17 +376,13 @@ void GLBackendPrivate::stopShaderEffects(void)
 
 /** GLBackend **/
 
-GLBackend::GLBackend(MdFb::ColorDepth bpp)
-	: super(bpp)
+GLBackend::GLBackend()
+	: super()
 	, d(new GLBackendPrivate(this))
 	, m_winW(640), m_winH(480)
 {
 	// Default window size is 640x480.
 	// GL must be initialized by the subclass.
-
-	// TODO: Remove bpp parameter;
-	// update other classes' bpp when the
-	// MdFb's bpp changes?
 }
 
 GLBackend::~GLBackend()

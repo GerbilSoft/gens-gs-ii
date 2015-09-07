@@ -50,7 +50,7 @@ namespace GensSdl {
 
 class VBackend {
 	public:
-		VBackend(LibGens::MdFb::ColorDepth bpp);
+		VBackend();
 		virtual ~VBackend();
 
 	private:
@@ -197,9 +197,6 @@ class VBackend {
 
 		// Internal MdFb for effects.
 		LibGens::MdFb *m_int_fb;
-
-		// Internal color depth.
-		LibGens::MdFb::ColorDepth m_bpp;
 
 		// Dirty flag functions.
 		void setDirty(void);

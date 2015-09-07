@@ -61,10 +61,9 @@ SdlHandler::~SdlHandler()
 /**
  * Initialize SDL video.
  * TODO: Parameter for GL rendering.
- * @param bpp Color depth.
  * @return 0 on success; non-zero on error.
  */
-int SdlHandler::init_video(MdFb::ColorDepth bpp)
+int SdlHandler::init_video(void)
 {
 	if (m_vBackend) {
 		// Video is already initialized.
@@ -82,7 +81,7 @@ int SdlHandler::init_video(MdFb::ColorDepth bpp)
 
 	// Initialize the video backend.
 	// TODO: Fullscreen; GL vs. SW selection; VSync.
-	m_vBackend = new SdlSWBackend(bpp);
+	m_vBackend = new SdlGLBackend();
 	return 0;
 }
 
