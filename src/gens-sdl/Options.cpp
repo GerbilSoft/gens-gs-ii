@@ -37,7 +37,58 @@ using std::string;
 
 namespace GensSdl {
 
-Options::Options()
+class OptionsPrivate
+{
+	public:
+		OptionsPrivate();
+
+	private:
+		friend class Options;
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add GensSdl-specific version of Q_DISABLE_COPY().
+		OptionsPrivate(const OptionsPrivate &);
+		OptionsPrivate &operator=(const OptionsPrivate &);
+
+	public:
+		/**
+		 * Reset all options to their default values.
+		 */
+		void reset(void);
+
+	public:
+		// Options set by the caller.
+		bool rom_filename_required;
+
+		// NOTE: bool values are ints for compatibility
+		// with popt. The accessor functions normalize
+		// the ints to bool.
+		// TODO: Convert to bool to make access faster?
+		string rom_filename;		// ROM to load.
+		string tmss_rom_filename;	// TMSS ROM image.
+
+		// Audio options.
+		int sound_freq;			// Sound frequency.
+		int stereo;			// Stereo audio?
+
+		// Emulation options.
+		int sprite_limits;		// Enable sprite limits?
+		int auto_fix_checksum;		// Auto fix checksum?
+
+		// UI options.
+		int fps_counter;		// Enable FPS counter?
+		int auto_pause;			// Auto pause?
+		int paused_effect;		// Paused effect?
+		int bpp;			// Color depth. (15, 16, 32)
+
+		// Special run modes.
+		int run_crazy_effect;		// Run the Crazy Effect
+};
+
+/** OptionsPrivate **/
+
+OptionsPrivate::OptionsPrivate()
+	: rom_filename_required(true)
 {
 	// Reset the options to the default values.
 	reset();
@@ -45,15 +96,13 @@ Options::Options()
 
 /**
  * Reset all options to their default values.
+ * This does NOT include caller-set options.
  */
-void Options::reset(void)
+void OptionsPrivate::reset(void)
 {
-	rom_filename_required = true;
-
 	// TODO: Swap with empty strings?
 	rom_filename.clear();
 	tmss_rom_filename.clear();
-	tmss_enabled = false;
 
 	// Audio options.
 	sound_freq = 44100;
@@ -71,6 +120,25 @@ void Options::reset(void)
 
 	// Special run modes.
 	run_crazy_effect = false;
+}
+
+/** Options **/
+
+Options::Options()
+	: d(new OptionsPrivate())
+{ }
+
+Options::~Options()
+{
+	delete d;
+}
+
+/**
+ * Reset all options to their default values.
+ */
+void Options::reset(void)
+{
+	d->reset();
 }
 
 // TODO: Improve these.
@@ -123,43 +191,18 @@ int Options::parse(int argc, const char *argv[])
 		return -EINVAL;
 	}
 
+	// Reset the options.
+	reset();
+
 	// Temporary internal option variables.
+	// Required for strings, since popt uses
+	// const char*, so we have to copy them
+	// to standard C++ strings later.
 	struct {
-		// popt is a C library, so we have to use
-		// C strings here initially. Also, we can't
-		// use bool; we have to use int.
 		const char *rom_filename;
 		const char *tmss_rom_filename;
-		// tmss_enabled is implied by tmss_rom_filename.
-
-		// Audio options.
-		int sound_freq;
-		int stereo;
-
-		// Emulation options.
-		int sprite_limits;
-		int auto_fix_checksum;
-
-		// UI options.
-		int fps_counter;
-		int auto_pause;
-		int paused_effect;
-		int bpp;
-
-		// Special run modes.
-		int run_crazy_effect;
 	} tmp;
-
-	// Set default values.
-	// TODO: Separate function for this?
 	memset(&tmp, 0, sizeof(tmp));
-	tmp.sound_freq = 44100;
-	tmp.stereo = 1;
-	tmp.sprite_limits = 1;
-	tmp.auto_fix_checksum = 1;
-	tmp.fps_counter = 1;
-	tmp.paused_effect = 1;
-	tmp.bpp = 32;
 
 	// NOTE: rom_filename is provided as a non-option parameter.
 	// It will get parsed later.
@@ -174,50 +217,50 @@ int Options::parse(int argc, const char *argv[])
 
 	// popt: audio options table.
 	struct poptOption audioOptionsTable[] = {
-		{"frequency", 0, POPT_ARG_INT, &tmp.sound_freq, 0,
+		{"frequency", 0, POPT_ARG_INT, &d->sound_freq, 0,
 			"  Audio frequency.", "FREQ"},
-		{"mono", 0, POPT_ARG_VAL, &tmp.stereo, 0,
+		{"mono", 0, POPT_ARG_VAL, &d->stereo, 0,
 			"  Use monaural audio.", NULL},
-		{"stereo", 0, POPT_ARG_VAL, &tmp.stereo, 1,
+		{"stereo", 0, POPT_ARG_VAL, &d->stereo, 1,
 			"  Use stereo audio.", NULL},
 		POPT_TABLEEND
 	};
 
 	// popt: emulation options table.
 	struct poptOption emulationOptionsTable[] = {
-		{"sprite-limits", 0, POPT_ARG_VAL, &tmp.sprite_limits, 1,
+		{"sprite-limits", 0, POPT_ARG_VAL, &d->sprite_limits, 1,
 			"* Enable sprite limits.", NULL},
-		{"no-sprite-limits", 0, POPT_ARG_VAL, &tmp.sprite_limits, 0,
+		{"no-sprite-limits", 0, POPT_ARG_VAL, &d->sprite_limits, 0,
 			"  Disable sprite limits.", NULL},
-		{"auto-fix-checksum", 0, POPT_ARG_VAL, &tmp.auto_fix_checksum, 1,
+		{"auto-fix-checksum", 0, POPT_ARG_VAL, &d->auto_fix_checksum, 1,
 			"* Automatically fix checksums.", NULL},
-		{"no-auto-fix-checksum", 0, POPT_ARG_VAL, &tmp.auto_fix_checksum, 0,
+		{"no-auto-fix-checksum", 0, POPT_ARG_VAL, &d->auto_fix_checksum, 0,
 			"  Don't automatically fix checksums.", NULL},
 		POPT_TABLEEND
 	};
 
 	// popt: UI options table.
 	struct poptOption uiOptionsTable[] = {
-		{"fps", 0, POPT_ARG_VAL, &tmp.fps_counter, 1,
+		{"fps", 0, POPT_ARG_VAL, &d->fps_counter, 1,
 			"* Enable the FPS counter.", NULL},
-		{"no-fps", 0, POPT_ARG_VAL, &tmp.fps_counter, 0,
+		{"no-fps", 0, POPT_ARG_VAL, &d->fps_counter, 0,
 			"  Disable the FPS counter.", NULL},
-		{"auto-pause", 0, POPT_ARG_VAL, &tmp.auto_pause, 1,
+		{"auto-pause", 0, POPT_ARG_VAL, &d->auto_pause, 1,
 			"* Pause emulator when focus is lost.", NULL},
-		{"no-auto-pause", 0, POPT_ARG_VAL, &tmp.auto_pause, 0,
+		{"no-auto-pause", 0, POPT_ARG_VAL, &d->auto_pause, 0,
 			"  Don't pause emulator when focus is lost.", NULL},
-		{"paused-effect", 0, POPT_ARG_VAL, &tmp.paused_effect, 1,
+		{"paused-effect", 0, POPT_ARG_VAL, &d->paused_effect, 1,
 			"* Tint the window when paused.", NULL},
-		{"no-paused-effect", 0, POPT_ARG_VAL, &tmp.paused_effect, 0,
+		{"no-paused-effect", 0, POPT_ARG_VAL, &d->paused_effect, 0,
 			"  Don't tint the window when paused.", NULL},
-		{"bpp", 0, POPT_ARG_INT, &tmp.bpp, 0,
+		{"bpp", 0, POPT_ARG_INT, &d->bpp, 0,
 			"  Set the internal color depth. (15, 16, 32)", "BPP"},
 		POPT_TABLEEND
 	};
 
 	// popt: Special run modes table.
 	struct poptOption runModesTable[] = {
-		{"crazy-effect", 0, POPT_ARG_VAL, &tmp.run_crazy_effect, 1,
+		{"crazy-effect", 0, POPT_ARG_VAL, &d->run_crazy_effect, 1,
 			"  Run the \"Crazy\" Effect instead of loading a ROM.", NULL},
 		POPT_TABLEEND
 	};
@@ -242,7 +285,7 @@ int Options::parse(int argc, const char *argv[])
 	// Create the popt context.
 	poptContext optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
 	poptSetOtherOptionHelp(optCon, "[rom_file]");
-	if (rom_filename_required && argc < 2) {
+	if (d->rom_filename_required && argc < 2) {
 		poptPrintUsage(optCon, stderr, 0);
 		return -EINVAL;
 	}
@@ -310,8 +353,7 @@ int Options::parse(int argc, const char *argv[])
 	// TMSS ROM filename.
 	if (tmp.tmss_rom_filename != nullptr) {
 		// TMSS ROM filename was specified.
-		this->tmss_rom_filename = string(tmss_rom_filename);
-		this->tmss_enabled = true;
+		d->tmss_rom_filename = string(tmp.tmss_rom_filename);
 	}
 
 	// Get the ROM filename.
@@ -321,8 +363,8 @@ int Options::parse(int argc, const char *argv[])
 	tmp.rom_filename = poptGetArg(optCon);
 	if (tmp.rom_filename != nullptr) {
 		// ROM filename was specified.
-		this->rom_filename = string(tmp.rom_filename);
-	} else if (this->rom_filename_required && !tmp.run_crazy_effect) {
+		d->rom_filename = string(tmp.rom_filename);
+	} else if (d->rom_filename_required && !d->run_crazy_effect) {
 		// A ROM is required, but wasn't specified.
 		// (If --crazy-effect is specified, this is ignored.)
 		fprintf(stderr, "%s: no ROM filename specified\n"
@@ -342,35 +384,85 @@ int Options::parse(int argc, const char *argv[])
 		return -EINVAL;
 	}
 
-	// Copy other arguments.
-	// TODO: Verify that they're valid.
-
-	// Audio options.
-	this->sound_freq = tmp.sound_freq;
-	this->stereo = !!tmp.stereo;
-
-	// Emulation options.
-	this->sprite_limits = !!tmp.sprite_limits;
-	this->auto_fix_checksum = !!tmp.auto_fix_checksum;
-
-	// UI options.
-	this->fps_counter = !!tmp.fps_counter;
-	this->auto_pause = !!tmp.auto_pause;
-	this->paused_effect = !!tmp.paused_effect;
-
-	if (tmp.bpp == 15 || tmp.bpp == 16 || tmp.bpp == 32) {
-		this->bpp = (uint8_t)tmp.bpp;
-	} else {
-		// TODO: Show an error.
-		this->bpp = 32;
+	// Verify certain options.
+	if (d->bpp != 15 && d->bpp != 16 && d->bpp != 32) {
+		// Invalid color depth.
+		fprintf(stderr, "%s: '--bpp=%d': invalid color depth\n"
+			"Valid options are 15, 16, and 32.\n"
+			"Try `%s --help` for more information.\n",
+			argv[0], d->bpp, argv[0]);
+		poptFreeContext(optCon);
+		return -EINVAL;
 	}
-
-	// Special run modes.
-	this->run_crazy_effect = !!tmp.run_crazy_effect;
 
 	// Done parsing arguments.
 	poptFreeContext(optCon);
 	return 0;
 }
+
+/** Options set by the caller. **/
+
+/**
+ * Is a ROM filename required?
+ * @return True if a ROM filename is required; false if not.
+ */
+bool Options::is_rom_filename_required(void) const
+{
+	return d->rom_filename_required;
+}
+
+/**
+ * Set if a ROM filename should be required.
+ * @param rom_filename_required True if a ROM filename is required; false if not.
+ */
+void Options::set_rom_filename_required(bool rom_filename_required)
+{
+	d->rom_filename_required = rom_filename_required;
+}
+
+/** Parameter accessors. **/
+
+#define ACCESSOR(type, name) \
+type Options::name(void) const \
+{ \
+	return (type)d->name; \
+}
+
+#define ACCESSOR_BOOL(name) \
+bool Options::name(void) const \
+{ \
+	return !!d->name; \
+}
+
+/** General options. **/
+ACCESSOR(string, rom_filename)
+ACCESSOR(string, tmss_rom_filename)
+
+/**
+ * Is TMSS enabled?
+ * This option is implied by the presence of a TMSS ROM filename.
+ * @return True if TMSS is enabled; false if not.
+ */
+bool Options::is_tmss_enabled(void) const
+{
+	return !d->tmss_rom_filename.empty();
+}
+
+/** Audio options. **/
+ACCESSOR(int, sound_freq)
+ACCESSOR_BOOL(stereo)
+
+/** Emulation options. **/
+ACCESSOR_BOOL(sprite_limits)
+ACCESSOR_BOOL(auto_fix_checksum)
+
+/** UI options. **/
+ACCESSOR_BOOL(fps_counter)
+ACCESSOR_BOOL(auto_pause)
+ACCESSOR_BOOL(paused_effect)
+ACCESSOR(uint8_t, bpp)
+
+/** Special run modes. **/
+ACCESSOR_BOOL(run_crazy_effect)
 
 }

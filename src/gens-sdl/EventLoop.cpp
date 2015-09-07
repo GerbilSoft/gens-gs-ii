@@ -99,7 +99,7 @@ void EventLoopPrivate::doPauseProcessing(void)
 	bool any = !!paused.data;
 
 	// Set the paused effect.
-	if (options->paused_effect) {
+	if (options->paused_effect()) {
 		vBackend->setPausedEffect(manual);
 	} else {
 		vBackend->setPausedEffect(false);
@@ -287,14 +287,14 @@ int EventLoop::processSdlEvent(const SDL_Event *event)
 					break;
 				case SDL_WINDOWEVENT_FOCUS_LOST:
 					// If AutoPause is enabled, pause the emulator.
-					if (d_ptr->options->auto_pause) {
+					if (d_ptr->options->auto_pause()) {
 						d_ptr->doAutoPause(true);
 					}
 					break;
 				case SDL_WINDOWEVENT_FOCUS_GAINED:
 					// If AutoPause is enabled, unpause the emulator.
 					// TODO: Always run this, even if !autoPause?
-					if (d_ptr->options->auto_pause) {
+					if (d_ptr->options->auto_pause()) {
 						d_ptr->doAutoPause(false);
 					}
 					break;

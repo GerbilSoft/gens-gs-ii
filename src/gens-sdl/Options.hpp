@@ -27,11 +27,16 @@
 
 namespace GensSdl {
 
+class OptionsPrivate;
 class Options
 {
 	public:
 		Options();
+		~Options();
 
+	private:
+		friend class OptionsPrivate;
+		OptionsPrivate *const d;
 	private:
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add GensSdl-specific version of Q_DISABLE_COPY().
@@ -53,36 +58,101 @@ class Options
 		int parse(int argc, const char *argv[]);
 
 	public:
+		/** Options set by the caller. **/
+
 		/**
 		 * Is a ROM filename required?
-		 * Set this before calling parse().
+		 * @return True if a ROM filename is required; false if not.
 		 */
-		bool rom_filename_required;
+		bool is_rom_filename_required(void) const;
+
+		/**
+		 * Set if a ROM filename should be required.
+		 * @param rom_filename_required True if a ROM filename is required; false if not.
+		 */
+		void set_rom_filename_required(bool rom_filename_required);
 
 	public:
 		/** Command line parameters. **/
-		// TODO: Use accessors instead?
-		std::string rom_filename;	// ROM to load.
-		std::string tmss_rom_filename;	// TMSS ROM image.
-		bool tmss_enabled;		// Enable TMSS?
 
-		// Audio options.
-		int sound_freq;			// Sound frequency.
-		bool stereo;			// Stereo audio?
+		/**
+		 * Get the filename of the ROM to load.
+		 */
+		std::string rom_filename(void) const;
 
-		// Emulation options.
-		bool sprite_limits;		// Enable sprite limits?
-		bool auto_fix_checksum;		// Auto fix checksum?
+		/**
+		 * Get the filename of the TMSS ROM to load.
+		 */
+		std::string tmss_rom_filename(void) const;
 
-		// UI options.
-		bool fps_counter;		// Enable FPS counter?
-		bool auto_pause;		// Auto pause?
-		bool paused_effect;		// Paused effect?
-		uint8_t bpp;			// Color depth. (15, 16, 32)
+		/**
+		 * Is TMSS enabled?
+		 * This option is implied by the presence of a TMSS ROM filename.
+		 * @return True if TMSS is enabled; false if not.
+		 */
+		bool is_tmss_enabled(void) const;
 
-		// Special run modes.
-		bool run_crazy_effect;		// Run the Crazy Effect
-						// instead of loading a ROM?
+		/** Audio options. **/
+
+		/**
+		 * Get the requested sound frequency.
+		 * @return Sound frequency.
+		 */
+		int sound_freq(void) const;
+
+		/**
+		 * Use stereo audio?
+		 * @return True for stereo; false for monaural.
+		 */
+		bool stereo(void) const;
+
+		/** Emulation options. **/
+
+		/**
+		 * Enable sprite limits?
+		 * @return True to enable; false to disable.
+		 */
+		bool sprite_limits(void) const;
+
+		/**
+		 * Automatically fix checksums?
+		 * @return True to auto-fix; false to not.
+		 */
+		bool auto_fix_checksum(void) const;
+
+		/** UI options. **/
+
+		/**
+		 * Enable the FPS counter?
+		 * @return True to enable; false to disable.
+		 */
+		bool fps_counter(void) const;
+
+		/**
+		 * Automatically pause the emulator when focus is lost?
+		 * @return True to automatically pause; false to not.
+		 */
+		bool auto_pause(void) const;
+
+		/**
+		 * Use the paused effect when the emulator is manually paused?
+		 * @return True to use the paused effect; false to not.
+		 */
+		bool paused_effect(void) const;
+
+		/**
+		 * Color depth to use. (15, 16, 32)
+		 * @return Color depth.
+		 */
+		uint8_t bpp(void) const;
+
+		/** Special run modes. **/
+
+		/**
+		 * Run the Crazy Effect instead of loading a ROM?
+		 * @return True to run the Crazy Effect.
+		 */
+		bool run_crazy_effect(void) const;
 };
 
 }

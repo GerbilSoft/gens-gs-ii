@@ -174,7 +174,7 @@ int run(void)
 	// Register the LibGens OSD handler.
 	lg_set_osd_fn(gsdl_osd);
 
-	if (options->run_crazy_effect) {
+	if (options->run_crazy_effect()) {
 		// Run the Crazy Effect.
 		eventLoop = new CrazyEffectLoop();
 	} else {
@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
 
 	// Parse command line options.
 	GensSdl::options = new GensSdl::Options();
-	GensSdl::options->rom_filename_required = true;
+	GensSdl::options->set_rom_filename_required(true);
 	int ret = GensSdl::options->parse(argc, (const char**)argv);
 	if (ret != 0) {
 		// Error parsing command line options.

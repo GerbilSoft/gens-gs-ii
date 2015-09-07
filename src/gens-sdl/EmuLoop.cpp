@@ -527,12 +527,13 @@ int EmuLoop::run(const Options *options)
 	d->options = options;
 	
 	// Load the ROM image.
-	d->rom = new Rom(options->rom_filename.c_str());
+	const char *rom_filename = options->rom_filename().c_str();
+	d->rom = new Rom(rom_filename);
 	if (!d->rom->isOpen()) {
 		// Error opening the ROM.
 		// TODO: Error code?
 		fprintf(stderr, "Error opening ROM file %s: (TODO get error code)\n",
-			options->rom_filename.c_str());
+			rom_filename);
 		delete d->rom;
 		d->rom = nullptr;
 		return EXIT_FAILURE;
@@ -548,7 +549,7 @@ int EmuLoop::run(const Options *options)
 		// ROM format is not supported.
 		const char *rom_format = romFormatToString(d->rom->romFormat());
 		fprintf(stderr, "Error loading ROM file %s: ROM is in %s format.\nOnly plain binary and SMD-format ROMs are supported.\n",
-			options->rom_filename.c_str(), rom_format);
+			rom_filename, rom_format);
 		return EXIT_FAILURE;
 	}
 
@@ -557,7 +558,7 @@ int EmuLoop::run(const Options *options)
 		// System is not supported.
 		const char *rom_sysId = sysIdToString(d->rom->sysId());
 		fprintf(stderr, "Error loading ROM file %s: ROM is for %s.\nOnly Mega Drive and Pico ROMs are supported.\n",
-			options->rom_filename.c_str(), rom_sysId);
+			rom_filename, rom_sysId);
 		return EXIT_FAILURE;
 	}
 
@@ -576,9 +577,13 @@ int EmuLoop::run(const Options *options)
 		// Error loading the ROM into EmuMD.
 		// TODO: Error code?
 		fprintf(stderr, "Error initializing EmuContext for %s: (TODO get error code)\n",
-			options->rom_filename.c_str());
+			rom_filename);
 		return EXIT_FAILURE;
 	}
+
+	// Done using rom_filename. NULL it out to prevent
+	// issues with Options possibly deleting the string.
+	rom_filename = nullptr;
 
 	// Initialize the SDL handlers.
 	d->sdlHandler = new SdlHandler();
