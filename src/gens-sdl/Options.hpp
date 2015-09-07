@@ -22,6 +22,9 @@
 #ifndef __GENS_SDL_OPTIONS_HPP__
 #define __GENS_SDL_OPTIONS_HPP__
 
+// MdFb
+#include "libgens/Util/MdFb.hpp"
+
 // C++ includes.
 #include <string>
 
@@ -141,10 +144,10 @@ class Options
 		bool paused_effect(void) const;
 
 		/**
-		 * Color depth to use. (15, 16, 32)
+		 * Color depth to use.
 		 * @return Color depth.
 		 */
-		uint8_t bpp(void) const;
+		LibGens::MdFb::ColorDepth bpp(void) const;
 
 		/** Special run modes. **/
 

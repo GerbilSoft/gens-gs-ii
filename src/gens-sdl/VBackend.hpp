@@ -40,8 +40,9 @@
 // ZOMG image data.
 struct _Zomg_Img_Data_t;
 
+// LibGens includes.
+#include "libgens/Util/MdFb.hpp"
 namespace LibGens {
-	class MdFb;
 	class EmuContext;
 }
 
@@ -49,7 +50,7 @@ namespace GensSdl {
 
 class VBackend {
 	public:
-		VBackend();
+		VBackend(LibGens::MdFb::ColorDepth bpp);
 		virtual ~VBackend();
 
 	private:
@@ -196,6 +197,9 @@ class VBackend {
 
 		// Internal MdFb for effects.
 		LibGens::MdFb *m_int_fb;
+
+		// Internal color depth.
+		LibGens::MdFb::ColorDepth m_bpp;
 
 		// Dirty flag functions.
 		void setDirty(void);

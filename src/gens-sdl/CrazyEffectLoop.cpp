@@ -107,7 +107,7 @@ int CrazyEffectLoop::run(const Options *options)
 
 	// Initialize the SDL handlers.
 	d->sdlHandler = new SdlHandler();
-	if (d->sdlHandler->init_video() < 0)
+	if (d->sdlHandler->init_video(options->bpp()) < 0)
 		return EXIT_FAILURE;
 	// No audio here.
 	//if (d->sdlHandler->init_audio() < 0)
@@ -131,7 +131,7 @@ int CrazyEffectLoop::run(const Options *options)
 	// Image size defaults to the full framebuffer,
 	// so we don't have to worry about "stretch modes".
 	d->crazyFb = new MdFb();
-	d->crazyFb->setBpp(MdFb::BPP_32);
+	d->crazyFb->setBpp(options->bpp());
 	// Set the SDL video source.
 	d->sdlHandler->set_video_source(d->crazyFb);
 

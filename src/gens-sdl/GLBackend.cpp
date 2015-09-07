@@ -20,6 +20,7 @@
  ***************************************************************************/
 
 #include "GLBackend.hpp"
+
 #include "libgens/Util/MdFb.hpp"
 using LibGens::MdFb;
 
@@ -375,12 +376,17 @@ void GLBackendPrivate::stopShaderEffects(void)
 
 /** GLBackend **/
 
-GLBackend::GLBackend()
-	: d(new GLBackendPrivate(this))
+GLBackend::GLBackend(MdFb::ColorDepth bpp)
+	: super(bpp)
+	, d(new GLBackendPrivate(this))
 	, m_winW(640), m_winH(480)
 {
 	// Default window size is 640x480.
 	// GL must be initialized by the subclass.
+
+	// TODO: Remove bpp parameter;
+	// update other classes' bpp when the
+	// MdFb's bpp changes?
 }
 
 GLBackend::~GLBackend()

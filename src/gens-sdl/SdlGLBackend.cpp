@@ -20,6 +20,7 @@
  ***************************************************************************/
 
 #include "SdlGLBackend.hpp"
+
 #include "libgens/Util/MdFb.hpp"
 using LibGens::MdFb;
 
@@ -48,8 +49,8 @@ using LibGens::MdFb;
 
 namespace GensSdl {
 
-SdlGLBackend::SdlGLBackend()
-	: super()
+SdlGLBackend::SdlGLBackend(MdFb::ColorDepth bpp)
+	: super(bpp)
 	, m_window(nullptr)
 	, m_glContext(nullptr)
 {
@@ -58,11 +59,31 @@ SdlGLBackend::SdlGLBackend()
 	// window isn't ridiculously tiny.
 	// FIXME: SDL window resizing is broken.
 	m_winW = 640; m_winH = 480;
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+
+	// Set the color depth.
+	switch (bpp) {
+		case MdFb::BPP_15:
+			SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
+			SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
+			SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
+			break;
+		case MdFb::BPP_16:
+			SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
+			SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 6);
+			SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
+			break;
+		case MdFb::BPP_32:
+		default:
+			SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+			SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+			SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+			break;
+	}
+
+	// Other GL parameters.
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, true);
+
 	// TODO: Make sure m_window, m_glContext, etc. were created successfully.
 	// TODO: Rename m_window to m_window?
 	m_window = SDL_CreateWindow("Gens/GS II [SDL]",

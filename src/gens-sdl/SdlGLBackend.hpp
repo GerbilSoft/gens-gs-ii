@@ -31,16 +31,13 @@
 #include <SDL.h>
 
 // Video Backend.
-#include "VBackend.hpp"
 #include "GLBackend.hpp"
-// LibGens includes.
-#include "libgens/Util/MdFb.hpp"
 
 namespace GensSdl {
 
 class SdlGLBackend : public GLBackend {
 	public:
-		SdlGLBackend();
+		SdlGLBackend(LibGens::MdFb::ColorDepth bpp);
 		virtual ~SdlGLBackend();
 
 	private:

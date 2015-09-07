@@ -27,15 +27,13 @@
 
 // Video Backend.
 #include "VBackend.hpp"
-// LibGens includes.
-#include "libgens/Util/MdFb.hpp"
 
 namespace GensSdl {
 
 class GLBackendPrivate;
 class GLBackend : public VBackend {
 	public:
-		GLBackend();
+		GLBackend(LibGens::MdFb::ColorDepth bpp);
 		virtual ~GLBackend();
 
 	private:

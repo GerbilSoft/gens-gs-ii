@@ -20,7 +20,9 @@
  ***************************************************************************/
 
 #include "SdlSWBackend.hpp"
+
 #include "libgens/Util/MdFb.hpp"
+using LibGens::MdFb;
 
 // C includes. (C++ namespace)
 #include <cassert>
@@ -36,8 +38,9 @@
 
 namespace GensSdl {
 
-SdlSWBackend::SdlSWBackend()
-	: m_window(nullptr)
+SdlSWBackend::SdlSWBackend(MdFb::ColorDepth bpp)
+	: super(bpp)
+	, m_window(nullptr)
 	, m_renderer(nullptr)
 	, m_texture(nullptr)
 {
@@ -72,8 +75,20 @@ SdlSWBackend::SdlSWBackend()
 	SDL_RenderPresent(m_renderer);
 
 	// Create a texture.
-	m_texture = SDL_CreateTexture(m_renderer,
-			SDL_PIXELFORMAT_ARGB8888,
+	uint32_t format;
+	switch (bpp) {
+		case MdFb::BPP_15:
+			format = SDL_PIXELFORMAT_RGB555;
+			break;
+		case MdFb::BPP_16:
+			format = SDL_PIXELFORMAT_RGB565;
+			break;
+		case MdFb::BPP_32:
+		default:
+			format = SDL_PIXELFORMAT_ARGB8888;
+			break;
+	}
+	m_texture = SDL_CreateTexture(m_renderer, format,
 			SDL_TEXTUREACCESS_STREAMING,
 			320, 240);
 }
@@ -133,7 +148,12 @@ void SdlSWBackend::update(bool fb_dirty)
 	SDL_RenderClear(m_renderer);
 	if (m_fb) {
 		// Source surface is available.
-		SDL_UpdateTexture(m_texture, nullptr, m_fb->fb32(), m_fb->pxPitch() * sizeof(uint32_t));
+		// TODO: Verify color depth.
+		if (m_bpp == MdFb::BPP_32) {
+			SDL_UpdateTexture(m_texture, nullptr, m_fb->fb32(), m_fb->pxPitch() * sizeof(uint32_t));
+		} else {
+			SDL_UpdateTexture(m_texture, nullptr, m_fb->fb16(), m_fb->pxPitch() * sizeof(uint16_t));
+		}
 		SDL_RenderCopy(m_renderer, m_texture, nullptr, nullptr);
 	}
 

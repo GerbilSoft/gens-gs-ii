@@ -587,7 +587,7 @@ int EmuLoop::run(const Options *options)
 
 	// Initialize the SDL handlers.
 	d->sdlHandler = new SdlHandler();
-	if (d->sdlHandler->init_video() < 0)
+	if (d->sdlHandler->init_video(options->bpp()) < 0)
 		return EXIT_FAILURE;
 	if (d->sdlHandler->init_audio() < 0)
 		return EXIT_FAILURE;
@@ -607,9 +607,8 @@ int EmuLoop::run(const Options *options)
 	// TODO: Close the ROM, or let EmuContext do it?
 
 	// Set the color depth.
-	// TODO: Command line option?
 	MdFb *fb = d->emuContext->m_vdp->MD_Screen->ref();
-	fb->setBpp(MdFb::BPP_32);
+	fb->setBpp(options->bpp());
 
 	// Set the SDL video source.
 	d->sdlHandler->set_video_source(fb);

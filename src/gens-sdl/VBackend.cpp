@@ -20,18 +20,21 @@
  ***************************************************************************/
 
 #include "VBackend.hpp"
+
 #include "libgens/Util/MdFb.hpp"
+using LibGens::MdFb;
 
 // C includes. (C++ namespace)
 #include <cstdio>
 
 namespace GensSdl {
 
-VBackend::VBackend()
+VBackend::VBackend(MdFb::ColorDepth bpp)
 	: m_dirty(true)
 	, m_fullscreen(false)
 	, m_fb(nullptr)
 	, m_int_fb(nullptr)
+	, m_bpp(bpp)
 	, m_stretchMode(STRETCH_H)
 	, m_aspectRatioConstraint(true)
 	, m_pausedEffect(false)

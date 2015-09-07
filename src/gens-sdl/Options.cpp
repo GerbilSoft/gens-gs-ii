@@ -21,6 +21,10 @@
 
 #include "Options.hpp"
 
+// MdFb
+#include "libgens/Util/MdFb.hpp"
+using LibGens::MdFb;
+
 // C includes. (C++ namespace)
 #include <cstring>
 #include <cerrno>
@@ -79,7 +83,7 @@ class OptionsPrivate
 		int fps_counter;		// Enable FPS counter?
 		int auto_pause;			// Auto pause?
 		int paused_effect;		// Paused effect?
-		int bpp;			// Color depth. (15, 16, 32)
+		MdFb::ColorDepth bpp;		// Color depth. (15, 16, 32)
 
 		// Special run modes.
 		int run_crazy_effect;		// Run the Crazy Effect
@@ -116,7 +120,7 @@ void OptionsPrivate::reset(void)
 	fps_counter = true;
 	auto_pause = false;
 	paused_effect = true;
-	bpp = 32;
+	bpp = MdFb::BPP_32;
 
 	// Special run modes.
 	run_crazy_effect = false;
@@ -201,8 +205,10 @@ int Options::parse(int argc, const char *argv[])
 	struct {
 		const char *rom_filename;
 		const char *tmss_rom_filename;
+		int bpp;
 	} tmp;
 	memset(&tmp, 0, sizeof(tmp));
+	tmp.bpp = 32;
 
 	// NOTE: rom_filename is provided as a non-option parameter.
 	// It will get parsed later.
@@ -253,7 +259,7 @@ int Options::parse(int argc, const char *argv[])
 			"* Tint the window when paused.", NULL},
 		{"no-paused-effect", 0, POPT_ARG_VAL, &d->paused_effect, 0,
 			"  Don't tint the window when paused.", NULL},
-		{"bpp", 0, POPT_ARG_INT, &d->bpp, 0,
+		{"bpp", 0, POPT_ARG_INT, &tmp.bpp, 0,
 			"  Set the internal color depth. (15, 16, 32)", "BPP"},
 		POPT_TABLEEND
 	};
@@ -385,12 +391,13 @@ int Options::parse(int argc, const char *argv[])
 	}
 
 	// Verify certain options.
-	if (d->bpp != 15 && d->bpp != 16 && d->bpp != 32) {
+	d->bpp = MdFb::bppToColorDepth(tmp.bpp);
+	if (d->bpp < 0 || d->bpp >= MdFb::BPP_MAX) {
 		// Invalid color depth.
 		fprintf(stderr, "%s: '--bpp=%d': invalid color depth\n"
 			"Valid options are 15, 16, and 32.\n"
 			"Try `%s --help` for more information.\n",
-			argv[0], d->bpp, argv[0]);
+			argv[0], tmp.bpp, argv[0]);
 		poptFreeContext(optCon);
 		return -EINVAL;
 	}
@@ -460,7 +467,7 @@ ACCESSOR_BOOL(auto_fix_checksum)
 ACCESSOR_BOOL(fps_counter)
 ACCESSOR_BOOL(auto_pause)
 ACCESSOR_BOOL(paused_effect)
-ACCESSOR(uint8_t, bpp)
+ACCESSOR(MdFb::ColorDepth, bpp)
 
 /** Special run modes. **/
 ACCESSOR_BOOL(run_crazy_effect)

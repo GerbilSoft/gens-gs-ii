@@ -21,6 +21,7 @@
 
 #include "SdlHandler.hpp"
 #include "libgens/Util/MdFb.hpp"
+using LibGens::MdFb;
 
 #include "libgens/sound/SoundMgr.hpp"
 using LibGens::SoundMgr;
@@ -60,9 +61,10 @@ SdlHandler::~SdlHandler()
 /**
  * Initialize SDL video.
  * TODO: Parameter for GL rendering.
+ * @param bpp Color depth.
  * @return 0 on success; non-zero on error.
  */
-int SdlHandler::init_video(void)
+int SdlHandler::init_video(MdFb::ColorDepth bpp)
 {
 	if (m_vBackend) {
 		// Video is already initialized.
@@ -80,7 +82,7 @@ int SdlHandler::init_video(void)
 
 	// Initialize the video backend.
 	// TODO: Fullscreen; GL vs. SW selection; VSync.
-	m_vBackend = new SdlGLBackend();
+	m_vBackend = new SdlSWBackend(bpp);
 	return 0;
 }
 
@@ -112,7 +114,7 @@ void SdlHandler::set_window_title(const char *title)
  * If nullptr, removes the SDL video source.
  * @param fb MdFb.
  */
-void SdlHandler::set_video_source(LibGens::MdFb *fb)
+void SdlHandler::set_video_source(MdFb *fb)
 {
 	if (m_vBackend) {
 		m_vBackend->set_video_source(fb);

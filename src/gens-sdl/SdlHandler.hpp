@@ -31,10 +31,8 @@
 // SDL
 #include <SDL.h>
 
+#include "libgens/Util/MdFb.hpp"
 #include "libgenskeys/GensKey_t.h"
-namespace LibGens {
-	class MdFb;
-}
 
 // TODO: Minimum gcc version, other compilers?
 // TODO: Move to libgens/macros/common.h?
@@ -65,9 +63,10 @@ class SdlHandler {
 		/**
 		 * Initialize SDL video.
 		 * TODO: Parameter for GL rendering.
+		 * @param bpp Color depth.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int init_video(void);
+		int init_video(LibGens::MdFb::ColorDepth bpp);
 
 		/**
 		 * Shut down SDL video.
