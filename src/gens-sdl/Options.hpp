@@ -1,6 +1,6 @@
 /***************************************************************************
  * gens-sdl: Gens/GS II basic SDL frontend.                                *
- * CrazyEffectLoop.hpp: "Crazy" Effect loop.                               *
+ * Options.hpp: Command line option parser.                                *
  *                                                                         *
  * Copyright (c) 2015 by David Korth.                                      *
  *                                                                         *
@@ -19,56 +19,72 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_SDL_CRAZYEFFECTLOOP_HPP__
-#define __GENS_SDL_CRAZYEFFECTLOOP_HPP__
+#ifndef __GENS_SDL_OPTIONS_HPP__
+#define __GENS_SDL_OPTIONS_HPP__
 
-#include "EventLoop.hpp"
+// C++ includes.
+#include <string>
 
 namespace GensSdl {
 
-class CrazyEffectLoopPrivate;
-class CrazyEffectLoop : public EventLoop
+class Options
 {
 	public:
-		CrazyEffectLoop();
-		virtual ~CrazyEffectLoop();
+		Options();
 
-	private:
-		EVENT_LOOP_DECLARE_PRIVATE(CrazyEffectLoop)
 	private:
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add GensSdl-specific version of Q_DISABLE_COPY().
-		CrazyEffectLoop(const CrazyEffectLoop &);
-		CrazyEffectLoop &operator=(const CrazyEffectLoop &);
+		Options(const Options &);
+		Options &operator=(const Options &);
 
 	public:
 		/**
-		 * Run the event loop.
-		 * @param options Options.
-		 * @return Exit code.
+		 * Reset all options to their default values.
 		 */
-		virtual int run(const Options *options) final;
-
-	protected:
-		// TODO: Move to CrazyEffectLoopPrivate?
+		void reset(void);
 
 		/**
-		 * Run a normal frame.
-		 * This function is called by runFrame(),
-		 * and should be handled by running a full
-		 * frame with video and audio updates.
+		 * Parse command line arguments.
+		 * @param argc
+		 * @param argv
+		 * @return 0 on success; non-zero on error.
 		 */
-		virtual void runFullFrame(void) final;
+		int parse(int argc, const char *argv[]);
 
+	public:
 		/**
-		 * Run a fast frame.
-		 * This function is called by runFrame() if the
-		 * system is lagging a bit, and should be handled
-		 * by running a frame with audio updates only.
+		 * Is a ROM filename required?
+		 * Set this before calling parse().
 		 */
-		virtual void runFastFrame(void) final;
+		bool rom_filename_required;
+
+	public:
+		/** Command line parameters. **/
+		// TODO: Use accessors instead?
+		std::string rom_filename;	// ROM to load.
+		std::string tmss_rom_filename;	// TMSS ROM image.
+		bool tmss_enabled;		// Enable TMSS?
+
+		// Audio options.
+		int sound_freq;			// Sound frequency.
+		bool stereo;			// Stereo audio?
+
+		// Emulation options.
+		bool sprite_limits;		// Enable sprite limits?
+		bool auto_fix_checksum;		// Auto fix checksum?
+
+		// UI options.
+		bool fps_counter;		// Enable FPS counter?
+		bool auto_pause;		// Auto pause?
+		bool paused_effect;		// Paused effect?
+		uint8_t bpp;			// Color depth. (15, 16, 32)
+
+		// Special run modes.
+		bool run_crazy_effect;		// Run the Crazy Effect
+						// instead of loading a ROM?
 };
 
 }
 
-#endif /* __GENS_SDL_CRAZYEFFECTLOOP_HPP__ */
+#endif /* __GENS_SDL_OPTIONS_HPP__ */

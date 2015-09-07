@@ -26,6 +26,9 @@ INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${GLEW_INCLUDE_DIR})
 
+# Popt include directory.
+INCLUDE_DIRECTORIES(${POPT_INCLUDE_DIR})
+
 # Write the config.h file.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/config.gens-sdl.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.gens-sdl.h")
 
@@ -45,6 +48,7 @@ SET(gens-sdl_SRCS
 	GLBackend.cpp
 	str_lookup.cpp
 	GLTex.cpp
+	Options.cpp
 	)
 
 # Headers.
@@ -63,6 +67,7 @@ SET(gens-sdl_H
 	GLBackend.hpp
 	str_lookup.hpp
 	GLTex.hpp
+	Options.hpp
 	)
 
 # OSD sources.
@@ -116,6 +121,7 @@ TARGET_LINK_LIBRARIES(gens-sdl
 	${SDL2_LIBRARY}
 	${OPENGL_gl_LIBRARY}
 	${GLEW_LIBRARY}
+	${POPT_LIBRARY}
 	)
 
 # Set the compile definitions.

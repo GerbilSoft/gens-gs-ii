@@ -64,6 +64,9 @@ using LibGensKeys::KeyManager;
 using LibZomg::ZomgBase;
 using LibZomg::Zomg;
 
+// Command line parameters.
+#include "Options.hpp"
+
 // C++ includes.
 #include <string>
 using std::string;
@@ -512,21 +515,29 @@ int EmuLoop::processSdlEvent(const SDL_Event *event) {
 
 /**
  * Run the event loop.
- * @param rom_filename ROM filename. [TODO: Replace with options struct?]
+ * @param options Options.
  * @return Exit code.
  */
-int EmuLoop::run(const char *rom_filename)
+int EmuLoop::run(const Options *options)
 {
-	// Load the ROM image.
+	// Save options.
+	// TODO: Make EmuLoop::run() non-virtual, save options there,
+	// and then call protected virtual run_int()?
 	EmuLoopPrivate *const d = d_func();
-	d->rom = new Rom(rom_filename);
+	d->options = options;
+	
+	// Load the ROM image.
+	d->rom = new Rom(options->rom_filename.c_str());
 	if (!d->rom->isOpen()) {
 		// Error opening the ROM.
 		// TODO: Error code?
 		fprintf(stderr, "Error opening ROM file %s: (TODO get error code)\n",
-			rom_filename);
+			options->rom_filename.c_str());
+		delete d->rom;
+		d->rom = nullptr;
 		return EXIT_FAILURE;
 	}
+
 	if (d->rom->isMultiFile()) {
 		// Select the first file.
 		d->rom->select_z_entry(d->rom->get_z_entry_list());
@@ -537,7 +548,7 @@ int EmuLoop::run(const char *rom_filename)
 		// ROM format is not supported.
 		const char *rom_format = romFormatToString(d->rom->romFormat());
 		fprintf(stderr, "Error loading ROM file %s: ROM is in %s format.\nOnly plain binary and SMD-format ROMs are supported.\n",
-			rom_filename, rom_format);
+			options->rom_filename.c_str(), rom_format);
 		return EXIT_FAILURE;
 	}
 
@@ -546,7 +557,7 @@ int EmuLoop::run(const char *rom_filename)
 		// System is not supported.
 		const char *rom_sysId = sysIdToString(d->rom->sysId());
 		fprintf(stderr, "Error loading ROM file %s: ROM is for %s.\nOnly Mega Drive and Pico ROMs are supported.\n",
-			rom_filename, rom_sysId);
+			options->rom_filename.c_str(), rom_sysId);
 		return EXIT_FAILURE;
 	}
 
@@ -565,7 +576,7 @@ int EmuLoop::run(const char *rom_filename)
 		// Error loading the ROM into EmuMD.
 		// TODO: Error code?
 		fprintf(stderr, "Error initializing EmuContext for %s: (TODO get error code)\n",
-			rom_filename);
+			options->rom_filename.c_str());
 		return EXIT_FAILURE;
 	}
 

@@ -42,6 +42,9 @@ using LibGens::MdFb;
 #include "libgens/Effects/CrazyEffect.hpp"
 using LibGens::CrazyEffect;
 
+// Command line parameters.
+#include "Options.hpp"
+
 #include "EventLoop_p.hpp"
 namespace GensSdl {
 
@@ -89,18 +92,20 @@ CrazyEffectLoop::~CrazyEffectLoop()
 
 /**
  * Run the event loop.
- * @param rom_filename ROM filename. [TODO: Replace with options struct?]
+ * @param options Options.
  * @return Exit code.
  */
-int CrazyEffectLoop::run(const char *rom_filename)
+int CrazyEffectLoop::run(const Options *options)
 {
-	// rom_filename isn't used here.
-	((void)rom_filename);
+	// Save options.
+	// TODO: Make EmuLoop::run() non-virtual, save options there,
+	// and then call protected virtual run_int()?
+	CrazyEffectLoopPrivate *const d = d_func();
+	d->options = options;
 
 	// TODO: Move common code back to gens-sdl?
 
 	// Initialize the SDL handlers.
-	CrazyEffectLoopPrivate *const d = d_func();
 	d->sdlHandler = new SdlHandler();
 	if (d->sdlHandler->init_video() < 0)
 		return EXIT_FAILURE;

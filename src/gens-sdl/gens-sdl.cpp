@@ -44,6 +44,9 @@ using GensSdl::VBackend;
 #include "EmuLoop.hpp"
 #include "CrazyEffectLoop.hpp"
 
+// Command line parameters.
+#include "Options.hpp"
+
 // OS-specific includes.
 #ifdef _WIN32
 // Windows
@@ -70,11 +73,7 @@ using std::vector;
 namespace GensSdl {
 
 /** Command line parameters. **/
-// TODO: Write a popt-based command line parser with
-// a struct containing all of the options.
-static const char *rom_filename = nullptr;
-// If true, don't emulate anything; just run the Crazy Effect.
-static bool runCrazyEffect = false;
+static Options *options = nullptr;
 
 // Event loop.
 static EventLoop *eventLoop = nullptr;
@@ -175,16 +174,16 @@ int run(void)
 	// Register the LibGens OSD handler.
 	lg_set_osd_fn(gsdl_osd);
 
-	if (runCrazyEffect) {
+	if (options->run_crazy_effect) {
 		// Run the Crazy Effect.
-		GensSdl::eventLoop = new GensSdl::CrazyEffectLoop();
+		eventLoop = new CrazyEffectLoop();
 	} else {
 		// Start the emulation loop.
-		GensSdl::eventLoop = new GensSdl::EmuLoop();
+		eventLoop = new EmuLoop();
 	}
 	int ret = 0;
-	if (GensSdl::eventLoop) {
-		ret = GensSdl::eventLoop->run(rom_filename);
+	if (eventLoop) {
+		ret = eventLoop->run(options);
 	}
 
 	// Unregister the LibGens OSD handler.
@@ -208,13 +207,16 @@ int main(int argc, char *argv[])
 	}
 #endif /* _WIN32 */
 
-	// TODO: Use popt; don't require a ROM filename if
-	// using "Crazy" Effect mode.
-	if (argc < 2) {
-		fprintf(stderr, "usage: %s [rom filename]\n", argv[0]);
-		return EXIT_FAILURE;
+	// Parse command line options.
+	GensSdl::options = new GensSdl::Options();
+	GensSdl::options->rom_filename_required = true;
+	int ret = GensSdl::options->parse(argc, (const char**)argv);
+	if (ret != 0) {
+		// Error parsing command line options.
+		// Options::parse() already printed an error message.
+		delete GensSdl::options;
+		return ret;
 	}
-	GensSdl::rom_filename = argv[1];
 
 	// Make sure we have a valid configuration directory.
 	if (GensSdl::getConfigDir().empty()) {
@@ -223,12 +225,17 @@ int main(int argc, char *argv[])
 	}
 
 	// Initialize SDL.
-	int ret = SDL_Init(0);
+	ret = SDL_Init(0);
 	if (ret < 0) {
 		fprintf(stderr, "SDL initialization failed: %d - %s\n",
 			ret, SDL_GetError());
 		return EXIT_FAILURE;
 	}
 
-	return GensSdl::run();
+	ret = GensSdl::run();
+	// Command line options are no longer needed.
+	// TODO: Should we bother deleting it? The program's
+	// exiting here anyway...
+	delete GensSdl::options;
+	return ret;
 }
