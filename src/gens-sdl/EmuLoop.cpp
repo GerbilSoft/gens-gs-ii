@@ -529,10 +529,9 @@ int EmuLoop::run(const Options *options)
 	d->options = options;
 	
 	// Load the ROM image.
-	// NOTE: If we get rom_filename().c_str(),
-	// random corruption happens with long filenames.
-	// This might be a result of gcc-5.x using
-	// "short string optimization".
+	// NOTE: On gcc-5.x, if we store rom_filename().c_str(),
+	// random corruption happens with filenames longer than
+	// the short string buffer.
 	string rom_filename = options->rom_filename();
 	d->rom = new Rom(rom_filename.c_str());
 	if (!d->rom->isOpen()) {
