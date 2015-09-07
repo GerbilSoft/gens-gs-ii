@@ -60,6 +60,7 @@ CHECK_INCLUDE_FILE(langinfo.h	HAVE_LANGINFO_H)
 CHECK_INCLUDE_FILE(libintl.h	HAVE_LIBINTL_H)
 CHECK_INCLUDE_FILE(mcheck.h	HAVE_MCHECK_H)
 CHECK_INCLUDE_FILE(unistd.h	HAVE_UNISTD_H)
+CHECK_INCLUDE_FILE(stdalign.h	HAVE_STDALIGN_H)
 
 # Other checks not provided by configure.ac.
 # (Automatic autoconf checks?)
@@ -100,6 +101,10 @@ SET(popt_SRCS
 	poptint.c
 	poptparse.c
 	)
+
+IF(NOT HAVE_SECURE_GETENV AND NOT HAVE___SECURE_GETENV)
+	SET(popt_SRCS ${popt_SRCS} secure_getenv.c)
+ENDIF(NOT HAVE_SECURE_GETENV AND NOT HAVE___SECURE_GETENV)
 
 # Internal header files.
 SET(popt_H_INT

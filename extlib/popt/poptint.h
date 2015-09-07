@@ -9,7 +9,20 @@
 #ifndef H_POPTINT
 #define H_POPTINT
 
+/* Gens/GS II: Only use GCC visibility if it's supported. */
+/* TODO: 4.2.0 minimum, or older? */
+#if !defined(_WIN32) && \
+    defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2))
+#ifndef HAVE_GCC_VISIBILITY
+#define HAVE_GCC_VISIBILITY 1
+#endif
+#endif
+
 #include <stdint.h>
+
+#ifdef HAVE_GCC_VISIBILITY
+#pragma GCC visibility push(hidden)
+#endif
 
 /**
  * Wrapper to free(3), hides const compilation noise, permit NULL, return NULL.
@@ -132,6 +145,7 @@ struct poptContext_s {
 /*@owned@*/ /*@null@*/
     poptItem execs;
     int numExecs;
+    char * execFail;
 /*@only@*/ /*@null@*/
     poptArgv finalArgv;
     int finalArgvCount;
@@ -148,6 +162,10 @@ struct poptContext_s {
 /*@null@*/
     pbm_set * arg_strip;
 };
+
+#ifdef HAVE_GCC_VISIBILITY
+#pragma GCC visibility pop
+#endif
 
 #if defined(POPT_fprintf)
 #define	POPT_dgettext	dgettext
@@ -182,6 +200,10 @@ extern char *nl_langinfo (nl_item __item)
 #endif
 #endif
 
+#ifdef HAVE_GCC_VISIBILITY
+#pragma GCC visibility push(hidden)
+#endif
+
 #if defined(HAVE_DCGETTEXT) && !defined(__LCLINT__)
 char *POPT_dgettext(const char * dom, const char * str)
 	/*@*/;
@@ -198,6 +220,10 @@ const char *POPT_prev_char (/*@returned@*/ const char *str)
 const char *POPT_next_char (/*@returned@*/ const char *str)
 	/*@*/;
 
+#endif
+
+#ifdef HAVE_GCC_VISIBILITY
+#pragma GCC visibility pop(hidden)
 #endif
 
 /** Gens/GS II: libintl.h is required even if ENABLE_NLS is disabled. **/

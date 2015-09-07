@@ -1,0 +1,10 @@
+These patches are from openSUSE's popt-1.16-28.19.src.rpm.
+
+popt-alignment-checks.patch:
+- Verify alignment of parameters.
+
+popt-libc-updates.patch:
+- Changes for glibc updates.
+
+Original URL:
+- https://dl.fedoraproject.org/pub/fedora/linux/development/rawhide/source/SRPMS/p/popt-1.16-6.fc23.src.rpm

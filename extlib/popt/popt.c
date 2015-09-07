@@ -25,6 +25,15 @@ extern long long int strtoll(const char *nptr, /*@null@*/ char **endptr,
 
 #include "poptint.h"
 
+#ifdef HAVE_STDALIGN_H
+#include <stdalign.h>
+#define ALIGNOF(x) alignof(x)
+#elif defined __GNUC__
+#define ALIGNOF(x) __alignof__(x)
+#else
+#define ALIGNOF(x) sizeof(x)
+#endif
+
 #ifdef	MYDEBUG
 /*@unchecked@*/
 int _popt_debug = 0;
@@ -202,12 +211,13 @@ poptContext poptGetContext(const char * name, int argc, const char ** argv,
     con->flags = flags;
     con->execs = NULL;
     con->numExecs = 0;
+    con->execFail = NULL;
     con->finalArgvAlloced = argc * 2;
     con->finalArgv = calloc( (size_t)con->finalArgvAlloced, sizeof(*con->finalArgv) );
     con->execAbsolute = 1;
     con->arg_strip = NULL;
 
-    if (getenv("POSIXLY_CORRECT") || getenv("POSIX_ME_HARDER"))
+    if (secure_getenv("POSIXLY_CORRECT") || secure_getenv("POSIX_ME_HARDER"))
 	con->flags |= POPT_CONTEXT_POSIXMEHARDER;
 
     if (name)
@@ -246,6 +256,7 @@ void poptResetContext(poptContext con)
     con->nextLeftover = 0;
     con->restLeftover = 0;
     con->doExec = NULL;
+    con->execFail = _free(con->execFail);
 
     if (con->finalArgv != NULL)
     for (i = 0; i < con->finalArgvCount; i++) {
@@ -452,7 +463,7 @@ const char * findProgramPath(/*@null@*/ const char * argv0)
     if (strchr(argv0, '/'))
 	return xstrdup(argv0);
 
-    if ((path = getenv("PATH")) == NULL || (path = xstrdup(path)) == NULL)
+    if ((path = secure_getenv("PATH")) == NULL || (path = xstrdup(path)) == NULL)
 	return NULL;
 
     /* The return buffer in t is big enough for any path. */
@@ -582,6 +593,7 @@ if (_popt_debug)
 /*@-nullstate@*/
     rc = execvp(argv[0], (char *const *)argv);
 /*@=nullstate@*/
+    con->execFail = xstrdup(argv[0]);
 
 exit:
     if (argv) {
@@ -995,12 +1007,8 @@ static unsigned int seed = 0;
 
 int poptSaveLongLong(long long * arg, unsigned int argInfo, long long aLongLong)
 {
-    if (arg == NULL
-#ifdef	NOTYET
     /* XXX Check alignment, may fail on funky platforms. */
-     || (((unsigned long long)arg) & (sizeof(*arg)-1))
-#endif
-    )
+    if (arg == NULL || (((unsigned long)arg) & (ALIGNOF(*arg)-1)))
 	return POPT_ERROR_NULLARG;
 
     if (aLongLong != 0 && LF_ISSET(RANDOM)) {
@@ -1041,7 +1049,7 @@ int poptSaveLongLong(long long * arg, unsigned int argInfo, long long aLongLong)
 int poptSaveLong(long * arg, unsigned int argInfo, long aLong)
 {
     /* XXX Check alignment, may fail on funky platforms. */
-    if (arg == NULL || (((unsigned long)arg) & (sizeof(*arg)-1)))
+    if (arg == NULL || (((unsigned long)arg) & (ALIGNOF(*arg)-1)))
 	return POPT_ERROR_NULLARG;
 
     if (aLong != 0 && LF_ISSET(RANDOM)) {
@@ -1074,7 +1082,7 @@ int poptSaveLong(long * arg, unsigned int argInfo, long aLong)
 int poptSaveInt(/*@null@*/ int * arg, unsigned int argInfo, long aLong)
 {
     /* XXX Check alignment, may fail on funky platforms. */
-    if (arg == NULL || (((unsigned long)arg) & (sizeof(*arg)-1)))
+    if (arg == NULL || (((unsigned long)arg) & (ALIGNOF(*arg)-1)))
 	return POPT_ERROR_NULLARG;
 
     if (aLong != 0 && LF_ISSET(RANDOM)) {
@@ -1107,7 +1115,7 @@ int poptSaveInt(/*@null@*/ int * arg, unsigned int argInfo, long aLong)
 int poptSaveShort(/*@null@*/ short * arg, unsigned int argInfo, long aLong)
 {
     /* XXX Check alignment, may fail on funky platforms. */
-    if (arg == NULL || (((unsigned long)arg) & (sizeof(*arg)-1)))
+    if (arg == NULL || (((unsigned long)arg) & (ALIGNOF(*arg)-1)))
 	return POPT_ERROR_NULLARG;
 
     if (aLong != 0 && LF_ISSET(RANDOM)) {
@@ -1715,11 +1723,19 @@ int poptAddItem(poptContext con, poptItem newItem, int flags)
 const char * poptBadOption(poptContext con, unsigned int flags)
 {
     struct optionStackEntry * os = NULL;
+    const char *badOpt = NULL;
 
-    if (con != NULL)
-	os = (flags & POPT_BADOPTION_NOALIAS) ? con->optionStack : con->os;
+    if (con != NULL) {
+       /* Stupid hack to return something semi-meaningful from exec failure */
+       if (con->execFail) {
+           badOpt = con->execFail;
+       } else {
+           os = (flags & POPT_BADOPTION_NOALIAS) ? con->optionStack : con->os;
+           badOpt = os->argv[os->next - 1];
+       }
+    }
 
-    return (os != NULL && os->argv != NULL ? os->argv[os->next - 1] : NULL);
+    return badOpt;
 }
 
 const char * poptStrerror(const int error)

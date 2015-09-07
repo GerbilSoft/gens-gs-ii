@@ -1,0 +1,16 @@
+These patches are from Fedora 23's popt-1.16-6.fc23.src.rpm.
+
+popt-1.16-execfail.patch:
+- Patch to fix poptbadOption()'s return value if an exec alias fails.
+
+popt-1.16-help.patch:
+- Fixes translations for help messages for --help and --usage.
+
+popt-1.16-man-page.patch:
+- Fixes spelling mistakes in popt's man page.
+
+popt-1.16-pkgconfig.patch:
+- Fixes the pkgconfig path on 64-bit systems.
+
+Original URL:
+- https://dl.fedoraproject.org/pub/fedora/linux/development/rawhide/source/SRPMS/p/popt-1.16-6.fc23.src.rpm
