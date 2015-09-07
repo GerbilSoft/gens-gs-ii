@@ -549,6 +549,12 @@ int EmuLoop::run(const Options *options)
 		d->rom->select_z_entry(d->rom->get_z_entry_list());
 	}
 
+	// Is a TMSS ROM filename specified?
+	if (options->is_tmss_enabled()) {
+		EmuContext::SetTmssRomFilename(options->tmss_rom_filename());
+		EmuContext::SetTmssEnabled(true);
+	}
+
 	// Is the ROM format supported?
 	if (!EmuContextFactory::isRomFormatSupported(d->rom)) {
 		// ROM format is not supported.
