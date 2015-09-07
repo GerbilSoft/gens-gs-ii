@@ -60,27 +60,13 @@ SdlGLBackend::SdlGLBackend(MdFb::ColorDepth bpp)
 	// FIXME: SDL window resizing is broken.
 	m_winW = 640; m_winH = 480;
 
-	// Set the color depth.
-	switch (bpp) {
-		case MdFb::BPP_15:
-			SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
-			SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
-			SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
-			break;
-		case MdFb::BPP_16:
-			SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
-			SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 6);
-			SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
-			break;
-		case MdFb::BPP_32:
-		default:
-			SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-			SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-			SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-			break;
-	}
-
-	// Other GL parameters.
+	// Set the GL attributes.
+	// NOTE: We're always setting GL color depth to 888,
+	// since most modern video cards prefer it compared
+	// to 15-bit/16-bit.
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, true);
 
