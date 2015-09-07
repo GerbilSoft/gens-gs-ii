@@ -102,6 +102,10 @@ SET(popt_SRCS
 	poptparse.c
 	)
 
+IF(NOT HAVE_SECURE_GETENV AND NOT HAVE___SECURE_GETENV)
+	SET(popt_SRCS ${popt_SRCS} secure_getenv.c)
+ENDIF(NOT HAVE_SECURE_GETENV AND NOT HAVE___SECURE_GETENV)
+
 # Internal header files.
 SET(popt_H_INT
 	poptint.h

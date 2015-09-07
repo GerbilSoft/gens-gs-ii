@@ -156,11 +156,10 @@ static inline char * stpcpy (char *dest, const char * src) {
 #  ifdef HAVE___SECURE_GETENV
 #    define secure_getenv __secure_getenv
 #  else
-/* Gens/GS II: FIXME: Implement secure_getenv() for non-GNU systems.
-#    error neither secure_getenv nor __secure_getenv is available
-*/
-#    pragma message("WARNING: secure_getenv() is unavailable; please implement a replacement.")
-#    define secure_getenv(_s) getenv(_s)
+     /* Gens/GS II: secure_getenv() is implemented in system.h. */
+/*#    error neither secure_getenv nor __secure_getenv is available*/
+char *popt_secure_getenv(const char *name);
+#    define secure_getenv popt_secure_getenv
 #  endif
 #endif
 
