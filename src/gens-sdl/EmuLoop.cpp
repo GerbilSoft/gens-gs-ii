@@ -41,8 +41,10 @@ using GensSdl::VBackend;
 // LibGens
 #include "libgens/Rom.hpp"
 #include "libgens/Util/MdFb.hpp"
+#include "libgens/Vdp/Vdp.hpp"
 using LibGens::Rom;
 using LibGens::MdFb;
+using LibGens::Vdp;
 
 // Emulation Context.
 #include "libgens/EmuContext/EmuContext.hpp"
@@ -577,6 +579,9 @@ int EmuLoop::run(const Options *options)
 	// Set the SRAM/EEPROM path.
 	EmuContext::SetPathSRam(getConfigDir("SRAM").c_str());
 
+	// Set some static EmuContext properties.
+	EmuContext::SetAutoFixChecksum(options->auto_fix_checksum());
+
 	// Create the emulation context.
 	d->emuContext = EmuContextFactory::createContext(d->rom);
 	if (!d->emuContext || !d->emuContext->isRomOpened()) {
@@ -586,6 +591,11 @@ int EmuLoop::run(const Options *options)
 			rom_filename.c_str());
 		return EXIT_FAILURE;
 	}
+
+	// Set VDP properties.
+	// TODO: More properties?
+	Vdp *vdp = d->emuContext->m_vdp;
+	vdp->options.spriteLimits = options->sprite_limits();
 
 	// Initialize the SDL handlers.
 	d->sdlHandler = new SdlHandler();
