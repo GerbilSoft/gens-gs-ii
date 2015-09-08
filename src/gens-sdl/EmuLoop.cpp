@@ -606,7 +606,7 @@ int EmuLoop::run(const Options *options)
 	d->sdlHandler = new SdlHandler();
 	if (d->sdlHandler->init_video() < 0)
 		return EXIT_FAILURE;
-	if (d->sdlHandler->init_audio() < 0)
+	if (d->sdlHandler->init_audio(options->sound_freq(), options->stereo()) < 0)
 		return EXIT_FAILURE;
 	d->vBackend = d->sdlHandler->vBackend();
 

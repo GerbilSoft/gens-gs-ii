@@ -307,6 +307,18 @@ int Options::parse(int argc, const char *argv[])
 		poptAddAlias(optCon, help_alias, 0);
 	}
 
+	// popt: Alias '--freq' to '--frequency'.
+	// NOTE: freq_argv must be free()able, so it
+	// can't be static or allocated on the stack.
+	{
+		const char **freq_argv = (const char**)malloc(sizeof(const char*) * 2);
+		freq_argv[0] = "--frequency";
+		freq_argv[1] = NULL;
+		// TODO: Change all 0 chars to '\0'.
+		struct poptAlias freq_alias = {"freq", '\0', 1, freq_argv};
+		poptAddAlias(optCon, freq_alias, 0);
+	}
+
 	// Process options.
 	int c;
 	while ((c = poptGetNextOpt(optCon)) >= 0) {

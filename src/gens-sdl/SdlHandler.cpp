@@ -46,6 +46,7 @@ SdlHandler::SdlHandler()
 	, m_audioDevice(0)
 	, m_audioBuffer(nullptr)
 	, m_sampleSize(0)
+	, m_stereo(false)
 	, m_segBuffer(nullptr)
 	, m_segBufferLen(0)
 	, m_segBufferSamples(0)
@@ -183,9 +184,11 @@ VBackend *SdlHandler::vBackend(void) const
 
 /**
  * Initialize SDL audio.
+ * @param freq Frequency.
+ * @param stereo If true, use stereo.
  * @return 0 on success; non-zero on error.
  */
-int SdlHandler::init_audio(void)
+int SdlHandler::init_audio(int freq, bool stereo)
 {
 	SDL_AudioSpec wanted_spec, actual_spec;
 
@@ -204,9 +207,9 @@ int SdlHandler::init_audio(void)
 
 	// Number of samples to buffer.
 	// FIXME: Should be segment size, rounded up to pow2.
-	wanted_spec.freq	= 44100;
+	wanted_spec.freq	= freq;
 	wanted_spec.format	= AUDIO_S16SYS;
-	wanted_spec.channels	= 2;
+	wanted_spec.channels	= (stereo ? 2 : 1);
 	wanted_spec.samples	= 1024;
 	wanted_spec.callback	= sdl_audio_callback;
 	wanted_spec.userdata	= this;
@@ -227,13 +230,17 @@ int SdlHandler::init_audio(void)
 	if (m_audioBuffer) {
 		delete m_audioBuffer;
 	}
-	// Buffer should be (SegLength * 4) + actual samples.
-	int samples = (SoundMgr::GetSegLength() * 4) + actual_spec.samples;
+
+	// Determine the sample size.
+	m_stereo = stereo;
+	m_sampleSize = (stereo ? 4 : 2);
+
+	// Buffer should be: (SegLength * m_sampleSize) + actual samples.
+	int samples = (SoundMgr::GetSegLength() * m_sampleSize) + actual_spec.samples;
 	m_audioBuffer = new RingBuffer(samples);
 
 	// Segment buffer.
 	// Needed to convert "int32_t" to int16_t.
-	m_sampleSize = 4; // TODO: Move to RingBuffer?
 	m_segBufferSamples = SoundMgr::GetSegLength();
 	m_segBufferLen = m_segBufferSamples * m_sampleSize;
 	m_segBuffer = (int16_t*)aligned_malloc(16, m_segBufferLen);
@@ -325,7 +332,12 @@ void SdlHandler::update_audio(void)
 
 	// FIXME: If our buffer is too small, we'll lose
 	// some of the audio.
-	int samples = SoundMgr::writeStereo(m_segBuffer, m_segBufferSamples);
+	int samples;
+	if (m_stereo) {
+		samples = SoundMgr::writeStereo(m_segBuffer, m_segBufferSamples);
+	} else {
+		samples = SoundMgr::writeMono(m_segBuffer, m_segBufferSamples);
+	}
 
 	// Write to the ringbuffer.
 	if (m_audioDevice > 0 && samples > 0) {
