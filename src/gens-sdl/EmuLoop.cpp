@@ -108,7 +108,7 @@ class EmuLoopPrivate : public EventLoopPrivate
 		 * @param zomg Save file.
 		 * @return String contianing the mtime, or an error message if invalid.
 		 */
-		static std::string getSaveSlot_mtime(const LibZomg::ZomgBase *zomg);
+		static string getSaveSlot_mtime(const LibZomg::ZomgBase *zomg);
 
 		/**
 		 * Save slot selection.
@@ -135,6 +135,11 @@ class EmuLoopPrivate : public EventLoopPrivate
 		 * Take a screenshot.
 		 */
 		void doScreenShot(void);
+
+		/**
+		 * Update the window title using the ROM name.
+		 */
+		void updateRomName(void);
 };
 
 /** EmuLoopPrivate **/
@@ -388,6 +393,44 @@ void EmuLoopPrivate::doScreenShot(void)
 	}
 }
 
+/**
+ * Update the window title using the ROM name.
+ */
+void EmuLoopPrivate::updateRomName(void)
+{
+	string romName;
+
+	if (emuContext->versionRegisterObject()->isEast()) {
+		// East (JP). Use the domestic ROM name.
+		romName = rom->romNameJP();
+		if (romName.empty()) {
+			// Domestic ROM name is empty.
+			// Use the overseas ROM name.
+			romName = rom->romNameUS();
+		}
+	} else {
+		// West (US/EU). Use the overseas ROM name.
+		romName = rom->romNameUS();
+		if (romName.empty()) {
+			// Overseas ROM name is empty.
+			// Use the domestic ROM name.
+			romName = rom->romNameJP();
+		}
+	}
+
+	if (romName.empty()) {
+		// ROM name is empty.
+		// This might be an unlicensed and/or pirated ROM.
+
+		// Use the ROM filename, without extensions.
+		// TODO: Also the z_filename?
+		romName = rom->filename_baseNoExt();
+	}
+
+	// Set the window title to the ROM's name.
+	updateWindowTitle(romName.c_str());
+}
+
 /** EmuLoop **/
 
 EmuLoop::EmuLoop()
@@ -577,9 +620,6 @@ int EmuLoop::run(const char *rom_filename)
 		return EXIT_FAILURE;
 	d->vBackend = d->sdlHandler->vBackend();
 
-	// Set the window title.
-	d->sdlHandler->set_window_title("Gens/GS II [SDL]");
-
 	// Check for startup messages.
 	checkForStartupMessages();
 
@@ -587,6 +627,12 @@ int EmuLoop::run(const char *rom_filename)
 	// TODO: Region code?
 	bool isPal = false;
 	d->setFrameTiming(isPal ? 50 : 60);
+
+	// Update the ROM name and the window title.
+	// FIXME: On my XP VM, there's a slight pause while
+	// loading where it shows "Gens/GS II [SDL]", then
+	// it gets changed to the ROM name.
+	d->updateRomName();
 
 	// TODO: Close the ROM, or let EmuContext do it?
 

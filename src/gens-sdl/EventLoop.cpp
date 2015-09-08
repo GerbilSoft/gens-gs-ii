@@ -58,6 +58,7 @@ EventLoopPrivate::EventLoopPrivate()
 	, exposed(false)
 	, lastF1time(0)
 	, usec_per_frame(0)
+	, win_title("Gens/GS II [SDL]")
 {
 	paused.data = 0;
 
@@ -104,11 +105,7 @@ void EventLoopPrivate::doPauseProcessing(void)
 	sdlHandler->pause_audio(any);
 
 	// Update the window title.
-	if (manual) {
-		sdlHandler->set_window_title("Gens/GS II [SDL] [Paused]");
-	} else {
-		sdlHandler->set_window_title("Gens/GS II [SDL]");
-	}
+	updateWindowTitle();
 }
 
 /**
@@ -176,6 +173,43 @@ void EventLoopPrivate::setFrameTiming(int framerate)
 {
 	usec_per_frame = (1000000 / framerate);
 	clks.reset();
+}
+
+/**
+ * Update the window title.
+ * Call this function if the name doesn't
+ * need to be changed, but the state does.
+ */
+void EventLoopPrivate::updateWindowTitle(void)
+{
+	char title[512];
+
+	// If the emulator is paused manually,
+	// prefix the window title.
+	const char *paused_prefix = (paused.manual ? "[Paused] " : "");
+
+	if (clks.fps > 0) {
+		snprintf(title, sizeof(title), "%s%s (%u fps)",
+			 paused_prefix,
+			 this->win_title.c_str(),
+			 clks.fps);
+	} else {
+		snprintf(title, sizeof(title), "%s%s",
+			 paused_prefix,
+			 this->win_title.c_str());
+	}
+
+	sdlHandler->set_window_title(title);
+}
+
+/**
+ * Update the window title.
+ * @param win_title New window title.
+ */
+void EventLoopPrivate::updateWindowTitle(const char *win_title)
+{
+	this->win_title = string(win_title);
+	updateWindowTitle();
 }
 
 /** EventLoop **/
@@ -380,12 +414,12 @@ void EventLoop::runFrame(void)
 		}
 		d_ptr->clks.frames_old = d_ptr->clks.frames;
 
-		// Update the window title.
 		// TODO: Average the FPS over multiple seconds
 		// and/or quarter-seconds.
-		char win_title[256];
-		snprintf(win_title, sizeof(win_title), "Gens/GS II [SDL] - %u fps", d_ptr->clks.fps);
-		d_ptr->sdlHandler->set_window_title(win_title);
+		// TODO: FPS manager and OSD FPS.
+
+		// Update the window title.
+		d_ptr->updateWindowTitle();
 	}
 
 	// Frameskip.

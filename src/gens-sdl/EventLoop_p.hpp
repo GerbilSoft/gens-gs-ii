@@ -47,6 +47,9 @@
 
 #include "libgens/Util/Timing.hpp"
 
+// C++ includes.
+#include <string>
+
 namespace GensSdl {
 
 class SdlHandler;
@@ -171,6 +174,26 @@ class EventLoopPrivate
 		 * @param framerate Frame rate, e.g. 50 or 60.
 		 */
 		void setFrameTiming(int framerate);
+
+	private:
+		// Window title.
+		// Usually the ROM's name.
+		// Does not include modifiers like "[Paused]".
+		std::string win_title;
+
+	public:
+		/**
+		 * Update the window title.
+		 * Call this function if the name doesn't
+		 * need to be changed, but the state does.
+		 */
+		void updateWindowTitle(void);
+
+		/**
+		 * Update the window title.
+		 * @param win_title New window title.
+		 */
+		void updateWindowTitle(const char *win_title);
 };
 
 }
