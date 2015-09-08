@@ -216,74 +216,74 @@ int Options::parse(int argc, const char *argv[])
 	// popt: help options table.
 	struct poptOption helpOptionsTable[] = {
 		{"help", '?', POPT_ARG_NONE, NULL, '?', "Show this help message", NULL},
-		{"usage", 0, POPT_ARG_NONE, NULL, 'u', "Display brief usage message", NULL},
+		{"usage", '\0', POPT_ARG_NONE, NULL, 'u', "Display brief usage message", NULL},
 		{"version", 'V', POPT_ARG_NONE, NULL, 'V', "Display version information", NULL},
 		POPT_TABLEEND
 	};
 
 	// popt: audio options table.
 	struct poptOption audioOptionsTable[] = {
-		{"frequency", 0, POPT_ARG_INT, &d->sound_freq, 0,
+		{"frequency", '\0', POPT_ARG_INT, &d->sound_freq, 0,
 			"  Audio frequency.", "FREQ"},
-		{"mono", 0, POPT_ARG_VAL, &d->stereo, 0,
+		{"mono", '\0', POPT_ARG_VAL, &d->stereo, 0,
 			"  Use monaural audio.", NULL},
-		{"stereo", 0, POPT_ARG_VAL, &d->stereo, 1,
+		{"stereo", '\0', POPT_ARG_VAL, &d->stereo, 1,
 			"  Use stereo audio.", NULL},
 		POPT_TABLEEND
 	};
 
 	// popt: emulation options table.
 	struct poptOption emulationOptionsTable[] = {
-		{"sprite-limits", 0, POPT_ARG_VAL, &d->sprite_limits, 1,
+		{"sprite-limits", '\0', POPT_ARG_VAL, &d->sprite_limits, 1,
 			"* Enable sprite limits.", NULL},
-		{"no-sprite-limits", 0, POPT_ARG_VAL, &d->sprite_limits, 0,
+		{"no-sprite-limits", '\0', POPT_ARG_VAL, &d->sprite_limits, 0,
 			"  Disable sprite limits.", NULL},
-		{"auto-fix-checksum", 0, POPT_ARG_VAL, &d->auto_fix_checksum, 1,
+		{"auto-fix-checksum", '\0', POPT_ARG_VAL, &d->auto_fix_checksum, 1,
 			"* Automatically fix checksums.", NULL},
-		{"no-auto-fix-checksum", 0, POPT_ARG_VAL, &d->auto_fix_checksum, 0,
+		{"no-auto-fix-checksum", '\0', POPT_ARG_VAL, &d->auto_fix_checksum, 0,
 			"  Don't automatically fix checksums.", NULL},
 		POPT_TABLEEND
 	};
 
 	// popt: UI options table.
 	struct poptOption uiOptionsTable[] = {
-		{"fps", 0, POPT_ARG_VAL, &d->fps_counter, 1,
+		{"fps", '\0', POPT_ARG_VAL, &d->fps_counter, 1,
 			"* Enable the FPS counter.", NULL},
-		{"no-fps", 0, POPT_ARG_VAL, &d->fps_counter, 0,
+		{"no-fps", '\0', POPT_ARG_VAL, &d->fps_counter, 0,
 			"  Disable the FPS counter.", NULL},
-		{"auto-pause", 0, POPT_ARG_VAL, &d->auto_pause, 1,
+		{"auto-pause", '\0', POPT_ARG_VAL, &d->auto_pause, 1,
 			"* Pause emulator when focus is lost.", NULL},
-		{"no-auto-pause", 0, POPT_ARG_VAL, &d->auto_pause, 0,
+		{"no-auto-pause", '\0', POPT_ARG_VAL, &d->auto_pause, 0,
 			"  Don't pause emulator when focus is lost.", NULL},
-		{"paused-effect", 0, POPT_ARG_VAL, &d->paused_effect, 1,
+		{"paused-effect", '\0', POPT_ARG_VAL, &d->paused_effect, 1,
 			"* Tint the window when paused.", NULL},
-		{"no-paused-effect", 0, POPT_ARG_VAL, &d->paused_effect, 0,
+		{"no-paused-effect", '\0', POPT_ARG_VAL, &d->paused_effect, 0,
 			"  Don't tint the window when paused.", NULL},
-		{"bpp", 0, POPT_ARG_INT, &tmp.bpp, 0,
+		{"bpp", '\0', POPT_ARG_INT, &tmp.bpp, 0,
 			"  Set the internal color depth. (15, 16, 32)", "BPP"},
 		POPT_TABLEEND
 	};
 
 	// popt: Special run modes table.
 	struct poptOption runModesTable[] = {
-		{"crazy-effect", 0, POPT_ARG_VAL, &d->run_crazy_effect, 1,
+		{"crazy-effect", '\0', POPT_ARG_VAL, &d->run_crazy_effect, 1,
 			"  Run the \"Crazy\" Effect instead of loading a ROM.", NULL},
 		POPT_TABLEEND
 	};
 
 	// popt: main options table.
 	struct poptOption optionsTable[] = {
-		{"tmss-rom", 0, POPT_ARG_STRING, &tmp.tmss_rom_filename, 0,
+		{"tmss-rom", '\0', POPT_ARG_STRING, &tmp.tmss_rom_filename, 0,
 			"TMSS ROM filename.", "FILENAME"},
-		{NULL, 0, POPT_ARG_INCLUDE_TABLE, audioOptionsTable, 0,
+		{NULL, '\0', POPT_ARG_INCLUDE_TABLE, audioOptionsTable, 0,
 			"Audio options: (* indicates default)", NULL},
-		{NULL, 0, POPT_ARG_INCLUDE_TABLE, emulationOptionsTable, 0,
+		{NULL, '\0', POPT_ARG_INCLUDE_TABLE, emulationOptionsTable, 0,
 			"Emulation options: (* indicates default)", NULL},
-		{NULL, 0, POPT_ARG_INCLUDE_TABLE, uiOptionsTable, 0,
+		{NULL, '\0', POPT_ARG_INCLUDE_TABLE, uiOptionsTable, 0,
 			"UI options: (* indicates default)", NULL},
-		{NULL, 0, POPT_ARG_INCLUDE_TABLE, runModesTable, 0,
+		{NULL, '\0', POPT_ARG_INCLUDE_TABLE, runModesTable, 0,
 			"Special run modes:", NULL},
-		{NULL, 0, POPT_ARG_INCLUDE_TABLE, helpOptionsTable, 0,
+		{NULL, '\0', POPT_ARG_INCLUDE_TABLE, helpOptionsTable, 0,
 			"Help options:", NULL},
 		POPT_TABLEEND
 	};
