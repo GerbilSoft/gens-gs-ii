@@ -28,17 +28,11 @@
 // C++ includes.
 #include <string>
 
-// PNG structs.
-// NOTE: Copied fron png.h to avoid having to include it here.
-extern "C" {
-struct png_struct_def;
-typedef struct png_struct_def png_struct;
-typedef png_struct * png_structp;
-
-struct png_info_def;
-typedef struct png_info_def png_info;
-typedef png_info * png_infop;
-}
+// libpng
+// NOTE: The PNG struct definitions changed in libpng-1.5.0.
+// Instead of doing a bunch of complicated maneuvers to get
+// it working without including png.h, just include png.h.
+#include <png.h>
 
 namespace LibZomg {
 

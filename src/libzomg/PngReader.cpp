@@ -175,23 +175,33 @@ int PngReaderPrivate::readFromPng(png_structp png_ptr, png_infop info_ptr,
 	png_read_info(png_ptr, info_ptr);
 
 	// Read the PNG image header.
+	// NOTE: libpng-1.2 defines png_uint_32 as long.
+	// libpng-1.4.0beta7 appears to redefine it to unsigned int.
+	// Since we're using unsigned int in img_data, we can't
+	// save the values directly to the struct.
+	// TODO: Conditionally use temp variables for libpng <1.4?
 	int bit_depth, color_type;
+	png_uint_32 img_w, img_h;
 	png_get_IHDR(png_ptr, info_ptr,
-		     &img_data->w, &img_data->h,
+		     &img_w, &img_h,
 		     &bit_depth, &color_type,
 		     nullptr, nullptr, nullptr);
-	if (img_data->w <= 0 || img_data->h <= 0) {
+	if (img_w <= 0 || img_h <= 0) {
 		// Invalid image size.
 		// TODO: Better error code?
 		return -EINVAL;
 	}
+	// Save the image size.
+	img_data->w = (unsigned int)img_w;
+	img_data->h = (unsigned int)img_h;
 
 	// Check for pHYs.
 	if (png_get_valid(png_ptr, info_ptr, PNG_INFO_pHYs)) {
 		// TODO: Only if unit_type == PNG_RESOLUTION_UNKNOWN?
-		png_get_pHYs(png_ptr, info_ptr,
-			     &img_data->phys_x, &img_data->phys_y,
-			     nullptr);
+		png_uint_32 phys_x, phys_y;
+		png_get_pHYs(png_ptr, info_ptr, &phys_x, &phys_y, nullptr);
+		img_data->phys_x = (unsigned int)phys_x;
+		img_data->phys_y = (unsigned int)phys_y;
 	} else {
 		// No pHYs.
 		img_data->phys_x = 0;
@@ -229,7 +239,7 @@ int PngReaderPrivate::readFromPng(png_structp png_ptr, png_infop info_ptr,
 	}
 
 	// Get the new PNG information.
-	png_get_IHDR(png_ptr, info_ptr, &img_data->w, &img_data->h, &bit_depth, &color_type,
+	png_get_IHDR(png_ptr, info_ptr, &img_w, &img_h, &bit_depth, &color_type,
 		     nullptr, nullptr, nullptr);
 
 	// Check if the image has an alpha channel.

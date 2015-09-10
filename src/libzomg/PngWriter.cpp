@@ -56,6 +56,17 @@
 using std::string;
 using std::vector;
 
+// libpng-1.5.0 marked several function parameters as const.
+// Older versions don't have them marked as const, but they're
+// effectively const anyway.
+#if PNG_LIBPNG_VER_MAJOR > 1 || (PNG_LIBPNG_VER_MAJOR == 1 && PNG_LIBPNG_VER_MINOR >= 5)
+// libpng-1.5.0: Functions have const pointer arguments.
+#define PNG_CONST_CAST(type, ptr) (ptr)
+#else
+// libpng-1.4.x or earlier: Functions do *not* have const pointer arguments.
+#define PNG_CONST_CAST(type, ptr) const_cast<type>(ptr)
+#endif
+
 namespace LibZomg {
 
 // TODO: Convert to a static class?
@@ -274,23 +285,20 @@ int PngWriterPrivate::writeToPng(png_structp png_ptr, png_infop info_ptr,
 		     );
 
 	// Write the sBIT chunk.
+	static const png_color_8 sBIT_15 = {5, 5, 5, 0, 0};
+	static const png_color_8 sBIT_16 = {5, 6, 5, 0, 0};
+	static const png_color_8 sBIT_32 = {8, 8, 8, 0, 0};
 	switch (img_data->bpp) {
-		case 15: {
-			static const png_color_8 sBIT_15 = {5, 5, 5, 0, 0};
-			png_set_sBIT(png_ptr, info_ptr, &sBIT_15);
+		case 15:
+			png_set_sBIT(png_ptr, info_ptr, PNG_CONST_CAST(png_color_8*, &sBIT_15));
 			break;
-		}
-		case 16: {
-			static const png_color_8 sBIT_16 = {5, 6, 5, 0, 0};
-			png_set_sBIT(png_ptr, info_ptr, &sBIT_16);
+		case 16:
+			png_set_sBIT(png_ptr, info_ptr, PNG_CONST_CAST(png_color_8*, &sBIT_16));
 			break;
-		}
 		case 32:
-		default: {
-			static const png_color_8 sBIT_32 = {8, 8, 8, 0, 0};
-			png_set_sBIT(png_ptr, info_ptr, &sBIT_32);
+		default:
+			png_set_sBIT(png_ptr, info_ptr, PNG_CONST_CAST(png_color_8*, &sBIT_32));
 			break;
-		}
 	}
 
 	// Write the pHYs chunk.
