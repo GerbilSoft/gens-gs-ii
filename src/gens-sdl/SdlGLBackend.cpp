@@ -179,10 +179,6 @@ int SdlGLBackend::translateAbsMouseCoords(int *x, int *y) const
 		return -1;
 	}
 
-	// TODO: Cache the window size?
-	int win_w, win_h;
-	SDL_GetWindowSize(m_window, &win_w, &win_h);
-
 	if (aspectRatioConstraint()) {
 		// Aspect ratio constraints are enabled.
 		// NOTE: Since this is low-level OpenGL,
@@ -191,24 +187,24 @@ int SdlGLBackend::translateAbsMouseCoords(int *x, int *y) const
 		int tmp_win_w, tmp_win_h;
 		int offset_x, offset_y;
 
-		int expected_w = win_h * 4;
-		int expected_h = win_w * 3;
+		int expected_w = m_winH * 4;
+		int expected_h = m_winW * 3;
 		if (expected_h > expected_w) {
 			// Window is wider than it should be.
-			tmp_win_h = win_h;
+			tmp_win_h = m_winH;
 			tmp_win_w = expected_w / 3;
-			offset_x = (win_w - tmp_win_w) / 2;
+			offset_x = (m_winW - tmp_win_w) / 2;
 			*x -= offset_x;
 		} else if (expected_w > expected_h) {
 			// Window is taller than it should be.
-			tmp_win_w = win_w;
+			tmp_win_w = m_winW;
 			tmp_win_h = expected_h / 4;
-			offset_y = (win_h - tmp_win_h) / 2;
+			offset_y = (m_winH - tmp_win_h) / 2;
 			*y -= offset_y;
 		} else {
 			// Window is 4:3.
-			tmp_win_w = win_w;
-			tmp_win_h = win_h;
+			tmp_win_w = m_winW;
+			tmp_win_h = m_winH;
 			offset_x = 0;
 			offset_y = 0;
 		}
@@ -228,8 +224,8 @@ int SdlGLBackend::translateAbsMouseCoords(int *x, int *y) const
 		}
 	} else {
 		// Aspect ratio constraints are disabled.
-		*x = (int)((*x * MAX_X) / (float)win_w);
-		*y = (int)((*y * MAX_Y) / (float)win_h);
+		*x = (int)((*x * MAX_X) / (float)m_winW);
+		*y = (int)((*y * MAX_Y) / (float)m_winH);
 	}
 
 	if (*x < 0 || *y < 0)
