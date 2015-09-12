@@ -179,6 +179,22 @@ class VBackend {
 		 */
 		virtual void osd_preview_image(int duration, const _Zomg_Img_Data_t *img_data);
 
+	public:
+		/** Absolute Mouse Movement functions. **/
+		/** Used for Pico emulation. **/
+
+		/**
+		 * Translate absolute mouse coordinates into tablet coordinates.
+		 * Absolute mouse coordinates are window-relative.
+		 * Tablet coordinates are scaled to 1280x240.
+		 * 1280 allows for easy conversion to 320px or 240px.
+		 * NOTE: If the mouse is offscreen, coordinates (-1,-1) will be returned.
+		 * @param x	[in, out] Mouse X coordinate.
+		 * @param y	[in, out] Mouse Y coordinate.
+		 * @return 0 if mouse is onscreen; -1 if mouse is offscreen.
+		 */
+		virtual int translateAbsMouseCoords(int *x, int *y) const;
+
 	private:
 		// Dirty flag.
 		// TODO: Combine into a bitfield?

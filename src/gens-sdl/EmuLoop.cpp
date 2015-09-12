@@ -145,6 +145,14 @@ class EmuLoopPrivate : public EventLoopPrivate
 		 * Update the window title using the ROM name.
 		 */
 		void updateRomName(void);
+
+		/**
+		 * Handle an absolute mouse motion event for graphics tablets,
+		 * e.g. the Sega Pico.
+		 * @param x Mouse X coordinate. (-1 for offscreen)
+		 * @param y Mouse Y coordinate. (-1 for offscreen)
+		 */
+		void doAbsMouseMove(int x, int y);
 };
 
 /** EmuLoopPrivate **/
@@ -436,6 +444,19 @@ void EmuLoopPrivate::updateRomName(void)
 	updateWindowTitle(romName.c_str());
 }
 
+/**
+ * Handle an absolute mouse motion event for graphics tablets,
+ * e.g. the Sega Pico.
+ * @param x Mouse X coordinate. (-1 for offscreen)
+ * @param y Mouse Y coordinate. (-1 for offscreen)
+ */
+void EmuLoopPrivate::doAbsMouseMove(int x, int y)
+{
+	// Translate the mouse coordinates into tablet coordinates.
+	int ret = vBackend->translateAbsMouseCoords(&x, &y);
+	printf("translate: %d -> (%d, %d)\n", ret, x, y);
+}
+
 /** EmuLoop **/
 
 EmuLoop::EmuLoop()
@@ -542,6 +563,30 @@ int EmuLoop::processSdlEvent(const SDL_Event *event) {
 		case SDL_KEYUP:
 			// SDL keycodes nearly match GensKey.
 			d->keyManager->keyUp(SdlHandler::scancodeToGensKey(event->key.keysym.scancode));
+			break;
+
+		case SDL_MOUSEMOTION:
+			// Mouse motion event.
+			// Handle graphics tablets, e.g. Pico.
+			// TODO: Relative mouse motion for Sega Mouse?
+			// TODO: Also, light gun emulation.
+			// TODO: Update mouse position if aspect ratio constraint is changed?
+			d->doAbsMouseMove(event->motion.x, event->motion.y);
+			break;
+
+		case SDL_WINDOWEVENT:
+			if (event->window.event == SDL_WINDOWEVENT_LEAVE) {
+				// The mouse pointer left the window.
+				// This is the equivalent of removing the
+				// pen from the graphics tablet.
+				// TODO: Handle relative mouse motion for Sega Mouse?
+				// TODO: Also, light gun emulation.
+				d->doAbsMouseMove(-1, -1);
+				break;
+			}
+
+			// Allow the superclass to handle this event anyway.
+			ret = 1;
 			break;
 
 		default:

@@ -152,4 +152,89 @@ void SdlGLBackend::toggle_fullscreen(void)
 	}
 }
 
+/** Absolute Mouse Movement functions. **/
+/** Used for Pico emulation. **/
+
+/**
+ * Translate absolute mouse coordinates into tablet coordinates.
+ * Absolute mouse coordinates are window-relative.
+ * Tablet coordinates are scaled to 1280x240.
+ * 1280 allows for easy conversion to 320px or 240px.
+ * NOTE: If the mouse is offscreen, coordinates (-1,-1) will be returned.
+ * @param x	[in, out] Mouse X coordinate.
+ * @param y	[in, out] Mouse Y coordinate.
+ * @return 0 if mouse is onscreen; -1 if mouse is offscreen.
+ */
+int SdlGLBackend::translateAbsMouseCoords(int *x, int *y) const
+{
+	// Tablet size.
+	static const int MAX_X = 1280;
+	static const int MAX_Y = 240;
+
+	if (*x < 0 || *y < 0) {
+		// One of the coordinates is offscreen.
+		// Set both to offscreen.
+		*x = -1;
+		*y = -1;
+		return -1;
+	}
+
+	// TODO: Cache the window size?
+	int win_w, win_h;
+	SDL_GetWindowSize(m_window, &win_w, &win_h);
+
+	if (aspectRatioConstraint()) {
+		// Aspect ratio constraints are enabled.
+		// NOTE: Since this is low-level OpenGL,
+		// SDL does *not* scale the mouse position.
+		// We have to do that ourselves.
+		int tmp_win_w, tmp_win_h;
+		int offset_x, offset_y;
+
+		int expected_w = win_h * 4;
+		int expected_h = win_w * 3;
+		if (expected_h > expected_w) {
+			// Window is wider than it should be.
+			tmp_win_h = win_h;
+			tmp_win_w = expected_w / 3;
+			offset_x = (win_w - tmp_win_w) / 2;
+			*x -= offset_x;
+		} else if (expected_w > expected_h) {
+			// Window is taller than it should be.
+			tmp_win_w = win_w;
+			tmp_win_h = expected_h / 4;
+			offset_y = (win_h - tmp_win_h) / 2;
+			*y -= offset_y;
+		} else {
+			// Window is 4:3.
+			tmp_win_w = win_w;
+			tmp_win_h = win_h;
+			offset_x = 0;
+			offset_y = 0;
+		}
+
+		// Scale the mouse coordinates to 1280x240.
+		// 1280 is divisible by both 320 and 256, so it
+		// can be used by both Pico and the SMS tablet.
+		// TODO: Handle aspect ratio and stretch mode?
+		*x = (int)((*x * MAX_X) / (float)tmp_win_w);
+		*y = (int)((*y * MAX_Y) / (float)tmp_win_h);
+
+		if (*x < 0 || *y < 0 || *x >= MAX_X || *y >= MAX_Y) {
+			// Mouse pointer is onscreen, but not
+			// in the visible image area.
+			*x = -1;
+			*y = -1;
+		}
+	} else {
+		// Aspect ratio constraints are disabled.
+		*x = (int)((*x * MAX_X) / (float)win_w);
+		*y = (int)((*y * MAX_Y) / (float)win_h);
+	}
+
+	if (*x < 0 || *y < 0)
+		return -1;
+	return 0;
+}
+
 }
