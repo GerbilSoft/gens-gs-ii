@@ -62,6 +62,12 @@ class SdlSWBackendPrivate
 		// Last color depth.
 		MdFb::ColorDepth lastBpp;
 
+		// Window size.
+		int winW, winH;
+
+		// Previous aspect ratio constraint.
+		bool prevAspectRatioConstraint;
+
 	public:
 		/**
 		 * (Re-)Initialize the texture.
@@ -79,11 +85,16 @@ SdlSWBackendPrivate::SdlSWBackendPrivate(SdlSWBackend *q)
 	, renderer(nullptr)
 	, texture(nullptr)
 	, lastBpp(MdFb::BPP_MAX)
+	, winW(320), winH(240)
+	, prevAspectRatioConstraint(false)
 {
 	// lastBpp is initialized to MdFb::BPP_MAX in order to
 	// ensure that the texture is initialized. If it's set
 	// to MdFb::BPP_32, then the texture wouldn't get
 	// initialized if m_fb was also set to MdFb::BPP_32.
+
+	// prevAspectRatioConstraint is initialized to false, since
+	// SDL doesn't enable constraints by default.
 }
 
 SdlSWBackendPrivate::~SdlSWBackendPrivate()
@@ -149,7 +160,8 @@ SdlSWBackend::SdlSWBackend()
 	d->window = SDL_CreateWindow("Gens/GS II [SDL]",
 				SDL_WINDOWPOS_UNDEFINED,
 				SDL_WINDOWPOS_UNDEFINED,
-				320, 240, SDL_WINDOW_RESIZABLE);
+				d->winW, d->winH,
+				SDL_WINDOW_RESIZABLE);
 
 	// TODO: Split icon setting into a common function?
 #ifdef _WIN32
@@ -226,6 +238,19 @@ void SdlSWBackend::update(bool fb_dirty)
 
 	// Clear the screen before doing anything else.
 	SDL_RenderClear(d->renderer);
+
+	// Check if the Aspect Ratio Constraint needs to be updated.
+	if (d->prevAspectRatioConstraint != m_aspectRatioConstraint) {
+		// Update the Aspect Ratio Constraint.
+		d->prevAspectRatioConstraint = m_aspectRatioConstraint;
+		if (m_aspectRatioConstraint) {
+			// TODO: Use MdFb size?
+			SDL_RenderSetLogicalSize(d->renderer, 320, 240);
+		} else {
+			SDL_RenderSetLogicalSize(d->renderer, 0, 0);
+		}
+	}
+
 	if (m_fb) {
 		// Source surface is available.
 		const MdFb::ColorDepth bpp = m_fb->bpp();
@@ -259,11 +284,12 @@ void SdlSWBackend::update(bool fb_dirty)
  */
 void SdlSWBackend::resize(int width, int height)
 {
-	// SDL 2.0 automatically handles resize for standard rendering.
-	// TODO: Aspect ratio constraints?
-	((void)width);
-	((void)height);
-	return;
+	// Save the window size for later.
+	d->winW = width;
+	d->winH = height;
+
+	// Aspect ratio constraints will be updated in the
+	// next frame update.
 }
 
 /**
