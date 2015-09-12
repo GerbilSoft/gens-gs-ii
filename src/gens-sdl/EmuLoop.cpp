@@ -549,12 +549,6 @@ int EmuLoop::run(const Options *options)
 		d->rom->select_z_entry(d->rom->get_z_entry_list());
 	}
 
-	// Is a TMSS ROM filename specified?
-	if (options->is_tmss_enabled()) {
-		EmuContext::SetTmssRomFilename(options->tmss_rom_filename());
-		EmuContext::SetTmssEnabled(true);
-	}
-
 	// Is the ROM format supported?
 	if (!EmuContextFactory::isRomFormatSupported(d->rom)) {
 		// ROM format is not supported.
@@ -585,7 +579,12 @@ int EmuLoop::run(const Options *options)
 	EmuContext::SetPathSRam(getConfigDir("SRAM").c_str());
 
 	// Set some static EmuContext properties.
+	// TODO: Make these non-static?
 	EmuContext::SetAutoFixChecksum(options->auto_fix_checksum());
+	if (options->is_tmss_enabled()) {
+		EmuContext::SetTmssRomFilename(options->tmss_rom_filename());
+		EmuContext::SetTmssEnabled(true);
+	}
 
 	// Create the emulation context.
 	d->emuContext = EmuContextFactory::createContext(d->rom);
@@ -675,6 +674,8 @@ int EmuLoop::run(const Options *options)
 			// Emulation is paused.
 			// Don't run any frames.
 			// TODO: Wait for what would be the next frame?
+			// Otherwise, we'll end up "spinning" if e.g.
+			// there are OSD messages being processed.
 			continue;
 		}
 
