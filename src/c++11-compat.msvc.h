@@ -78,27 +78,8 @@
  *
  * Note that later versions of MSVC (esp. 2013 and 2015)
  * have added more C99 functionality, since C99 is included
+ * in C++ 2011.
  */
-
-/** snprintf(), vsnprintf() **/
-
-/**
- * MSVC 2015 (14.0) supports snprintf() and vsnprintf().
- * Older versions have them prefixed with underscores.
- */
-#if _MSC_VER < 1400
-/**
- * MSVC 2005 added support for variadic macros. *
- * https://msdn.microsoft.com/en-US/library/ms177415(v=vs.80).aspx
- * TODO: Verify MSVC 2002 and 2003.
- */
-#define snprintf _snprintf
-#define vsnprintf _vsnprintf
-#elif _MSC_VER < 1900
-/* MSVC 2005 - 2013: variadic macros supported, but no snprintf(). */
-#define snprintf(str, size, format, ...) _snprintf(str, size, format, __VA_ARGS__)
-#define vsnprintf(str, size, format, ap) _vsnprintf(str, size, format, ap)
-#endif /* _MSC_VER < 1900 */
 
 /** strcasecmp(), strncasecmp() **/
 

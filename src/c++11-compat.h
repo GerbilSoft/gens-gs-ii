@@ -92,4 +92,12 @@ namespace std {
 # endif
 #endif
 
+/**
+ * MSVCRT prior to MSVC 2015 has a non-compliant _snprintf().
+ * Note that MinGW-w64 uses MSVCRT.
+ */
+#ifdef _WIN32
+#include "c99-compat.msvcrt.h"
+#endif
+
 #endif /* __CXX11_COMPAT_H__ */
