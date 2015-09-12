@@ -473,8 +473,6 @@ void MetadataPrivate::InitSystemMetadata(void)
 		// OS does not support Unicode.
 		sysInfo.username = getUserName_ansi();
 	}
-
-	// TODO: CPU information.
 }
 
 }

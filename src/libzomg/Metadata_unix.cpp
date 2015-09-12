@@ -108,8 +108,6 @@ void MetadataPrivate::InitSystemMetadata(void)
 		// Could not retrieve user information.
 		sysInfo.username = string();
 	}
-
-	// TODO: CPU information.
 }
 
 }
