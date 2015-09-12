@@ -307,4 +307,56 @@ void SdlSWBackend::toggle_fullscreen(void)
 	}
 }
 
+/** Absolute Mouse Movement functions. **/
+/** Used for Pico emulation. **/
+
+/**
+ * Translate absolute mouse coordinates into tablet coordinates.
+ * Absolute mouse coordinates are window-relative.
+ * Tablet coordinates are scaled to 1280x240.
+ * 1280 allows for easy conversion to 320px or 240px.
+ * NOTE: If the mouse is offscreen, coordinates (-1,-1) will be returned.
+ * @param x	[in, out] Mouse X coordinate.
+ * @param y	[in, out] Mouse Y coordinate.
+ * @return 0 if mouse is onscreen; -1 if mouse is offscreen.
+ */
+int SdlSWBackend::translateAbsMouseCoords(int *x, int *y) const
+{
+	// Tablet size.
+	static const int MAX_X = 1280;
+	static const int MAX_Y = 240;
+
+	if (*x < 0 || *y < 0) {
+		// One of the coordinates is offscreen.
+		// Set both to offscreen.
+		*x = -1;
+		*y = -1;
+		return -1;
+	}
+
+	if (aspectRatioConstraint()) {
+		// Aspect ratio constraints are enabled.
+		// Window has a logical size of 320x240.
+		// (TODO: MdFb size?)
+		*x = (int)((*x * MAX_X) / (float)320);
+		*y = (int)((*y * MAX_Y) / (float)240);
+
+		if (*x < 0 || *y < 0 || *x >= MAX_X || *y >= MAX_Y) {
+			// Mouse pointer is onscreen, but not
+			// in the visible image area.
+			*x = -1;
+			*y = -1;
+		}
+	} else {
+		// Aspect ratio constraints are disabled.
+		// Use the actual window size.
+		*x = (int)((*x * MAX_X) / (float)d->winW);
+		*y = (int)((*y * MAX_Y) / (float)d->winH);
+	}
+
+	if (*x < 0 || *y < 0)
+		return -1;
+	return 0;
+}
+
 }
