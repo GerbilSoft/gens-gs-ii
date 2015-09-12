@@ -26,10 +26,15 @@
 // _POSIX_SOURCE and _POSIX_C_SOURCE definitions.
 #include "libcompat/reentrant.h"
 
+// libpng
+// MUST be included before Metadata.hpp.
+#include <png.h>
+
+// ZOMG metadata.
+#include "Metadata.hpp"
+
 // Ensure CPU_Flags is initialized.
 #include "libcompat/cpuflags.h"
-
-#include "Metadata.hpp"
 
 // C includes. (C++ namespace)
 #include <ctime>
@@ -43,9 +48,6 @@
 using std::string;
 using std::swap;
 using std::ostringstream;
-
-// libpng
-#include <png.h>
 
 // Platform-dependent newline constant.
 #ifdef _WIN32

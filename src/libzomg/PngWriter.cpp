@@ -22,11 +22,12 @@
 #include "PngWriter.hpp"
 #include "img_data.h"
 
+// libpng
+// MUST be included before Metadata.hpp.
+#include <png.h>
+
 // ZOMG metadata.
 #include "Metadata.hpp"
-
-// libpng
-#include <png.h>
 
 // MiniZip
 #include "minizip/zip.h"
