@@ -20,7 +20,9 @@
  ***************************************************************************/
 
 #include "VBackend.hpp"
+
 #include "libgens/Util/MdFb.hpp"
+using LibGens::MdFb;
 
 // C includes. (C++ namespace)
 #include <cstdio>

@@ -20,7 +20,9 @@
  ***************************************************************************/
 
 #include "SdlSWBackend.hpp"
+
 #include "libgens/Util/MdFb.hpp"
+using LibGens::MdFb;
 
 // C includes. (C++ namespace)
 #include <cassert>
@@ -36,13 +38,115 @@
 
 namespace GensSdl {
 
+class SdlSWBackendPrivate
+{
+	public:
+		SdlSWBackendPrivate(SdlSWBackend *q);
+		~SdlSWBackendPrivate();
+
+	private:
+		friend class SdlSWBackend;
+		SdlSWBackend *const q;
+	private:
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add GensSdl-specific version of Q_DISABLE_COPY().
+		SdlSWBackendPrivate(const SdlSWBackendPrivate &);
+		SdlSWBackendPrivate &operator=(const SdlSWBackendPrivate &);
+
+	public:
+		// Screen context.
+		SDL_Window *window;
+		SDL_Renderer *renderer;
+		SDL_Texture *texture;
+
+		// Last color depth.
+		MdFb::ColorDepth lastBpp;
+
+	public:
+		/**
+		 * (Re-)Initialize the texture.
+		 * If m_fb is set, uses m_fb's color depth.
+		 * Otherwise, BPP_32 is used.
+		 */
+		void reinitTexture(void);
+};
+
+/** SdlSWBackendPrivate **/
+
+SdlSWBackendPrivate::SdlSWBackendPrivate(SdlSWBackend *q)
+	: q(q)
+	, window(nullptr)
+	, renderer(nullptr)
+	, texture(nullptr)
+	, lastBpp(MdFb::BPP_MAX)
+{
+	// lastBpp is initialized to MdFb::BPP_MAX in order to
+	// ensure that the texture is initialized. If it's set
+	// to MdFb::BPP_32, then the texture wouldn't get
+	// initialized if m_fb was also set to MdFb::BPP_32.
+}
+
+SdlSWBackendPrivate::~SdlSWBackendPrivate()
+{
+	SDL_DestroyTexture(texture);
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+}
+
+/**
+ * (Re-)Initialize the texture.
+ * If m_fb is set, uses m_fb's color depth.
+ * Otherwise, BPP_32 is used.
+ */
+void SdlSWBackendPrivate::reinitTexture(void)
+{
+	if (!q->m_fb) {
+		// No framebuffer. Don't do anything.
+		return;
+	}
+
+	const MdFb::ColorDepth bpp = q->m_fb->bpp();
+	if (lastBpp == bpp) {
+		// Color depth hasn't changed.
+		return;
+	}
+
+	// Determine the SDL texture format.
+	uint32_t format;
+	switch (bpp) {
+		case MdFb::BPP_15:
+			format = SDL_PIXELFORMAT_RGB555;
+			break;
+		case MdFb::BPP_16:
+			format = SDL_PIXELFORMAT_RGB565;
+			break;
+		case MdFb::BPP_32:
+		default:
+			format = SDL_PIXELFORMAT_ARGB8888;
+			break;
+	}
+
+	if (texture) {
+		// Destroy the existing texture.
+		SDL_DestroyTexture(texture);
+	}
+
+	// Create the texture.
+	texture = SDL_CreateTexture(renderer, format,
+			SDL_TEXTUREACCESS_STREAMING,
+			320, 240);
+	// Save the last color depth.
+	lastBpp = bpp;
+}
+
+/** SdlSWBackend **/
+
 SdlSWBackend::SdlSWBackend()
-	: m_window(nullptr)
-	, m_renderer(nullptr)
-	, m_texture(nullptr)
+	: super()
+	, d(new SdlSWBackendPrivate(this))
 {
 	// Initialize the SDL window.
-	m_window = SDL_CreateWindow("Gens/GS II [SDL]",
+	d->window = SDL_CreateWindow("Gens/GS II [SDL]",
 				SDL_WINDOWPOS_UNDEFINED,
 				SDL_WINDOWPOS_UNDEFINED,
 				320, 240, SDL_WINDOW_RESIZABLE);
@@ -54,7 +158,7 @@ SdlSWBackend::SdlSWBackend()
 	if (hIcon) {
 		SDL_SysWMinfo info;
 		SDL_VERSION(&info.version);
-		if (SDL_GetWindowWMInfo(m_window, &info)) {
+		if (SDL_GetWindowWMInfo(d->window, &info)) {
 			SetClassLongPtr(info.info.win.window, GCL_HICON, (LONG_PTR)hIcon);
 		}
 	}
@@ -64,30 +168,20 @@ SdlSWBackend::SdlSWBackend()
 
 	// Create a renderer.
 	// TODO: Parameter for enabling/disabling VSync?
-	m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_PRESENTVSYNC);
+	d->renderer = SDL_CreateRenderer(d->window, -1, SDL_RENDERER_PRESENTVSYNC);
 
 	// Clear the screen.
-	SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
-	SDL_RenderClear(m_renderer);
-	SDL_RenderPresent(m_renderer);
+	SDL_SetRenderDrawColor(d->renderer, 0, 0, 0, 255);
+	SDL_RenderClear(d->renderer);
+	SDL_RenderPresent(d->renderer);
 
-	// Create a texture.
-	m_texture = SDL_CreateTexture(m_renderer,
-			SDL_PIXELFORMAT_ARGB8888,
-			SDL_TEXTUREACCESS_STREAMING,
-			320, 240);
+	// Initialize the texture.
+	d->reinitTexture();
 }
 
 SdlSWBackend::~SdlSWBackend()
 {
-	if (m_fb) {
-		m_fb->unref();
-		m_fb = nullptr;
-	}
-
-	SDL_DestroyTexture(m_texture);
-	SDL_DestroyRenderer(m_renderer);
-	SDL_DestroyWindow(m_window);
+	delete d;
 }
 
 /**
@@ -97,7 +191,7 @@ SdlSWBackend::~SdlSWBackend()
  */
 void SdlSWBackend::set_window_title(const char *title)
 {
-	SDL_SetWindowTitle(m_window, title);
+	SDL_SetWindowTitle(d->window, title);
 }
 
 /**
@@ -115,6 +209,7 @@ void SdlSWBackend::set_video_source(LibGens::MdFb *fb)
 
 	if (fb) {
 		m_fb = fb->ref();
+		d->reinitTexture();
 	}
 }
 
@@ -130,15 +225,28 @@ void SdlSWBackend::update(bool fb_dirty)
 	((void)fb_dirty);
 
 	// Clear the screen before doing anything else.
-	SDL_RenderClear(m_renderer);
+	SDL_RenderClear(d->renderer);
 	if (m_fb) {
 		// Source surface is available.
-		SDL_UpdateTexture(m_texture, nullptr, m_fb->fb32(), m_fb->pxPitch() * sizeof(uint32_t));
-		SDL_RenderCopy(m_renderer, m_texture, nullptr, nullptr);
+		const MdFb::ColorDepth bpp = m_fb->bpp();
+		if (bpp != d->lastBpp) {
+			// Color depth has changed.
+			d->reinitTexture();
+		}
+
+		// Update the texture.
+		if (bpp == MdFb::BPP_32) {
+			SDL_UpdateTexture(d->texture, nullptr,
+				m_fb->fb32(), m_fb->pxPitch() * sizeof(uint32_t));
+		} else {
+			SDL_UpdateTexture(d->texture, nullptr,
+				m_fb->fb16(), m_fb->pxPitch() * sizeof(uint16_t));
+		}
+		SDL_RenderCopy(d->renderer, d->texture, nullptr, nullptr);
 	}
 
 	// Update the screen.
-	SDL_RenderPresent(m_renderer);
+	SDL_RenderPresent(d->renderer);
 
 	// VBackend is no longer dirty.
 	clearDirty();
@@ -166,10 +274,10 @@ void SdlSWBackend::toggle_fullscreen(void)
 	m_fullscreen = !m_fullscreen;
 	if (m_fullscreen) {
 		// Switched to windowed fullscreen.
-		SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		SDL_SetWindowFullscreen(d->window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 	} else {
 		// Switch to windowed mode.
-		SDL_SetWindowFullscreen(m_window, 0);
+		SDL_SetWindowFullscreen(d->window, 0);
 	}
 }
 

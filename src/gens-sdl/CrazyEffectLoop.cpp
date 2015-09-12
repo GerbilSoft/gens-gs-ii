@@ -42,6 +42,9 @@ using LibGens::MdFb;
 #include "libgens/Effects/CrazyEffect.hpp"
 using LibGens::CrazyEffect;
 
+// Command line parameters.
+#include "Options.hpp"
+
 #include "EventLoop_p.hpp"
 namespace GensSdl {
 
@@ -89,23 +92,25 @@ CrazyEffectLoop::~CrazyEffectLoop()
 
 /**
  * Run the event loop.
- * @param rom_filename ROM filename. [TODO: Replace with options struct?]
+ * @param options Options.
  * @return Exit code.
  */
-int CrazyEffectLoop::run(const char *rom_filename)
+int CrazyEffectLoop::run(const Options *options)
 {
-	// rom_filename isn't used here.
-	((void)rom_filename);
+	// Save options.
+	// TODO: Make EmuLoop::run() non-virtual, save options there,
+	// and then call protected virtual run_int()?
+	CrazyEffectLoopPrivate *const d = d_func();
+	d->options = options;
 
 	// TODO: Move common code back to gens-sdl?
 
 	// Initialize the SDL handlers.
-	CrazyEffectLoopPrivate *const d = d_func();
 	d->sdlHandler = new SdlHandler();
 	if (d->sdlHandler->init_video() < 0)
 		return EXIT_FAILURE;
 	// No audio here.
-	//if (d->sdlHandler->init_audio() < 0)
+	//if (d->sdlHandler->init_audio(options->sound_freq(), options->stereo()) < 0)
 	//	return EXIT_FAILURE;
 	d->vBackend = d->sdlHandler->vBackend();
 
@@ -126,7 +131,7 @@ int CrazyEffectLoop::run(const char *rom_filename)
 	// Image size defaults to the full framebuffer,
 	// so we don't have to worry about "stretch modes".
 	d->crazyFb = new MdFb();
-	d->crazyFb->setBpp(MdFb::BPP_32);
+	d->crazyFb->setBpp(options->bpp());
 	// Set the SDL video source.
 	d->sdlHandler->set_video_source(d->crazyFb);
 

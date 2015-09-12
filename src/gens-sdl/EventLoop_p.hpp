@@ -54,6 +54,7 @@ namespace GensSdl {
 
 class SdlHandler;
 class VBackend;
+class Options;
 
 class EventLoopPrivate
 {
@@ -107,6 +108,9 @@ class EventLoopPrivate
 		bool running;
 		bool frameskip;
 
+		// Options.
+		const Options *options;
+
 		union paused_t {
 			struct {
 				uint8_t manual	: 1;	// Manual pause.
@@ -116,9 +120,6 @@ class EventLoopPrivate
 			// TODO: Add assign/copy constructors and operator==()?
 		};
 		paused_t paused;	// Current 'paused' value.
-
-		// Automatically pause when the window loses focus?
-		bool autoPause;
 
 		// Window has been exposed.
 		// Video should be updated if emulation is paused.

@@ -49,10 +49,10 @@ class EmuLoop : public EventLoop
 	public:
 		/**
 		 * Run the event loop.
-		 * @param rom_filename ROM filename. [TODO: Replace with options struct?]
+		 * @param options Options.
 		 * @return Exit code.
 		 */
-		virtual int run(const char *rom_filename) final;
+		virtual int run(const Options *options) final;
 
 	protected:
 		/**

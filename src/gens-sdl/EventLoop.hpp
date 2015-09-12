@@ -35,6 +35,7 @@
 namespace GensSdl {
 
 class VBackend;
+class Options;
 
 class EventLoopPrivate;
 class EventLoop
@@ -55,10 +56,10 @@ class EventLoop
 	public:
 		/**
 		 * Run the event loop.
-		 * @param rom_filename ROM filename. [TODO: Replace with options struct?]
+		 * @param options Options.
 		 * @return Exit code.
 		 */
-		virtual int run(const char *rom_filename) = 0;
+		virtual int run(const Options *options) = 0;
 
 		/**
 		 * Get the VBackend.

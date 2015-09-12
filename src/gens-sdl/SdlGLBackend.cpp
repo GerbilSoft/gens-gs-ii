@@ -20,6 +20,7 @@
  ***************************************************************************/
 
 #include "SdlGLBackend.hpp"
+
 #include "libgens/Util/MdFb.hpp"
 using LibGens::MdFb;
 
@@ -58,11 +59,17 @@ SdlGLBackend::SdlGLBackend()
 	// window isn't ridiculously tiny.
 	// FIXME: SDL window resizing is broken.
 	m_winW = 640; m_winH = 480;
+
+	// Set the GL attributes.
+	// NOTE: We're always setting GL color depth to 888,
+	// since most modern video cards prefer it compared
+	// to 15-bit/16-bit.
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, true);
+
 	// TODO: Make sure m_window, m_glContext, etc. were created successfully.
 	// TODO: Rename m_window to m_window?
 	m_window = SDL_CreateWindow("Gens/GS II [SDL]",

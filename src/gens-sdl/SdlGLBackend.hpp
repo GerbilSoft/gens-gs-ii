@@ -31,10 +31,7 @@
 #include <SDL.h>
 
 // Video Backend.
-#include "VBackend.hpp"
 #include "GLBackend.hpp"
-// LibGens includes.
-#include "libgens/Util/MdFb.hpp"
 
 namespace GensSdl {
 

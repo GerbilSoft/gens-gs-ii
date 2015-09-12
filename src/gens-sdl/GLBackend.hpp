@@ -27,8 +27,6 @@
 
 // Video Backend.
 #include "VBackend.hpp"
-// LibGens includes.
-#include "libgens/Util/MdFb.hpp"
 
 namespace GensSdl {
 

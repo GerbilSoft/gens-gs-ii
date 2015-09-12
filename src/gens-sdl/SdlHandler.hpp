@@ -31,10 +31,8 @@
 // SDL
 #include <SDL.h>
 
+#include "libgens/Util/MdFb.hpp"
 #include "libgenskeys/GensKey_t.h"
-namespace LibGens {
-	class MdFb;
-}
 
 // TODO: Minimum gcc version, other compilers?
 // TODO: Move to libgens/macros/common.h?
@@ -122,9 +120,11 @@ class SdlHandler {
 
 		/**
 		 * Initialize SDL audio.
+		 * @param freq Frequency.
+		 * @param stereo If true, use stereo.
 		 * @return 0 on success; non-zero on error.
 		 */
-		int init_audio(void);
+		int init_audio(int freq, bool stereo);
 
 		/**
 		 * Shut down SDL audio.
@@ -170,6 +170,7 @@ class SdlHandler {
 		SDL_AudioDeviceID m_audioDevice;
 		RingBuffer *m_audioBuffer;
 		int m_sampleSize;
+		bool m_stereo;
 
 		// Segment buffer.
 		int16_t *m_segBuffer;

@@ -40,8 +40,9 @@
 // ZOMG image data.
 struct _Zomg_Img_Data_t;
 
+// LibGens includes.
+#include "libgens/Util/MdFb.hpp"
 namespace LibGens {
-	class MdFb;
 	class EmuContext;
 }
 

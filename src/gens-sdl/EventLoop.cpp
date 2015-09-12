@@ -40,6 +40,9 @@ using GensSdl::VBackend;
 #include "libgens/Util/MdFb.hpp"
 using LibGens::MdFb;
 
+// Command line parameters.
+#include "Options.hpp"
+
 // C++ includes.
 #include <string>
 using std::string;
@@ -54,7 +57,7 @@ EventLoopPrivate::EventLoopPrivate()
 	, vBackend(nullptr)
 	, running(false)
 	, frameskip(true)
-	, autoPause(false)
+	, options(nullptr)
 	, exposed(false)
 	, lastF1time(0)
 	, usec_per_frame(0)
@@ -95,9 +98,13 @@ void EventLoopPrivate::doPauseProcessing(void)
 {
 	bool manual = paused.manual;
 	bool any = !!paused.data;
-	// TODO: Option to disable the Paused Effect?
-	// When enabled, it's only used for Manual Pause.
-	vBackend->setPausedEffect(manual);
+
+	// Set the paused effect.
+	if (options->paused_effect()) {
+		vBackend->setPausedEffect(manual);
+	} else {
+		vBackend->setPausedEffect(false);
+	}
 
 	// Reset the clocks and counters.
 	clks.reset();
@@ -314,14 +321,14 @@ int EventLoop::processSdlEvent(const SDL_Event *event)
 					break;
 				case SDL_WINDOWEVENT_FOCUS_LOST:
 					// If AutoPause is enabled, pause the emulator.
-					if (d_ptr->autoPause) {
+					if (d_ptr->options->auto_pause()) {
 						d_ptr->doAutoPause(true);
 					}
 					break;
 				case SDL_WINDOWEVENT_FOCUS_GAINED:
 					// If AutoPause is enabled, unpause the emulator.
 					// TODO: Always run this, even if !autoPause?
-					if (d_ptr->autoPause) {
+					if (d_ptr->options->auto_pause()) {
 						d_ptr->doAutoPause(false);
 					}
 					break;

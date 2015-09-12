@@ -41,8 +41,10 @@ using GensSdl::VBackend;
 // LibGens
 #include "libgens/Rom.hpp"
 #include "libgens/Util/MdFb.hpp"
+#include "libgens/Vdp/Vdp.hpp"
 using LibGens::Rom;
 using LibGens::MdFb;
+using LibGens::Vdp;
 
 // Emulation Context.
 #include "libgens/EmuContext/EmuContext.hpp"
@@ -63,6 +65,9 @@ using LibGensKeys::KeyManager;
 #include "libzomg/img_data.h"
 using LibZomg::ZomgBase;
 using LibZomg::Zomg;
+
+// Command line parameters.
+#include "Options.hpp"
 
 // C++ includes.
 #include <string>
@@ -555,21 +560,33 @@ int EmuLoop::processSdlEvent(const SDL_Event *event) {
 
 /**
  * Run the event loop.
- * @param rom_filename ROM filename. [TODO: Replace with options struct?]
+ * @param options Options.
  * @return Exit code.
  */
-int EmuLoop::run(const char *rom_filename)
+int EmuLoop::run(const Options *options)
 {
-	// Load the ROM image.
+	// Save options.
+	// TODO: Make EmuLoop::run() non-virtual, save options there,
+	// and then call protected virtual run_int()?
 	EmuLoopPrivate *const d = d_func();
-	d->rom = new Rom(rom_filename);
+	d->options = options;
+	
+	// Load the ROM image.
+	// NOTE: On gcc-5.x, if we store rom_filename().c_str(),
+	// random corruption happens with filenames longer than
+	// the short string buffer.
+	string rom_filename = options->rom_filename();
+	d->rom = new Rom(rom_filename.c_str());
 	if (!d->rom->isOpen()) {
 		// Error opening the ROM.
 		// TODO: Error code?
 		fprintf(stderr, "Error opening ROM file %s: (TODO get error code)\n",
-			rom_filename);
+			rom_filename.c_str());
+		delete d->rom;
+		d->rom = nullptr;
 		return EXIT_FAILURE;
 	}
+
 	if (d->rom->isMultiFile()) {
 		// Select the first file.
 		d->rom->select_z_entry(d->rom->get_z_entry_list());
@@ -579,8 +596,9 @@ int EmuLoop::run(const char *rom_filename)
 	if (!EmuContextFactory::isRomFormatSupported(d->rom)) {
 		// ROM format is not supported.
 		const char *rom_format = romFormatToString(d->rom->romFormat());
-		fprintf(stderr, "Error loading ROM file %s: ROM is in %s format.\nOnly plain binary and SMD-format ROMs are supported.\n",
-			rom_filename, rom_format);
+		fprintf(stderr, "Error loading ROM file %s: ROM is in %s format.\n"
+			"Only plain binary and SMD-format ROMs are supported.\n",
+			rom_filename.c_str(), rom_format);
 		return EXIT_FAILURE;
 	}
 
@@ -588,8 +606,9 @@ int EmuLoop::run(const char *rom_filename)
 	if (!EmuContextFactory::isRomSystemSupported(d->rom)) {
 		// System is not supported.
 		const char *rom_sysId = sysIdToString(d->rom->sysId());
-		fprintf(stderr, "Error loading ROM file %s: ROM is for %s.\nOnly Mega Drive and Pico ROMs are supported.\n",
-			rom_filename, rom_sysId);
+		fprintf(stderr, "Error loading ROM file %s: ROM is for %s.\n"
+			"Only Mega Drive and Pico ROMs are supported.\n",
+			rom_filename.c_str(), rom_sysId);
 		return EXIT_FAILURE;
 	}
 
@@ -602,21 +621,34 @@ int EmuLoop::run(const char *rom_filename)
 	// Set the SRAM/EEPROM path.
 	EmuContext::SetPathSRam(getConfigDir("SRAM").c_str());
 
+	// Set some static EmuContext properties.
+	// TODO: Make these non-static?
+	EmuContext::SetAutoFixChecksum(options->auto_fix_checksum());
+	if (options->is_tmss_enabled()) {
+		EmuContext::SetTmssRomFilename(options->tmss_rom_filename());
+		EmuContext::SetTmssEnabled(true);
+	}
+
 	// Create the emulation context.
 	d->emuContext = EmuContextFactory::createContext(d->rom);
 	if (!d->emuContext || !d->emuContext->isRomOpened()) {
 		// Error loading the ROM into EmuMD.
 		// TODO: Error code?
 		fprintf(stderr, "Error initializing EmuContext for %s: (TODO get error code)\n",
-			rom_filename);
+			rom_filename.c_str());
 		return EXIT_FAILURE;
 	}
+
+	// Set VDP properties.
+	// TODO: More properties?
+	Vdp *vdp = d->emuContext->m_vdp;
+	vdp->options.spriteLimits = options->sprite_limits();
 
 	// Initialize the SDL handlers.
 	d->sdlHandler = new SdlHandler();
 	if (d->sdlHandler->init_video() < 0)
 		return EXIT_FAILURE;
-	if (d->sdlHandler->init_audio() < 0)
+	if (d->sdlHandler->init_audio(options->sound_freq(), options->stereo()) < 0)
 		return EXIT_FAILURE;
 	d->vBackend = d->sdlHandler->vBackend();
 
@@ -637,9 +669,8 @@ int EmuLoop::run(const char *rom_filename)
 	// TODO: Close the ROM, or let EmuContext do it?
 
 	// Set the color depth.
-	// TODO: Command line option?
 	MdFb *fb = d->emuContext->m_vdp->MD_Screen->ref();
-	fb->setBpp(MdFb::BPP_32);
+	fb->setBpp(options->bpp());
 
 	// Set the SDL video source.
 	d->sdlHandler->set_video_source(fb);
@@ -689,6 +720,8 @@ int EmuLoop::run(const char *rom_filename)
 			// Emulation is paused.
 			// Don't run any frames.
 			// TODO: Wait for what would be the next frame?
+			// Otherwise, we'll end up "spinning" if e.g.
+			// there are OSD messages being processed.
 			continue;
 		}
 
