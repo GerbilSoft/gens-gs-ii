@@ -338,17 +338,19 @@ string OsdGLPrivate::utf16ToInternal(const char16_t *str, size_t len)
 			// Some Unicode characters over U+00FF are supported.
 			// TODO: Replacement character for unsupported characters.
 
-			// Check if this is a supported cp437 character.
+			// Check if this is a supported cp437, cp1252, or custom character.
 			// TODO: Optimize this!
-			char chr8;
+			// TODO: Use character constants?
+			int chr8;
 			switch (chr16) {
+				// cp437: 0x00-0x1F
 				case 0x263A:	chr8 = 0x01; break;
 				case 0x263B:	chr8 = 0x02; break;
 				case 0x2665:	chr8 = 0x03; break;
 				case 0x2666:	chr8 = 0x04; break;
 				case 0x2663:	chr8 = 0x05; break;
 				case 0x2660:	chr8 = 0x06; break;
-				case 0x2022:	chr8 = 0x07; break;
+				//case 0x2022:	chr8 = 0x07; break;	// This is part of cp1252...
 				case 0x2508:	chr8 = 0x08; break;
 				case 0x25CB:	chr8 = 0x09; break;
 				case 0x25D9:	chr8 = 0x0A; break;
@@ -374,17 +376,46 @@ string OsdGLPrivate::utf16ToInternal(const char16_t *str, size_t len)
 				case 0x2582:	chr8 = 0x1E; break;
 				case 0x25BC:	chr8 = 0x1F; break;
 
+				// cp1252: 0x80-0x9F
+				case 0x20AC:    chr8 = 0x80; break;
+				case 0x201A:    chr8 = 0x82; break;
+				case 0x0192:    chr8 = 0x83; break;
+				case 0x201E:    chr8 = 0x84; break;
+				case 0x2026:    chr8 = 0x85; break;
+				case 0x2020:    chr8 = 0x86; break;
+				case 0x2021:    chr8 = 0x87; break;
+				case 0x02C6:    chr8 = 0x88; break;
+				case 0x2030:    chr8 = 0x89; break;
+				case 0x0160:    chr8 = 0x8A; break;
+				case 0x2039:    chr8 = 0x8B; break;
+				case 0x0152:    chr8 = 0x8C; break;
+				case 0x017D:    chr8 = 0x8E; break;
+				case 0x2018:    chr8 = 0x91; break;
+				case 0x2019:    chr8 = 0x92; break;
+				case 0x201C:    chr8 = 0x93; break;
+				case 0x201D:    chr8 = 0x94; break;
+				case 0x2022:    chr8 = 0x95; break;
+				case 0x2013:    chr8 = 0x96; break;
+				case 0x2014:    chr8 = 0x97; break;
+				case 0x02DC:    chr8 = 0x98; break;
+				case 0x2122:    chr8 = 0x99; break;
+				case 0x0161:    chr8 = 0x9A; break;
+				case 0x203A:    chr8 = 0x9B; break;
+				case 0x0153:    chr8 = 0x9C; break;
+				case 0x017E:    chr8 = 0x9E; break;
+				case 0x0178:    chr8 = 0x9F; break;
+
 				// VCR symbols.
-				// NOTE: MSVC 2010 complains about
-				// truncation of constant values.
+				/* TODO: Move these to unused areas in 0x80-0x9F.
 				case 0x25CF:	chr8 = (char)0x80; break;	// Record. (BLACK CIRCLE)
 				case 0xF8FE:	chr8 = (char)0x81; break;	// Pause. (Private Use Area)
 				case 0x25A0:	chr8 = (char)0x82; break;	// Stop. (BLACK SQUARE)
+				*/
 
 				default:	chr8 = 0; break;
 			}
 
-			cp8[i] = chr8;
+			cp8[i] = (char)chr8;
 		}
 	}
 
