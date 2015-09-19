@@ -98,4 +98,70 @@ void *OsdFontLoader::load_A8(const char *name,
 	return img;
 }
 
+// TODO: ifdef out for non-embedded?
+/**
+ * Load a font as 4-bit grayscale. (I4)
+ * @param name		[in]  Font name.
+ * @param p_chrW	[out] Character width.
+ * @param p_chrH	[out] Character height.
+ * @param p_sz		[out] Size of allocated data, in bytes.
+ * @return Allocated image data, or nullptr on error.
+ * Caller must free the image data using free().
+ * TODO: This may be switched to aligned_malloc() / aligned_free() later.
+ */
+void *OsdFontLoader::load_A4(const char *name,
+	uint8_t *p_chrW, uint8_t *p_chrH, unsigned int *p_sz)
+{
+	const OsdFont *font;
+	if (!strcmp(name, "VGA")) {
+		font = &VGA_font;
+	} else if (!strcmp(name, "C64")) {
+		font = &C64_font;
+	} else {
+		return nullptr;
+	}
+
+	const uint8_t chrW = font->w;
+	const uint8_t chrH = font->h;
+	const uint8_t *fontData = font->data;
+
+	// Allocate the image buffer.
+	const unsigned int sz = (256 * chrW * chrH) / 2;
+	uint8_t *img = (uint8_t*)malloc(sz);
+	if (!img)
+		return nullptr;
+
+	// Converting 1bpp characters to 4bpp.
+	// pitch = 4 bytes per character; 16 per line.
+	const int pitch = (chrW * 16) / 2;
+	for (int chr = 0; chr < 256; chr++) {
+		const int y_pos = ((chr / 16) * chrH);
+		const int x_pos = ((chr & 15) * chrW) / 2;
+
+		uint8_t *pos = &img[(y_pos * pitch) + x_pos];
+		// TODO: Support chrW != 8.
+		const uint8_t *p_chr_data = &fontData[chr * chrH];
+		for (int y = 0; y < chrH; y++, pos += (pitch - (chrW/2)), p_chr_data++) {
+			uint8_t chr_data = *p_chr_data;
+			for (int x = chrW; x > 0; x -= 2, chr_data <<= 2) {
+				uint8_t px = ((chr_data & 0x80) ? 0xF0 : 0x00);
+				px |=        ((chr_data & 0x40) ? 0x0F : 0x00);
+				*pos++ = px;
+			}
+		}
+	}
+
+	// Return the data.
+	if (p_chrW) {
+		*p_chrW = chrW;
+	}
+	if (p_chrW) {
+		*p_chrH = chrH;
+	}
+	if (p_sz) {
+		*p_sz = sz;
+	}
+	return img;
+}
+
 }

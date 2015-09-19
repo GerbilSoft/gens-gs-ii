@@ -52,6 +52,20 @@ class OsdFontLoader {
 		 */
 		static void *load_A8(const char *name,
 			uint8_t *p_chrW, uint8_t *p_chrH, unsigned int *p_sz);
+
+		// TODO: ifdef out for non-embedded?
+		/**
+		 * Load a font as 4-bit grayscale. (I4)
+		 * @param name		[in]  Font name.
+		 * @param p_chrW	[out] Character width.
+		 * @param p_chrH	[out] Character height.
+		 * @param p_sz		[out] Size of allocated data, in bytes.
+		 * @return Allocated image data, or nullptr on error.
+		 * Caller must free the image data using free().
+		 * TODO: This may be switched to aligned_malloc() / aligned_free() later.
+		 */
+		static void *load_A4(const char *name,
+			uint8_t *p_chrW, uint8_t *p_chrH, unsigned int *p_sz);
 };
 
 }
