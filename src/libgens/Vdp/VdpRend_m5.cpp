@@ -34,15 +34,17 @@
 #include "macros/common.h"
 
 // TODO: Maybe move these to class enum constants?
-#define LINEBUF_HIGH_B	0x80
-#define LINEBUF_SHAD_B	0x40
-#define LINEBUF_PRIO_B	0x01
-#define LINEBUF_SPR_B	0x20
-#define LINEBUF_WIN_B	0x02
+#define LINEBUF_HIGH_B	0x80	/* Highlighted. */
+#define LINEBUF_SHAD_B	0x40	/* Shadowed. */
+#define LINEBUF_PRIO_B	0x01	/* High priority. */
+#define LINEBUF_SPRSH_B	0x10	/* Sprite pixel is a shadow/highlight operator. */
+#define LINEBUF_SPR_B	0x20	/* Sprite pixel. */
+#define LINEBUF_WIN_B	0x02	/* Window pixel. */
 
 #define LINEBUF_HIGH_W	0x8080
 #define LINEBUF_SHAD_W	0x4040
 #define LINEBUF_PRIO_W	0x0100
+#define LINEBUF_SPRSH_W	0x1000
 #define LINEBUF_SPR_W	0x2000
 #define LINEBUF_WIN_W	0x0200
 
@@ -248,20 +250,26 @@ FORCE_INLINE uint8_t VdpPrivate::T_PutPixel_Sprite(int disp_pixnum, uint32_t pat
 
 		// Return the original linebuffer priority data.
 		return layer_bits;
+	} else if (h_s && (layer_bits & LINEBUF_SPRSH_B)) {
+		// A sprite shadow/highlight operator has already been applied.
+		// This pixel is masked.
+		return layer_bits;
 	}
 
 	// Shift the pixel and apply the palette.
 	px = ((px >> shift) | palette);
 
 	if (h_s) {
-		// Highlight/Shadow enabled.
+		// Shadow/Highlight enabled.
+		// NOTE: S/H operators not only mask this sprite,
+		// they mask all other sprites as well.
 		if (px == 0x3E) {
 			// Palette 3, color 14: Highlight. (Sprite pixel doesn't show up.)
-			LineBuf.u16[LineBuf_pixnum] |= LINEBUF_HIGH_W;
+			LineBuf.u16[LineBuf_pixnum] |= (LINEBUF_HIGH_W | LINEBUF_SPRSH_W);
 			return 0;
 		} else if (px == 0x3F) {
 			// Palette 3, color 15: Shadow. (Sprite pixel doesn't show up.)
-			LineBuf.u16[LineBuf_pixnum] |= LINEBUF_SHAD_W;
+			LineBuf.u16[LineBuf_pixnum] |= (LINEBUF_SHAD_W | LINEBUF_SPRSH_W);
 			return 0;
 		}
 
