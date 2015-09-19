@@ -35,53 +35,53 @@
 //   - https://en.wikipedia.org/wiki/Control_register
 
 // CR0.EM: FPU emulation.
-#define IA32_CR0_EM		(1 << 2)
+#define IA32_CR0_EM		(1U << 2)
 
 // CPUID function 1: Processor Info and Feature Bits
 
 // Flags stored in the %edx register.
-#define CPUFLAG_IA32_EDX_MMX		((uint32_t)(1 << 23))
-#define CPUFLAG_IA32_EDX_FXSAVE		((uint32_t)(1 << 24))
-#define CPUFLAG_IA32_EDX_SSE		((uint32_t)(1 << 25))
-#define CPUFLAG_IA32_EDX_SSE2		((uint32_t)(1 << 26))
+#define CPUFLAG_IA32_EDX_MMX		((uint32_t)(1U << 23))
+#define CPUFLAG_IA32_EDX_FXSAVE		((uint32_t)(1U << 24))
+#define CPUFLAG_IA32_EDX_SSE		((uint32_t)(1U << 25))
+#define CPUFLAG_IA32_EDX_SSE2		((uint32_t)(1U << 26))
 
 // Flags stored in the %ecx register.
-#define CPUFLAG_IA32_ECX_SSE3		((uint32_t)(1 << 0))
-#define CPUFLAG_IA32_ECX_SSSE3		((uint32_t)(1 << 9))
-#define CPUFLAG_IA32_ECX_SSE41		((uint32_t)(1 << 19))
-#define CPUFLAG_IA32_ECX_SSE42		((uint32_t)(1 << 20))
-#define CPUFLAG_IA32_ECX_XSAVE		((uint32_t)(1 << 26))
-#define CPUFLAG_IA32_ECX_OSXSAVE	((uint32_t)(1 << 27))
-#define CPUFLAG_IA32_ECX_AVX		((uint32_t)(1 << 28))
-#define CPUFLAG_IA32_ECX_FMA3		((uint32_t)(1 << 12))
+#define CPUFLAG_IA32_ECX_SSE3		((uint32_t)(1U << 0))
+#define CPUFLAG_IA32_ECX_SSSE3		((uint32_t)(1U << 9))
+#define CPUFLAG_IA32_ECX_SSE41		((uint32_t)(1U << 19))
+#define CPUFLAG_IA32_ECX_SSE42		((uint32_t)(1U << 20))
+#define CPUFLAG_IA32_ECX_XSAVE		((uint32_t)(1U << 26))
+#define CPUFLAG_IA32_ECX_OSXSAVE	((uint32_t)(1U << 27))
+#define CPUFLAG_IA32_ECX_AVX		((uint32_t)(1U << 28))
+#define CPUFLAG_IA32_ECX_FMA3		((uint32_t)(1U << 12))
 
 // CPUID function 7: Extended Features
 
 // Flags stored in the %ebx register.
-#define CPUFLAG_IA32_FN7_EBX_AVX2	((uint32_t)(1 << 5))
+#define CPUFLAG_IA32_FN7_EBX_AVX2	((uint32_t)(1U << 5))
 
 // CPUID function 0x80000001: Extended Processor Info and Feature Bits
 
 // Flags stored in the %edx register.
-#define CPUFLAG_IA32_EXT_EDX_MMXEXT	((uint32_t)(1 << 22))
-#define CPUFLAG_IA32_EXT_EDX_3DNOW	((uint32_t)(1 << 31))
-#define CPUFLAG_IA32_EXT_EDX_3DNOWEXT	((uint32_t)(1 << 30))
+#define CPUFLAG_IA32_EXT_EDX_MMXEXT	((uint32_t)(1U << 22))
+#define CPUFLAG_IA32_EXT_EDX_3DNOW	((uint32_t)(1U << 31))
+#define CPUFLAG_IA32_EXT_EDX_3DNOWEXT	((uint32_t)(1U << 30))
 
 // Flags stored in the %ecx register.
-#define CPUFLAG_IA32_EXT_ECX_SSE4A	((uint32_t)(1 << 6))
-#define CPUFLAG_IA32_EXT_ECX_F16C	((uint32_t)(1 << 29))
-#define CPUFLAG_IA32_EXT_ECX_XOP	((uint32_t)(1 << 11))
-#define CPUFLAG_IA32_EXT_ECX_FMA4	((uint32_t)(1 << 16))
+#define CPUFLAG_IA32_EXT_ECX_SSE4A	((uint32_t)(1U << 6))
+#define CPUFLAG_IA32_EXT_ECX_F16C	((uint32_t)(1U << 29))
+#define CPUFLAG_IA32_EXT_ECX_XOP	((uint32_t)(1U << 11))
+#define CPUFLAG_IA32_EXT_ECX_FMA4	((uint32_t)(1U << 16))
 
 // CPUID functions.
-#define CPUID_MAX_FUNCTIONS			((uint32_t)(0x00000000))
-#define CPUID_PROC_INFO_FEATURE_BITS		((uint32_t)(0x00000001))
-#define CPUID_EXT_FEATURES			((uint32_t)(0x00000007))
-#define CPUID_MAX_EXT_FUNCTIONS			((uint32_t)(0x80000000))
-#define CPUID_EXT_PROC_INFO_FEATURE_BITS	((uint32_t)(0x80000001))
-#define CPUID_EXT_PROC_BRAND_STRING_1		((uint32_t)(0x80000002))
-#define CPUID_EXT_PROC_BRAND_STRING_2		((uint32_t)(0x80000003))
-#define CPUID_EXT_PROC_BRAND_STRING_3		((uint32_t)(0x80000004))
+#define CPUID_MAX_FUNCTIONS			((uint32_t)(0x00000000U))
+#define CPUID_PROC_INFO_FEATURE_BITS		((uint32_t)(0x00000001U))
+#define CPUID_EXT_FEATURES			((uint32_t)(0x00000007U))
+#define CPUID_MAX_EXT_FUNCTIONS			((uint32_t)(0x80000000U))
+#define CPUID_EXT_PROC_INFO_FEATURE_BITS	((uint32_t)(0x80000001U))
+#define CPUID_EXT_PROC_BRAND_STRING_1		((uint32_t)(0x80000002U))
+#define CPUID_EXT_PROC_BRAND_STRING_2		((uint32_t)(0x80000003U))
+#define CPUID_EXT_PROC_BRAND_STRING_3		((uint32_t)(0x80000004U))
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400
 // __cpuid() was added in MSVC 2005.

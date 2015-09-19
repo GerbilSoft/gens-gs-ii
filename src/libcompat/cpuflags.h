@@ -46,25 +46,25 @@ extern "C" {
     defined(_M_IX86) || defined(_M_X64)
 
 /*! BEGIN: MDP v1.0 CPU flags. !*/
-#define MDP_CPUFLAG_X86_MMX		((uint32_t)(1 << 0))
-#define MDP_CPUFLAG_X86_MMXEXT		((uint32_t)(1 << 1))	/* AMD only */
-#define MDP_CPUFLAG_X86_3DNOW		((uint32_t)(1 << 2))	/* AMD only */
-#define MDP_CPUFLAG_X86_3DNOWEXT	((uint32_t)(1 << 3))	/* AMD only */
-#define MDP_CPUFLAG_X86_SSE		((uint32_t)(1 << 4))
-#define MDP_CPUFLAG_X86_SSE2		((uint32_t)(1 << 5))
-#define MDP_CPUFLAG_X86_SSE3		((uint32_t)(1 << 6))
-#define MDP_CPUFLAG_X86_SSSE3		((uint32_t)(1 << 7))
-#define MDP_CPUFLAG_X86_SSE41		((uint32_t)(1 << 8))
-#define MDP_CPUFLAG_X86_SSE42		((uint32_t)(1 << 9))
-#define MDP_CPUFLAG_X86_SSE4A		((uint32_t)(1 << 10))
+#define MDP_CPUFLAG_X86_MMX		((uint32_t)(1U << 0))
+#define MDP_CPUFLAG_X86_MMXEXT		((uint32_t)(1U << 1))	/* AMD only */
+#define MDP_CPUFLAG_X86_3DNOW		((uint32_t)(1U << 2))	/* AMD only */
+#define MDP_CPUFLAG_X86_3DNOWEXT	((uint32_t)(1U << 3))	/* AMD only */
+#define MDP_CPUFLAG_X86_SSE		((uint32_t)(1U << 4))
+#define MDP_CPUFLAG_X86_SSE2		((uint32_t)(1U << 5))
+#define MDP_CPUFLAG_X86_SSE3		((uint32_t)(1U << 6))
+#define MDP_CPUFLAG_X86_SSSE3		((uint32_t)(1U << 7))
+#define MDP_CPUFLAG_X86_SSE41		((uint32_t)(1U << 8))
+#define MDP_CPUFLAG_X86_SSE42		((uint32_t)(1U << 9))
+#define MDP_CPUFLAG_X86_SSE4A		((uint32_t)(1U << 10))
 /*! END: MDP v1.0 CPU flags. !*/
 /*! BEGIN: MDP v1.x CPU flags. (TODO: Add to MDP.) */
-#define MDP_CPUFLAG_X86_AVX		((uint32_t)(1 << 11))
-#define MDP_CPUFLAG_X86_F16C		((uint32_t)(1 << 12))	/* AMD only */
-#define MDP_CPUFLAG_X86_XOP		((uint32_t)(1 << 13))	/* AMD only */
-#define MDP_CPUFLAG_X86_FMA4		((uint32_t)(1 << 14))	/* AMD only */
-#define MDP_CPUFLAG_X86_FMA3		((uint32_t)(1 << 15))
-#define MDP_CPUFLAG_X86_AVX2		((uint32_t)(1 << 16))
+#define MDP_CPUFLAG_X86_AVX		((uint32_t)(1U << 11))
+#define MDP_CPUFLAG_X86_F16C		((uint32_t)(1U << 12))	/* AMD only */
+#define MDP_CPUFLAG_X86_XOP		((uint32_t)(1U << 13))	/* AMD only */
+#define MDP_CPUFLAG_X86_FMA4		((uint32_t)(1U << 14))	/* AMD only */
+#define MDP_CPUFLAG_X86_FMA3		((uint32_t)(1U << 15))
+#define MDP_CPUFLAG_X86_AVX2		((uint32_t)(1U << 16))
 // TODO: Bit manipulation instructions?
 // NOTE: Some implementations of certain instruction sets
 // may be slower on older CPUs, e.g. SSE2 on Core 1.
@@ -73,10 +73,10 @@ extern "C" {
 //   but may be slow in certain cases. (Benchmarking is needed.)
 // - If SSE2 is not set and SSE2SLOW is set, SSE2 is almost
 //   always slower and should not be used.
-#define MDP_CPUFLAG_X86_SSE2SLOW	((uint32_t)(1 << 31))
-#define MDP_CPUFLAG_X86_SSE3SLOW	((uint32_t)(1 << 30))
-#define MDP_CPUFLAG_X86_ATOM		((uint32_t)(1 << 29))	/* slow SSSE3 */
-#define MDP_CPUFLAG_X86_AVXSLOW		((uint32_t)(1 << 28))
+#define MDP_CPUFLAG_X86_SSE2SLOW	((uint32_t)(1U << 31))
+#define MDP_CPUFLAG_X86_SSE3SLOW	((uint32_t)(1U << 30))
+#define MDP_CPUFLAG_X86_ATOM		((uint32_t)(1U << 29))	/* slow SSSE3 */
+#define MDP_CPUFLAG_X86_AVXSLOW		((uint32_t)(1U << 28))
 /*! END: MDP v1.x CPU flags. !*/
 
 #endif /* defined(__i386__) || defined(__amd64__) || defined(__x86_64__) */
