@@ -44,9 +44,8 @@ using std::vector;
 // GL Texture wrapper.
 #include "GLTex.hpp"
 
-// OSD fonts.
-#include "OsdFont_VGA.hpp"
-#include "OsdFont_C64.hpp"
+// OSD font loader.
+#include "OsdFontLoader.hpp"
 
 // ZOMG image data.
 #include "libzomg/img_data.h"
@@ -83,8 +82,8 @@ class OsdGLPrivate {
 		// Timer.
 		LibGens::Timing timer;
 
-		// OSD font.
-		const OsdFont *font;
+		// OSD font properties.
+		uint8_t chrW, chrH;
 
 		// OSD queue.
 		// NOTE: Manually allocating objects.
@@ -182,7 +181,7 @@ const double OsdGLPrivate::ortho_default[4] = {0.0, 320.0, 240.0, 0.0};
 /** OsdGLPrivate **/
 
 OsdGLPrivate::OsdGLPrivate()
-	: font(&VGA_font)
+	: chrW(0), chrH(0)
 	, displayList(0)
 	, dirty(true)
 	, fpsEnabled(false)
@@ -225,31 +224,15 @@ void OsdGLPrivate::reallocOsdTexture()
 		}
 	}
 
-	// Create the GL image.
-	// Using GL_ALPHA.
-	// TODO: Optimize this?
-	const uint8_t chrW = font->w;
-	const uint8_t chrH = font->h;
-	const uint8_t *fontData = font->data;
-
-	uint8_t *glImage = (uint8_t*)malloc(256 * chrW * chrH);
-	// Converting 1bpp characters to 8bpp.
-	// pitch = 8 pixels per character; 16 per line.
-	const int pitch = chrW * 16;
-	for (int chr = 0; chr < 256; chr++) {
-		const int y_pos = (chr / 16) * chrH;
-		const int x_pos = (chr & 15) * chrW;
-
-		uint8_t *pos = &glImage[(y_pos * pitch) + x_pos];
-		// TODO: Support chrW != 8.
-		const uint8_t *p_chr_data = &fontData[chr * chrH];
-		for (int y = 0; y < chrH; y++, pos += (pitch - chrW), p_chr_data++) {
-			uint8_t chr_data = *p_chr_data;
-			for (int x = chrW; x > 0; x--, chr_data <<= 1) {
-				*pos = ((chr_data & 0x80) ? 0xFF : 0);
-				pos++;
-			}
-		}
+	// Load the OSD font.
+	void *glImage = OsdFontLoader::load_A8("VGA", &chrW, &chrH, nullptr);
+	if (!glImage) {
+		// Error loading the font.
+		// TODO: Show an error message?
+		chrW = 0;
+		chrH = 0;
+		texOsd.dealloc();
+		return;
 	}
 
 	// Allocate the texture.
@@ -270,10 +253,6 @@ void OsdGLPrivate::reallocOsdTexture()
  */
 void OsdGLPrivate::printLine(int x, int y, const std::string &msg)
 {
-	// TODO: Wordwrapping.
-	const int chrW = font->w;
-	const int chrH = font->h;
-
 	// TODO: Precalculate vertices?
 	const int len = (int)msg.size();
 	// TODO: Allocate once, and reallocate if a larger one is needed?
@@ -288,7 +267,7 @@ void OsdGLPrivate::printLine(int x, int y, const std::string &msg)
 			break;
 
 		// Vertex coordinates.
-		GLTex::toCoords(&vtx[i*8], x, y, chrW, chrH);
+		GLTex::toCoords(&vtx[i*8], x, y, (int)chrW, (int)chrH);
 		// Texture coordinates.
 		memcpy(&txc[i*8], &osdVertex[chr][0], sizeof(osdVertex[chr]));
 	}
@@ -668,9 +647,7 @@ void OsdGL::draw(void)
 	glBindTexture(GL_TEXTURE_2D, d->texOsd.name);
 
 	// TODO: Adjust for visible texture size.
-	const uint8_t chrW = d->font->w;
-	const uint8_t chrH = d->font->h;
-	int y = (240 - chrH);
+	int y = (240 - d->chrH);
 
 	// Print from top to bottom to avoid collisions
 	// with the drop shadow. (C64 font)
@@ -692,7 +669,7 @@ void OsdGL::draw(void)
 		}
 
 		// Process this message.
-		y -= chrH;
+		y -= d->chrH;
 		firstIdx = i;
 	}
 
@@ -718,12 +695,12 @@ void OsdGL::draw(void)
 		}
 		// TODO: Make the drop shadow optional.
 		glColor4f(0.0f, 0.0f, 0.0f, alpha);
-		d->printLine(chrW+1, y+1, osdMsg->msg);
+		d->printLine(d->chrW+1, y+1, osdMsg->msg);
 		d->setGLColor(d->msgColor, alpha);
-		d->printLine(chrW, y, osdMsg->msg);
+		d->printLine(d->chrW, y, osdMsg->msg);
 
 		// Next line.
-		y += chrH;
+		y += d->chrH;
 	}
 
 	// Done with vertex and texture coordinate arrays.
@@ -814,7 +791,7 @@ void OsdGL::print(unsigned int duration, const char *msg)
 
 	// Number of characters per line.
 	// 2 characters margin on the sides.
-	const int line_w = (320 / d->font->w) - 2;
+	const int line_w = (320 / d->chrW) - 2;
 
 	// Check for newlines and/or text wrapping.
 	// TODO: Actual word wrapping instead of just text wrapping.

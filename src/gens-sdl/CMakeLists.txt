@@ -75,6 +75,7 @@ SET(gens-sdl_OSD_SRCS
 	Osd/OsdGL.cpp
 	Osd/OsdFont_VGA.cpp
 	Osd/OsdFont_C64.cpp
+	Osd/OsdFontLoader.cpp
 	)
 
 # OSD headers.
@@ -82,6 +83,7 @@ SET(gens-sdl_OSD_H
 	Osd/OsdGL.hpp
 	Osd/OsdFont_VGA.hpp
 	Osd/OsdFont_C64.hpp
+	Osd/OsdFontLoader.hpp
 	)
 
 # Shader sources.
