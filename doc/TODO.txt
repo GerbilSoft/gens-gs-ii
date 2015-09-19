@@ -21,6 +21,9 @@ Infrastructure:
 - Remove automatic GPL printout from libgens startup.
   - Just print out libgens version information.
   - GPL can be printed using various options.
+- Use gcc/clang version detection like this:
+  - https://github.com/qtproject/qtbase/commit/561ccd7ca3db39f74ee0dc3966d3c6a9234186b4
+  - Check whole file for OS X Clang detection as well.
 
 Sega Pico:
 - Add pen support.
@@ -48,7 +51,8 @@ Windows:
   - https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247%28v=vs.85%29.aspx
 - W32U_mini.c: Use GetVersionEx() instead of GetModuleHandleW().
   - KernelEx implements GetModuleHandleW().
-- aligned_malloc(): Return with an error if alignment is 0
+- http://blogs.msdn.com/b/vcblog/archive/2014/06/18/crt-features-fixes-and-breaking-changes-in-visual-studio-14-ctp1.aspx
+  - aligned_malloc(): Return with an error if alignment is 0
 - MinGW: Define __MINGW_MSVC_COMPAT_WARNINGS
   - See _mingw_mac.h.
 
