@@ -39,7 +39,7 @@ using LibGens::FastBlur;
 #include <GL/glew.h>
 
 // Onscreen Display.
-#include "OsdGL.hpp"
+#include "Osd/OsdGL.hpp"
 
 // GL Texture wrpaper.
 #include "GLTex.hpp"
