@@ -26,6 +26,9 @@
 #include "libgens/Rom.hpp"
 using LibGens::Rom;
 
+// EmuManager::SysAbbrev()
+#include "../EmuManager.hpp"
+
 // Qt includes.
 #include <QtCore/QList>
 #include <QtCore/QDir>
@@ -109,14 +112,6 @@ void RecentRomsMenuPrivate::update(void)
 	}
 
 	// Create new QActions from the Recent ROMs list.
-	// TODO: Move the ROM format prefixes somewhere else.
-	static const char RomFormatPrefix[Rom::MDP_SYSTEM_MAX][8] =
-	{
-		"---", "MD", "MCD", "32X",
-		"MCD,32X", "SMS", "GG", "SG",
-		"Pico"
-		// TODO: ColecoVision.
-	};
 
 	//: %1 = menu index; %2 = system abbreviation; %3 = filename.
 	const QString title_template = RecentRoms::tr("&%1 [%2] %3");
@@ -129,13 +124,9 @@ void RecentRomsMenuPrivate::update(void)
 	QString filename;
 	foreach (const RecentRom_t& rom, recentRoms->romList()) {
 		// System ID.
-		const char *sysAbbrev;
-		if (rom.sysId >= Rom::MDP_SYSTEM_UNKNOWN &&
-		    rom.sysId < Rom::MDP_SYSTEM_MAX)
-		{
-			sysAbbrev = RomFormatPrefix[rom.sysId];
-		} else {
-			sysAbbrev = RomFormatPrefix[Rom::MDP_SYSTEM_UNKNOWN];
+		QString sysAbbrev = EmuManager::SysAbbrev(rom.sysId);
+		if (sysAbbrev.isEmpty()) {
+			sysAbbrev = QLatin1String("---");
 		}
 
 		// Remove directories from the filename.
@@ -155,16 +146,16 @@ void RecentRomsMenuPrivate::update(void)
 			QString z_filename = rom.z_filename;
 			z_filename.replace(QChar(L'&'), QLatin1String("&&"));
 			title = title_z_template
-				.arg(i)				// ROM index.
-				.arg(QLatin1String(sysAbbrev))	// System abbreviation.
-				.arg(filename)			// ROM filename, minus directories.
-				.arg(z_filename);		// Compressed filename.
+				.arg(i)			// ROM index.
+				.arg(sysAbbrev)		// System abbreviation.
+				.arg(filename)		// ROM filename, minus directories.
+				.arg(z_filename);	// Compressed filename.
 		} else {
 			// No compressed filename.
 			title = title_template
-				.arg(i)				// ROM index.
-				.arg(QLatin1String(sysAbbrev))	// System abbreviation.
-				.arg(filename);			// ROM filename, minus directories.
+				.arg(i)			// ROM index.
+				.arg(sysAbbrev)		// System abbreviation.
+				.arg(filename);		// ROM filename, minus directories.
 		}
 
 		// Create the QAction.
