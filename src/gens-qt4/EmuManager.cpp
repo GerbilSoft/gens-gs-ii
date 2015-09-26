@@ -683,6 +683,18 @@ QString EmuManager::sysName(void)
 }
 
 /**
+ * Get the system abbreviation for the active ROM.
+ * @return System abbreviation, or empty string if unknown or no ROM is loaded.
+ */
+QString EmuManager::sysAbbrev(void)
+{
+	if (!m_rom || !gqt4_emuContext)
+		return QString();
+
+	return SysAbbrev(m_rom->sysId());
+}
+
+/**
  * Get the savestate filename.
  * TODO: Move savestate code to another file?
  * NOTE: Returned filename uses Qt directory separators. ('/')
