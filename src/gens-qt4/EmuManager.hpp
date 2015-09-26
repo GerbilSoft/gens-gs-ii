@@ -232,7 +232,7 @@ class EmuManager : public QObject
 		static QString LgRegionCodeStr(LibGens::SysVersion::RegionCode_t region);
 
 		/**
-		 * StrMD(): Get a string identifying a given region code. (MD hex code)
+		 * Get a string identifying a given region code. (MD hex code)
 		 * @param region Region code.
 		 * @return Region code string, or empty string on error.
 		 */
@@ -255,7 +255,15 @@ class EmuManager : public QObject
 		static QString SysName_l(LibGens::Rom::MDP_SYSTEM_ID sysId);
 
 		/**
-		 * RomFormat(): Get the ROM format name for the specified ROM format ID.
+		 * Get the system abbreviation for the specified system ID.
+		 * (TODO: Localized/unlocalized?)
+		 * @param sysID System ID.
+		 * @return System abbreviation, or empty string on error.
+		 */
+		static QString SysAbbrev(LibGens::Rom::MDP_SYSTEM_ID sysId);
+
+		/**
+		 * Get the ROM format name for the specified ROM format ID.
 		 * @param romFormat ROM format ID.
 		 * @return ROM format name, or empty string on error.
 		 */
