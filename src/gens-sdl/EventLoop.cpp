@@ -24,6 +24,8 @@
 // _POSIX_SOURCE and _POSIX_C_SOURCE definitions.
 #include "libcompat/reentrant.h"
 
+#include <config.gens-sdl.h>
+
 #include "EventLoop.hpp"
 #include "gens-sdl.hpp"
 
@@ -195,13 +197,21 @@ void EventLoopPrivate::updateWindowTitle(void)
 	// prefix the window title.
 	const char *paused_prefix = (paused.manual ? "[Paused] " : "");
 
+#ifdef GENS_ENABLE_EMULATION
+#define NOEMU_PREFIX
+#else /* !GENS_ENABLE_EMULATION */
+#define NOEMU_PREFIX "[NO-EMU] "
+#endif
+
 	if (clks.fps > 0) {
-		snprintf(title, sizeof(title), "%s%s (%u fps)",
+		snprintf(title, sizeof(title),
+			 NOEMU_PREFIX "%s%s (%u fps)",
 			 paused_prefix,
 			 this->win_title.c_str(),
 			 clks.fps);
 	} else {
-		snprintf(title, sizeof(title), "%s%s",
+		snprintf(title, sizeof(title),
+			 NOEMU_PREFIX "%s%s",
 			 paused_prefix,
 			 this->win_title.c_str());
 	}
