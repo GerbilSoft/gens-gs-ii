@@ -454,7 +454,7 @@ void EmuLoopPrivate::updateWinTitleInfo(void)
 			winTitle = "[32X]";
 			break;
 		case Rom::MDP_SYSTEM_MCD32X:
-			winTitle = "[MCD32X]";
+			winTitle = "[MCD,32X]";
 			break;
 		case Rom::MDP_SYSTEM_SMS:
 			winTitle = "[SMS]";
