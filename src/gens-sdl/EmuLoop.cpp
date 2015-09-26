@@ -69,6 +69,9 @@ using LibZomg::Zomg;
 // Command line parameters.
 #include "Options.hpp"
 
+// C includes. (C++ namespace)
+#include <cassert>
+
 // C++ includes.
 #include <string>
 using std::string;
@@ -142,9 +145,11 @@ class EmuLoopPrivate : public EventLoopPrivate
 		void doScreenShot(void);
 
 		/**
-		 * Update the window title using the ROM name.
+		 * Update the window title information.
+		 * This uses the system abbreviation
+		 * and the ROM name.
 		 */
-		void updateRomName(void);
+		void updateWinTitleInfo(void);
 };
 
 /** EmuLoopPrivate **/
@@ -399,9 +404,11 @@ void EmuLoopPrivate::doScreenShot(void)
 }
 
 /**
- * Update the window title using the ROM name.
+ * Update the window title information.
+ * This uses the system abbreviation
+ * and the ROM name.
  */
-void EmuLoopPrivate::updateRomName(void)
+void EmuLoopPrivate::updateWinTitleInfo(void)
 {
 	string romName;
 
@@ -432,8 +439,49 @@ void EmuLoopPrivate::updateRomName(void)
 		romName = rom->filename_baseNoExt();
 	}
 
-	// Set the window title to the ROM's name.
-	updateWindowTitle(romName.c_str());
+	// Get the system abbreviation.
+	// TODO: Split into a separate function?
+	string winTitle;
+	assert(rom->sysId() > Rom::MDP_SYSTEM_UNKNOWN && rom->sysId() < Rom::MDP_SYSTEM_MAX);
+	switch (rom->sysId()) {
+		case Rom::MDP_SYSTEM_MD:
+			winTitle = "[MD]";
+			break;
+		case Rom::MDP_SYSTEM_MCD:
+			winTitle = "[MCD]";
+			break;
+		case Rom::MDP_SYSTEM_32X:
+			winTitle = "[32X]";
+			break;
+		case Rom::MDP_SYSTEM_MCD32X:
+			winTitle = "[MCD32X]";
+			break;
+		case Rom::MDP_SYSTEM_SMS:
+			winTitle = "[SMS]";
+			break;
+		case Rom::MDP_SYSTEM_GG:
+			winTitle = "[GG]";
+			break;
+		case Rom::MDP_SYSTEM_SG1000:
+			winTitle = "[SG]";
+			break;
+		case Rom::MDP_SYSTEM_PICO:
+			winTitle = "[Pico]";
+			break;
+		default:
+			break;
+	}
+
+	// Append the ROM's name.
+	if (!romName.empty()) {
+		if (!winTitle.empty()) {
+			winTitle += ' ';
+		}
+		winTitle += romName;
+	}
+
+	// Set the window title.
+	updateWindowTitle(winTitle.c_str());
 }
 
 /** EmuLoop **/
@@ -660,11 +708,11 @@ int EmuLoop::run(const Options *options)
 	bool isPal = false;
 	d->setFrameTiming(isPal ? 50 : 60);
 
-	// Update the ROM name and the window title.
+	// Update the window title information.
 	// FIXME: On my XP VM, there's a slight pause while
 	// loading where it shows "Gens/GS II [SDL]", then
 	// it gets changed to the ROM name.
-	d->updateRomName();
+	d->updateWinTitleInfo();
 
 	// TODO: Close the ROM, or let EmuContext do it?
 
