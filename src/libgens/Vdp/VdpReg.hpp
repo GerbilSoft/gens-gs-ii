@@ -46,7 +46,7 @@ namespace VdpTypes {
 
 			/**
 			 * Register 0: Mode Set 1.
-			 * [   0    0   LCB  IE1    0 PSEL   M3    0]
+			 * [   0    0   LCB  IE1 HSTG PSEL   M3 EXTV]
 			 * 
 			 * LCB: Left Column Blank. SMS VDP leftover; if set, masks the first 8 pixels
 			 *      with the background color. (SG-1000 MkII and later)
@@ -54,6 +54,14 @@ namespace VdpTypes {
 			 * M4/PSEL: Palette Select. If clear, masks high two bits of each CRam color component.
 			 *          If M5 is off, acts like M4 instead of PSEL.
 			 * M3: HV counter latch. (1 == stop HV counter; 0 == enable read, H, V counter)
+			 *
+			 * NOTE: The following bits are not emulated.
+			 *
+			 * HSTG: Toggle HSync every line. This causes shenanigans and breaks H40.
+			 *       Set this bit to 0.
+			 * EXTV: 1 == Enables the EXTernal Video function.
+			 *       Uses CSync pin as external video signal.
+			 *       If enabled and nothing is connected to CSync, screen will blank.
 			 */
 			uint8_t Set1;
 
@@ -131,7 +139,7 @@ namespace VdpTypes {
 
 			/**
 			 * Register 11: Mode Set 3.
-			 * [   0    0    0    0  IE2 VSCR HSCR LSCR]
+			 * [PBUS LOCK    0    0  IE2 VSCR HSCR LSCR]
 			 * 
 			 * IE2: Enable external interrupt. (1 == on; 0 == off)
 			 * VSCR: V Scroll mode. (0 == full; 1 == 2-cell)
@@ -140,6 +148,15 @@ namespace VdpTypes {
 			 *   - 01 == invalid (first 8 entries used for whole screen)
 			 *   - 10 == per-cell
 			 *   - 11 == per-line
+			 *
+			 * NOTE: The following bits are not emulated.
+			 *
+			 * PBUS: 1 == Enables the external pixel bus.
+			 *       When enabled, the 6-bit palette index is placed on
+			 *       the pixel bus pins when rendering a pixel. This is
+			 *       used for Sega System C, C2, and 18.
+			 *       Has no effect on stock Mega Drive hardware.
+			 * LOCK: Locks up the system when set to 1.
 			 */
 			uint8_t Set3;
 
@@ -157,8 +174,10 @@ namespace VdpTypes {
 			 *
 			 * NOTE: The following bits are not emulated.
 			 *
-			 * SPR: 1 == Enables the external pixel bus.
-			 * HSY: 1 == Messes with horizontal sync.
+			 * SPR: 1 == Enables the SPA/B pin. Used when implementing
+			 *      external CRAM, e.g. on Sega System C, C2, and 18.
+			 *      SPA/B value is 0 for sprite pixel, 1 for non-sprite pixel.
+			 * HSY: 1 == Locks HSync to 1. Results in ~16 kHz H40 mode.
 			 * VSY: 1 == Replaces the VSync signal with the pixel clock.
 			 */
 			uint8_t Set4;
