@@ -147,11 +147,11 @@ uint8_t Vdp::readVCounter(void)
 
 	if (d->isH40()) {
 		// H40
-		H_Counter = d->H_Counter_Table[odo_68K][0];
+		H_Counter = d->H_Counter_Table[odo_68K][1];
 		bl = 0xA4;
 	} else {
 		// H32
-		H_Counter = d->H_Counter_Table[odo_68K][1];
+		H_Counter = d->H_Counter_Table[odo_68K][0];
 		bl = 0x84;
 	}
 
