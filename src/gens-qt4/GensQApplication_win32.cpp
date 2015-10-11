@@ -73,10 +73,10 @@ static int SetSecurityOptions(void)
 		pfnSetDep(PROCESS_DEP_ENABLE);
 
 	// Remove the current directory from the DLL search path.
-	typedef BOOL (WINAPI *PFNSETDLLDIRA)(LPCSTR lpPathName);
-	PFNSETDLLDIRA pfnSetDllDirectoryA = (PFNSETDLLDIRA)GetProcAddress(hKernel32, "SetDllDirectoryA");
-	if (pfnSetDllDirectoryA)
-		pfnSetDllDirectoryA("");
+	typedef BOOL (WINAPI *PFNSETDLLDIRW)(LPCWSTR lpPathName);
+	PFNSETDLLDIRW pfnSetDllDirectoryW = (PFNSETDLLDIRW)GetProcAddress(hKernel32, "SetDllDirectoryW");
+	if (pfnSetDllDirectoryW)
+		pfnSetDllDirectoryW(L"");
 
 	// Terminate the process if heap corruption is detected.
 	// NOTE: Parameter 2 is usually type enum HEAP_INFORMATION_CLASS,
