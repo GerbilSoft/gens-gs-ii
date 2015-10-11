@@ -60,8 +60,9 @@ extern void qWinMain(HINSTANCE, HINSTANCE, LPSTR, int, int &, QVector<char *> &)
 static int SetSecurityOptions(void)
 {
 	HMODULE hKernel32 = LoadLibraryA("kernel32.dll");
-	if (hKernel32 == nullptr)
+	if (hKernel32 == nullptr) {
 		return -1;
+	}
 
 	// Enable DEP/NX. (WinXP SP3, Vista, and later.)
 	// NOTE: DEP/NX should be specified in the PE header
@@ -69,14 +70,16 @@ static int SetSecurityOptions(void)
 	// just in case the linker doesn't support it.
 	typedef BOOL (WINAPI *PFNSETDEP)(DWORD dwFlags);
 	PFNSETDEP pfnSetDep = (PFNSETDEP)GetProcAddress(hKernel32, "SetProcessDEPPolicy");
-	if (pfnSetDep)
+	if (pfnSetDep) {
 		pfnSetDep(PROCESS_DEP_ENABLE);
+	}
 
 	// Remove the current directory from the DLL search path.
 	typedef BOOL (WINAPI *PFNSETDLLDIRW)(LPCWSTR lpPathName);
 	PFNSETDLLDIRW pfnSetDllDirectoryW = (PFNSETDLLDIRW)GetProcAddress(hKernel32, "SetDllDirectoryW");
-	if (pfnSetDllDirectoryW)
+	if (pfnSetDllDirectoryW) {
 		pfnSetDllDirectoryW(L"");
+	}
 
 	// Terminate the process if heap corruption is detected.
 	// NOTE: Parameter 2 is usually type enum HEAP_INFORMATION_CLASS,
@@ -91,8 +94,9 @@ static int SetSecurityOptions(void)
 		pfnHeapSetInformation(nullptr, 1, nullptr, 0);
 	}
 
-	if (hKernel32)
+	if (hKernel32) {
 		FreeLibrary(hKernel32);
+	}
 
 	return 0;
 }
