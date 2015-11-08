@@ -395,10 +395,16 @@ void VdpPrivate::vdpDataWrite_int(uint16_t data)
 			// odd addresses results in "interesting side effects".
 			// Those side effects aren't listed, so we're just going to
 			// mask the LSB for now.
+			// FIXME: "The Adventures of Batman and Robin" has problems if
+			// the address wraps around. Ignore addresses over 0x80 for now.
+			// Note that this breaks a test in VDPFIFOTesting:
+			// #22. DMA Transfer to CRAM Wrapping
 
 			// Write the word to CRam.
 			// CRam is 128 bytes. (64 words)
-			palette.writeCRam_16((address & 0x7E), data);
+			if (address < 0x80) {
+				palette.writeCRam_16((address & 0x7E), data);
+			}
 			break;
 
 		case VdpTypes::CD_DEST_VSRAM:
