@@ -35,12 +35,20 @@
 // W32U_IsUnicode()
 #include "is_unicode.h"
 
-// __wgetmainargs(), __getmainargs()
+#if defined(_MSC_VER) && _MSC_VER >= 1900
+// MSVC 2015 removed __wgetmainargs() and __getmainargs().
+// Use CommandLineToArgvW() instead.
+#include <shellapi.h>
+#define USE_COMMANDLINETOARGVW 1
+#endif
+
+#if !defined(USE_COMMANDLINETOARGVW)
 typedef struct {
 	int newmode;
 } _startupinfo;
 _CRTIMP int __cdecl __wgetmainargs(int * _Argc, wchar_t ***_Argv, wchar_t ***_Env, int _DoWildCard, _startupinfo *_StartInfo);
 _CRTIMP int __cdecl __getmainargs(int * _Argc, char ***_Argv, char ***_Env, int _DoWildCard, _startupinfo *_StartInfo);
+#endif
 
 // Converted parameters are stored here.
 static int saved_argcU = 0;
@@ -459,6 +467,92 @@ out:
 
 /** External functions **/
 
+typedef enum _AllocType {
+	ALLOC_NONE	= 0,
+	ALLOC_MALLOC,
+	ALLOC_LOCALALLOC,
+} AllocType;
+
+static inline void special_free(void *buf, AllocType allocType)
+{
+	switch (allocType) {
+		case ALLOC_NONE:
+		default:
+			// No allocation.
+			break;
+		case ALLOC_MALLOC:
+			// malloc()'d buffer - use free().
+			free(buf);
+			break;
+		case ALLOC_LOCALALLOC:
+			// LocalAlloc()'d buffer - use LocalFree().
+			LocalFree(buf);
+			break;
+	}
+}
+
+#ifdef USE_COMMANDLINETOARGVW
+/**
+ * Convert a Windows environment strings block to envpW.
+ * The allocated envpW contains pointers to the original
+ * environment strings, so it should not be freed or modified
+ * until envpW is freed.
+ * @param envStringsW Windows environment strings. (Use GetEnvironmentStringsW().)
+ * @return Allocated envpW(). (malloc()'d; use free() when finished.)
+ */
+static wchar_t **EnvironmentStringsToEnvpW(wchar_t *envStringsW)
+{
+	// NOTE: envStringsW and p_cur are NOT const.
+	// envpW isn't const, so in order to avoid lots of casting,
+	// we'll just use non-const variables.
+	wchar_t *p_cur;
+	wchar_t **envpW;
+	int envpW_cnt = 0;
+	int i;
+
+	// Convert envStringsW to envpW.
+	// - envStringsW = multiple null-terminated strings in a single buffer.
+	// - envpW = array of pointers pointing to the start of each string.
+
+	// Determine how many strings are in the environment.
+	// TODO: Optimize this?
+	for (p_cur = envStringsW; ; p_cur++) {
+		if (*p_cur == 0) {
+			// Found a NULL byte.
+			envpW_cnt++;
+			if (*(p_cur+1) == 0) {
+				// End of environment block.
+				break;
+			}
+		}
+	}
+
+	// Allocate envpW.
+	envpW = (wchar_t**)malloc((envpW_cnt+1) * sizeof(envpW));
+	if (!envpW)
+		return NULL;
+
+	// Store pointers to the actual environment data in envpW.
+	p_cur = envStringsW;
+	for (i = 0; i < envpW_cnt; i++) {
+		envpW[i] = p_cur;
+		// Find the next string.
+		for (; ; p_cur++) {
+			if (*p_cur == 0) {
+				// Found a NULL byte.
+				p_cur++;
+				break;
+			}
+		}
+	}
+
+	// Final entry is NULL.
+	envpW[envpW_cnt] = NULL;
+	return envpW;
+}
+
+#endif /* USE_COMMANDLINETOARGVW */
+
 /**
  * Convert the Windows command line to UTF-8.
  * @param p_argc	[out] Pointer to new argc.
@@ -472,6 +566,8 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 	int argcW = 0;
 	wchar_t **argvW = NULL;
 	wchar_t **envpW = NULL;
+	AllocType argvW_allocType = ALLOC_NONE;
+	AllocType envpW_allocType = ALLOC_NONE;
 	// Temporary variables.
 	int ret = -1;
 	// UTF-8 data.
@@ -496,7 +592,8 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 	if (!isUnicode) {
 #ifdef ENABLE_ANSI_WINDOWS
 		// ANSI. Use __getmainargs().
-		// TODO: Free these variables later.
+		argvW_allocType = ALLOC_MALLOC;
+		envpW_allocType = ALLOC_MALLOC;
 		ret = getArgvAtoW(&argcW, &argvW, &envpW);
 		if (ret != 0) {
 			// ERROR!
@@ -508,10 +605,44 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 		return ERROR_CALL_NOT_IMPLEMENTED;
 #endif /* ENABLE_ANSI_WINDOWS */
 	} else {
-		// Unicode. Use __wgetmainargs().
+		// Unicode.
+#ifdef USE_COMMANDLINETOARGVW
+		wchar_t *envStringsW;
+		// Use CommandLineToArgvW().
+		argvW = CommandLineToArgvW(GetCommandLineW(), &argcW);
+		// TODO: Verify argcW.
+		if (!argvW) {
+			// ERROR!
+			// TODO: What values?
+			goto out;
+		}
+		argvW_allocType = ALLOC_LOCALALLOC;
+
+		// NOTE: GetEnvironmentStringsW() is XP+.
+		// MSVC 2015 only targets XP+, so GetProcAddress()
+		// isn't necessary here.
+		envStringsW = GetEnvironmentStringsW();
+		if (!envStringsW) {
+			// ERROR!
+			// TODO: What values?
+			goto out;
+		}
+
+		// Convert envStringsW to envpW.
+		envpW = EnvironmentStringsToEnvpW(envStringsW);
+		if (!envpW) {
+			// ERROR!
+			// TODO: What values?
+			goto out;
+		}
+		envpW_allocType = ALLOC_MALLOC;
+#else
+		// Use __wgetmainargs().
 		// TODO: Get existing newmode from MSVCRT.
 		_startupinfo StartInfo;
 		StartInfo.newmode = 0;
+		argvW_allocType = ALLOC_NONE;
+		envpW_allocType = ALLOC_NONE;
 
 		// NOTE: __wgetmainargs() is in MSVC 2010+.
 		// MinGW-w64 should support it as well.
@@ -522,6 +653,7 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 			// TODO: What values?
 			goto out;
 		}
+#endif
 	}
 
 	// NOTE: Empty strings should still take up 1 character,
@@ -535,20 +667,20 @@ int W32U_GetArgvU(int *p_argc, char **p_argv[], char **p_envp[])
 	}
 
 	// Convert envpW from UTF-16 to UTF-8.
-	ret = convertEnvpWtoU((const wchar_t**)envpW, &envpU);
-	if (ret != 0) {
-		// An error occurred.
-		goto out;
+	if (envpW) {
+		ret = convertEnvpWtoU((const wchar_t**)envpW, &envpU);
+		if (ret != 0) {
+			// An error occurred.
+			goto out;
+		}
 	}
 
 out:
-	if (!isUnicode) {
-		// ANSI system.
-		// Free the temporary UTF-16 buffers.
-		free(argvW);
-		free(envpW);
-	}
-
+	// Free the Unicode variables depending on
+	// how they were allocated.
+	special_free(argvW, argvW_allocType);
+	special_free(envpW, envpW_allocType);
+	
 	if (ret != 0) {
 		// An error occurred.
 		free(argvU);
