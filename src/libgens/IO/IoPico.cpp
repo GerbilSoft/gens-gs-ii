@@ -24,8 +24,11 @@
 #include "IoPico.hpp"
 #include "lg_osd.h"
 
+// References:
+// - http://notaz.gp2x.de/docs/picodoc.txt
+
 // TODO: Add support for:
-// - Pen position.
+// - Pen position. (in progress)
 
 namespace LibGens { namespace IO {
 
@@ -166,6 +169,55 @@ uint8_t IoPico::picoCurPageReg(void) const
 {
 	static const uint8_t pg_reg[8] = {0x00, 0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3F, 0x3F};
 	return pg_reg[m_page_num & 7];
+}
+
+/**
+ * Read a Pico I/O port related to controller input.
+ * This maps to odd addresses in the range:
+ * - [800003, 80000D]
+ * @param address Address.
+ * @param d_out Data output.
+ * @return 0 on success; non-zero if address is invalid.
+ */
+int IoPico::picoReadIO(uint32_t address, uint8_t *d_out) const
+{
+	if ((address & 0xFFFFF1) != 0x800001) {
+		// Invalid address.
+		return -1;
+	}
+
+	int ret = 0;
+	switch (address & 0xF) {
+		case 0x3:
+			// Buttons.
+			*d_out = this->deviceData;
+			break;
+		case 0x5:
+			// Pen X coordinate, MSB.
+			*d_out = (m_adj_x >> 8);
+			break;
+		case 0x7:
+			// Pen X coordinate, LSB.
+			*d_out = (m_adj_x & 0xFF);
+			break;
+		case 0x9:
+			// Pen Y coordinate, MSB.
+			*d_out = (m_adj_y >> 8);
+			break;
+		case 0xB:
+			// Pen Y coordinate, LSB.
+			*d_out = (m_adj_y & 0xFF);
+			break;
+		case 0xD:
+			// Page register.
+			*d_out = picoCurPageReg();
+			break;
+		default:
+			ret = -1;
+			break;
+	}
+
+	return ret;
 }
 
 } }

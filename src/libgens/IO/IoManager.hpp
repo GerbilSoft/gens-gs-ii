@@ -104,6 +104,7 @@ class IoManager
 		 * Button read is mapped to Port 1.
 		 */
 		uint8_t picoReadButtons(void) const;
+		int picoReadIO(uint32_t address, uint8_t *d_out) const;
 
 		// Page register.
 		// FIXME: Huckle & Lowly's Busiest Day Ever don't have

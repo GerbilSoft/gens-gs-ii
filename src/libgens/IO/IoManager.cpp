@@ -707,7 +707,8 @@ uint8_t IoManager::picoReadButtons(void) const
 {
 	uint8_t ret = 0xFF;
 	const IO::Device *dev = d->ioDevices[VIRTPORT_1];
-	if (dev) {
+	// TODO: Remove the dev->type() check?
+	if (dev && dev->type() == IoManager::IOT_PICO) {
 		/**
 		 * Button layout: PudBRLDU
 		 * - P = pen button
@@ -722,10 +723,28 @@ uint8_t IoManager::picoReadButtons(void) const
 		 * - Add functionality to KeyManager?
 		 * - Create new controller based on Io3BTN that handles this?
 		 */
-		
+
 		ret &= (dev->getButtons() | 0x60);
 	}
 	return ret;
+}
+
+/**
+ * Read a Pico I/O port related to controller input.
+ * This maps to odd addresses in the range:
+ * - [800003, 80000D]
+ * @param address Address.
+ * @param d_out Data output.
+ * @return 0 on success; non-zero if address is invalid.
+ */
+int IoManager::picoReadIO(uint32_t address, uint8_t *d_out) const
+{
+	const IO::Device *dev = d->ioDevices[VIRTPORT_1];
+	if (dev && dev->type() == IoManager::IOT_PICO) {
+		const IO::IoPico *pico = (IO::IoPico*)dev;
+		return pico->picoReadIO(address, d_out);
+	}
+	return -1;
 }
 
 /**

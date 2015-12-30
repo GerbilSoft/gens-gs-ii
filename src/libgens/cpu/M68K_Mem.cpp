@@ -472,6 +472,7 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Pico_IO(uint32_t address)
 
 	LibGens::IoManager *const ioManager = EmuContext::m_ioManager;
 	uint8_t ret = 0xFF; // TODO: Default to prefetched data?
+
 	switch (address & 0x1F) {
 		case 0x01:
 			// Version register.
@@ -482,26 +483,17 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Pico_IO(uint32_t address)
 			// - 11: ??
 			// TODO: Verify this?
 			break;
-		case 0x03:
-			// Buttons.
-			ret = ioManager->picoReadButtons();
+		case 0x03: case 0x05: case 0x07:
+		case 0x09: case 0x0B: case 0x0D: {
+			// Controller I/O.
+			// NOTE: IoPico::picoReadIO() has its own switch/case.
+			int isIO = ioManager->picoReadIO(address, &ret);
+			if (isIO != 0) {
+				// Invalid address...
+				ret = 0xFF;
+			}
 			break;
-		case 0x05:
-			// Most-significant byte of pen X coordinate.
-			break;
-		case 0x07:
-			// Least-significant byte of pen X coordinate.
-			break;
-		case 0x09:
-			// Most-significant byte of pen Y coordinate.
-			break;
-		case 0x0B:
-			// Least-significant byte of pen Y coordinate.
-			break;
-		case 0x0D:
-			// Page register.
-			ret = ioManager->picoCurPageReg();
-			break;
+		}
 		case 0x10: case 0x11:
 			// ADPCM data register. (word)
 			// TODO: Return number of free bytes left in the PCM FIFO.

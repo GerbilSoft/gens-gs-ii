@@ -82,6 +82,16 @@ class IoPico : public Device
 		 */
 		uint8_t picoCurPageReg(void) const;
 
+		/**
+		 * Read a Pico I/O port related to controller input.
+		 * This maps to odd addresses in the range:
+		 * - [800003, 80000D]
+		 * @param address Address.
+		 * @param d_out Data output.
+		 * @return 0 on success; non-zero if address is invalid.
+		 */
+		int picoReadIO(uint32_t address, uint8_t *d_out) const;
+
 	private:
 		// Page number.
 		uint8_t m_page_num;
