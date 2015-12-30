@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2013 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -809,6 +809,37 @@ void IoManager::update(int virtPort, uint32_t buttons)
 
 		// Update the device.
 		dev->update(buttons);
+	}
+}
+
+/**
+ * Update an I/O device's absolute tablet coordinates.
+ * Coordinates must be scaled to 1280x240.
+ * If the input device is offscreen, both X and Y should be -1.
+ * For two-display devices, Y should be [0,239] for the top screen,
+ * and [240,479] for the bottom screen.
+ * @param virtPort Virtual port.
+ * @param x X coordinate.
+ * @param y Y coordinate.
+ */
+void IoManager::updateAbsolutePosition(int virtPort, int x, int y)
+{
+	// TODO: Flag for device to indicate if it supports:
+	// - No absolute positioning at all.
+	// - Single screen: Y == [0, 239]
+	// - Double screen: Y == [0, 479]
+	assert(virtPort >= VIRTPORT_1 && virtPort < VIRTPORT_MAX);
+	IO::Device *const dev = d->ioDevices[virtPort];
+	if (dev != nullptr) {
+		// If either X or Y are out of range,
+		// make them both -1.
+		if (x < 0 || y < 0 || x >= 1280 || y >= 480) {
+			x = -1;
+			y = -1;
+		}
+
+		// Update the device.
+		dev->updateAbsolutePosition(x, y);
 	}
 }
 

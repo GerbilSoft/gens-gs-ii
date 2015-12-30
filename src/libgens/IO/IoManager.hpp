@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2013 by David Korth.                                 *
+ * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -120,6 +120,18 @@ class IoManager
 		 * @param buttons New button state.
 		 */
 		void update(int virtPort, uint32_t buttons);
+
+		/**
+		 * Update an I/O device's absolute tablet coordinates.
+		 * Coordinates must be scaled to 1280x240.
+		 * If the input device is offscreen, both X and Y should be -1.
+		 * For two-display devices, Y should be [0,239] for the top screen,
+		 * and [240,479] for the bottom screen.
+		 * @param virtPort Virtual port.
+		 * @param x X coordinate.
+		 * @param y Y coordinate.
+		 */
+		void updateAbsolutePosition(int virtPort, int x, int y);
 
 		/**
 		 * Update the scanline counter for all controllers.

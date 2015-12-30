@@ -32,6 +32,8 @@ namespace LibGens { namespace IO {
 IoPico::IoPico()
 	: Device()
 	, m_page_num(0)
+	, m_adj_x(0)
+	, m_adj_y(0)
 {
 	m_type = IoManager::IOT_PICO;
 	m_hasDPad = false;
@@ -101,6 +103,31 @@ void IoPico::update(void)
 		if (m_page_num > 0) {
 			m_page_num--;
 			lg_osd(OSD_PICO_PAGEUP, m_page_num);
+		}
+	}
+
+	// Adjust absolute coordinates.
+	if (m_abs_x < 0 || m_abs_y < 0) {
+		// Offscreen.
+		// TODO: What is the correct "offscreen" value?
+		m_adj_x = 0;
+		m_adj_y = 0;
+	} else {
+		// Adjust the X coordinate.
+		// m_abs_x = [0, 1279]
+		// m_adj_x = [0x3C, 0x17C)?
+		m_adj_x = (m_abs_x / 5) + 0x3C;
+
+		// Adjust the Y coordinate.
+		// m_abs_y = [0, 479]
+		// m_adj_y = [0x1FC, 0x2F7], then [0x2F8, 0x3F3]
+		// Note that the vertical ranges are each 251 lines,
+		// whereas the visible image is 240 lines.
+		// TODO: Figure out the correct calibration.
+		if (m_abs_y < 240) {
+			m_adj_y = 0x1FC + m_abs_y;
+		} else {
+			m_adj_y = 0x2F8 + (m_abs_y - 240);
 		}
 	}
 }

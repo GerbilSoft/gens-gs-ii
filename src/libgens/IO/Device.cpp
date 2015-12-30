@@ -63,6 +63,7 @@ void Device::resetDev(void) {
 	buttons = ~0;
 	buttons_prev = ~0;
 	deviceData = 0xFF;
+	m_abs_x = m_abs_y = -1;
 	updateTristateInputCache();
 }
 
@@ -100,6 +101,28 @@ void Device::update(uint32_t buttons)
 	// Save the buttons and update the device.
 	this->buttons_prev = this->buttons;
 	this->buttons = buttons;
+	update();
+}
+
+/**
+ * Update the I/O device's absolute tablet coordinates.
+ * Coordinates must be scaled to 1280x240.
+ * If the input device is offscreen, both X and Y should be -1.
+ * For two-display devices, Y should be [0,239] for the top screen,
+ * and [240,479] for the bottom screen.
+ * @param x X coordinate.
+ * @param y Y coordinate.
+ */
+void Device::updateAbsolutePosition(int x, int y)
+{
+	// Save the absolute position and update the device.
+	// TODO:
+	// - Combined buttons/abs update to reduce
+	//   number of update() calls?
+	// - Some field to indicate if the device actually has
+	//   absolute positioning?
+	this->m_abs_x = x;
+	this->m_abs_y = y;
 	update();
 }
 

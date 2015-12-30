@@ -134,6 +134,15 @@ class Device
 			mdData_tris = (~ctrl | mdData);
 		}
 
+		/**
+		 * Absolute positioning.
+		 * Ranges:
+		 * - X: [0, 1279]
+		 * - Y: [0, 239] or [0, 479]
+		 * "Offscreen" is represented by abs_x = abs_y = -1.
+		 */
+		int m_abs_x, m_abs_y;
+
 	public:
 		/**
 		 * Get the buttons bitfield.
@@ -186,6 +195,17 @@ class Device
 		 * @param buttons New button state.
 		 */
 		void update(uint32_t buttons);
+
+		/**
+		 * Update the I/O device's absolute tablet coordinates.
+		 * Coordinates must be scaled to 1280x240.
+		 * If the input device is offscreen, both X and Y should be -1.
+		 * For two-display devices, Y should be [0,239] for the top screen,
+		 * and [240,479] for the bottom screen.
+		 * @param x X coordinate.
+		 * @param y Y coordinate.
+		 */
+		void updateAbsolutePosition(int x, int y);
 
 		/**
 		 * Update the I/O device.

@@ -85,6 +85,9 @@ class IoPico : public Device
 	private:
 		// Page number.
 		uint8_t m_page_num;
+
+		// Adjusted X/Y coordinates.
+		int m_adj_x, m_adj_y;
 };
 
 } }
