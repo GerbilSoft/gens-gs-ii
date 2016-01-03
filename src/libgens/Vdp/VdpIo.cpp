@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <config.libgens.h>
+
 #include "Vdp.hpp"
 #include "Vdp_p.hpp"
 
