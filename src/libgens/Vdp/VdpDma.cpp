@@ -298,12 +298,8 @@ inline void VdpPrivate::T_DMA_Loop(void)
 	//inc_DMA_Src_Adr(q->DMAT_Length);
 
 	// Update DMA.
-	q->updateDMA();
-
-	// NOTE: main68k_releaseCycles() takes no parameters,
-	// but the actual function subtracts eax from __io_cycle_counter.
-	// eax was equal to DMAT_Length.
-	M68K::ReleaseCycles(q->DMAT_Length);
+	int cycles = q->updateDMA();
+	M68K::ReleaseCycles(cycles);
 }
 
 /**
