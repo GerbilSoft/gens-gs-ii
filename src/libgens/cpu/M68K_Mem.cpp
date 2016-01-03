@@ -21,8 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "M68K_Mem.hpp"
 #include <libgens/config.libgens.h>
+
+#include "M68K_Mem.hpp"
 
 #include "Vdp/Vdp.hpp"
 

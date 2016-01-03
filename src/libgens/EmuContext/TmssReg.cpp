@@ -21,9 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "TmssReg.hpp"
-
 #include <libgens/config.libgens.h>
+
+#include "TmssReg.hpp"
 
 #include "EmuContext.hpp"
 #include "Rom.hpp"

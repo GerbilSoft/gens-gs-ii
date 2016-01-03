@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <config.libgens.h>
+
 #include "Z80.hpp"
 #include "Z80_MD_Mem.hpp"
 #include "M68K_Mem.hpp"

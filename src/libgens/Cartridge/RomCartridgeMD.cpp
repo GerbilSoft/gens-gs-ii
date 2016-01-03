@@ -21,9 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include "RomCartridgeMD.hpp"
-
 #include <libgens/config.libgens.h>
+
+#include "RomCartridgeMD.hpp"
 
 #include "EmuContext/EmuContext.hpp"
 #include "EmuContext/EmuContextFactory.hpp"
