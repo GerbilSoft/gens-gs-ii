@@ -216,9 +216,11 @@ SET(libgens_DECOMPRESSOR_H
 # File/Archive subsystem.
 SET(libgens_FILE_SRCS
 	File/Archive.cpp
+	File/ArchiveFactory.cpp
 	)
 SET(libgens_FILE_H
 	File/Archive.hpp
+	File/ArchiveFactory.hpp
 	)
 
 IF(HAVE_LZMA)
