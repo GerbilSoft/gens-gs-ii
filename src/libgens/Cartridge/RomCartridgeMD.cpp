@@ -401,19 +401,6 @@ int RomCartridgeMD::loadRom(void)
 	// TODO: Store the rounded-up size.
 	m_romData_size = d->rom->romSize();
 	uint32_t rnd_512k = ((m_romData_size + 0x7FFFF) & ~0x7FFFF);
-	switch (d->rom->romFormat()) {
-		case Rom::RFMT_SMD:
-		case Rom::RFMT_SMD_SPLIT:
-			// ROM buffer needs an extra 512 bytes for the header.
-			// TODO: Add a generic function to return this.
-			// TODO: Eliminate this by loading the ROM directly
-			// after the header.
-			rnd_512k += 512;
-			break;
-
-		default:
-			break;
-	}
 	// Align to 16 bytes for potential SSE2 optimizations.
 	m_romData = aligned_malloc(16, rnd_512k);
 
