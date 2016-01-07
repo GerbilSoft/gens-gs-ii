@@ -132,7 +132,7 @@ class RomPrivate
 		static int DetectRegionCodeMD(const char countryCodes[16]);
 
 		/**
-		 * Decode a Super Magic Drive interleaced block.
+		 * Decode a Super Magic Drive interleaved block.
 		 * @param dest Destination block. (Must be 16 KB.)
 		 * @param src Source block. (Must be 16 KB.)
 		 */
@@ -791,21 +791,15 @@ int Rom::loadRom(void *buf, size_t siz)
 		case RFMT_SMD_SPLIT: {
 			// TODO: Split SMD isn't supported.
 			// Handling it as plain SMD for now.
-			if (siz < (d->romSize + 512)) {
-				// Not enough space for the SMD header.
-				return -4;
-			}
 
 			// Read the SMD data.
-			ret = d->archive->readFile(d->z_entry_sel, buf, siz, &ret_siz);
-			if (ret != 0 || ret_siz <= 512) {
-				// ROM is too small.
+			// (Skip the 512-byte header.)
+			ret = d->archive->readFile(d->z_entry_sel, 512, d->romSize, buf, siz, &ret_siz);
+			if (ret != 0 || ret_siz == 0 || ret_siz > (Archive::file_offset_t)siz) {
+				// Read error.
 				ret_siz = 0;
 				break;
 			}
-
-			// Skip the header.
-			ret_siz -= 512;
 
 			// Temporary SMD block buffer.
 			uint8_t *smd_block = (uint8_t*)malloc(16384);
@@ -813,25 +807,20 @@ int Rom::loadRom(void *buf, size_t siz)
 			// Process 16 KB blocks.
 			// NOTE: If ret_siz isn't a multiple of 16 KB,
 			// the last block will not be decoded properly.
-			size_t remain = ret_siz;
-			const uint8_t *buf_read = &((uint8_t*)buf)[512];
-			uint8_t *buf_write = (uint8_t*)buf;
+			Archive::file_offset_t remain = ret_siz;
+			const uint8_t *buf_read = reinterpret_cast<const uint8_t*>(buf);
+			uint8_t *buf_write = reinterpret_cast<uint8_t*>(buf);
 			for (; remain >= 16384; remain -= 16384, buf_read += 16384, buf_write += 16384) {
 				memcpy(smd_block, buf_read, 16384);
 				d->DecodeSMDBlock(buf_write, smd_block);
 			}
 
-			if (remain > 0) {
-				// SMD isn't a multiple of 16 KB.
-				// The last block will not be decoded properly.
-				// (...or at all.)
-				memmove(buf_write, buf_read, remain);
-			}
-
+			// FIXME: What do we do if remain > 0?
+			// TODO: Verify that the SMD code works with the Archive skip parameter.
 			free(smd_block);
 			ret = 0;
 			break;
-               }
+		}
 
 		default:
 			// Unsupported ROM format.
@@ -849,7 +838,8 @@ int Rom::loadRom(void *buf, size_t siz)
 	d->rom_crc32 = crc32(0, (const Bytef*)buf, siz);
 
 	// Return the number of bytes read.
-	return ret_siz;
+	// TODO: Change return value to Archive::file_offset_t?
+	return (int)ret_siz;
 }
 
 /**
