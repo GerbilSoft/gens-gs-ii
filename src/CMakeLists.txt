@@ -18,12 +18,14 @@ ELSE(MSVC)
 ENDIF(MSVC)
 SET(GENS_CXXFLAG_CXX11_COMPAT ${GENS_CXX11_COMPAT_HEADER})
 
+# Compatibility library. (Includes W32U Mini.)
+# NOTE: This should NOT be compiled with the C++11 compatibility header,
+# since it redefines some LFS functions, resulting in misconfiguration.
+ADD_SUBDIRECTORY(libcompat)
+
 # Add the C++11 compatibility header to CFLAGS/CXXFLAGS.
 SET(CMAKE_C_FLAGS	"${CMAKE_C_FLAGS} ${GENS_CXX11_COMPAT_HEADER}")
 SET(CMAKE_CXX_FLAGS	"${CMAKE_CXX_FLAGS} ${GENS_CXXFLAG_CXX11_COMPAT}")
-
-# Compatibility library. (Includes W32U Mini.)
-ADD_SUBDIRECTORY(libcompat)
 
 # Source Code subdirectories.
 ADD_SUBDIRECTORY(libzomg)

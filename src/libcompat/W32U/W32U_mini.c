@@ -125,9 +125,9 @@ wchar_t *W32U_mbs_to_UTF16(const char *mbs, unsigned int codepage)
 	int cchWcs;
 	wchar_t *wcs;
 
-	cchWcs = MultiByteToWideChar(codepage, 0, mbs, -1, nullptr, 0);
+	cchWcs = MultiByteToWideChar(codepage, 0, mbs, -1, NULL, 0);
 	if (cchWcs <= 0)
-		return nullptr;
+		return NULL;
 
 	wcs = (wchar_t*)malloc(cchWcs * sizeof(wchar_t));
 	MultiByteToWideChar(codepage, 0, mbs, -1, wcs, cchWcs);
@@ -145,11 +145,11 @@ char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage)
 	int cbMbs;
 	char *mbs;
 
-	cbMbs = WideCharToMultiByte(codepage, 0, wcs, -1, nullptr, 0, nullptr, nullptr);
+	cbMbs = WideCharToMultiByte(codepage, 0, wcs, -1, NULL, 0, NULL, NULL);
 	if (cbMbs <= 0)
-		return nullptr;
+		return NULL;
 
 	mbs = (char*)malloc(cbMbs);
-	WideCharToMultiByte(codepage, 0, wcs, -1, mbs, cbMbs, nullptr, nullptr);
+	WideCharToMultiByte(codepage, 0, wcs, -1, mbs, cbMbs, NULL, NULL);
 	return mbs;
 }

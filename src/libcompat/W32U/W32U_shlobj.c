@@ -93,6 +93,6 @@ BOOL SHGetSpecialFolderPathU(HWND hwndOwner, char *lpszPath, int cbPath, int csi
 	}
 
 	// Convert the path from UTF-16 to UTF-8.
-	wc_ret = WideCharToMultiByte(CP_UTF8, 0, pathW, -1, lpszPath, cbPath, nullptr, nullptr);
+	wc_ret = WideCharToMultiByte(CP_UTF8, 0, pathW, -1, lpszPath, cbPath, NULL, NULL);
 	return (wc_ret != 0);
 }

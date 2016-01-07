@@ -22,6 +22,8 @@
 #ifndef __LIBCOMPAT_TESTS_BYTESWAPTEST_DATA_H__
 #define __LIBCOMPAT_TESTS_BYTESWAPTEST_DATA_H__
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

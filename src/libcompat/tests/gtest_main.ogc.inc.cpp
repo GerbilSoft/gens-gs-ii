@@ -35,8 +35,8 @@
 // libogc
 #include <gccore.h>
 #include <wiiuse/wpad.h>
-static GXRModeObj *rmode = nullptr;
-static void *xfb = nullptr;
+static GXRModeObj *rmode = NULL;
+static void *xfb = NULL;
 
 // These variables are set if the
 // corresponding button is pressed.
@@ -93,7 +93,7 @@ static void init_libogc(void)
 	// Initialize video using the preferred video mode.
 	// This corresponds to the settings in the Wii System Menu.
 	VIDEO_Init();
-	rmode = VIDEO_GetPreferredMode(nullptr);
+	rmode = VIDEO_GetPreferredMode(NULL);
 
 	// Workaround for overscan issues. (from DOP-Mii)
 	// NOTE: This effectively decreases visible area from 80x30 to 80x28 on NTSC!

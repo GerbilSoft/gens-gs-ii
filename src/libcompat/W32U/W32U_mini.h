@@ -57,7 +57,7 @@ void W32U_CheckUTF8(void);
  * Convert a null-terminated multibyte string to UTF-16.
  * @param mbs Multibyte string. (null-terminated)
  * @param codepage mbs codepage.
- * @return UTF-16 string, or nullptr on error.
+ * @return UTF-16 string, or NULL on error.
  */
 wchar_t *W32U_mbs_to_UTF16(const char *mbs, unsigned int codepage);
 
@@ -65,7 +65,7 @@ wchar_t *W32U_mbs_to_UTF16(const char *mbs, unsigned int codepage);
  * Convert a null-terminated UTF-16 string to multibyte.
  * @param wcs UTF-16 string. (null-terminated)
  * @param codepage mbs codepage.
- * @return Multibyte string, or nullptr on error.
+ * @return Multibyte string, or NULL on error.
  */
 char *W32U_UTF16_to_mbs(const wchar_t *wcs, unsigned int codepage);
 

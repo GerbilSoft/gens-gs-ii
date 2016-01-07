@@ -57,7 +57,7 @@ extern "C" {
  * Open a file.
  * @param filename Filename.
  * @param mode File mode.
- * @return File pointer, or nullptr on error.
+ * @return File pointer, or NULL on error.
  */
 FILE *W32U_fopen(const char *filename, const char *mode);
 

@@ -71,10 +71,10 @@ FILE *W32U_fopen(const char *filename, const char *mode)
 	UtoW(mode);
 	if (!filenameW || !modeW) {
 		errno = EINVAL;
-		return nullptr;
+		return NULL;
 	}
 
-	fRet = nullptr;
+	fRet = NULL;
 	if (W32U_IsUnicode()) {
 		// Unicode version.
 		fRet = _wfopen(filenameW, modeW);
