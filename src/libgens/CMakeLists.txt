@@ -213,6 +213,14 @@ SET(libgens_DECOMPRESSOR_H
 	Decompressor/DcMemFake.hpp
 	)
 
+# File/Archive subsystem.
+SET(libgens_FILE_SRCS
+	File/Archive.cpp
+	)
+SET(libgens_FILE_H
+	File/Archive.hpp
+	)
+
 IF(HAVE_LZMA)
 	SET(libgens_DECOMPRESSOR_SRCS
 		${libgens_DECOMPRESSOR_SRCS}
@@ -259,6 +267,7 @@ ADD_LIBRARY(gens STATIC
 	${libgens_VDP_SRCS} ${libgens_VDP_H}
 	${libgens_IO_SRCS} ${libgens_IO_H}
 	${libgens_DECOMPRESSOR_SRCS} ${libgens_DECOMPRESSOR_H}
+	${libgens_FILE_SRCS} ${libgens_FILE_H}
 	)
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(gens)
