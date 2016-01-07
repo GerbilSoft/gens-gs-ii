@@ -754,7 +754,7 @@ Rom::~Rom()
 /**
  * Load the ROM image into a buffer.
  * @param buf	[out] Buffer.
- * @param siz	[in]  Buffer size.
+ * @param siz	[in]  Size of buf.
  * @return Positive value indicating amount of data read on success; 0 or negative on error.
  * TODO: Error code constants!
  */
