@@ -47,6 +47,8 @@ ENDMACRO(CHECK_FUNCTION_EXISTS_OR_INLINE VARIABLE)
 CHECK_FUNCTION_EXISTS_OR_INLINE(localtime_r "time.h" "time_t tm; localtime_r(&tm, NULL);" HAVE_LOCALTIME_R)
 # NOTE: May be _localtime32_s() or _localtime64_s() on MSVC 2005+.
 # The "inline" part will detect that.
+# FIXME: CHECK_SYMBOL_EXISTS() works for macros like in MSVC,
+# but fails with inline functions like in MinGW-w64.
 CHECK_FUNCTION_EXISTS_OR_INLINE(localtime_s "time.h" "time_t tm; localtime_s(&tm, NULL);" HAVE_LOCALTIME_S)
 CHECK_FUNCTION_EXISTS(getpwuid_r HAVE_GETPWUID_R)
 # NOTE: These should either both be present or both be absent.
