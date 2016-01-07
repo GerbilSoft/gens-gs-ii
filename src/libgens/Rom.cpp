@@ -753,11 +753,8 @@ Rom::~Rom()
 
 /**
  * Load the ROM image into a buffer.
- * @param buf Buffer.
- * @param siz Buffer size.
- * For most ROM formats, siz should be equal to the ROM size.
- * For SMD format, siz should be ROM size + 512, since the header
- * is read into the buffer as well. It's removed afterwards.
+ * @param buf	[out] Buffer.
+ * @param siz	[in]  Buffer size.
  * @return Positive value indicating amount of data read on success; 0 or negative on error.
  * TODO: Error code constants!
  */
