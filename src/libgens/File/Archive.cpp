@@ -169,7 +169,7 @@ int Archive::readFile(const mdp_z_entry_t *z_entry,
 
 	// Read the file into the buffer.
 	// FIXME: 64-bit parameters for fread?
-	*ret_siz = fread(buf, 1, read_len, m_file);
+	*ret_siz = fread(buf, 1, (size_t)read_len, m_file);
 	if (*ret_siz != siz) {
 		// Short read. Something went wrong.
 		m_lastError = errno;
