@@ -217,10 +217,12 @@ SET(libgens_DECOMPRESSOR_H
 SET(libgens_FILE_SRCS
 	File/Archive.cpp
 	File/ArchiveFactory.cpp
+	File/Gzip.cpp
 	)
 SET(libgens_FILE_H
 	File/Archive.hpp
 	File/ArchiveFactory.hpp
+	File/Gzip.hpp
 	)
 
 IF(HAVE_LZMA)

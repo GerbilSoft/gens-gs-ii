@@ -21,6 +21,7 @@
 
 #include "ArchiveFactory.hpp"
 #include "Archive.hpp"
+#include "Gzip.hpp"
 
 namespace LibGens { namespace File {
 
@@ -38,20 +39,30 @@ Archive *ArchiveFactory::openArchive(const char *filename)
 	 * - Handle libarchive, MiniZip, and zlib.
 	 *   Maybe skip MiniZip if libarchive is supported...
 	 */
-	Archive *archive = nullptr;
+	Archive *archive;
 
-	// Use the base Archive class.
+	// Try Gzip (zlib) first.
+	// Note that zlib will handle uncompressed files
+	// as well as compressed files, so this attempt
+	// shouldn't fail.
+	archive = new Gzip(filename);
+	if (archive->isOpen())
+		return archive;
+
+	delete archive;
+	archive = nullptr;
+
+	// As a last resort, use the base Archive class.
 	// No decompression will be performed, so only
 	// uncompressed ROMs will work properly.
 	archive = new Archive(filename);
-	if (!archive->isOpen()) {
-		// Error opening the archive.
-		// TODO: Error code?
-		delete archive;
-		archive = nullptr;
-	}
+	if (archive->isOpen())
+		return archive;
 
-	return archive;
+	// Error opening the archive.
+	// TODO: Error code?
+	delete archive;
+	return nullptr;
 }
 
 } }
