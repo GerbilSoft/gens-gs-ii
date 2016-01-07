@@ -35,7 +35,11 @@
 #include "../macros/common.h"
 
 // C includes.
-#include <stdio.h>
+#include <stdint.h>
+// C includes. (C++ namespace)
+#include <cstdio>
+// C++ includes.
+#include <algorithm>
 
 // TODO: Use the MDP headers for mdp_z_entry_t.
 #ifdef __cplusplus
@@ -54,12 +58,6 @@ typedef struct PACKED _mdp_z_entry_t {
 #ifdef __cplusplus
 }
 #endif
-
-// C includes.
-#include <stdint.h>
-
-// C++ includes.
-#include <string>
 
 // TODO: Use MDP error codes later.
 // For now, using POSIX error codes.
@@ -197,7 +195,9 @@ inline bool Archive::isOpen(void) const
  */
 inline int Archive::readFile(const mdp_z_entry_t *z_entry, void *buf, file_offset_t siz, file_offset_t *ret_siz)
 {
-	return readFile(z_entry, 0, z_entry->filesize, buf, siz, ret_siz);
+	// TODO: Convert z_entry->filesize to file_offset_t?
+	file_offset_t max_size = std::min(static_cast<file_offset_t>(z_entry->filesize), siz);
+	return readFile(z_entry, 0, max_size, buf, siz, ret_siz);
 }
 
 } }

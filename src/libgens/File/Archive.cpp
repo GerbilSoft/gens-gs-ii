@@ -158,7 +158,7 @@ int Archive::readFile(const mdp_z_entry_t *z_entry,
 	if (!z_entry || !buf ||
 	    start_pos < 0 || start_pos >= z_entry->filesize ||
 	    read_len < 0 || z_entry->filesize - read_len < start_pos ||
-	    siz <= 0)
+	    siz <= 0 || siz < read_len)
 	{
 		m_lastError = EINVAL;
 		return -m_lastError; // TODO: return -MDP_ERR_INVALID_PARAMETERS;
@@ -167,14 +167,14 @@ int Archive::readFile(const mdp_z_entry_t *z_entry,
 		return -m_lastError; // TODO: return -MDP_ERR_INVALID_PARAMETERS;
 	}
 
-	// Seek to the beginning of the file.
-	fseeko(m_file, 0, SEEK_SET);
+	// Seek to the specified starting position.
+	fseeko(m_file, start_pos, SEEK_SET);
 
 	// Read the file into the buffer.
 	// FIXME: 64-bit parameters for fread?
-	*ret_siz = fread(buf, 1, siz, m_file);
+	*ret_siz = fread(buf, 1, read_len, m_file);
 	if (*ret_siz != siz) {
-		// Short read. Something happened.
+		// Short read. Something went wrong.
 		m_lastError = errno;
 		return -m_lastError;
 	}
