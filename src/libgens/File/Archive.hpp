@@ -78,6 +78,15 @@ class Archive
 		Archive(const char *filename);
 		virtual ~Archive();
 
+	private:
+		// COMMIT NOTE: Maybe add to the initial commit?
+		// Otherwise, note that it was copied from the Factory class.
+		// Q_DISABLE_COPY() equivalent.
+		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
+		Archive(const Archive &);
+		Archive &operator=(const Archive &);
+
+	public:
 		/**
 		 * Get the last error code. (POSIX error codes)
 		 * This value is NOT reset if a function is successful.
