@@ -29,6 +29,9 @@
 #include <cstdlib>
 #include <cstring>
 
+// Byteswapping macros.
+#include "libcompat/byteswap.h"
+
 // gzclose_r() and gzclose_w() were introduced in zlib-1.2.4.
 #if (ZLIB_VER_MAJOR > 1) || \
     (ZLIB_VER_MAJOR == 1 && ZLIB_VER_MINOR > 2) || \
@@ -157,20 +160,21 @@ int Gzip::getFileInfo(mdp_z_entry_t **z_entry_out)
 
 	// Gzipped files contain a 32-bit uncompressed size value at the end of the file.
 	// Use that to improve performance.
-	// Reference: http://insanecoding.blogspot.com/2007/03/file-descriptors-and-why-we-cant-use.html
-	uint8_t buf[4];
+	// References:
+	// - http://insanecoding.blogspot.com/2007/03/file-descriptors-and-why-we-cant-use.html
+	// - http://www.zlib.org/rfc-gzip.html
+	uint32_t gzsize;
 	fseeko(m_file, -4, SEEK_END);
-	int ret = fread(buf, 1, sizeof(buf), m_file);
-	if (ret != sizeof(buf)) {
+	int ret = fread(&gzsize, 1, sizeof(gzsize), m_file);
+	if (ret != sizeof(gzsize)) {
 		// Error reading the uncompressed filesize.
 		// TODO: Check for EOF?
 		m_lastError = errno;
 		return -m_lastError;
 	}
 
-	// TODO: Use byteswapping macros from libcompat?
-	// TODO: Verify CRCs and check header flags?
-	int64_t gzsize = buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24);
+	// Byteswap the Gzip size.
+	gzsize = le32_to_cpu(gzsize);
 
 	// Get the actual filesize.
 	// Note that zlib works with uncompressed files as well,
@@ -195,7 +199,7 @@ int Gzip::getFileInfo(mdp_z_entry_t **z_entry_out)
 	// FIXME: z_entry->filesize should be changed to int64_t.
 	// For filesize, check if zlib is operating on a compressed file.
 	// If it is, use gzsize; otherwise, use filesize.
-	z_entry->filesize = (size_t)(gzdirect(m_gzFile) ? filesize : gzsize);
+	z_entry->filesize = (gzdirect(m_gzFile) ? (size_t)filesize : (size_t)gzsize);
 	z_entry->filename = (!m_filename.empty() ? strdup(m_filename.c_str()) : nullptr);
 	z_entry->next = nullptr;
 
