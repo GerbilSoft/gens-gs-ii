@@ -32,11 +32,8 @@
 
 // C includes.
 #include <stdlib.h>
-#include <string.h>
-
-// C++ includes.
-#include <string>
-using std::string;
+// C includes. (C++ namespace)
+#include <cstring>
 
 #ifdef _WIN32
 // Win32 Unicode Translation Layer.
