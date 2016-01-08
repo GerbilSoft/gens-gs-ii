@@ -74,7 +74,7 @@ IF(HAVE_MINIZIP)
 		${libcompat_W32U_minizip_H}
 		)
 	SET_MSVC_DEBUG_PATH(compat_W32U_minizip)
-	TARGET_LINK_LIBRARIES(compat_W32U_minizip ${MINIZIP_LIBRARY})
+	TARGET_LINK_LIBRARIES(compat_W32U_minizip compat_W32U ${MINIZIP_LIBRARY})
 ENDIF(HAVE_MINIZIP)
 
 # TODO: Test suite?
