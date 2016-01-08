@@ -417,8 +417,18 @@ int RomCartridgeMD::loadRom(void)
 		return -4;
 	}
 
+	// Clear the empty part of the ROM buffer.
+	// TODO: Clear with 0 or 0xFF? (TMSS is cleared with 0xFF.)
+	if (m_romData_size < rnd_512k) {
+		const uint32_t diff = rnd_512k - m_romData_size;
+		memset((uint8_t*)m_romData + m_romData_size, 0, diff);
+	}
+
 	// Byteswap the ROM image.
-	be16_to_cpu_array((uint16_t*)m_romData, m_romData_size);
+	// NOTE: If the ROM is an odd number of bytes, the final byte
+	// will be byteswapped with 0.
+	// m_romData_size is rounded up to the nearest multiple of two.
+	be16_to_cpu_array((uint16_t*)m_romData, ((m_romData_size + 1) & ~1));
 
 	// Initialize the ROM mapper.
 	// NOTE: This must be done after loading the ROM;
