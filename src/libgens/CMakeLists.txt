@@ -218,11 +218,13 @@ SET(libgens_FILE_SRCS
 	File/Archive.cpp
 	File/ArchiveFactory.cpp
 	File/Gzip.cpp
+	File/Zip.cpp
 	)
 SET(libgens_FILE_H
 	File/Archive.hpp
 	File/ArchiveFactory.hpp
 	File/Gzip.hpp
+	File/Zip.hpp
 	)
 
 IF(HAVE_LZMA)

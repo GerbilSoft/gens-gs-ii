@@ -22,6 +22,7 @@
 #include "ArchiveFactory.hpp"
 #include "Archive.hpp"
 #include "Gzip.hpp"
+#include "Zip.hpp"
 
 namespace LibGens { namespace File {
 
@@ -41,7 +42,15 @@ Archive *ArchiveFactory::openArchive(const char *filename)
 	 */
 	Archive *archive;
 
-	// Try Gzip (zlib) first.
+	// Try Zip via MiniZip.
+	archive = new Zip(filename);
+	if (archive->isOpen())
+		return archive;
+
+	delete archive;
+	archive = nullptr;
+
+	// Try Gzip (zlib).
 	// Note that zlib will handle uncompressed files
 	// as well as compressed files, so this attempt
 	// shouldn't fail.
