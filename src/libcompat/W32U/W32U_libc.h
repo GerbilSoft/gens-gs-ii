@@ -30,8 +30,8 @@
 #error Do not include W32U_libc.h directly, include W32U_mini.h!
 #endif
 
-// libcompat configuration.
-#include <libcompat/config.libcompat.h>
+// libcompat/W32U configuration.
+#include "libcompat/W32U/config.libcompat_W32U.h"
 
 // C includes.
 #include <wchar.h>

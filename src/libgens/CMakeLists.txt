@@ -302,6 +302,7 @@ IF(WIN32)
 	# - GetFileVersionInfo()
 	# - VerQueryValue()
 	TARGET_LINK_LIBRARIES(gens version)
+	TARGET_LINK_LIBRARIES(gens compat_W32U)
 	IF(HAVE_MINIZIP)
 		# MiniZip Win32 UTF-8 compatibility library.
 		TARGET_LINK_LIBRARIES(gens compat_W32U_minizip)

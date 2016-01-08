@@ -117,6 +117,9 @@ TARGET_LINK_LIBRARIES(gens-sdl compat gens genskeys zomg)
 DO_SPLIT_DEBUG(gens-sdl)
 
 # Additional libraries.
+IF(WIN32)
+	TARGET_LINK_LIBRARIES(gens-sdl compat_W32U)
+ENDIF(WIN32)
 TARGET_LINK_LIBRARIES(gens-sdl
 	${SDL2_LIBRARY}
 	${OPENGL_gl_LIBRARY}

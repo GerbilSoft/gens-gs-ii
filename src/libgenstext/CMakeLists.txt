@@ -49,9 +49,13 @@ SET(libgenstext_SRCS
 ######################
 
 ADD_LIBRARY(genstext STATIC ${libgenstext_SRCS})
+INCLUDE(SetMSVCDebugPath)
+SET_MSVC_DEBUG_PATH(genstext)
+
+# Additional libraries.
+IF(WIN32)
+	TARGET_LINK_LIBRARIES(genstext compat_W32U)
+ENDIF(WIN32)
 IF(ICONV_LIBRARY)
 	TARGET_LINK_LIBRARIES(genstext ${ICONV_LIBRARY})
 ENDIF(ICONV_LIBRARY)
-
-INCLUDE(SetMSVCDebugPath)
-SET_MSVC_DEBUG_PATH(genstext)

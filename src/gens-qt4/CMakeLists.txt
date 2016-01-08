@@ -384,6 +384,9 @@ TARGET_LINK_LIBRARIES(gens-qt4 compat gens ${ZLIB_LIBRARY} genscd genskeys)
 ADD_DEPENDENCIES(gens-qt4 translations_target)
 
 # Additional libraries.
+IF(WIN32)
+	TARGET_LINK_LIBRARIES(gens-qt4 compat_W32U)
+ENDIF(WIN32)
 IF(APPLE AND APPLE_LIBS)
 	TARGET_LINK_LIBRARIES(gens-qt4 ${APPLE_LIBS})
 ENDIF(APPLE AND APPLE_LIBS)
