@@ -93,7 +93,7 @@ class MemFake : public Archive
 				     file_offset_t start_pos, file_offset_t read_len,
 				     void *buf, file_offset_t siz, file_offset_t *ret_siz) final;
 
-	protected:
+	private:
 		const uint8_t *m_rom_data;
 		unsigned int m_rom_size;
 		unsigned int m_pos;
