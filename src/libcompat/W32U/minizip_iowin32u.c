@@ -14,69 +14,53 @@
 #include <windows.h>
 #include "W32U_mini.h"
 
+#define __IN_W32U__
+#include "W32U_alloca.h"
+
 // open64 function pointers from iowin32.
 static open64_file_func pWin32_open64_file_funcA;
 static open64_file_func pWin32_open64_file_funcW;
 
-voidpf ZCALLBACK win32_open64_file_funcUA(voidpf opaque, const void* filename, int mode)
+static voidpf ZCALLBACK win32_open64_file_funcUA(voidpf opaque, const void* filename_utf8, int mode)
 {
-	int cchWcs, cbMbs;
-	wchar_t *wcs;
-	char *mbs;
-	voidpf ret;
+	// NOTE: Extra cast is required because
+	// UtoW_filename() and WtoA_filename() are macros.
+	const char *filename = (const char*)filename_utf8;
+	wchar_t *filenameW;
+	char *filenameA;
 
-	// Convert the UTF-8 filename to UTF-16.
-	cchWcs = MultiByteToWideChar(CP_UTF8, 0, filename, -1, NULL, 0);
-	if (cchWcs <= 0)
+	// Convert the filename from UTF-8 to UTF-16.
+	UtoW_filename(filename);
+	if (!filenameW)
 		return NULL;
 
-	wcs = (wchar_t*)malloc(cchWcs * sizeof(wchar_t));
-	MultiByteToWideChar(CP_UTF8, 0, filename, -1, wcs, cchWcs);
-
-	// Convert the UTF-16 filename to ANSI.
-	cbMbs = WideCharToMultiByte(CP_ACP, 0, wcs, cchWcs, NULL, 0, NULL, NULL);
-	if (cbMbs <= 0) {
-		free(wcs);
+	// Convert the filename from UTF-16 to ANSI.
+	WtoA_filename(filename);
+	if (!filename)
 		return NULL;
-	}
-
-	mbs = (char*)malloc(cbMbs);
-	WideCharToMultiByte(CP_ACP, 0, wcs, cchWcs, mbs, cbMbs, NULL, NULL);
-	free(wcs);
 
 	// Call the iowin32.c function.
-	ret = pWin32_open64_file_funcA(opaque, mbs, mode);
-	free(mbs);
-	return ret;
+	return pWin32_open64_file_funcA(opaque, filenameA, mode);
 }
 
-voidpf ZCALLBACK win32_open64_file_funcUW(voidpf opaque, const void* filename, int mode)
+static voidpf ZCALLBACK win32_open64_file_funcUW(voidpf opaque, const void* filename_utf8, int mode)
 {
-	int cchWcs;
-	wchar_t *wcs;
-	voidpf ret;
+	// NOTE: Extra cast is required because
+	// UtoW_filename() is a macro.
+	const char *filename = (const char*)filename_utf8;
+	wchar_t *filenameW;
 
-	// Convert the UTF-8 filename to UTF-16.
-	cchWcs = MultiByteToWideChar(CP_UTF8, 0, filename, -1, NULL, 0);
-	if (cchWcs <= 0)
+	// Convert the filename from UTF-8 to UTF-16.
+	UtoW_filename(filename);
+	if (!filenameW)
 		return NULL;
 
-	wcs = (wchar_t*)malloc(cchWcs * sizeof(wchar_t));
-	MultiByteToWideChar(CP_UTF8, 0, filename, -1, wcs, cchWcs);
-
 	// Call the iowin32.c function.
-	ret = pWin32_open64_file_funcW(opaque, (const void*)wcs, mode);
-	free(wcs);
-	return ret;
+	return pWin32_open64_file_funcW(opaque, filenameW, mode);
 }
 
 void fill_win32_filefunc64U(zlib_filefunc64_def* pzlib_filefunc_def)
 {
-	// TODO: Verify that the system supports UTF-8.
-	// Win9x: Windows 98 and later supports UTF-8. (NOT WINDOWS 95!)
-	// WinNT: Windows NT 4.0 and later supports UTF-8.
-	// Not sure about NT 3.x.
-
 	// NOTE: The ANSI and Unicode iowin32 function pointer tables
 	// are identical except for the open64 function.
 
