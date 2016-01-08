@@ -39,6 +39,10 @@ Archive *ArchiveFactory::openArchive(const char *filename)
 	 *   the filename so we can check for errors here?
 	 * - Handle libarchive, MiniZip, and zlib.
 	 *   Maybe skip MiniZip if libarchive is supported...
+	 * - Differentiate between "file not supported" and
+	 *   "file supported, but broken". The latter case
+	 *   should return immediately without trying any
+	 *   other readers.
 	 */
 	Archive *archive;
 
