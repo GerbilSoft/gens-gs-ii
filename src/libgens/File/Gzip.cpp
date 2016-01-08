@@ -153,7 +153,7 @@ int Gzip::getFileInfo(mdp_z_entry_t **z_entry_out)
 	if (!z_entry_out) {
 		m_lastError = EINVAL;
 		return -m_lastError; // TODO: return -MDP_ERR_INVALID_PARAMETERS;
-	} else if (!m_file) {
+	} else if (!m_file || !m_gzFile) {
 		m_lastError = EBADF;
 		return -m_lastError; // TODO: return -MDP_ERR_INVALID_PARAMETERS;
 	}
@@ -233,7 +233,7 @@ int Gzip::readFile(const mdp_z_entry_t *z_entry,
 	{
 		m_lastError = EINVAL;
 		return -m_lastError; // TODO: return -MDP_ERR_INVALID_PARAMETERS;
-	} else if (!m_file) {
+	} else if (!m_file || !m_gzFile) {
 		m_lastError = EBADF;
 		return -m_lastError; // TODO: return -MDP_ERR_INVALID_PARAMETERS;
 	}
