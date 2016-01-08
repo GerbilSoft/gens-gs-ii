@@ -83,8 +83,8 @@ Gzip::Gzip(const char *filename)
 	int fd = dup(fileno(m_file));
 	if (fd == -1) {
 		// dup() failed.
-		m_lastError = errno;
 		fclose(m_file);
+		m_lastError = errno;
 		m_file = nullptr;
 		return;
 	}
