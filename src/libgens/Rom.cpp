@@ -26,10 +26,10 @@
 #include "Rom.hpp"
 #include "File/Archive.hpp"
 #include "File/ArchiveFactory.hpp"
+#include "File/MemFake.hpp"
 using LibGens::File::Archive;
 using LibGens::File::ArchiveFactory;
-// TODO: Replace with Archive subsystem.
-//#include "Decompressor/DcMemFake.hpp"
+using LibGens::File::MemFake;
 
 // C includes. (C++ namespace)
 #include <cstring>
@@ -285,17 +285,13 @@ RomPrivate::RomPrivate(Rom *q, const uint8_t *rom_data, unsigned int rom_size,
 	, rom_crc32(0)
 {
 	// TODO: Support decompression from RAM.
-	// For now, use a pseudo-decompressor that provides the same
+	// For now, use a fake decompressor that provides the same
 	// interface, but just reads from memory.
 	if (!rom_data || rom_size == 0)
 		return;
 
-	// FIXME: Port DcMemFake to the new Archive subsystem.
-	return;
-#if 0
 	// "Open" the file using the fake decompressor.
-	decomp = new DcMemFake(rom_data, rom_size);
-#endif
+	archive = new MemFake(rom_data, rom_size);
 
 	// Get the list of files in the archive.
 	int ret = archive->getFileInfo(&z_entry_list);
@@ -849,7 +845,7 @@ int Rom::loadRom(void *buf, size_t siz)
  */
 bool Rom::isOpen(void) const
 {
-	// NOTE: We're checking archive, since DcMemFake is
+	// NOTE: We're checking archive, since MemFake is
 	// memory-backed and doesn't have an actual file.
 	return (d->archive != nullptr);
 }

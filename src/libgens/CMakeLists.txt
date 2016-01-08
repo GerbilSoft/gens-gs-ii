@@ -219,12 +219,14 @@ SET(libgens_FILE_SRCS
 	File/ArchiveFactory.cpp
 	File/Gzip.cpp
 	File/Zip.cpp
+	File/MemFake.cpp
 	)
 SET(libgens_FILE_H
 	File/Archive.hpp
 	File/ArchiveFactory.hpp
 	File/Gzip.hpp
 	File/Zip.hpp
+	File/MemFake.hpp
 	)
 
 IF(HAVE_LZMA)
