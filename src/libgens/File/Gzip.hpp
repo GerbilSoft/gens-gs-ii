@@ -78,7 +78,7 @@ class Gzip : public Archive
 				     file_offset_t start_pos, file_offset_t read_len,
 				     void *buf, file_offset_t siz, file_offset_t *ret_siz) final;
 
-	protected:
+	private:
 		gzFile m_gzFile;
 };
 
