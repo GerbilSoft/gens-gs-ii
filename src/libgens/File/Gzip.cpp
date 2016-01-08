@@ -229,7 +229,7 @@ int Gzip::readFile(const mdp_z_entry_t *z_entry,
 	if (!z_entry || !buf ||
 	    start_pos < 0 || start_pos >= z_entry->filesize ||
 	    read_len < 0 || z_entry->filesize - read_len < start_pos ||
-	    siz <= 0 || ret_siz <= 0 || siz < read_len)
+	    siz <= 0 || siz < read_len)
 	{
 		m_lastError = EINVAL;
 		return -m_lastError; // TODO: return -MDP_ERR_INVALID_PARAMETERS;
