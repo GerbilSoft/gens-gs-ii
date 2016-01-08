@@ -44,8 +44,6 @@ class ConfigHandler : public QObject
 		Q_DISABLE_COPY(ConfigHandler)
 
 	public slots:
-		void extprgUnRAR_changed_slot(const QVariant &extprgUnRAR);
-
 		void tmssRomFilename_changed_slot(const QVariant &tmssRomFilename);
 		void tmssEnabled_changed_slot(const QVariant &tmssEnabled);
 		

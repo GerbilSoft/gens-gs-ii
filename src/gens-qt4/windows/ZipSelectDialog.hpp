@@ -28,8 +28,8 @@
 #include <QtCore/QModelIndex>
 
 // LibGens includes.
-// TODO: Use MDP's mdp_z_entry_t instead of LibGens::Decompressor.
-#include "libgens/Decompressor/Decompressor.hpp"
+// TODO: Use MDP's mdp_z_entry_t instead of LibGens::File::Archive.
+#include "libgens/File/Archive.hpp"
 
 namespace GensQt4 {
 
