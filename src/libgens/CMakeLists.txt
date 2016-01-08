@@ -215,19 +215,19 @@ SET(libgens_FILE_H
 	File/MemFake.hpp
 	)
 
-# TODO: Port to the Archive subsystem.
-IF(0)
 IF(HAVE_LZMA)
-	SET(libgens_DECOMPRESSOR_SRCS
-		${libgens_DECOMPRESSOR_SRCS}
-		Decompressor/Dc7z.cpp
+	SET(libgens_FILE_SRCS
+		${libgens_FILE_SRCS}
+		File/Sz.cpp
 		)
-	SET(libgens_DECOMPRESSOR_H
-		${libgens_DECOMPRESSOR_H}
-		Decompressor/Dc7z.hpp
+	SET(libgens_FILE_H
+		${libgens_FILE_H}
+		File/Sz.hpp
 		)
 ENDIF()
 
+# TODO: Port to the Archive subsystem.
+IF(0)
 # Platform-specific sources.
 IF(WIN32)
 	SET(libgens_DECOMPRESSOR_SRCS

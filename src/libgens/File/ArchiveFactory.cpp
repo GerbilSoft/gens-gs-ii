@@ -23,6 +23,7 @@
 #include "Archive.hpp"
 #include "Gzip.hpp"
 #include "Zip.hpp"
+#include "Sz.hpp"
 
 namespace LibGens { namespace File {
 
@@ -45,6 +46,14 @@ Archive *ArchiveFactory::openArchive(const char *filename)
 	 *   other readers.
 	 */
 	Archive *archive;
+
+	// Try 7-Zip via the LZMA SDK.
+	archive = new Sz(filename);
+	if (archive->isOpen())
+		return archive;
+
+	delete archive;
+	archive = nullptr;
 
 	// Try Zip via MiniZip.
 	archive = new Zip(filename);
