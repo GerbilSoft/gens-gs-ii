@@ -379,10 +379,8 @@ ADD_EXECUTABLE(gens-qt4
 	${gens-qt4_UIS_H}
 	${gens-qt4_RCC_O}
 	)
-INCLUDE(SetMSVCDebugPath)
-SET_MSVC_DEBUG_PATH(gens-qt4)
-TARGET_LINK_LIBRARIES(gens-qt4 compat gens ${ZLIB_LIBRARY} genscd genskeys)
 DO_SPLIT_DEBUG(gens-qt4)
+TARGET_LINK_LIBRARIES(gens-qt4 compat gens ${ZLIB_LIBRARY} genscd genskeys)
 ADD_DEPENDENCIES(gens-qt4 translations_target)
 
 # Additional libraries.
