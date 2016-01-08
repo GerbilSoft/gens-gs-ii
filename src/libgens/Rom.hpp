@@ -30,8 +30,9 @@
 // C++ includes.
 #include <string>
 
-// Decompressor subsystem.
-#include "Decompressor/Decompressor.hpp"
+// Archive subsystem. (for mdp_z_entry_t)
+// TODO: Move to MDP headers.
+#include "File/Archive.hpp"
 
 namespace LibGens {
 
