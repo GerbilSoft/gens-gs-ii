@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#error Decompressor.hpp is deprecated. Use Archive.hpp.
+
 #ifndef __LIBGENS_DECOMPRESSOR_DECOMPRESSOR_HPP__
 #define __LIBGENS_DECOMPRESSOR_DECOMPRESSOR_HPP__
 

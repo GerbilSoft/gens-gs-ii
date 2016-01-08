@@ -199,20 +199,6 @@ SET(libgens_IO_H
 	IO/IoMasterTap.hpp
 	)
 
-# TODO: Completely rework the decompressor subsystem.
-SET(libgens_DECOMPRESSOR_SRCS
-	Decompressor/Decompressor.cpp
-	Decompressor/DcGzip.cpp
-	Decompressor/DcZip.cpp
-	Decompressor/DcMemFake.cpp
-	)
-SET(libgens_DECOMPRESSOR_H
-	Decompressor/Decompressor.hpp
-	Decompressor/DcGzip.hpp
-	Decompressor/DcZip.hpp
-	Decompressor/DcMemFake.hpp
-	)
-
 # File/Archive subsystem.
 SET(libgens_FILE_SRCS
 	File/Archive.cpp
@@ -229,6 +215,8 @@ SET(libgens_FILE_H
 	File/MemFake.hpp
 	)
 
+# TODO: Port to the Archive subsystem.
+IF(0)
 IF(HAVE_LZMA)
 	SET(libgens_DECOMPRESSOR_SRCS
 		${libgens_DECOMPRESSOR_SRCS}
@@ -262,6 +250,7 @@ ELSE()
 		Decompressor/DcRar.hpp
 		)
 ENDIF()
+ENDIF(0)
 
 ######################
 # Build the library. #
