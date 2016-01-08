@@ -25,7 +25,6 @@
 
 // C includes.
 #include <stdint.h>
-
 // C includes. (C++ namespace)
 #include <cstdlib>
 #include <cstring>
