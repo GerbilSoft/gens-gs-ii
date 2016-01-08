@@ -50,7 +50,7 @@ extern "C" {
 typedef struct PACKED _mdp_z_entry_t {
 	char *filename;
 	size_t filesize;
-	
+
 	struct _mdp_z_entry_t *next;
 } mdp_z_entry_t;
 #pragma pack()
@@ -124,7 +124,7 @@ class Archive
 		 * @param z_entry	[in]  Pointer to mdp_z_entry_t describing the file to extract.
 		 * @param buf		[out] Buffer to read the file into.
 		 * @param siz		[in]  Size of buf. (Must be >= the size of the file.)
-		 * @param ret_siz	[out] Pointer to size_t to store the number of bytes read.
+		 * @param ret_siz	[out] Pointer to file_offset_t to store the number of bytes read.
 		 * @return 0 on success; negative POSIX error code on error.
 		 */
 		inline int readFile(const mdp_z_entry_t *z_entry, void *buf,
@@ -141,7 +141,7 @@ class Archive
 		 * @param read_len	[in]  Number of bytes to read.
 		 * @param buf		[out] Buffer to read the file into.
 		 * @param siz		[in]  Size of buf. (Must be >= read_len.)
-		 * @param ret_siz	[out] Pointer to size_t to store the number of bytes read.
+		 * @param ret_siz	[out] Pointer to file_offset_t to store the number of bytes read.
 		 * @return 0 on success; negative POSIX error code on error.
 		 */
 		virtual int readFile(const mdp_z_entry_t *z_entry,

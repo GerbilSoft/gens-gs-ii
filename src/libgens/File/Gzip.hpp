@@ -71,7 +71,7 @@ class Gzip : public Archive
 		 * @param read_len	[in]  Number of bytes to read.
 		 * @param buf		[out] Buffer to read the file into.
 		 * @param siz		[in]  Size of buf. (Must be >= read_len.)
-		 * @param ret_siz	[out] Pointer to size_t to store the number of bytes read.
+		 * @param ret_siz	[out] Pointer to file_offset_t to store the number of bytes read.
 		 * @return 0 on success; negative POSIX error code on error.
 		 */
 		virtual int readFile(const mdp_z_entry_t *z_entry,
