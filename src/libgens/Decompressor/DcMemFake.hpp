@@ -1,6 +1,6 @@
 /***************************************************************************
- * gens-qt4: Gens Qt4 UI.                                                  *
- * ZipSelectDialog.hpp: Multi-File Archive Selection Dialog.               *
+ * libgens: Gens Emulation Library.                                        *
+ * DcMemFake.hpp: Fake decompressor using a ROM already loaded in memory.  *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,61 +21,53 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_WINDOWS_ZIPSELECTDIALOG_HPP__
-#define __GENS_QT4_WINDOWS_ZIPSELECTDIALOG_HPP__
+#ifndef __LIBGENS_DECOMPRESSOR_DCMEMFAKE_HPP__
+#define __LIBGENS_DECOMPRESSOR_DCMEMFAKE_HPP__
 
-#include <QtGui/QDialog>
-#include <QtCore/QModelIndex>
+#include "Decompressor.hpp"
 
-// LibGens includes.
-// TODO: Use MDP's mdp_z_entry_t instead of LibGens::Decompressor.
-#include "libgens/Decompressor/Decompressor.hpp"
+namespace LibGens {
 
-namespace GensQt4 {
-
-class ZipSelectDialogPrivate;
-
-class ZipSelectDialog : public QDialog
+class DcMemFake : public Decompressor
 {
-	Q_OBJECT
-	
-	public:
-		ZipSelectDialog(QWidget *parent = nullptr);
-		virtual ~ZipSelectDialog();
-
 	private:
-		typedef QDialog super;
-		ZipSelectDialogPrivate *const d_ptr;
-		Q_DECLARE_PRIVATE(ZipSelectDialog)
-	private:
-		Q_DISABLE_COPY(ZipSelectDialog)
-
+		DcMemFake(FILE *f, const char *filename);
 	public:
-		/**
-		 * Set the file list.
-		 * @param z_entry File list.
-		 */
-		void setFileList(const mdp_z_entry_t *z_entry);
+		DcMemFake(const uint8_t *rom_data, unsigned int rom_size);
+		virtual ~DcMemFake();
 
 		/**
-		 * Get the selected file.
-		 * @return Selected file, or nullptr if no file was selected.
+		 * Detect if the file can be handled by this decompressor.
+		 * This function should be reimplemented by derived classes.
+		 * NOTE: Do NOT call this function like a virtual function!
+		 * @param f File pointer.
+		 * @return True if the file can be handled by this decompressor.
 		 */
-		const mdp_z_entry_t *selectedFile(void) const;
+		static bool DetectFormat(FILE *f);
+
+		/**
+		 * Get information about all files in the archive.
+		 * @param z_entry_out Pointer to mdp_z_entry_t*, which will contain an allocated mdp_z_entry_t.
+		 * @return MDP error code. [TODO]
+		 */
+		int getFileInfo(mdp_z_entry_t **z_entry_out);
+
+		/**
+		 * Get a file from the archive.
+		 * @param z_entry	[in]  Pointer to mdp_z_entry_t describing the file to extract.
+		 * @param buf		[out] Buffer to read the file into.
+		 * @param siz		[in]  Size of buf.
+		 * @param ret_siz	[out] Pointer to size_t to store the number of bytes read.
+		 * @return MDP error code. [TODO]
+		 */
+		int getFile(const mdp_z_entry_t *z_entry, void *buf, size_t siz, size_t *ret_siz);
 
 	protected:
-		// State change event. (Used for switching the UI language at runtime.)
-		virtual void changeEvent(QEvent *event) override;
-
-	private slots:
-		virtual void accept(void) override;
-
-		// Widget signals.
-		void on_treeView_clicked(const QModelIndex& index);
-		void on_treeView_collapsed(const QModelIndex& index);
-		void on_treeView_expanded(const QModelIndex& index);
+		const uint8_t *rom_data;
+		unsigned int rom_size;
+		unsigned int pos;
 };
 
 }
 
-#endif /* __GENS_QT4_WINDOWS_ZIPSELECTDIALOG_HPP__ */
+#endif /* __LIBGENS_DECOMPRESSOR_DCMEMFAKE_HPP__ */

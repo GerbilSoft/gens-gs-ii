@@ -62,6 +62,9 @@ void GeneralConfigWindow::apply(void)
 	SetValByPath_QString("Sega_CD/bootRomJPN", d->ui.txtMcdRomJPN->text());
 	SetValByPath_QString("Sega_CD/bootRomAsia", d->ui.txtMcdRomAsia->text());
 
+	/** External programs. **/
+	SetValByPath_QString("External_Programs/UnRAR", d->ui.txtExtPrgUnRAR->text());
+
 	/** Graphics settings. **/
 	SetValByPath_bool("Graphics/aspectRatioConstraint", d->ui.chkAspectRatioConstraint->isChecked());
 	SetValByPath_bool("Graphics/fastBlur", d->ui.chkFastBlur->isChecked());

@@ -574,6 +574,20 @@ void GeneralConfigWindowPrivate::mcdDisplayRomFileStatus(const QString &rom_id, 
 }
 
 /**
+ * Display external program file status.
+ * @param file_id File ID.
+ * @param file_desc File description. (detected by examining the file)
+ */
+void GeneralConfigWindowPrivate::extprgDisplayFileStatus(const QString &file_id, const QString &file_desc)
+{
+	// Set the file description.
+	QString sel_prg = GeneralConfigWindow::tr("Selected Program: %1");
+	ui.lblExtPrgSel->setText(sel_prg.arg(file_id) +
+				QLatin1String("<br/>\n") + file_desc);
+	ui.lblExtPrgSel->setTextFormat(Qt::RichText);
+}
+
+/**
  * Enable or disable the Apply button.
  * @param enabled True to enable; false to disable.
  */

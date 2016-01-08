@@ -39,6 +39,7 @@
 #include <QtGui/QKeyEvent>
 
 // libgens
+#include "libgens/Decompressor/DcRar.hpp"
 #include "libgens/macros/common.h"
 
 // ROM database.
@@ -89,6 +90,7 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 		"applications-system",		// System
 		"",				// Genesis (TODO)
 		"media-optical",		// Sega CD
+		"utilities-terminal",		// External Programs
 		nullptr
 	};
 
@@ -179,6 +181,19 @@ GeneralConfigWindow::GeneralConfigWindow(QWidget *parent)
 	d->ui.txtMcdRomJPN->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Mega CD (J)")));
 	d->ui.txtMcdRomAsia->setPlaceholderText(sMcdBootRom_PlaceholderText.arg(tr("Mega CD (Asia)")));
 #endif /* QT_VERSION >= 0x040700 */
+
+	// External Programs: Set the textbox icon and placeholder text.
+	d->ui.txtExtPrgUnRAR->setIcon(style()->standardIcon(QStyle::SP_MessageBoxQuestion));
+#ifdef Q_OS_WIN32
+	d->ui.lblExtPrgUnRAR->setText(tr("UnRAR DLL:"));
+#if QT_VERSION >= 0x040700
+	d->ui.txtExtPrgUnRAR->setPlaceholderText(tr("Select an UnRAR DLL..."));
+#endif /* QT_VERSION >= 0x040700 */
+#else /* !Q_OS_WIN32 */
+#if QT_VERSION >= 0x040700
+	d->ui.txtExtPrgUnRAR->setPlaceholderText(tr("Select a RAR or UnRAR binary..."));
+#endif /* QT_VERSION >= 0x040700 */
+#endif /* Q_OS_WIN32 */
 
 	// Load configuration.
 	reload();
@@ -273,6 +288,11 @@ void GeneralConfigWindow::changeEvent(QEvent *event)
 		// Update the ROM file status.
 		// TODO: Update labels?
 		d->updateRomFileStatus();
+
+		// Update external program status.
+		// TODO: Split the RAR check code out of the on_txtExtPrgUnRAR_textChanged() function.
+		// NOTE: Calling on_txtExtPrgUnRAR_textChanged() will enable the Apply button!
+		on_txtExtPrgUnRAR_textChanged();
 	}
 
 	// Pass the event to the base class.
@@ -350,6 +370,9 @@ void GeneralConfigWindow::reload(void)
 	d->ui.txtMcdRomJPN->setText(ValByPath_QString("Sega_CD/bootRomJPN"));
 	d->ui.txtMcdRomAsia->setText(ValByPath_QString("Sega_CD/bootRomAsia"));
 	on_txtMcdRomUSA_focusIn();
+
+	/** External programs. **/
+	d->ui.txtExtPrgUnRAR->setText(ValByPath_QString("External_Programs/UnRAR"));
 
 	/** Graphics settings. **/
 	d->ui.chkAspectRatioConstraint->setChecked(ValByPath_bool("Graphics/aspectRatioConstraint"));
@@ -636,6 +659,208 @@ void GeneralConfigWindow::on_txtMcdRomAsia_textChanged(void)
 		d->setApplyButtonEnabled(true);
 	} else {
 		SetValByPath_QString("Sega_CD/bootRomAsia", d->ui.txtMcdRomAsia->text());
+	}
+}
+
+/** External programs **/
+
+/**
+ * Select a RAR/UnRAR binary.
+ */
+void GeneralConfigWindow::on_btnExtPrgUnRAR_clicked(void)
+{
+	// Create the dialog title.
+#ifdef Q_OS_WIN32
+	const QString title = tr("Select UnRAR DLL");
+#else
+	const QString title = tr("Select RAR or UnRAR binary");
+#endif
+
+	Q_D(GeneralConfigWindow);
+	QString filename = QFileDialog::getOpenFileName(this, title,
+			d->ui.txtExtPrgUnRAR->text(),	// Default filename.
+#ifdef Q_OS_WIN32
+			tr("DLL files") + QLatin1String(" (*.dll);;") +
+#else
+			tr("rar or unrar") + QLatin1String(" (rar unrar);;") +
+#endif
+			tr("All files") + QLatin1String(" (*.*)"));
+
+	if (filename.isEmpty())
+		return;
+
+	// Convert to native pathname separators.
+	filename = QDir::toNativeSeparators(filename);
+
+	// Set the filename text.
+	// Program file status will be updated automatically by
+	// the textChanged() signal from QLineEdit.
+	d->ui.txtExtPrgUnRAR->setText(filename);
+
+	// Set focus to the textbox.
+	d->ui.txtExtPrgUnRAR->setFocus(Qt::OtherFocusReason);
+}
+
+void GeneralConfigWindow::on_txtExtPrgUnRAR_focusIn(void)
+{
+	Q_D(GeneralConfigWindow);
+#ifdef Q_OS_WIN32
+	d->extprgDisplayFileStatus(tr("UnRAR DLL"), d->sExtPrgStatus_UnRAR);
+#else
+	d->extprgDisplayFileStatus(tr("RAR or UnRAR binary"), d->sExtPrgStatus_UnRAR);
+#endif
+}
+
+void GeneralConfigWindow::on_txtExtPrgUnRAR_textChanged(void)
+{
+	// Check the RAR binary to make sure it's valid.
+	// TODO: Split status detection into a separate function like Sega CD Boot ROMs?
+	QString prg_id = tr("Unknown");
+	QString prg_status;
+	QStyle::StandardPixmap filename_icon = QStyle::SP_MessageBoxQuestion;
+	LibGens::DcRar::ExtPrgInfo prg_info;
+	
+	// Check if the file exists.
+	Q_D(GeneralConfigWindow);
+	QString filename = d->ui.txtExtPrgUnRAR->text();
+	if (filename.isEmpty()) {
+		prg_status = tr("No filename specified.");
+	} else {
+		int status = LibGens::DcRar::CheckExtPrg(d->ui.txtExtPrgUnRAR->text().toUtf8().constData(), &prg_info);
+		switch (status) {
+			case 0:
+				// RAR is usable.
+				filename_icon = QStyle::SP_DialogYesButton;
+				break;
+
+			case -1:
+				// RAR not found.
+				prg_status = tr("The specified file was not found.");
+				break;
+
+			case -2:
+				// RAR not executable.
+				prg_status = d->sWarning + tr("The specified file is not executable.");
+				filename_icon = QStyle::SP_MessageBoxWarning;
+				break;
+
+			case -3:
+				// File isn't a regular file.
+				prg_status = d->sWarning + tr("The specified file is not a regular file.");
+				filename_icon = QStyle::SP_MessageBoxCritical;
+				break;
+
+			case -4:
+				// Error calling stat().
+				// TODO: Get the stat() error code?
+				prg_status = d->sWarning + tr("Error calling stat().");
+				filename_icon = QStyle::SP_MessageBoxCritical;
+				break;
+
+#ifdef Q_OS_WIN32
+			case -5:
+				// UnRAR.dll API version is too old. (Win32 only)
+				prg_status = d->sWarning + tr("UnRAR.dll API version is too old.") + QLatin1String("<br/>\n") +
+							   tr("Gens/GS II requires API version %1 or later.").arg(RAR_DLL_VERSION);
+				filename_icon = QStyle::SP_MessageBoxCritical;
+				break;
+#endif
+
+			case -6:
+				// Version information not found.
+#ifdef Q_OS_WIN32
+				prg_status = d->sWarning + tr("DLL version information not found.");
+#else
+				prg_status = d->sWarning + tr("Program version information not found.");
+#endif
+				filename_icon = QStyle::SP_MessageBoxCritical;
+				break;
+
+			case -7:
+				// Not RAR, UnRAR, or UnRAR.dll.
+#ifdef Q_OS_WIN32
+				prg_status = d->sWarning + tr("Selected DLL is not UnRAR.dll.");
+#else
+				prg_status = d->sWarning + tr("Selected program is neither RAR nor UnRAR.");
+#endif
+				filename_icon = QStyle::SP_MessageBoxCritical;
+				break;
+
+			default:
+				// Unknown error.
+				prg_status = d->sWarning + tr("Unknown error code %1 received from RAR file handler.").arg(status);
+				filename_icon = QStyle::SP_MessageBoxWarning;
+				break;
+		}
+	}
+
+	// Set program ID.
+	if (prg_info.dll_major != 0 || prg_info.dll_minor != 0 ||
+	    prg_info.dll_revision != 0 || prg_info.dll_build != 0)
+	{
+		switch (prg_info.rar_type) {
+			case LibGens::DcRar::ExtPrgInfo::RAR_ET_UNKNOWN:
+			default:
+				break;
+
+			case LibGens::DcRar::ExtPrgInfo::RAR_ET_UNRAR:
+				prg_id = tr("UnRAR");
+				break;
+
+			case LibGens::DcRar::ExtPrgInfo::RAR_ET_RAR:
+				prg_id = tr("RAR");
+				break;
+
+			case LibGens::DcRar::ExtPrgInfo::RAR_ET_UNRAR_DLL:
+				prg_id = tr("UnRAR.dll");
+				break;
+		}
+	}
+	d->sExtPrgStatus_UnRAR = tr("Identified as: %1").arg(prg_id);
+
+	// Line break string.
+	static const QString sLineBreak = QLatin1String("<br/>\n");
+
+	// Print DLL version information, if available.
+	if (prg_info.dll_major != 0 || prg_info.dll_minor != 0 ||
+	    prg_info.dll_revision != 0 || prg_info.dll_build != 0)
+	{
+		QString rar_version;
+#ifdef Q_OS_WIN32
+		rar_version = tr("%1 version %2.%3.%4.%5");
+		rar_version = rar_version.arg(prg_id);
+		rar_version = rar_version.arg(prg_info.dll_major);
+		rar_version = rar_version.arg(prg_info.dll_minor);
+		rar_version = rar_version.arg(prg_info.dll_revision);
+		rar_version = rar_version.arg(prg_info.dll_build);
+#else
+		rar_version = tr("%1 version %2.%3");
+		rar_version = rar_version.arg(prg_id);
+		rar_version = rar_version.arg(prg_info.dll_major);
+		rar_version = rar_version.arg(prg_info.dll_minor);
+#endif
+		d->sExtPrgStatus_UnRAR += sLineBreak + sLineBreak + rar_version;
+#ifdef Q_OS_WIN32
+		if (prg_info.api_version > 0)
+			d->sExtPrgStatus_UnRAR += sLineBreak + tr("API version %1").arg(prg_info.api_version);
+#endif
+	}
+
+	if (!prg_status.isEmpty())
+		d->sExtPrgStatus_UnRAR += sLineBreak + sLineBreak + prg_status;
+
+	// Set the textbox's icon.
+	d->ui.txtExtPrgUnRAR->setIcon(style()->standardIcon(filename_icon));
+
+	// TODO: Create a constant string for DLL vs. binary.
+	// For now, just call focusIn() to update the description.
+	on_txtExtPrgUnRAR_focusIn();
+
+	// Settings have been changed.
+	if (!d->applySettingsImmediately) {
+		d->setApplyButtonEnabled(true);
+	} else {
+		SetValByPath_QString("External_Programs/UnRAR", d->ui.txtExtPrgUnRAR->text());
 	}
 }
 

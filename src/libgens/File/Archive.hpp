@@ -34,6 +34,9 @@
 // PACKED macro.
 #include "../macros/common.h"
 
+// Needed for mdp_z_entry_t.
+#include "../Decompressor/Decompressor.hpp"
+
 // C includes.
 #include <stdint.h>
 // C includes. (C++ namespace)
@@ -46,6 +49,7 @@
 extern "C" {
 #endif
 
+/* FIXME: Uncomment once Decompressor is removed.
 #pragma pack(1)
 typedef struct PACKED _mdp_z_entry_t {
 	char *filename;
@@ -54,6 +58,7 @@ typedef struct PACKED _mdp_z_entry_t {
 	struct _mdp_z_entry_t *next;
 } mdp_z_entry_t;
 #pragma pack()
+*/
 
 #ifdef __cplusplus
 }

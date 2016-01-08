@@ -75,6 +75,22 @@ const ConfigDefaults::DefaultSetting ConfigDefaults::DefaultSettings[] =
 	{"Sega_CD/bootRomJPN",	"", 0, 0,			DefaultSetting::VT_NONE, 0, 0},
 	{"Sega_CD/bootRomAsia",	"", 0, 0,			DefaultSetting::VT_NONE, 0, 0},
 	
+	/** External programs. **/
+#ifdef Q_OS_WIN32
+#if defined(__amd64__) || defined(__x86_64__)
+	{"External_Programs/UnRAR", "UnRAR64.dll", 0, 0,	DefaultSetting::VT_NONE, 0, 0},
+#else
+	{"External_Programs/UnRAR", "UnRAR.dll", 0, 0,		DefaultSetting::VT_NONE, 0, 0},
+#endif
+#else /* !Q_OS_WIN32 */
+	// TODO: Check for the existence of unrar and rar.
+	// We should:
+	// - Default to unrar if it's found.
+	// - Fall back to rar if it's found but unrar isn't.
+	// - Assume unrar if neither are found.
+	{"External_Programs/UnRAR", "/usr/bin/unrar", 0, 0,	DefaultSetting::VT_NONE, 0, 0},
+#endif /* Q_OS_WIN32 */
+
 	/** Graphics settings. **/
 	// TODO: Use enum constants for range.
 	{"Graphics/aspectRatioConstraint",	"true", 0, 0,	DefaultSetting::VT_BOOL, 0, 0},

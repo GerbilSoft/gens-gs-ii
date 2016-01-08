@@ -1,7 +1,9 @@
 /***************************************************************************
- * gens-qt4: Gens Qt4 UI.                                                  *
- * ConfigHandler.hpp: General configuration signal handler.                *
+ * libgens: Gens Emulation Library.                                        *
+ * UnRAR_dll.cpp: UnRAR.dll Management Class.                              *
  *                                                                         *
+ * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
+ * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
  * Copyright (c) 2008-2015 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
@@ -19,44 +21,42 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __GENS_QT4_CONFIGHANDLER_HPP__
-#define __GENS_QT4_CONFIGHANDLER_HPP__
+#ifndef __LIBGENS_DECOMPRESSOR_UNRAR_DLL_HPP__
+#define __LIBGENS_DECOMPRESSOR_UNRAR_DLL_HPP__
 
-// Qt includes.
-#include <QtCore/QObject>
+#ifndef _WIN32
+#error UnRAR_dll.cpp only works on Win32.
+#endif
 
-// PathConfig.
-#include "Config/PathConfig.hpp"
+#include <windows.h>
+#include "unrar.h"
 
-namespace GensQt4 {
+#ifndef MAKE_CLASSFUNCPTR
+#define MAKE_CLASSFUNCPTR(f) typeof(f) * p##f
+#endif
 
-// General configuration signal handler.
-class ConfigHandler : public QObject
+class UnRAR_dll
 {
-	Q_OBJECT
-	
 	public:
-		ConfigHandler(QObject *parent = 0);
-
-	private:
-		typedef QObject super;
-	private:
-		Q_DISABLE_COPY(ConfigHandler)
-
-	public slots:
-		void extprgUnRAR_changed_slot(const QVariant &extprgUnRAR);
-
-		void tmssRomFilename_changed_slot(const QVariant &tmssRomFilename);
-		void tmssEnabled_changed_slot(const QVariant &tmssEnabled);
+		UnRAR_dll(void);
+		~UnRAR_dll();
 		
-		/**
-		 * A configuration path has been changed.
-		 * @param path Configuration path.
-		 * @param dir New directory.
-		 */
-		void pathChanged(GensQt4::PathConfig::ConfigPath path, const QString &dir);
+		bool load(const char *filename);
+		void unload(void);
+		
+		inline bool isLoaded(void) const
+			{ return m_loaded; }
+		
+		MAKE_CLASSFUNCPTR(RAROpenArchiveEx);
+		MAKE_CLASSFUNCPTR(RARCloseArchive);
+		MAKE_CLASSFUNCPTR(RARReadHeaderEx);
+		MAKE_CLASSFUNCPTR(RARProcessFile);
+		MAKE_CLASSFUNCPTR(RARSetCallback);
+		MAKE_CLASSFUNCPTR(RARGetDllVersion);
+	
+	private:
+		bool m_loaded;
+		HINSTANCE hUnrarDll;
 };
 
-}
-
-#endif /* __GENS_QT4_CONFIGHANDLER_HPP__ */
+#endif /* __LIBGENS_DECOMPRESSOR_UNRAR_DLL_HPP__ */

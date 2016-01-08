@@ -101,6 +101,11 @@ class GeneralConfigWindow : public QMainWindow
 		void on_txtMcdRomJPN_textChanged(void);
 		void on_txtMcdRomAsia_textChanged(void);
 
+		/** External Programs **/
+		void on_btnExtPrgUnRAR_clicked(void);
+		void on_txtExtPrgUnRAR_focusIn(void);
+		void on_txtExtPrgUnRAR_textChanged(void);
+
 		/**
 		 * Setting change notifications.
 		 * On Mac OS X, settings are applied immediately.

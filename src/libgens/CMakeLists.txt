@@ -199,6 +199,20 @@ SET(libgens_IO_H
 	IO/IoMasterTap.hpp
 	)
 
+# TODO: Completely rework the decompressor subsystem.
+SET(libgens_DECOMPRESSOR_SRCS
+	Decompressor/Decompressor.cpp
+	Decompressor/DcGzip.cpp
+	Decompressor/DcZip.cpp
+	Decompressor/DcMemFake.cpp
+	)
+SET(libgens_DECOMPRESSOR_H
+	Decompressor/Decompressor.hpp
+	Decompressor/DcGzip.hpp
+	Decompressor/DcZip.hpp
+	Decompressor/DcMemFake.hpp
+	)
+
 # File/Archive subsystem.
 SET(libgens_FILE_SRCS
 	File/Archive.cpp
@@ -215,6 +229,40 @@ SET(libgens_FILE_H
 	File/MemFake.hpp
 	)
 
+IF(HAVE_LZMA)
+	SET(libgens_DECOMPRESSOR_SRCS
+		${libgens_DECOMPRESSOR_SRCS}
+		Decompressor/Dc7z.cpp
+		)
+	SET(libgens_DECOMPRESSOR_H
+		${libgens_DECOMPRESSOR_H}
+		Decompressor/Dc7z.hpp
+		)
+ENDIF()
+
+# Platform-specific sources.
+IF(WIN32)
+	SET(libgens_DECOMPRESSOR_SRCS
+		${libgens_DECOMPRESSOR_SRCS}
+		Decompressor/DcRar_Win32.cpp
+		Decompressor/UnRAR_dll.cpp
+		)
+	SET(libgens_DECOMPRESSOR_H
+		${libgens_DECOMPRESSOR_H}
+		Decompressor/DcRar.hpp
+		Decompressor/UnRAR_dll.hpp
+		)
+ELSE()
+	SET(libgens_DECOMPRESSOR_SRCS
+		${libgens_DECOMPRESSOR_SRCS}
+		Decompressor/DcRar_Unix.cpp
+		)
+	SET(libgens_DECOMPRESSOR_H
+		${libgens_DECOMPRESSOR_H}
+		Decompressor/DcRar.hpp
+		)
+ENDIF()
+
 ######################
 # Build the library. #
 ######################
@@ -226,6 +274,7 @@ ADD_LIBRARY(gens STATIC
 	${libgens_EMUCONTEXT_SRCS} ${libgens_EMUCONTEXT_H}
 	${libgens_VDP_SRCS} ${libgens_VDP_H}
 	${libgens_IO_SRCS} ${libgens_IO_H}
+	${libgens_DECOMPRESSOR_SRCS} ${libgens_DECOMPRESSOR_H}
 	${libgens_FILE_SRCS} ${libgens_FILE_H}
 	)
 INCLUDE(SetMSVCDebugPath)
