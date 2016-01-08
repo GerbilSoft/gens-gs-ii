@@ -30,10 +30,8 @@
 #include <cstring>
 
 #ifdef _WIN32
-// MiniZip Win32 I/O handler.
-// FIXME: Either make sure we always build MiniZip internally on Windows,
-// or move iowin32u to libgens.
-#include "minizip/iowin32u.h"
+// MiniZip Win32 UTF-8 compatibility library.
+#include "libcompat/W32U/minizip_iowin32u.h"
 #endif /* _WIN32 */
 
 // LOG_MSG() subsystem.

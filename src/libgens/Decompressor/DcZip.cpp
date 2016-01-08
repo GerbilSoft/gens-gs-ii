@@ -29,12 +29,12 @@
 #include <stdint.h>
 
 #ifdef _WIN32
-// MiniZip Win32 I/O handler.
-#include "../../extlib/minizip/iowin32u.h"
 // Win32 Unicode Translation Layer.
 // Needed for proper Unicode filename support on Windows.
 // Also required for large file support.
 #include "libcompat/W32U/W32U_mini.h"
+// MiniZip Win32 UTF-8 compatibility library.
+#include "libcompat/W32U/minizip_iowin32u.h"
 #endif /* _WIN32 */
 
 // LOG_MSG() subsystem.

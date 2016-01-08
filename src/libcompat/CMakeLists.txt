@@ -145,6 +145,20 @@ IF(WIN32)
 	TARGET_LINK_LIBRARIES(compat shell32)
 ENDIF(WIN32)
 
+# MiniZip UTF-8 compatibility for Windows.
+IF(WIN32 AND HAVE_MINIZIP)
+	INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+	INCLUDE_DIRECTORIES(${MINIZIP_INCLUDE_DIR})
+	SET(libcompat_W32U_minizip_SRCS W32U/minizip_iowin32u.c)
+	SET(libcompat_W32U_minizip_H W32U/minizip_iowin32u.h)
+	ADD_LIBRARY(compat_W32U_minizip STATIC
+		${libcompat_W32U_minizip_SRCS}
+		${libcompat_W32U_minizip_H}
+		)
+	SET_MSVC_DEBUG_PATH(compat_W32U_minizip)
+	TARGET_LINK_LIBRARIES(compat_W32U_minizip ${MINIZIP_LIBRARY})
+ENDIF(WIN32 AND HAVE_MINIZIP)
+
 # Test suite.
 IF(BUILD_TESTING)
        ADD_SUBDIRECTORY(tests)
