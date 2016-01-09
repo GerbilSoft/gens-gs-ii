@@ -34,6 +34,7 @@
 #ifdef HAVE_LZMA
 #include "Sz.hpp"
 #include "Xz.hpp"
+#include "Lzma.hpp"
 #endif /* HAVE_LZMA */
 
 // TODO: HAVE_UNRAR?
@@ -58,6 +59,7 @@ Archive *ArchiveFactory::openArchive(const char *filename)
 	 *   "file supported, but broken". The latter case
 	 *   should return immediately without trying any
 	 *   other readers.
+	 * - Option to disable certain formats.
 	 */
 	Archive *archive;
 
@@ -82,6 +84,14 @@ Archive *ArchiveFactory::openArchive(const char *filename)
 
 	// Try Xz via the LZMA SDK.
 	archive = new Xz(filename);
+	if (archive->isOpen())
+		return archive;
+
+	delete archive;
+	archive = nullptr;
+
+	// Try Lzma via the LZMA SDK.
+	archive = new Lzma(filename);
 	if (archive->isOpen())
 		return archive;
 

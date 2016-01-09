@@ -64,12 +64,14 @@ IF(HAVE_LZMA)
 		LzmaSdk.cpp
 		Sz.cpp
 		Xz.cpp
+		Lzma.cpp
 		)
 	SET(libgensfile_H
 		${libgensfile_H}
 		LzmaSdk.hpp
 		Sz.hpp
 		Xz.hpp
+		Lzma.hpp
 		)
 ENDIF(HAVE_LZMA)
 
