@@ -33,6 +33,7 @@
 
 #ifdef HAVE_LZMA
 #include "Sz.hpp"
+#include "Xz.hpp"
 #endif /* HAVE_LZMA */
 
 // TODO: HAVE_UNRAR?
@@ -73,6 +74,14 @@ Archive *ArchiveFactory::openArchive(const char *filename)
 #ifdef HAVE_LZMA
 	// Try 7-Zip via the LZMA SDK.
 	archive = new Sz(filename);
+	if (archive->isOpen())
+		return archive;
+
+	delete archive;
+	archive = nullptr;
+
+	// Try Xz via the LZMA SDK.
+	archive = new Xz(filename);
 	if (archive->isOpen())
 		return archive;
 

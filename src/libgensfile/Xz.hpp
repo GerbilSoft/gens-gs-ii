@@ -1,6 +1,6 @@
 /***************************************************************************
  * libgensfile: Gens file handling library.                                *
- * Sz.hpp: 7-Zip archive handler.                                          *
+ * Xz.hpp: Xz archive handler.                                             *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,18 +21,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENSFILE_SZ_HPP__
-#define __LIBGENSFILE_SZ_HPP__
+#ifndef __LIBGENSFILE_XZ_HPP__
+#define __LIBGENSFILE_XZ_HPP__
 
 #include "Archive.hpp"
 
 // 7-Zip includes.
-#include "lzma/7z.h"
 #include "lzma/7zFile.h"
+#include "lzma/Xz.h"
 
 namespace LibGensFile {
 
-class Sz : public Archive
+class Xz : public Archive
 {
 	public:
 		/**
@@ -41,14 +41,14 @@ class Sz : public Archive
 		 * If it wasn't, check lastError() for the POSIX error code.
 		 * @param filename Name of the file to open.
 		 */
-		Sz(const char *filename);
-		virtual ~Sz();
+		Xz(const char *filename);
+		virtual ~Xz();
 
 	private:
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
-		Sz(const Sz &);
-		Sz &operator=(const Sz &);
+		Xz(const Xz &);
+		Xz &operator=(const Xz &);
 
 	public:
 		/**
@@ -90,14 +90,9 @@ class Sz : public Archive
 
 		CFileInStream m_archiveStream;
 		CLookToRead m_lookStream;
-		CSzArEx m_db;
-
-		// Miscellaneous 7-Zip variables.
-		uint32_t m_blockIndex;	// can have any value for first call (if outBuffer == nullptr)
-		uint8_t *m_outBuffer;	// must be nullptr before first call for each new archive.
-		size_t m_outBufferSize;	// can have any value before first call (if outBuffer == nullptr)
+		CXzs m_xzs;
 };
 
 }
 
-#endif /* __LIBGENSFILE_SZ_HPP__ */
+#endif /* __LIBGENSFILE_XZ_HPP__ */

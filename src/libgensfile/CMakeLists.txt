@@ -59,8 +59,16 @@ IF(HAVE_LZMA)
 	INCLUDE_DIRECTORIES(${LZMA_INCLUDE_DIR})
 
 	# 7-Zip archive handler.
-	SET(libgensfile_SRCS ${libgensfile_SRCS} Sz.cpp)
-	SET(libgensfile_H    ${libgensfile_H}    Sz.hpp)
+	SET(libgensfile_SRCS
+		${libgensfile_SRCS}
+		Sz.cpp
+		Xz.cpp
+		)
+	SET(libgensfile_H
+		${libgensfile_H}
+		Sz.hpp
+		Xz.hpp
+		)
 ENDIF(HAVE_LZMA)
 
 # RAR (UnRAR.dll)
