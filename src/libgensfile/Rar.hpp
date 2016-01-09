@@ -85,6 +85,12 @@ class Rar : public Archive
 		// UnRAR.dll instance.
 		UnRAR_dll m_unrarDll;
 
+#ifdef _WIN32
+		// Various forms of the RAR filename.
+		std::wstring m_filenameW;	// Unicode
+		std::string m_filenameA;	// ANSI
+#endif /* _WIN32 */
+
 		/**
 		 * Open the Archive's file using UnRAR.dll.
 		 * @param mode RAR open mode.

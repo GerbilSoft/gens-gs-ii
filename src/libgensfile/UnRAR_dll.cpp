@@ -37,8 +37,8 @@
 // dlsym() compatibility macro.
 // TODO: Needs dlopen(), but charset conversion is required...
 // TODO: Add LoadLibrary() to W32U.
-#define dlsym(handle, name) GetProcAddress((handle), (name))
-#define dlclose(handle) FreeLibrary(handle)
+#define dlsym(handle, name) GetProcAddress((HMODULE)(handle), (name))
+#define dlclose(handle) FreeLibrary((HMODULE)handle)
 #else /* !_WIN32 */
 // Use dlopen().
 // TODO: Test for dlfcn.h, dlopen() and libdl, etc.
@@ -88,7 +88,7 @@ int UnRAR_dll::load(const char *filename)
 
 	if (W32U_IsUnicode()) {
 		// Use the Unicode filename.
-		hUnrarDll = LoadLibraryW(filenameW);
+		m_hUnrarDll = (void*)LoadLibraryW(filenameW);
 	} else {
 		// System doesn't support Unicode.
 		// Convert the filename from UTF-16 to ANSI.
@@ -99,7 +99,7 @@ int UnRAR_dll::load(const char *filename)
 		}
 
 		// Use the ANSI filename.
-		hUnrarDll = LoadLibraryA(filenameA);
+		m_hUnrarDll = (void*)LoadLibraryA(filenameA);
 		free(filenameA);
 	}
 	free(filenameW);

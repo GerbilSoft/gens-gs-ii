@@ -114,6 +114,9 @@ INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(gensfile)
 TARGET_LINK_LIBRARIES(gensfile compat)
 
+# TODO: Only link in libgenstext if HAVE_LZMA and HAVE_RAR.
+TARGET_LINK_LIBRARIES(gensfile genstext)
+
 # zlib and MiniZip
 IF(HAVE_ZLIB)
 	# NOTE: Due to linking order requirements, we have to link
