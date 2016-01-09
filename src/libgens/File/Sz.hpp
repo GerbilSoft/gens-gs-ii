@@ -27,8 +27,8 @@
 #include "Archive.hpp"
 
 // 7-Zip includes.
-#include "lzma/7z/7z.h"
-#include "lzma/7z/7zFile.h"
+#include "lzma/7z.h"
+#include "lzma/7zFile.h"
 
 namespace LibGens { namespace File {
 

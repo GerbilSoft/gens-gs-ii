@@ -203,22 +203,28 @@ SET(libgens_IO_H
 SET(libgens_FILE_SRCS
 	File/Archive.cpp
 	File/ArchiveFactory.cpp
-	File/Gzip.cpp
-	File/Zip.cpp
 	File/MemFake.cpp
 	)
 SET(libgens_FILE_H
 	File/Archive.hpp
 	File/ArchiveFactory.hpp
-	File/Gzip.hpp
-	File/Zip.hpp
 	File/MemFake.hpp
 	)
 
-IF(HAVE_LZMA AND HAVE_7z)
-	# LZMA and 7z include directories.
+# Gzip, Zip
+IF(HAVE_ZLIB)
+	SET(libgens_FILE_SRCS ${libgens_FILE_SRCS} File/Gzip.cpp)
+	SET(libgens_FILE_H ${libgens_FILEH} File/Zip.cpp)
+	IF(HAVE_MINIZIP)
+		SET(libgens_FILE_SRCS ${libgens_FILE_SRCS} File/Gzip.cpp)
+		SET(libgens_FILE_H ${libgens_FILEH} File/Zip.cpp)
+	ENDIF(HAVE_MINIZIP)
+ENDIF(HAVE_ZLIB)
+
+# LZMA (7-Zip)
+IF(HAVE_LZMA)
+	# LZMA include directory.
 	INCLUDE_DIRECTORIES(${LZMA_INCLUDE_DIR})
-	INCLUDE_DIRECTORIES(${7z_INCLUDE_DIR})
 
 	# 7-Zip archive handler.
 	SET(libgens_FILE_SRCS
@@ -229,7 +235,7 @@ IF(HAVE_LZMA AND HAVE_7z)
 		${libgens_FILE_H}
 		File/Sz.hpp
 		)
-ENDIF()
+ENDIF(HAVE_LZMA)
 
 # TODO: Port to the Archive subsystem.
 IF(0)
@@ -284,12 +290,9 @@ ENDIF(HAVE_CLOCK_GETTIME_IN_LIBRT)
 IF(HAVE_ICONV)
 	TARGET_LINK_LIBRARIES(gens ${ICONV_LIBRARY})
 ENDIF(HAVE_ICONV)
-IF(HAVE_LZMA AND HAVE_7z)
-	# Link ordering matters:
-	# * 7z depends on lzmabase.
-	# * lzmabase does NOT depend on 7z.
-	TARGET_LINK_LIBRARIES(gens ${7z_LIBRARY} ${LZMA_LIBRARY})
-ENDIF(HAVE_LZMA AND HAVE_7z)
+IF(HAVE_LZMA)
+	TARGET_LINK_LIBRARIES(gens ${LZMA_LIBRARY})
+ENDIF(HAVE_LZMA)
 IF(WIN32)
 	# version.dll is required for DcRar_Win32.cpp, which calls these functions:
 	# - GetFileVersionInfoSize()

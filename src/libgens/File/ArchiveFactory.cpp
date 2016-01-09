@@ -19,11 +19,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+#include <config.libgens.h>
+
 #include "ArchiveFactory.hpp"
 #include "Archive.hpp"
+
+#ifdef HAVE_ZLIB
 #include "Gzip.hpp"
+#ifdef HAVE_MINIZIP
 #include "Zip.hpp"
+#endif /* HAVE_MINIZIP */
+#endif /* HAVE_ZLIB */
+
+#ifdef HAVE_LZMA
 #include "Sz.hpp"
+#endif /* HAVE_LZMA */
 
 namespace LibGens { namespace File {
 
@@ -47,6 +57,7 @@ Archive *ArchiveFactory::openArchive(const char *filename)
 	 */
 	Archive *archive;
 
+#ifdef HAVE_LZMA
 	// Try 7-Zip via the LZMA SDK.
 	archive = new Sz(filename);
 	if (archive->isOpen())
@@ -54,7 +65,10 @@ Archive *ArchiveFactory::openArchive(const char *filename)
 
 	delete archive;
 	archive = nullptr;
+#endif /* HAVE_LZMA */
 
+#ifdef HAVE_ZLIB
+#ifdef HAVE_MINIZIP
 	// Try Zip via MiniZip.
 	archive = new Zip(filename);
 	if (archive->isOpen())
@@ -62,6 +76,7 @@ Archive *ArchiveFactory::openArchive(const char *filename)
 
 	delete archive;
 	archive = nullptr;
+#endif /* HAVE_MINIZIP */
 
 	// Try Gzip (zlib).
 	// Note that zlib will handle uncompressed files
@@ -73,6 +88,7 @@ Archive *ArchiveFactory::openArchive(const char *filename)
 
 	delete archive;
 	archive = nullptr;
+#endif /* HAVE_ZLIB */
 
 	// As a last resort, use the base Archive class.
 	// No decompression will be performed, so only

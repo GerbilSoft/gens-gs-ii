@@ -39,9 +39,9 @@ using std::string;
 using std::u16string;
 
 // 7-Zip includes.
-#include "lzma/7z/7zAlloc.h"
-#include "lzma/7z/7zVersion.h"
-#include "lzma/lzmabase/7zCrc.h"
+#include "lzma/7zAlloc.h"
+#include "lzma/7zVersion.h"
+#include "lzma/7zCrc.h"
 
 // Character set conversion.
 #include "libgenstext/Encoding.hpp"

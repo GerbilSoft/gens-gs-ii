@@ -33,6 +33,9 @@
 /* Define to 1 if you have the `zlib` library (-lz). */
 #cmakedefine HAVE_ZLIB 1
 
+/* Define to 1 if MiniZip is available. */
+#cmakedefine HAVE_MINIZIP 1
+
 /* Define to 1 if LibGens is built with LZMA support using the included LZMA SDK. */
 #cmakedefine HAVE_LZMA 1
 
