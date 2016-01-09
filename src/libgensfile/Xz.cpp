@@ -33,10 +33,8 @@
 #include "libcompat/byteswap.h"
 
 // 7-Zip includes.
-#include "lzma/7zCrc.h"
 #include "lzma/7zAlloc.h"
 #include "lzma/Xz.h"
-#include "lzma/XzCrc64.h"
 
 namespace LibGensFile {
 
