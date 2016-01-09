@@ -53,10 +53,12 @@
 #ifdef _UNIX
 #define CALLBACK
 #define PASCAL
-#define LONG long
-#define HANDLE void *
-#define LPARAM long
-#define UINT unsigned int
+// Gens/GS II: Use typedefs for these to avoid
+// interfering with DLLEXPORT.
+typedef long LONG;
+typedef void *HANDLE;
+typedef long LPARAM;
+typedef unsigned int UINT;
 #endif
 
 #define RHDF_SPLITBEFORE 0x01
