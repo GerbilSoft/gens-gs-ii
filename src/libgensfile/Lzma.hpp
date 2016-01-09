@@ -81,15 +81,15 @@ class Lzma : public LzmaSdk
 				     void *buf, file_offset_t siz, file_offset_t *ret_siz) final;
 
 	private:
-#if 0
-		// Xz archive.
-		CXzs m_xzs;
-		CXzUnpacker m_xzu;
+		// Lzma archive.
+		CLzmaDec m_lzd;
+		// Uncompressed filesize.
+		// NOTE: May be ~0, indicating "unknown".
+		uint64_t m_lzsize;
 
 		// Decompression buffers.
 		uint8_t *m_inBuf, *m_outBuf;
 		size_t m_inBufSz, m_outBufSz;
-#endif
 };
 
 }

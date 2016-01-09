@@ -45,10 +45,9 @@ namespace LibGensFile {
  */
 Lzma::Lzma(const char *filename)
 	: LzmaSdk(filename)
-#if 0
+	, m_lzsize(0)
 	, m_inBuf(nullptr), m_outBuf(nullptr)
 	, m_inBufSz(0), m_outBufSz(0)
-#endif
 {
 	if (!m_file) {
 		return;
@@ -63,7 +62,7 @@ Lzma::Lzma(const char *filename)
 	// If it's not there, this isn't an Lzma archive.
 	// NOTE: Lzma magic is a bit weird, so we're checking it here
 	// instead of using checkMagic().
-	uint8_t header[13];
+	uint8_t header[LZMA_PROPS_SIZE+8];
 	rewind(m_file);
 	size_t szread = fread(header, 1, sizeof(header), m_file);
 	bool is_lzma = false;
@@ -76,7 +75,7 @@ Lzma::Lzma(const char *filename)
 			// it should either be -1 (unknown) or
 			// an unsigned value less than 256 GB.
 			// TODO: Add 64-bit byteswapping to byteswap.h.
-			uint64_t lzsize = header[5] |
+			m_lzsize = header[5] |
 				((uint64_t)header[ 6] << 8) |
 				((uint64_t)header[ 7] << 16) |
 				((uint64_t)header[ 8] << 24) |
@@ -84,7 +83,7 @@ Lzma::Lzma(const char *filename)
 				((uint64_t)header[10] << 40) |
 				((uint64_t)header[11] << 48) |
 				((uint64_t)header[12] << 56);
-			if (lzsize == ~0ULL || lzsize < (256ULL*1024*1024*1024)) {
+			if (m_lzsize == ~0ULL || m_lzsize < (256ULL*1024*1024*1024)) {
 				// Size is valid.
 				is_lzma = true;
 			} else {
@@ -125,31 +124,18 @@ Lzma::Lzma(const char *filename)
 		return;
 	}
 
-#if 0
-	// TODO: Only read the first stream?
-	Xzs_Construct(&m_xzs);
-
-	// Read the Xz footer.
-	int64_t startPosition;
-	SRes res = Xzs_ReadBackward(&m_xzs, &m_lookStream.s, &startPosition, nullptr, &m_allocImp);
-	if (res != SZ_OK || startPosition != 0) {
-		// Error reading the Xz footer.
-		// TODO: Store non-zero startPosition and use it?
-		Xzs_Free(&m_xzs, &m_allocImp);
-		File_Close(&m_archiveStream.file);
-
+	// Initialize the Lzma decoder.
+	LzmaDec_Construct(&m_lzd);
+	SRes res = LzmaDec_Allocate(&m_lzd, header, LZMA_PROPS_SIZE, &m_allocImp);
+	if (res != SZ_OK) {
+		// LmzaDec buffer allocation failed.
 		fclose(m_file);
-		m_file = nullptr,
-		// TODO: Error code?
-		m_lastError = EIO;
+		m_file = nullptr;
+		m_lastError = ENOMEM;
 		return;
 	}
 
-	// Initialize the Xz unpacker.
-	XzUnpacker_Construct(&m_xzu, &m_allocImp);
-#endif
-
-	// Xz archive is opened.
+	// Lzma archive is opened.
 }
 
 /**
@@ -157,17 +143,15 @@ Lzma::Lzma(const char *filename)
  */
 Lzma::~Lzma()
 {
-#if 0
 	// Free any allocated buffers.
 	free(m_inBuf);
 	free(m_outBuf);
 
-	// Close the Xz file.
+	// Close the Lzma file.
 	if (m_file) {
-		Xzs_Free(&m_xzs, &m_allocImp);
+		LzmaDec_Free(&m_lzd, &m_allocImp);
 		// File_Close() is called by LzmaSdk.
 	}
-#endif
 }
 
 /**
@@ -175,7 +159,6 @@ Lzma::~Lzma()
  */
 void Lzma::close(void)
 {
-#if 0
 	// Free any allocated buffers.
 	free(m_inBuf);
 	m_inBuf = nullptr;
@@ -184,12 +167,11 @@ void Lzma::close(void)
 	m_outBuf = nullptr;
 	m_outBufSz = 0;
 
-	// Close the Xz file.
+	// Close the Lzma file.
 	if (m_file) {
-		Xzs_Free(&m_xzs, &m_allocImp);
+		LzmaDec_Free(&m_lzd, &m_allocImp);
 		// File_Close() is called by LzmaSdk.
 	}
-#endif
 
 	// LzmaSdk class closes m_archiveStream.file.
 	// Base class closes the FILE*.
@@ -203,7 +185,6 @@ void Lzma::close(void)
  */
 int Lzma::getFileInfo(mdp_z_entry_t **z_entry_out)
 {
-#if 0
 	if (!z_entry_out) {
 		m_lastError = EINVAL;
 		return -m_lastError; // TODO: return -MDP_ERR_INVALID_PARAMETERS;
@@ -215,6 +196,65 @@ int Lzma::getFileInfo(mdp_z_entry_t **z_entry_out)
 	// Create a fake mdp_z_entry_t containing the uncompressed
 	// filesize and the archive's filename.
 
+	// Allocate buffers.
+	if (!m_inBuf) {
+		m_inBufSz = (1 << 15);		// 32 KB
+		m_inBuf = (uint8_t*)malloc(m_inBufSz);
+	}
+	if (!m_outBuf) {
+		m_outBufSz = (1 << 21);		// 2 MB
+		m_outBuf = (uint8_t*)malloc(m_outBufSz);
+	}
+
+	// NOTE: Lzma doesn't have an easy way to get the uncompressed
+	// filesize without reading through the whole file.
+
+	// (Re-)Initialize the Lzma decoder.
+	LzmaDec_Init(&m_lzd);
+
+	// Seek to the beginning of the compressed data.
+	// TODO: Check the return value?
+	fseeko(m_file, LZMA_PROPS_SIZE+8, SEEK_SET);
+
+	// NOTE: LzmaDec uses a zlib-like interface,
+	// so we can use fread() directly instead of
+	// the weird crap Xz/Sz uses.
+	// TODO: Skip this if m_lzsize is valid?
+	file_offset_t lzsize = 0;
+	SRes res;
+	do {
+		size_t inLen = fread(m_inBuf, 1, m_inBufSz, m_file);
+		if (inLen != m_inBufSz && ferror(m_file)) {
+			// I/O error.
+			m_lastError = errno;
+			return -m_lastError;
+		}
+
+		size_t outLen = m_outBufSz;
+		ELzmaStatus status;	// TODO: Check this.
+		res = LzmaDec_DecodeToBuf(&m_lzd, m_outBuf, &outLen,
+				m_inBuf, &inLen, LZMA_FINISH_ANY, &status);
+
+		if (res == SZ_OK) {
+			lzsize += outLen;
+
+			// Check status.
+			if (status == LZMA_STATUS_FINISHED_WITH_MARK ||
+			    status == LZMA_STATUS_MAYBE_FINISHED_WITHOUT_MARK /* TODO: Allow this? */)
+			{
+				// Done decompressing.
+				break;
+			}
+		}
+	} while (res == SZ_OK);
+
+	if (res != SZ_OK) {
+		// Lzma decoder encountered an error.
+		// TODO: Convert the 7z error to MDP?
+		m_lastError = EIO;
+		return -m_lastError;
+	}
+
 	// Allocate an mdp_z_entry_t.
 	// NOTE: C-style malloc() is used because MDP is a C API.
 	mdp_z_entry_t *z_entry = (mdp_z_entry_t*)malloc(sizeof(mdp_z_entry_t));
@@ -225,16 +265,13 @@ int Lzma::getFileInfo(mdp_z_entry_t **z_entry_out)
 
 	// Set the elements of the list entry.
 	// FIXME: z_entry->filesize should be changed to int64_t.
-	// For filesize, check if zlib is operating on a compressed file.
-	// If it is, use gzsize; otherwise, use filesize.
-	z_entry->filesize = (size_t)Xzs_GetUnpackSize(&m_xzs);
+	z_entry->filesize = (size_t)lzsize;
 	z_entry->filename = (!m_filename.empty() ? strdup(m_filename.c_str()) : nullptr);
 	z_entry->next = nullptr;
 
 	// Return the list.
 	*z_entry_out = z_entry;
 	return 0; // TODO: return MDP_ERR_OK;
-#endif
 }
 
 /**
@@ -255,7 +292,6 @@ int Lzma::readFile(const mdp_z_entry_t *z_entry,
 		   file_offset_t start_pos, file_offset_t read_len,
 		   void *buf, file_offset_t siz, file_offset_t *ret_siz)
 {
-#if 0
 	if (!z_entry || !buf ||
 	    start_pos < 0 || start_pos >= z_entry->filesize ||
 	    read_len < 0 || z_entry->filesize - read_len < start_pos ||
@@ -268,17 +304,10 @@ int Lzma::readFile(const mdp_z_entry_t *z_entry,
 		return -m_lastError; // TODO: return -MDP_ERR_INVALID_PARAMETERS;
 	}
 
-	// Seek to the beginning of the file.
-	// TODO: Use startPosition from the header?
-	// TODO: Check return value?
-	int64_t startPosition = 0;
-	m_lookStream.s.Seek(&m_lookStream, &startPosition, SZ_SEEK_SET);
-	if (startPosition != 0) {
-		// Error seeking in the file.
-		m_lastError = EIO;
-		return -m_lastError;
-	}
-		
+	// Seek to the beginning of the compressed data.
+	// TODO: Check the return value?
+	fseeko(m_file, LZMA_PROPS_SIZE+8, SEEK_SET);
+
 	// Allocate buffers.
 	if (!m_inBuf) {
 		m_inBufSz = (1 << 15);		// 32 KB
@@ -288,104 +317,86 @@ int Lzma::readFile(const mdp_z_entry_t *z_entry,
 		m_outBufSz = (1 << 21);		// 2 MB
 		m_outBuf = (uint8_t*)malloc(m_outBufSz);
 	}
-		
-	// (Re-)Initialize the XzUnpacker.
-	XzUnpacker_Init(&m_xzu);
+
+	// (Re-)Initialize the Lzma decoder.
+	LzmaDec_Init(&m_lzd);
 
 	// Buffer space remaining.
 	// NOTE: We're using read_len, not siz,
 	// since we only want to read read_len bytes.
 	file_offset_t buf_spc_rem = read_len;
 
-	// Read the file into the buffer.
-	// Based on LZMA SDK 15.14's XzHandler.cpp: CDecoder::Decode()
+	// NOTE: LzmaDec uses a zlib-like interface,
+	// so we can use fread() directly instead of
+	// the weird crap Xz/Sz uses.
 	SRes res;
-	uint32_t inSize = 0;
-	size_t inPos = 0;
-	size_t outPos = 0;
 	*ret_siz = 0;
+	do {
+		size_t inLen = fread(m_inBuf, 1, m_inBufSz, m_file);
+		if (inLen != m_inBufSz && ferror(m_file)) {
+			// I/O error.
+			m_lastError = errno;
+			return -m_lastError;
+		}
 
-	while (true) {
-		if (inPos == inSize) {
-			inPos = 0;
-			// NOTE: ISeqInStream->Read() uses the same
-			// variable for buffer size and processed size.
-			// The COM version in XzHandler.cpp uses
-			// separate parameters for each.
-			inSize = m_inBufSz;
-			res = m_lookStream.s.Read(&m_lookStream, m_inBuf, &inSize);
-			if (res != 0) {
-				// TODO: Properly handle this error.
-				m_lastError = EIO;
-				return -m_lastError;
+		size_t outLen = m_outBufSz;
+		ELzmaStatus status;	// TODO: Check this.
+		res = LzmaDec_DecodeToBuf(&m_lzd, m_outBuf, &outLen,
+				m_inBuf, &inLen, LZMA_FINISH_ANY, &status);
+
+		if (res == SZ_OK) {
+			// Current output buffer.
+			// This is adjusted to handle start_pos if necessary.
+			uint8_t *outBuf = m_outBuf;
+			if (start_pos > 0) {
+				// Starting position is set.
+				// We want to remove these bytes from the
+				// beginning of the input stream.
+				if (outLen < start_pos) {
+					// Not enough data read yet.
+					// Discard the entire buffer.
+					start_pos -= outLen;
+					outLen = 0;
+				} else {
+					// We've read at least start_pos bytes.
+					outBuf += start_pos;
+					outLen -= start_pos;
+					start_pos = 0;
+				}
+			}
+
+			if (outLen > 0) {
+				// Copy data to the output buffer.
+				if (buf_spc_rem > outLen) {
+					// Space is available.
+					memcpy(buf, outBuf, outLen);
+					buf_spc_rem -= outLen;
+					buf = ((uint8_t*)buf + outLen);
+					*ret_siz += outLen;
+				} else {
+					// Either there's not enough space,
+					// or this will fill up the buffer.
+					memcpy(buf, outBuf, buf_spc_rem);
+					*ret_siz += buf_spc_rem;
+					buf_spc_rem = 0;
+				}
+			}
+
+			if (buf_spc_rem <= 0) {
+				// Out of space in the buffer.
+				// TODO: Error?
+				break;
+			}
+
+			// Check status.
+			if (status == LZMA_STATUS_FINISHED_WITH_MARK ||
+			    status == LZMA_STATUS_MAYBE_FINISHED_WITHOUT_MARK /* TODO: Allow this? */)
+			{
+				// Done decompressing.
+				break;
 			}
 		}
-
-		size_t inLen = inSize - inPos;
-		size_t outLen = m_outBufSz - outPos;
-		ECoderStatus status;
-
-		res = XzUnpacker_Code(&m_xzu,
-			m_outBuf + outPos, &outLen,
-			m_inBuf + inPos, &inLen,
-			(inSize == 0 ? CODER_FINISH_END : CODER_FINISH_ANY), &status);
-
-		inPos += inLen;
-		outPos += outLen;
-
-		bool finished = ((inLen == 0 && outLen == 0) || res != SZ_OK);
-
-		// Current output buffer.
-		// This is adjusted to handle start_pos if necessary.
-		uint8_t *outBuf = m_outBuf;
-		if (start_pos > 0) {
-			// Starting position is set.
-			// We want to remove these bytes from the
-			// beginning of the input stream.
-			if (outPos < start_pos) {
-				// Not enough data read yet.
-				// Discard the entire buffer.
-				start_pos -= outPos;
-				outPos = 0;
-			} else {
-				// We've read at least start_pos bytes.
-				outBuf += start_pos;
-				outPos -= start_pos;
-				start_pos = 0;
-			}
-		}
-
-		// Have we read any data yet?
-		if (outPos > 0) {
-			// Copy data to the output buffer.
-			if (buf_spc_rem > outPos) {
-				// Space is available.
-				memcpy(buf, outBuf, outPos);
-				buf_spc_rem -= outPos;
-				buf = ((uint8_t*)buf + outPos);
-				*ret_siz += outPos;
-			} else {
-				// Either there's not enough space,
-				// or this will fill up the buffer.
-				memcpy(buf, outBuf, buf_spc_rem);
-				*ret_siz += buf_spc_rem;
-				buf_spc_rem = 0;
-			}
-			outPos = 0;
-		}
-
-		if (buf_spc_rem <= 0) {
-			// Out of space in the buffer.
-			// TODO: Error?
-			break;
-		}
-
-		if (finished) {
-			// TODO: ExtraSize stuff?
-			// See LZMA SDK 15.14, CPP/7zip/Archive/XzHandler.cpp:597.
-			break;
-		}
-	}
+	} while (res == SZ_OK);
 
 	// Verify that the correct amount of data was read.
 	if (res != SZ_OK || *ret_siz != read_len) {
@@ -396,7 +407,6 @@ int Lzma::readFile(const mdp_z_entry_t *z_entry,
 		return -m_lastError;
 	}
 	return 0; // TODO: return MDP_ERR_OK;
-#endif
 }
 
 }
