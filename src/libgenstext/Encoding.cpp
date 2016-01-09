@@ -294,17 +294,20 @@ u16string Utf8_to_Utf16(const char *src, size_t len)
 string SJIS_to_Utf8(const char *src, size_t len)
 {
 	char *mbs = nullptr;
+	int cbMbs;
 #if defined(_WIN32)
 	// Win32 version. Use W32U_mini.
 	int cchWcs;
-	wchar_t *wcs = W32U_mbs_to_UTF16(src, len, CP_UTF8, &cchWcs);
+	wchar_t *wcs = W32U_mbs_to_UTF16(src, len, 932, &cchWcs);
 	if (wcs) {
-		//int cbMbs;	// TODO
-		mbs = W32U_UTF16_to_mbs(wcs, cchWcs, CP_UTF8, nullptr);
+		mbs = W32U_UTF16_to_mbs(wcs, cchWcs, CP_UTF8, &cbMbs);
+		free(wcs);
 	}
-	free(wcs);
 #elif defined(HAVE_ICONV)
 	mbs = gens_iconv(src, len, "SHIFT-JIS", "UTF-8");
+	if (mbs) {
+		cbMbs = strlen(mbs);
+	}
 #else
 	// No translation supported.
 	// TODO: #error?
@@ -312,7 +315,7 @@ string SJIS_to_Utf8(const char *src, size_t len)
 
 	if (!mbs)
 		return string();
-	string ret(mbs);
+	string ret(mbs, cbMbs);
 	free(mbs);
 	return ret;
 }
