@@ -35,6 +35,9 @@
 #include "Sz.hpp"
 #endif /* HAVE_LZMA */
 
+// TODO: HAVE_UNRAR?
+#include "Rar.hpp"
+
 namespace LibGensFile {
 
 /**
@@ -56,6 +59,16 @@ Archive *ArchiveFactory::openArchive(const char *filename)
 	 *   other readers.
 	 */
 	Archive *archive;
+
+	// TODO: Reorder based on overhead?
+
+	// Try RAR via UnRAR.dll.
+	archive = new Rar(filename);
+	if (archive->isOpen())
+		return archive;
+
+	delete archive;
+	archive = nullptr;
 
 #ifdef HAVE_LZMA
 	// Try 7-Zip via the LZMA SDK.

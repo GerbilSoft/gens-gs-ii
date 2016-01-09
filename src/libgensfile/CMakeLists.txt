@@ -68,10 +68,12 @@ ENDIF(HAVE_LZMA)
 SET(libgensfile_SRCS
 	${libgensfile_SRCS}
 	UnRAR_dll.cpp
+	Rar.cpp
 	)
 SET(libgensfile_H
 	${libgensfile_H}
 	UnRAR_dll.hpp
+	Rar.hpp
 	)
 
 # TODO: Port to the Archive subsystem.
@@ -127,6 +129,13 @@ ENDIF(HAVE_ZLIB)
 IF(HAVE_LZMA)
 	TARGET_LINK_LIBRARIES(gensfile ${LZMA_LIBRARY})
 ENDIF(HAVE_LZMA)
+
+# UnRAR. (TODO: HAVE_RAR?)
+# We're not linking directly to UnRAR, so we need
+# libdl on systems that use dlopen().
+IF(CMAKE_DL_LIBS)
+	TARGET_LINK_LIBRARIES(gensfile ${CMAKE_DL_LIBS})
+ENDIF(CMAKE_DL_LIBS)
 
 IF(WIN32)
 	# version.dll is required for DcRar_Win32.cpp, which calls these functions:
