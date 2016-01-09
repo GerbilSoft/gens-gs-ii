@@ -35,12 +35,20 @@
 // W32U_IsUnicode()
 #include "is_unicode.h"
 
-#if defined(_MSC_VER) && _MSC_VER >= 1900
+#if defined(_MSC_VER)
+#if _MSC_VER < 1900 && !defined(__cplusplus)
+// MSVC 2015 added 'inline' in C mode.
+// Older versions don't have it, so #define inline here.
+#define inline __inline
+#endif /* _MSC_VER < 1900 && !defined(__cplusplus) */
+
+#if _MSC_VER >= 1900
 // MSVC 2015 removed __wgetmainargs() and __getmainargs().
 // Use CommandLineToArgvW() instead.
 #include <shellapi.h>
 #define USE_COMMANDLINETOARGVW 1
 #endif
+#endif /* _MSC_VER */
 
 #if !defined(USE_COMMANDLINETOARGVW)
 typedef struct {
