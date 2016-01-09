@@ -45,6 +45,8 @@ using std::u16string;
 #include <cstdlib>
 #include <cstring>
 
+// TODO: Use std::auto_ptr<>?
+
 namespace LibGensText {
 
 #if defined(_WIN32)
@@ -218,19 +220,6 @@ static char *gens_iconv(const char *src, size_t src_bytes_len,
 /**
  * Convert UTF-16 (host-endian) to UTF-8.
  * @param src UTF-16 string. (host-endian)
- * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
- */
-std::string Utf16_to_Utf8(const u16string& src)
-{
-	// The raw char16_t* version is used in Dc7z.cpp,
-	// so we'll make the std::u16string version a wrapper
-	// instead of converting the char16_t* to an std::u16string.
-	return Utf16_to_Utf8(src.data(), src.size());
-}
-
-/**
- * Convert UTF-16 (host-endian) to UTF-8.
- * @param src UTF-16 string. (host-endian)
  * @param len Length of UTF-16 string, in characters.
  * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
  */
@@ -265,39 +254,7 @@ string Utf16_to_Utf8(const char16_t *src, size_t len)
 /**
  * Convert UTF-8 to UTF-16 (host-endian).
  * @param src UTF-8 string.
- * @return UTF-16 string, or empty string on error.
- */
-u16string Utf8_to_Utf16(const string& src)
-{
-#if defined(_WIN32)
-	// Win32 version. Use W32U_mini.
-	int cchWcs;
-	char16_t *wcs = (char16_t*)W32U_mbs_to_UTF16(src.c_str(), (int)src.size(), CP_UTF8, &cchWcs);
-	if (!wcs) {
-		return u16string();
-	}
-	u16string ret(wcs, cchWcs);
-	free(wcs);
-	return ret;
-#elif defined(HAVE_ICONV)
-	// iconv version.
-	char16_t *wcs = (char16_t*)gens_iconv(src.data(), src.size(), "UTF-8", UTF16_ENCODING);
-	if (!wcs) {
-		return u16string();
-	}
-	u16string ret(wcs);
-	free(wcs);
-	return ret;
-#else
-	// No translation supported.
-	// TODO: #error?
-	return u16string();
-#endif
-}
-
-/**
- * Convert UTF-8 to UTF-16 (host-endian).
- * @param src UTF-8 string.
+ * @param len Length of UTF-8 string, in bytes.
  * @return UTF-16 string, or empty string on error.
  */
 u16string Utf8_to_Utf16(const char *src, size_t len)
@@ -331,19 +288,23 @@ u16string Utf8_to_Utf16(const char *src, size_t len)
 /**
  * Convert Shift-JIS to UTF-8.
  * @param src Shift-JIS string.
+ * @param len Length of Shift-JIS string, in bytes.
  * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
  */
-string SJIS_to_Utf8(const string& src)
+string SJIS_to_Utf8(const char *src, size_t len)
 {
 	char *mbs = nullptr;
 #if defined(_WIN32)
-	wchar_t *wcs = W32U_mbs_to_UTF16(src.c_str(), 932); // cp932 == Shift-JIS
+	// Win32 version. Use W32U_mini.
+	int cchWcs;
+	wchar_t *wcs = W32U_mbs_to_UTF16(src, len, CP_UTF8, &cchWcs);
 	if (wcs) {
-		mbs = W32U_UTF16_to_mbs(wcs, CP_UTF8);
-		free(wcs);
+		//int cbMbs;	// TODO
+		mbs = W32U_UTF16_to_mbs(wcs, cchWcs, CP_UTF8, nullptr);
 	}
+	free(wcs);
 #elif defined(HAVE_ICONV)
-	mbs = gens_iconv(src.data(), src.length(), "SHIFT-JIS", "UTF-8");
+	mbs = gens_iconv(src, len, "SHIFT-JIS", "UTF-8");
 #else
 	// No translation supported.
 	// TODO: #error?

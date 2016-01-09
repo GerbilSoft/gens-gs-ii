@@ -28,15 +28,7 @@
 // C includes.
 #include <stdint.h>
 
-namespace LibGensText
-{
-
-/**
- * Convert UTF-16 (host-endian) to UTF-8.
- * @param src UTF-16 string. (host-endian)
- * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
- */
-std::string Utf16_to_Utf8(const std::u16string& src);
+namespace LibGensText {
 
 /**
  * Convert UTF-16 (host-endian) to UTF-8.
@@ -47,25 +39,50 @@ std::string Utf16_to_Utf8(const std::u16string& src);
 std::string Utf16_to_Utf8(const char16_t *src, size_t len);
 
 /**
+ * Convert UTF-16 (host-endian) to UTF-8.
+ * @param src UTF-16 string. (host-endian)
+ * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
+ */
+static inline std::string Utf16_to_Utf8(const std::u16string& src)
+{
+	return Utf16_to_Utf8(src.data(), src.size());
+}
+
+/**
  * Convert UTF-8 to UTF-16 (host-endian).
  * @param src UTF-8 string.
+ * @param len Length of UTF-8 string, in bytes.
  * @return UTF-16 string, or empty string on error.
  */
-std::u16string Utf8_to_Utf16(const std::string& src);
+std::u16string Utf8_to_Utf16(const char *src, size_t len);
 
 /**
  * Convert UTF-8 to UTF-16 (host-endian).
  * @param src UTF-8 string.
  * @return UTF-16 string, or empty string on error.
  */
-std::u16string Utf8_to_Utf16(const char *src, size_t len);
+static inline std::u16string Utf8_to_Utf16(const std::string& src)
+{
+	return Utf8_to_Utf16(src.data(), src.size());
+}
+
+/**
+ * Convert Shift-JIS to UTF-8.
+ * @param src Shift-JIS string.
+ * @param len Length of Shift-JIS string, in bytes.
+ * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
+ */
+std::string SJIS_to_Utf8(const char *src, size_t len);
 
 /**
  * Convert Shift-JIS to UTF-8.
  * @param src Shift-JIS string.
  * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
  */
-std::string SJIS_to_Utf8(const std::string& src);
+static inline std::string SJIS_to_Utf8(const std::string& src)
+{
+	return SJIS_to_Utf8(src.data(), src.size());
+}
 
 /**
  * Compare two UTF-16 strings.
