@@ -42,6 +42,18 @@
 #include "libcompat/W32U/W32U_mini.h"
 #endif
 
+// TODO: Move this to CMake?
+#ifdef _MSC_VER
+// MSVC: _alloca() is in malloc.h.
+#include <malloc.h>
+#ifndef alloca
+#define alloca(size) _alloca(size)
+#endif
+#else /* !_MSC_VER */
+// Other compilers: alloca() is in stdlib.h.
+#include <stdlib.h>
+#endif /* _MSC_VER */
+
 namespace LibGensFile {
 
 /**
@@ -194,6 +206,45 @@ void Archive::z_entry_t_free(mdp_z_entry_t *z_entry)
 		free(z_entry->filename);
 		free(z_entry);
 	}
+}
+
+/**
+ * Check for magic at the beginning of the file.
+ * @param magic	[in] Magic bytes.
+ * @param siz	[in] Size of magic.
+ * @return 0 on success; negative POSIX error code on error.
+ * m_lastError is NOT set by this function, since it's
+ * for use by subclasses only.
+ */
+int Archive::checkMagic(const uint8_t *magic, size_t siz)
+{
+	if (!m_file)
+		return -EBADF;
+
+	// Header buffer.
+	uint8_t *header = (uint8_t*)alloca(siz);
+
+	int ret = -ENOSYS;
+	rewind(m_file);
+	size_t szread = fread(header, 1, siz, m_file);
+	if (szread == siz) {
+		if (!memcmp(header, magic, sizeof(siz))) {
+			// Header matches.
+			ret = 0;
+		} else {
+			// TODO: Better error code?
+			ret = -EIO;
+		}
+	} else {
+		// Error reading from the file.
+		ret = -errno;
+		if (ret == 0) {
+			// Unknown error...
+			ret = -EIO; // TODO: MDP error code.
+		}
+	}
+
+	return ret;
 }
 
 }

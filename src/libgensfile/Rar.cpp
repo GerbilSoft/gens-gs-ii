@@ -205,34 +205,12 @@ HANDLE Rar::openRar(int mode)
 	// If it's not there, this is either a really old
 	// RAR 1.x archive, or it isn't a RAR archive at all.
 	// TODO: How do we check for RAR 1.x?
-	// Check if UnRAR.dll can open the file.
-	// TODO: Separate function to open the file.
-	// For now, just check for RAR magic.
 	static const uint8_t rar_magic[] = {'R', 'a', 'r', '!'};
-	uint8_t header[sizeof(rar_magic)];
-
-	bool is_rar = false;
-	rewind(m_file);
-	size_t ret = fread(&header, 1, sizeof(header), m_file);
-	if (ret == sizeof(header)) {
-		if (!memcmp(header, rar_magic, sizeof(header))) {
-			// Header matches.
-			is_rar = true;
-		} else {
-			// TODO: Better error code?
-			m_lastError = EINVAL;
-		}
-	} else {
-		// Error reading from the file.
-		m_lastError = errno;
-		if (m_lastError == 0) {
-			// Unknown error...
-			m_lastError = EIO; // TODO: MDP error code.
-		}
-	}
-
-	if (!is_rar) {
+	int ret = checkMagic(rar_magic, sizeof(rar_magic));
+	if (ret != 0) {
 		// Not a RAR archive.
+		// (Or, it's a really old RAR archive.)
+		m_lastError = -ret;
 		return nullptr;
 	}
 

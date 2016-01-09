@@ -50,32 +50,12 @@ Zip::Zip(const char *filename)
 		return;
 
 	// Check for Zip magic first.
-	// If it's not there, this isn't a Zip file.
+	// If it's not there, this isn't a Zip archive.
 	static const uint8_t zip_magic[] = {'P', 'K', 0x03, 0x04};
-	uint8_t header[sizeof(zip_magic)];
-
-	bool is_zip = false;
-	rewind(m_file);
-	size_t ret = fread(&header, 1, sizeof(header), m_file);
-	if (ret == sizeof(header)) {
-		if (!memcmp(header, zip_magic, sizeof(header))) {
-			// Header matches.
-			is_zip = true;
-		} else {
-			// TODO: Better error code?
-			m_lastError = EIO;
-		}
-	} else {
-		// Error reading from the file.
-		m_lastError = errno;
-		if (m_lastError == 0) {
-			// Unknown error...
-			m_lastError = EIO; // TODO: MDP error code.
-		}
-	}
-
-	if (!is_zip) {
-		// Not a 7z file.
+	int ret = checkMagic(zip_magic, sizeof(zip_magic));
+	if (ret != 0) {
+		// Not a Zip archive.
+		m_lastError = -ret;
 		fclose(m_file);
 		m_file = nullptr;
 		return;

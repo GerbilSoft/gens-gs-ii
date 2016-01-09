@@ -162,6 +162,17 @@ class Archive
 		static void z_entry_t_free(mdp_z_entry_t *z_entry);
 
 	protected:
+		/**
+		 * Check for magic at the beginning of the file.
+		 * @param magic	[in] Magic bytes.
+		 * @param siz	[in] Size of magic.
+		 * @return 0 on success; negative POSIX error code on error.
+		 * m_lastError is NOT set by this function, since it's
+		 * for use by subclasses only.
+		 */
+		int checkMagic(const uint8_t *magic, size_t siz);
+
+	protected:
 		// Common variables accessible by subclasses.
 		std::string m_filename;	// Filename.
 		FILE *m_file;		// Opened file handle.
