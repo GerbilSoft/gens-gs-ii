@@ -122,6 +122,11 @@ ELSE(MSVC) # TODO: GCC?
 	STRING(REPLACE "-Wall"   "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 	STRING(REPLACE "-Wextra" "" CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}")
 	STRING(REPLACE "-Wextra" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
+	# UnRAR.dll uses exceptions, so we can't disable them.
+	# TODO: Use CheckCXXNoExceptionsCompilerFlag()?
+	# (though that has "-EHsc" for MSVC, which is acceptable...)
+	STRING(REPLACE "-fno-exceptions" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 ENDIF(MSVC)
 
 SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${UNRAR_WARNING_FLAGS}")
