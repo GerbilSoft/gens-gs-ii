@@ -1,5 +1,5 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
+ * libgensfile: Gens file handling library.                                *
  * Sz.cpp: 7-Zip archive handler.                                          *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
@@ -52,10 +52,7 @@ using std::u16string;
 #include "libcompat/W32U/W32U_mini.h"
 #endif
 
-// LOG_MSG() subsystem.
-#include "macros/log_msg.h"
-
-namespace LibGens { namespace File {
+namespace LibGensFile {
 
 // Set to true if the 7z CRC table has been initialized.
 bool Sz::ms_CrcInit = false;
@@ -405,4 +402,4 @@ int Sz::readFile(const mdp_z_entry_t *z_entry,
 	return 0; // TODO: return MDP_ERR_OK;
 }
 
-} }
+}

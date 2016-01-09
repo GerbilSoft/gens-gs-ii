@@ -1,5 +1,5 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
+ * libgensfile: Gens file handling library.                                *
  * Archive.hpp: Archive file reader. (Base Class)                          *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
@@ -28,11 +28,18 @@
  * Using this class directly will effectively result in a nop.
  */
 
-#ifndef __LIBGENS_FILE_ARCHIVE_HPP__
-#define __LIBGENS_FILE_ARCHIVE_HPP__
+#ifndef __LIBGENSFILE_ARCHIVE_HPP__
+#define __LIBGENSFILE_ARCHIVE_HPP__
 
-// PACKED macro.
-#include "../macros/common.h"
+// PACKED macro from libgens/macros/common.h.
+// TODO: MSVC version; common version from MDP?
+#if !defined(PACKED)
+#if defined(__GNUC__)
+#define PACKED __attribute__ ((packed))
+#else
+#define PACKED
+#endif /* defined(__GNUC__) */
+#endif /* !defined(PACKED) */
 
 // C includes.
 #include <stdint.h>
@@ -62,7 +69,7 @@ typedef struct PACKED _mdp_z_entry_t {
 // TODO: Use MDP error codes later.
 // For now, using POSIX error codes.
 
-namespace LibGens { namespace File {
+namespace LibGensFile {
 
 class Archive
 {
@@ -200,6 +207,6 @@ inline int Archive::readFile(const mdp_z_entry_t *z_entry, void *buf, file_offse
 	return readFile(z_entry, 0, max_size, buf, siz, ret_siz);
 }
 
-} }
+}
 
-#endif /* __LIBGENS_FILE_ARCHIVE_HPP__ */
+#endif /* __LIBGENSFILE_ARCHIVE_HPP__ */

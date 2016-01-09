@@ -24,12 +24,12 @@
 #include <libgens/config.libgens.h>
 
 #include "Rom.hpp"
-#include "File/Archive.hpp"
-#include "File/ArchiveFactory.hpp"
-#include "File/MemFake.hpp"
-using LibGens::File::Archive;
-using LibGens::File::ArchiveFactory;
-using LibGens::File::MemFake;
+#include "libgensfile/Archive.hpp"
+#include "libgensfile/ArchiveFactory.hpp"
+#include "libgensfile/MemFake.hpp"
+using LibGensFile::Archive;
+using LibGensFile::ArchiveFactory;
+using LibGensFile::MemFake;
 
 // C includes. (C++ namespace)
 #include <cstring>

@@ -1,5 +1,5 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
+ * libgensfile: Gens file handling library.                                *
  * Zip.cpp: Zip archive handler.                                           *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
@@ -34,10 +34,7 @@
 #include "libcompat/W32U/minizip_iowin32u.h"
 #endif /* _WIN32 */
 
-// LOG_MSG() subsystem.
-#include "macros/log_msg.h"
-
-namespace LibGens { namespace File {
+namespace LibGensFile {
 
 /**
  * Open a file with this archive handler.
@@ -280,8 +277,10 @@ int Zip::readFile(const mdp_z_entry_t *z_entry,
 				break;
 		}
 
-		LOG_MSG(z, LOG_MSG_LEVEL_CRITICAL,
-			"Error extracting file '%s' from archive '%s': %s",
+		// TODO: This originally used LOG_MSG, but since it's no longer
+		// part of LibGens, we can't use that.
+		// TODO: Error codes and/or message?
+		fprintf(stderr, "Zip: Error extracting file '%s' from archive '%s': %s",
 			z_entry->filename, m_filename.c_str(), zip_err);
 		m_lastError = EIO;
 		return -m_lastError; // TODO: return -MDP_ERR_Z_CANT_OPEN_ARCHIVE;
@@ -292,4 +291,4 @@ int Zip::readFile(const mdp_z_entry_t *z_entry,
 	return 0; // TODO: return MDP_ERR_OK;
 }
 
-} }
+}

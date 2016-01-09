@@ -32,7 +32,7 @@
 
 // Archive subsystem. (for mdp_z_entry_t)
 // TODO: Move to MDP headers.
-#include "File/Archive.hpp"
+#include "libgensfile/Archive.hpp"
 
 namespace LibGens {
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
+ * libgensfile: Gens file handling library.                                *
  * Gzip.hpp: Gzip archive handler.                                         *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
@@ -21,13 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_FILE_GZIP_HPP__
-#define __LIBGENS_FILE_GZIP_HPP__
+#ifndef __LIBGENSFILE_GZIP_HPP__
+#define __LIBGENSFILE_GZIP_HPP__
 
 #include "Archive.hpp"
 #include <zlib.h>
 
-namespace LibGens { namespace File {
+namespace LibGensFile {
 
 class Gzip : public Archive
 {
@@ -82,6 +82,6 @@ class Gzip : public Archive
 		gzFile m_gzFile;
 };
 
-} }
+}
 
-#endif /* __LIBGENS_FILE_GZIP_HPP__ */
+#endif /* __LIBGENSFILE_GZIP_HPP__ */

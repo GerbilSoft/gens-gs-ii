@@ -1,5 +1,5 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
+ * libgensfile: Gens file handling library.                                *
  * MemFake.cpp: Fake archive handler using data already loaded in memory.  *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
@@ -29,7 +29,7 @@
 #include <cstdlib>
 #include <cstring>
 
-namespace LibGens { namespace File {
+namespace LibGensFile {
 
 /**
  * This archive handler does NOT support opening files.
@@ -156,4 +156,4 @@ int MemFake::readFile(const mdp_z_entry_t *z_entry,
 	return 0; // TODO: return MDP_ERR_OK;
 }
 
-} }
+}

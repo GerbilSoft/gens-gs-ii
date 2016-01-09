@@ -1,5 +1,5 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
+ * libgensfile: Gens file handling library.                                *
  * Gzip.cpp: Gzip archive handler.                                         *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
@@ -51,7 +51,7 @@
 #include "libcompat/W32U/W32U_mini.h"
 #endif /* _WIN32 */
 
-namespace LibGens { namespace File {
+namespace LibGensFile {
 
 /**
  * Open a file with this archive handler.
@@ -262,4 +262,4 @@ int Gzip::readFile(const mdp_z_entry_t *z_entry,
 	return 0; // TODO: return MDP_ERR_OK;
 }
 
-} }
+}

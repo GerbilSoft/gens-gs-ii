@@ -1,5 +1,5 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
+ * libgensfile: Gens file handling library.                                *
  * Archive.cpp: Archive file reader. (Base Class)                          *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
@@ -42,7 +42,7 @@
 #include "libcompat/W32U/W32U_mini.h"
 #endif
 
-namespace LibGens { namespace File {
+namespace LibGensFile {
 
 /**
  * Open a file with this archive handler.
@@ -196,4 +196,4 @@ void Archive::z_entry_t_free(mdp_z_entry_t *z_entry)
 	}
 }
 
-} }
+}

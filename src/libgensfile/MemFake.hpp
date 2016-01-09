@@ -1,6 +1,6 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
- * Sz.hpp: 7-Zip archive handler.                                          *
+ * libgensfile: Gens file handling library.                                *
+ * MemFake.hpp: Fake archive handler using data already loaded in memory.  *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,34 +21,46 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENS_ARCHIVE_SZ_HPP__
-#define __LIBGENS_ARCHIVE_SZ_HPP__
+#ifndef __LIBGENSFILE_MEMFILE_HPP___
+#define __LIBGENSFILE_MEMFILE_HPP___
 
 #include "Archive.hpp"
 
-// 7-Zip includes.
-#include "lzma/7z.h"
-#include "lzma/7zFile.h"
+namespace LibGensFile {
 
-namespace LibGens { namespace File {
-
-class Sz : public Archive
+class MemFake : public Archive
 {
+	private:
+		/**
+		 * This archive handler does NOT support opening files.
+		 * Calling this function will result in SIGABRT.
+		 * @param filename
+		 */
+		MemFake(const char *filename);
+
 	public:
 		/**
-		 * Open a file with this archive handler.
+		 * Open an area of memory as if it's an archive.
+		 * This is useful for some test suites.
+		 *
+		 * NOTE: The specified memory area is NOT copied.
+		 * Do NOT free the memory unless you either call
+		 * MemFake::close() or delete the MemFake object.
+		 *
 		 * Check isOpen() afterwards to see if the file was opened.
 		 * If it wasn't, check lastError() for the POSIX error code.
-		 * @param filename Name of the file to open.
+		 *
+		 * @param rom_data ROM data.
+		 * @param rom_size Size of rom_data.
 		 */
-		Sz(const char *filename);
-		virtual ~Sz();
+		MemFake(const uint8_t *rom_data, unsigned int rom_size);
+		virtual ~MemFake();
 
 	private:
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
-		Sz(const Sz &);
-		Sz &operator=(const Sz &);
+		MemFake(const MemFake &);
+		MemFake &operator=(const MemFake &);
 
 	public:
 		/**
@@ -82,21 +94,11 @@ class Sz : public Archive
 				     void *buf, file_offset_t siz, file_offset_t *ret_siz) final;
 
 	private:
-		CFileInStream m_archiveStream;
-		CLookToRead m_lookStream;
-		CSzArEx m_db;
-		ISzAlloc m_allocImp;
-		ISzAlloc m_allocTempImp;
-
-		// Miscellaneous 7-Zip variables.
-		uint32_t m_blockIndex;	// can have any value for first call (if outBuffer == nullptr)
-		uint8_t *m_outBuffer;	// must be nullptr before first call for each new archive.
-		size_t m_outBufferSize;	// can have any value before first call (if outBuffer == nullptr)
-
-		// Set to true if the 7z CRC table has been initialized.
-		static bool ms_CrcInit;
+		const uint8_t *m_rom_data;
+		unsigned int m_rom_size;
+		unsigned int m_pos;
 };
 
-} }
+}
 
-#endif /* __LIBGENS_ARCHIVE_SZ_HPP__ */
+#endif /* __LIBGENSFILE_MEMFILE_HPP___ */

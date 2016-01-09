@@ -1,5 +1,5 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
+ * libgensfile: Gens file handling library.                                *
  * ArchiveFactory.cpp: Archive factory class.                              *
  *                                                                         *
  * Copyright (c) 2015-2016 by David Korth.                                 *
@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#include <config.libgens.h>
+#include <config.libgensfile.h>
 
 #include "ArchiveFactory.hpp"
 #include "Archive.hpp"
@@ -35,7 +35,7 @@
 #include "Sz.hpp"
 #endif /* HAVE_LZMA */
 
-namespace LibGens { namespace File {
+namespace LibGensFile {
 
 /**
  * Open the specified file using an Archive subclass.
@@ -103,4 +103,4 @@ Archive *ArchiveFactory::openArchive(const char *filename)
 	return nullptr;
 }
 
-} }
+}

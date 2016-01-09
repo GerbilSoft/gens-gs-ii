@@ -32,7 +32,7 @@
 
 // LibGens includes.
 // TODO: Use MDP's mdp_z_entry_t instead of LibGens::File::Archive.
-#include "libgens/File/Archive.hpp"
+#include "libgensfile/Archive.hpp"
 
 namespace GensQt4 {
 
