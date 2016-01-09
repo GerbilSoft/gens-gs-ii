@@ -83,6 +83,11 @@ class Xz : public LzmaSdk
 	private:
 		// Xz archive.
 		CXzs m_xzs;
+		CXzUnpacker m_xzu;
+
+		// Decompression buffers.
+		uint8_t *m_inBuf, *m_outBuf;
+		size_t m_inBufSz, m_outBufSz;
 };
 
 }
