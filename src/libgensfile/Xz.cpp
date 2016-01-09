@@ -332,6 +332,7 @@ int Xz::readFile(const mdp_z_entry_t *z_entry,
 
 		if (finished) {
 			// TODO: ExtraSize stuff?
+			// See LZMA SDK 15.14, CPP/7zip/Archive/XzHandler.cpp:597.
 			break;
 		}
 	}
