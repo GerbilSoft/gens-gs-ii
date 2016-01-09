@@ -209,7 +209,6 @@ ADD_LIBRARY(gens STATIC
 	${libgens_EMUCONTEXT_SRCS} ${libgens_EMUCONTEXT_H}
 	${libgens_VDP_SRCS} ${libgens_VDP_H}
 	${libgens_IO_SRCS} ${libgens_IO_H}
-	${libgens_DECOMPRESSOR_SRCS} ${libgens_DECOMPRESSOR_H}
 	${libgens_FILE_SRCS} ${libgens_FILE_H}
 	)
 INCLUDE(SetMSVCDebugPath)
