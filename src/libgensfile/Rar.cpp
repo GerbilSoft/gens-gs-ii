@@ -320,37 +320,17 @@ int Rar::getFileInfo(mdp_z_entry_t **z_entry_out)
 		z_entry_cur->filesize = rar_header.UnpSize;
 		z_entry_cur->next = nullptr;
 
-		// TODO: Is the ANSI filename UTF-8 on Linux?
+		// UnRAR.dll always presents valid "ANSI" and Unicode filenames.
+#ifdef _WIN32
+		// Windows: rar_header.FileNameA is ANSI.
+		// Convert the Unicode filename to UTF-8.
+		z_entry_cur->filename = W32U_UTF16_to_mbs(rar_header.FileNameW, CP_UTF8);
+#else /* !_WIN32 */
+		// Other systems: Use the "ANSI" filename directly.
+		// The "ANSI" filename is converted from the original
+		// Unicode using mbsrtowcs(), so if the system locale
+		// is set to UTF-8, the filename will be UTF-8.
 		z_entry_cur->filename = strdup(rar_header.FileName);
-#if 0
-		if (rar_header.FileNameW[0] != 0x00) {
-			// Use the Unicode filename. (rar_header.FileNameW)
-			// Convert UTF-16 to UTF-8.
-			WideCharToMultiByte(CP_UTF8, 0, rar_header.FileNameW, -1,
-						utf8_buf, sizeof(utf8_buf), nullptr, nullptr);
-			z_entry_cur->filename = strdup(utf8_buf);
-		} else {
-			// Use the ANSI filename. (rar_header.FileName)
-			// TODO: Proper codepage detection.
-			// We're using CP_ACP for archives created on MS-DOS, OS/2, or Win32.
-			// We're using UTF-8 for archives created on Unix
-			if (rar_header.HostOS < 3) {
-				// MS-DOS, OS/2, Win32.
-
-				// Convert ANSI to UTF-16.
-				MultiByteToWideChar(CP_ACP, 0, rar_header.FileName, -1,
-							wcs_buf, ARRAY_SIZE(wcs_buf));
-				// Convert UTF-16 to UTF-8.
-				WideCharToMultiByte(CP_UTF8, 0, wcs_buf, -1,
-							utf8_buf, sizeof(utf8_buf), nullptr, nullptr);
-
-				// Save the filename.
-				z_entry_cur->filename = strdup(utf8_buf);
-			} else {
-				// Unix. Assume the ANSI filename is UTF-8.
-				z_entry_cur->filename = strdup(rar_header.FileName);
-			}
-		}
 #endif
 
 		if (!z_entry_head) {
