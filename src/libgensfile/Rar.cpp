@@ -212,7 +212,7 @@ HANDLE Rar::openRar(int mode)
 	uint8_t header[sizeof(rar_magic)];
 
 	bool is_rar = false;
-	fseeko(m_file, 0, SEEK_SET);
+	rewind(m_file);
 	size_t ret = fread(&header, 1, sizeof(header), m_file);
 	if (ret == sizeof(header)) {
 		if (!memcmp(header, rar_magic, sizeof(header))) {
