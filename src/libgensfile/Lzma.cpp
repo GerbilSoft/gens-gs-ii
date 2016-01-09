@@ -77,13 +77,13 @@ Lzma::Lzma(const char *filename)
 			// an unsigned value less than 256 GB.
 			// TODO: Add 64-bit byteswapping to byteswap.h.
 			uint64_t lzsize = header[3] |
-				(header[ 4] << 8) |
-				(header[ 5] << 16) |
-				(header[ 6] << 24) |
-				(header[ 7] << 32) |
-				(header[ 8] << 40) |
-				(header[ 9] << 48) |
-				(header[10] << 56);
+				((uint64_t)header[ 4] << 8) |
+				((uint64_t)header[ 5] << 16) |
+				((uint64_t)header[ 6] << 24) |
+				((uint64_t)header[ 7] << 32) |
+				((uint64_t)header[ 8] << 40) |
+				((uint64_t)header[ 9] << 48) |
+				((uint64_t)header[10] << 56);
 			if (lzsize == ~0ULL || lzsize < (256ULL*1024*1024*1024)) {
 				// Size is valid.
 				is_lzma = true;
