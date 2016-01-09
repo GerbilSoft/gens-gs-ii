@@ -23,6 +23,7 @@
 #include <errno.h>
 #include <stdint.h>
 #include <limits.h>
+#include <locale.h>
 
 // popt
 #include <popt.h>
@@ -371,6 +372,9 @@ int main(int argc, char *argv[])
                 return EXIT_FAILURE;
         }
 #endif /* _WIN32 */
+
+	// Initialize locale settings.
+	setlocale(LC_ALL, "");
 
 	// Initialize the popt context.
 	optCon = poptGetContext(NULL, argc, (const char**)argv, optionsTable, 0);

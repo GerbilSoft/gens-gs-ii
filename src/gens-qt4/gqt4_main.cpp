@@ -41,6 +41,9 @@
 // General configuration signal handler.
 #include "ConfigHandler.hpp"
 
+// C includes. (C++ namespace)
+#include <clocale>
+
 #ifdef Q_WS_X11
 // X11 includes.
 #include <X11/Xlib.h>
@@ -132,6 +135,9 @@ int gens_main(int argc, char *argv[])
 {
 	// Register the signal handler.
 	GensQt4::SigHandler::Init();
+
+	// Initialize locale settings.
+	setlocale(LC_ALL, "");
 
 #ifdef Q_WS_X11
 	// Initialize X11 threading.
