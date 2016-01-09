@@ -93,6 +93,50 @@ Rar::Rar(const char *filename)
 	}
 
 	// Check if UnRAR.dll can open the file.
+	HANDLE hRar = openRar(RAR_OM_LIST);
+	if (!hRar) {
+		// Error opening the file.
+		// openRar() already set m_lastError.
+		m_unrarDll.unload();
+	}
+}
+
+/**
+ * Delete the Rar object.
+ */
+Rar::~Rar()
+{
+	// Unload UnRAR.dll.
+	m_unrarDll.unload();
+}
+
+/**
+ * Close the archive file.
+ */
+void Rar::close(void)
+{
+	// Unload UnRAR.dll.
+	m_unrarDll.unload();
+
+	// Base class closes the FILE*.
+	Archive::close();
+}
+
+/**
+ * Open the Archive's file using UnRAR.dll.
+ * @param mode RAR open mode.
+ * @return RAR handle, or nullptr on error. (TODO: Error code?)
+ */
+HANDLE Rar::openRar(int mode)
+{
+	if (!m_file || m_filename.empty())
+		return nullptr;
+
+	// Check for RAR magic first.
+	// If it's not there, this is either a really old
+	// RAR 1.x archive, or it isn't a RAR archive at all.
+	// TODO: How do we check for RAR 1.x?
+	// Check if UnRAR.dll can open the file.
 	// TODO: Separate function to open the file.
 	// For now, just check for RAR magic.
 	static const uint8_t rar_magic[] = {'R', 'a', 'r', '!'};
@@ -118,31 +162,27 @@ Rar::Rar(const char *filename)
 		}
 	}
 
-	if (!is_rar) {
-		// Not a RAR archive.
-		m_unrarDll.unload();
+	if (!is_rar)
+		return nullptr;
+
+	// Attempt to open the RAR archive using UnRAR.dll.
+	struct RAROpenArchiveDataEx rar_open;
+	memset(&rar_open, 0, sizeof(rar_open));
+	rar_open.OpenMode = mode;
+
+	// TODO: Is UTF-16 needed on Linux?
+	// Assuming UnRAR.dll handles UTF-8 if the OS does.
+	rar_open.ArcName = (char*)m_filename.c_str();
+
+	// Open the RAR file.
+	HANDLE hRar = m_unrarDll.pRAROpenArchiveEx(&rar_open);
+	if (!hRar) {
+		// Error opening the RAR file.
+		// TODO: Correct error code?
+		m_lastError = EIO;
 	}
-}
 
-/**
- * Delete the Rar object.
- */
-Rar::~Rar()
-{
-	// Unload UnRAR.dll.
-	m_unrarDll.unload();
-}
-
-/**
- * Close the archive file.
- */
-void Rar::close(void)
-{
-	// Unload UnRAR.dll.
-	m_unrarDll.unload();
-
-	// Base class closes the FILE*.
-	Archive::close();
+	return hRar;
 }
 
 /**
@@ -202,7 +242,6 @@ int Rar::getFileInfo(mdp_z_entry_t **z_entry_out)
 	// TODO: Is UTF-16 needed on Linux?
 	// Assuming UnRAR.dll handles UTF-8 if the OS does.
 	rar_open.ArcName = (char*)m_filename.c_str();
-	
 #endif
 
 	// Open the RAR file.

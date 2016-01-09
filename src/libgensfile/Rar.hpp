@@ -85,6 +85,13 @@ class Rar : public Archive
 		// UnRAR.dll instance.
 		UnRAR_dll m_unrarDll;
 
+		/**
+		 * Open the Archive's file using UnRAR.dll.
+		 * @param mode RAR open mode.
+		 * @return RAR handle, or nullptr on error. (TODO: Error code?)
+		 */
+		HANDLE openRar(int mode);
+
 		// RAR state.
 		struct RarState_t {
 			uint8_t *buf;	// Buffer.
