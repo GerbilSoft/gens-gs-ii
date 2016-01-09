@@ -59,6 +59,25 @@ using std::auto_ptr;
 using std::string;
 using std::wstring;
 
+// FIXME: MinGW doesn't have wcscasecmp() or wcscmp() wrappers.
+// These macros are defined in c++11-compat.msvc.h,
+// but that's only included in MSVC builds.
+#if defined(_WIN32) && defined(__GNUC__)
+#define wcscasecmp(s1, s2)     _wcsicmp(s1, s2)
+#define wcsncasecmp(s1, s2, n) _wcsnicmp(s1, s2, n)
+#endif
+
+// Filename comparison functions.
+// Windows, Mac: Case-insensitive.
+// All others: Case-sensitive.
+#if defined(_WIN32) || defined(__APPLE__)
+#define WCS_FILENAME_COMPARE(file1, file2) wcscasecmp((file1), (file2))
+#define STR_FILENAME_COMPARE(file1, file2) strcasecmp((file1), (file2))
+#else
+#define WCS_FILENAME_COMPARE(file1, file2) wcscmp((file1), (file2))
+#define STR_FILENAME_COMPARE(file1, file2) strcmp((file1), (file2))
+#endif
+
 namespace LibGensFile {
 
 /** Static class variable initialization. **/
@@ -382,81 +401,58 @@ int Rar::readFile(const mdp_z_entry_t *z_entry,
 		  file_offset_t start_pos, file_offset_t read_len,
 		  void *buf, file_offset_t siz, file_offset_t *ret_siz)
 {
-#if 0
-	// Make sure all parameters are specified.
-	if (!z_entry || !buf || !siz || !ret_siz)
-		return -1; // TODO: return -MDP_ERR_INVALID_PARAMETERS;
-
-	// Make sure the file is open.
-	if (!m_file)
-		return -2;
-
-	// Check that UnRAR.dll is loaded.
-	if (!m_unrarDll.isLoaded()) {
-		// Error loading UnRAR.dll.
+	if (!z_entry || !buf ||
+	    start_pos < 0 || start_pos >= z_entry->filesize ||
+	    read_len < 0 || z_entry->filesize - read_len < start_pos ||
+	    siz <= 0 || siz < read_len)
+	{
+		m_lastError = EINVAL;
+		return -m_lastError; // TODO: return -MDP_ERR_INVALID_PARAMETERS;
+	} else if (!m_file) {
+		m_lastError = EBADF;
+		return -m_lastError; // TODO: return -MDP_ERR_INVALID_PARAMETERS;
+	} else if (!m_unrarDll.isLoaded()) {
+		// UnRAR.dll is not loaded.
 		// TODO: Determine if it was a missing DLL or a missing symbol.
-		return -3; // TODO: return -MDP_ERR_Z_EXE_NOT_FOUND;
+		m_lastError = ENOSYS;	// TODO: Better error?
+		return -m_lastError; // TODO: return -MDP_ERR_Z_EXE_NOT_FOUND;
 	}
 
-	// TODO: Open the RAR file in the constructor.
-	HANDLE hRar;
-	char *filenameA = nullptr;
-	wchar_t *filenameW = nullptr;
-
-	// Convert the filename from UTF-8 to UTF-16 first.
-	filenameW = W32U_mbs_to_UTF16(m_filename.c_str(), CP_UTF8);
-	if (!filenameW)
-		return -9; // TODO: Figure out an MDP error code for this.
-
-	if (!W32U_IsUnicode()) {
-		// System doesn't support Unicode.
-		// Convert the filename from UTF-16 to ANSI.
-		filenameA = W32U_UTF16_to_mbs(filenameW, CP_ACP);
-		free(filenameW);
-		filenameW = nullptr;
-
-		if (!filenameA)
-			return -9; // TODO: Figure out an MDP error code for this.
+	// Make sure the z_entry filename is valid.
+	if (!z_entry->filename) {
+		// Invalid filename.
+		m_lastError = EINVAL;
+		return -m_lastError; // TODO: Return an appropriate MDP error code.
 	}
+
+	// Convert z_entry->filename to wchar_t.
+	wstring z_filenameW = LibGensText::Utf8_to_Wchar(
+		z_entry->filename, strlen(z_entry->filename));
+	if (z_filenameW.empty()) {
+		// Error converting the filename.
+		m_lastError = EINVAL;
+		return m_lastError; // TODO: Return an appropriate MDP error code.
+	}
+
+#ifdef _WIN32
+	// Convert the filename from UTF-16 to ANSI in case files don't have a Unicode filename.
+	// TODO: Implement for Linux?
+	auto_ptr<char> z_filenameA(W32U_UTF16_to_mbs(z_filenameW.c_str(), CP_ACP));
+	if (!z_filenameA.get()) {
+		// Error converting the filename.
+		m_lastError = EINVAL;
+		return -m_lastError; // TODO: Return an appropriate MDP error code.
+	}
+#endif /* _WIN32 */
 
 	// Open the RAR file.
-	struct RAROpenArchiveDataEx rar_open;
-	rar_open.OpenMode = RAR_OM_EXTRACT;
-	rar_open.CmtBuf = nullptr;
-	rar_open.CmtBufSize = 0;
-
-	if (W32U_IsUnicode()) {
-		// Unicode mode.
-		rar_open.ArcName = nullptr;
-		rar_open.ArcNameW = filenameW;
-	} else {
-		// ANSI mode.
-		rar_open.ArcName = filenameA;
-		rar_open.ArcNameW = nullptr;
-	}
-
-	hRar = m_unrarDll.pRAROpenArchiveEx(&rar_open);
+	HANDLE hRar = openRar(RAR_OM_EXTRACT);
 	if (!hRar) {
 		// Error opening the RAR file.
-		free(filenameA);
-		free(filenameW);
-		return -4; // TODO: return -MDP_ERR_Z_CANT_OPEN_ARCHIVE;
+		// TODO: Correct error code?
+		m_lastError = EIO;
+		return -m_lastError; // TODO: return -MDP_ERR_Z_CANT_OPEN_ARCHIVE;
 	}
-
-	// Convert z_entry->filename to UTF-16.
-	// TODO: Move this to another function.
-	char *z_filenameA = nullptr;
-	wchar_t *z_filenameW = nullptr;
-
-	// Convert the z_entry filename from UTF-8 to UTF-16 first.
-	z_filenameW = W32U_mbs_to_UTF16(z_entry->filename, CP_UTF8);
-	if (!z_filenameW)
-		return -9; // TODO: Figure out an MDP error code for this.
-
-	// Convert the filename from UTF-16 to ANSI in case files don't have a Unicode filename.
-	z_filenameA = W32U_UTF16_to_mbs(z_filenameW, CP_ACP);
-	if (!z_filenameA)
-		return -9; // TODO: Figure out an MDP error code for this.
 
 	// Search for the file.
 	struct RARHeaderDataEx rar_header;
@@ -465,20 +461,24 @@ int Rar::readFile(const mdp_z_entry_t *z_entry,
 	while (m_unrarDll.pRARReadHeaderEx(hRar, &rar_header) == 0) {
 		if (rar_header.FileNameW[0] != 0x00) {
 			// Use the Unicode filename.
-			cmp = _wcsicmp(z_filenameW, rar_header.FileNameW);
+			cmp = WCS_FILENAME_COMPARE(z_filenameW.c_str(), rar_header.FileNameW);
 		} else {
 			// Use the ANSI filename. (rar_header.FileName)
 			// TODO: Proper codepage detection.
 			// We're using CP_ACP for archives created on MS-DOS, OS/2, or Win32.
 			// We're using UTF-8 for archives created on Unix
 
+			// TODO: ANSI support on Linux/Unix?
+#ifdef _WIN32
 			if (rar_header.HostOS < 3) {
 				// MS-DOS, OS/2, Win32.
 				// Use the ANSI codepage.
-				cmp = _stricmp(z_filenameA, rar_header.FileName);
-			} else {
+				cmp = STR_FILENAME_COMPARE(z_filenameA.get(), rar_header.FileName);
+			} else
+#endif /* _WIN32 */
+			{
 				// Unix. Assume the ANSI filename is UTF-8.
-				cmp = _stricmp(z_entry->filename, rar_header.FileName);
+				cmp = STR_FILENAME_COMPARE(z_entry->filename, rar_header.FileName);
 			}
 		}
 
@@ -520,16 +520,9 @@ int Rar::readFile(const mdp_z_entry_t *z_entry,
 
 	// Close the RAR file.
 	m_unrarDll.pRARCloseArchive(hRar);
-	free(filenameA);
-	free(filenameW);
-	free(z_filenameA);
-	free(z_filenameW);
 
 	// File extracted successfully.
 	return 0; // TODO: return MDP_ERR_OK;
-#endif
-	m_lastError = ENOSYS;
-	return -m_lastError;
 }
 
 /**
