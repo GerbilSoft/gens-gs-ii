@@ -76,32 +76,6 @@ SET(libgensfile_H
 	Rar.hpp
 	)
 
-# TODO: Port to the Archive subsystem.
-IF(0)
-# Platform-specific sources.
-IF(WIN32)
-	SET(libgens_DECOMPRESSOR_SRCS
-		${libgens_DECOMPRESSOR_SRCS}
-		Decompressor/DcRar_Win32.cpp
-		Decompressor/UnRAR_dll.cpp
-		)
-	SET(libgens_DECOMPRESSOR_H
-		${libgens_DECOMPRESSOR_H}
-		Decompressor/DcRar.hpp
-		Decompressor/UnRAR_dll.hpp
-		)
-ELSE()
-	SET(libgens_DECOMPRESSOR_SRCS
-		${libgens_DECOMPRESSOR_SRCS}
-		Decompressor/DcRar_Unix.cpp
-		)
-	SET(libgens_DECOMPRESSOR_H
-		${libgens_DECOMPRESSOR_H}
-		Decompressor/DcRar.hpp
-		)
-ENDIF()
-ENDIF(0)
-
 ######################
 # Build the library. #
 ######################
