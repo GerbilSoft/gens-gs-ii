@@ -4,9 +4,6 @@
 PROJECT(unrar)
 cmake_minimum_required(VERSION 2.4.4)
 
-# Required compile definitions.
-ADD_DEFINITIONS(-DRARDLL -DUNRAR -DSILENT)
-
 # UnRAR.dll sources.
 SET(unrar_SRCS
 	archive.cpp
@@ -114,7 +111,10 @@ SET(unrar_CRYPT_H
 
 # Add some compiler flags to suppress lots of warnings.
 IF(MSVC)
-	# TODO: MSVC warning flags.
+	# Ignore macro redefinitions.
+	# Macros defined in CMake that are also defined in raros.hpp:
+	# - STRICT, RAR_SMP, WIN32_LEAN_AND_MEAN, USE_SSE.
+	SET(UNRAR_WARNING_FLAGS "-wd4005")
 ELSE(MSVC) # TODO: GCC?
 	# TODO: Ensure "-fvisibility=hidden" is specified.
 	# Strip -Wall -Wextra.
@@ -129,8 +129,37 @@ ELSE(MSVC) # TODO: GCC?
 	STRING(REPLACE "-fno-exceptions" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 ENDIF(MSVC)
 
-SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${UNRAR_WARNING_FLAGS}")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${UNRAR_WARNING_FLAGS}")
+IF(UNRAR_WARNING_FLAGS)
+	SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${UNRAR_WARNING_FLAGS}")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${UNRAR_WARNING_FLAGS}")
+ENDIF(UNRAR_WARNING_FLAGS)
+
+# Required compile definitions.
+ADD_DEFINITIONS(-DRARDLL -DUNRAR -DSILENT)
+
+# TODO: Make these options.
+SET(RAR_USE_SMP 1)
+SET(RAR_USE_SSE 1)
+
+IF(RAR_USE_SMP)
+	# Multi-threaded extraction.
+	ADD_DEFINITIONS(-DRAR_SMP)
+ENDIF(RAR_USE_SMP)
+
+IF(MSVC AND RAR_USE_SSE)
+	# SSE optimizations.
+	# TODO: Port SSE optimizations to gcc.
+	STRING(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" arch)
+	IF(arch MATCHES "^(i.|x)86$|^x86_64$|^amd64$")
+		ADD_DEFINITIONS(-DUSE_SSE)
+	ENDIF()
+	UNSET(arch)
+ENDIF(MSVC AND RAR_USE_SSE)
+
+IF(WIN32)
+	# Win32 resources.
+	SET(unrar_PLATFORM_SRCS dll.rc)
+ENDIF(WIN32)
 
 # TODO: Generate a PCH file using rarpch.cpp.
 
@@ -141,6 +170,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${UNRAR_WARNING_FLAGS}")
 ADD_LIBRARY(gensunrar SHARED
 	${unrar_SRCS} ${unrar_H}
 	${unrar_CRYPT_SRCS} ${unrar_CRYPT_H}
+	${unrar_PLATFORM_SRCS}
 	)
 INCLUDE(SetMSVCDebugPath)
 DO_SPLIT_DEBUG(gensunrar)
@@ -154,6 +184,9 @@ SET_TARGET_PROPERTIES(gensunrar PROPERTIES
 	SOVERSION 0	# No ABI breakage.
 	)
 
-# TODO: When building for Windows:
-# - Add dll.rc.
-# - Use dll.def for exports.
+IF(WIN32)
+	# .DEF file for exports.
+	SET_TARGET_PROPERTIES(gensunrar
+		PROPERTIES LINK_FLAGS "-DEF:${CMAKE_CURRENT_SOURCE_DIR}/dll.def"
+		)
+ENDIF(WIN32)
