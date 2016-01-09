@@ -34,7 +34,7 @@
 
 // Included libraries.
 #include <zlib.h>
-#include "lzma/7z/7zVersion.h"
+#include "lzma/7zVersion.h"
 
 // LibGens includes.
 #include "libgens/lg_main.hpp"
@@ -328,7 +328,7 @@ QString AboutDialogPrivate::GetIncLibraries(void)
 	if (!sIncLibraries.isEmpty())
 		sIncLibraries += sLineBreak + sLineBreak;
 	sIncLibraries += sIntCopyOf.arg(QLatin1String("the LZMA SDK " MY_VERSION)) + sLineBreak +
-		QLatin1String("Copyright (c) 1999-2010 by Igor Pavlov.") + sLineBreak +
+		QLatin1String("Copyright (c) 1999-2015 by Igor Pavlov.") + sLineBreak +
 		QLatin1String("<a href=\"http://www.7-zip.org/sdk.html\">"
 					"http://www.7-zip.org/sdk.html</a>");
 #endif
