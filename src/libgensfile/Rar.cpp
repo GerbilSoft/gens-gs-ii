@@ -220,20 +220,19 @@ HANDLE Rar::openRar(int mode)
 			is_rar = true;
 		} else {
 			// TODO: Better error code?
-			m_lastError = EIO;
+			m_lastError = EINVAL;
 		}
 	} else {
 		// Error reading from the file.
 		m_lastError = errno;
 		if (m_lastError == 0) {
 			// Unknown error...
-			m_lastError = EIO;
+			m_lastError = EIO; // TODO: MDP error code.
 		}
 	}
 
 	if (!is_rar) {
 		// Not a RAR archive.
-		m_lastError = EINVAL;	// TODO: MDP error code.
 		return nullptr;
 	}
 
