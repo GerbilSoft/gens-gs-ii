@@ -144,7 +144,7 @@ void Xz::close(void)
 
 	// LzmaSdk class closes m_archiveStream.file.
 	// Base class closes the FILE*.
-	Archive::close();
+	LzmaSdk::close();
 }
 
 /**
