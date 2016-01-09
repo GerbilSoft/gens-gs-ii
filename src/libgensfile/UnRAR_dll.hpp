@@ -149,4 +149,4 @@ inline int UnRAR_dll::abiVersion(void) const
 
 };
 
-#endif /* __LIBGENS_FILE_UNRAR_DLL_HPP__ */
+#endif /* __LIBGENSFILE_UNRAR_DLL_HPP__ */
