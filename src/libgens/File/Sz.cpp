@@ -21,6 +21,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
+/**
+ * Based on 7zMain.c from the LZMA SDK 9.12.
+ * http://www.7-zip.org/sdk.html
+ */
+
 #include "Sz.hpp"
 
 // C includes.
