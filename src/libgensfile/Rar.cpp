@@ -105,6 +105,9 @@ Rar::Rar(const char *filename)
 		return;
 	}
 
+	// Close the RAR archive.
+	m_unrarDll.pRARCloseArchive(hRar);
+
 	// File is a RAR archive.
 }
 
