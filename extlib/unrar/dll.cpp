@@ -1,5 +1,20 @@
 #include "rar.hpp"
 
+/**
+ * Gens/GS II: Make functions visible when compiling as a
+ * shared library on Linux and other Unix systems.
+ */
+#ifdef _UNIX
+#ifdef __GNUC__
+#ifdef PASCAL
+#undef PASCAL
+#endif
+#define PASCAL __attribute__ ((visibility ("default")))
+#else /* !__GNUC__ */
+#error Unable to set visibility on this system. Please update unrar/dll.cpp.
+#endif /* __GNUC__ */
+#endif /* _UNIX */
+
 static int RarErrorToDll(RAR_EXIT ErrCode);
 
 struct DataSet
