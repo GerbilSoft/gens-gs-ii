@@ -229,13 +229,6 @@ int Xz::readFile(const mdp_z_entry_t *z_entry,
 		return -m_lastError;
 	}
 		
-	if (start_pos > 0) {
-		// Starting position is set.
-		// Seek to that position.
-		// TODO: Is there a way to "seek" in the compressed stream?
-		//gzseek(m_gzFile, (z_off_t)start_pos, SEEK_SET);
-	}
-
 	// Allocate buffers.
 	if (!m_inBuf) {
 		m_inBufSz = (1 << 15);		// 32 KB
@@ -292,21 +285,44 @@ int Xz::readFile(const mdp_z_entry_t *z_entry,
 
 		bool finished = ((inLen == 0 && outLen == 0) || res != SZ_OK);
 
-		// Copy data to the output buffer.
-		if (buf_spc_rem > outPos) {
-			// Space is available.
-			memcpy(buf, m_outBuf, outPos);
-			buf_spc_rem -= outPos;
-			buf = ((uint8_t*)buf + outPos);
-			*ret_siz += outPos;
-		} else {
-			// Either there's not enough space,
-			// or this will fill up the buffer.
-			memcpy(buf, m_outBuf, buf_spc_rem);
-			*ret_siz += buf_spc_rem;
-			buf_spc_rem = 0;
+		// Current output buffer.
+		// This is adjusted to handle start_pos if necessary.
+		uint8_t *outBuf = m_outBuf;
+		if (start_pos > 0) {
+			// Starting position is set.
+			// We want to remove these bytes from the
+			// beginning of the input stream.
+			if (outPos < start_pos) {
+				// Not enough data read yet.
+				// Discard the entire buffer.
+				start_pos -= outPos;
+				outPos = 0;
+			} else {
+				// We've read at least start_pos bytes.
+				outBuf += start_pos;
+				outPos -= start_pos;
+				start_pos = 0;
+			}
 		}
-		outPos = 0;
+
+		// Have we read any data yet?
+		if (outPos > 0) {
+			// Copy data to the output buffer.
+			if (buf_spc_rem > outPos) {
+				// Space is available.
+				memcpy(buf, outBuf, outPos);
+				buf_spc_rem -= outPos;
+				buf = ((uint8_t*)buf + outPos);
+				*ret_siz += outPos;
+			} else {
+				// Either there's not enough space,
+				// or this will fill up the buffer.
+				memcpy(buf, outBuf, buf_spc_rem);
+				*ret_siz += buf_spc_rem;
+				buf_spc_rem = 0;
+			}
+			outPos = 0;
+		}
 
 		if (buf_spc_rem <= 0) {
 			// Out of space in the buffer.
