@@ -1,6 +1,8 @@
 /* 7zFile.c -- File IO
 2009-11-24 : Igor Pavlov : Public domain */
 
+#include "Precomp.h"
+
 #include "7zFile.h"
 
 #ifndef USE_WINDOWS_FILE
@@ -200,8 +202,8 @@ WRes File_Seek(CSzFile *p, Int64 *pos, ESzSeek origin)
     case SZ_SEEK_END: moveMethod = SEEK_END; break;
     default: return 1;
   }
-  res = fseeko(p->file, *pos, moveMethod);
-  *pos = ftello(p->file);
+  res = fseek(p->file, (long)*pos, moveMethod);
+  *pos = ftell(p->file);
   return res;
   
   #endif
@@ -224,10 +226,10 @@ WRes File_GetLength(CSzFile *p, UInt64 *length)
   
   #else
   
-  off_t pos = ftello(p->file);
-  int res = fseeko(p->file, 0, SEEK_END);
-  *length = ftello(p->file);
-  fseeko(p->file, pos, SEEK_SET);
+  long pos = ftell(p->file);
+  int res = fseek(p->file, 0, SEEK_END);
+  *length = ftell(p->file);
+  fseek(p->file, pos, SEEK_SET);
   return res;
   
   #endif

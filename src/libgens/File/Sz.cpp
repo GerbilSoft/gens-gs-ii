@@ -226,9 +226,9 @@ int Sz::getFileInfo(mdp_z_entry_t **z_entry_out)
 	size_t filenameW_len = 0;
 
 	// Read the filenames.
-	for (unsigned int i = 0; i < m_db.db.NumFiles; i++) {
-		const CSzFileItem *f = (m_db.db.Files + i);
-		if (f->IsDir)
+	for (unsigned int i = 0; i < m_db.NumFiles; i++) {
+		// TODO: Verify this.
+		if (m_db.IsDirs[i])
 			continue;
 
 		// Get the filename.
@@ -261,7 +261,7 @@ int Sz::getFileInfo(mdp_z_entry_t **z_entry_out)
 		// Store the ROM file information.
 		// TODO: f->Size is 64-bit...
 		z_entry_cur->filename = strdup(z_entry_filename.c_str());
-		z_entry_cur->filesize = (size_t)f->Size;
+		z_entry_cur->filesize = (size_t)SzArEx_GetFileSize(&m_db, i);
 		z_entry_cur->next = nullptr;
 
 		if (!z_entry_head) {
@@ -335,9 +335,9 @@ int Sz::readFile(const mdp_z_entry_t *z_entry,
 	// Locate the file in the 7-Zip archive.
 	unsigned int i = 0;
 	SRes res;
-	for (i = 0; i < m_db.db.NumFiles; i++) {
-		const CSzFileItem *f = (m_db.db.Files + i);
-		if (f->IsDir)
+	for (i = 0; i < m_db.NumFiles; i++) {
+		// TODO: Verify this.
+		if (m_db.IsDirs[i])
 			continue;
 
 		// Get the filename.
@@ -371,7 +371,7 @@ int Sz::readFile(const mdp_z_entry_t *z_entry,
 			// Error extracting the file.
 			// TODO: Return an appropriate MDP error code.
 			// For now, just break out of the loop.
-			i = m_db.db.NumFiles;
+			i = m_db.NumFiles;
 			break;
 		}
 
@@ -389,7 +389,7 @@ int Sz::readFile(const mdp_z_entry_t *z_entry,
 	// Free the temporary UTF-16 filename buffer.
 	free(filenameW);
 
-	if (i >= m_db.db.NumFiles) {
+	if (i >= m_db.NumFiles) {
 		// File not found.
 		// TODO: Could also be an error in extracting the file.
 		m_lastError = ENOENT;

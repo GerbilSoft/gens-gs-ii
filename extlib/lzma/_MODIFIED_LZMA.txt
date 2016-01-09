@@ -1,12 +1,7 @@
-This copy of the LZMA SDK 9.20 is a modified version of the original.
+This copy of the LZMA SDK 15.14 is a modified version of the original.
 
 The following changes have been made to the original:
 - CMake build system.
-- LZMA/7z/Xz encoding has been removed.
-- LzmaLib wrappers have been removed.
-- MtCoder (multi-threaded coder) has been removed.
-- Threads.c/Threads.h (Windows-specific) have been removed.
-- LzfindMt.c/LzFindMt.h (Windows-specific) have been removed.
 - fseek() and ftell() have been replaced with fseeko() and ftello()
   for Large File Support on Unix and Linux platforms. (7z uses native
   Win32 functions on Windows, so Windows is not affected by this change.)
@@ -15,5 +10,12 @@ The following changes have been made to the original:
   - glibc: memory.h is simply a wrapper for string.h.
   - devkitPPC: memory.h doesn't exist; the functions are in string.h.
 
-To obtain the original LZMA SDK 9.20, visit
+The following files are still present, but are not compiled:
+- LZMA/7z/Xz encoding.
+- LzmaLib wrappers.
+- MtCoder (multi-threaded coder)
+- Threads.c/Threads.h (Windows-specific)
+- LzFindMt.c/LzFindMt.h (Windows-specific)
+
+To obtain the original LZMA SDK 15.14, visit:
 http://www.7-zip.org/sdk.html

@@ -215,7 +215,12 @@ SET(libgens_FILE_H
 	File/MemFake.hpp
 	)
 
-IF(HAVE_LZMA)
+IF(HAVE_LZMA AND HAVE_7z)
+	# LZMA and 7z include directories.
+	INCLUDE_DIRECTORIES(${LZMA_INCLUDE_DIR})
+	INCLUDE_DIRECTORIES(${7z_INCLUDE_DIR})
+
+	# 7-Zip archive handler.
 	SET(libgens_FILE_SRCS
 		${libgens_FILE_SRCS}
 		File/Sz.cpp
@@ -279,12 +284,12 @@ ENDIF(HAVE_CLOCK_GETTIME_IN_LIBRT)
 IF(HAVE_ICONV)
 	TARGET_LINK_LIBRARIES(gens ${ICONV_LIBRARY})
 ENDIF(HAVE_ICONV)
-IF(HAVE_LZMA)
+IF(HAVE_LZMA AND HAVE_7z)
 	# Link ordering matters:
 	# * 7z depends on lzmabase.
 	# * lzmabase does NOT depend on 7z.
 	TARGET_LINK_LIBRARIES(gens ${7z_LIBRARY} ${LZMA_LIBRARY})
-ENDIF(HAVE_LZMA)
+ENDIF(HAVE_LZMA AND HAVE_7z)
 IF(WIN32)
 	# version.dll is required for DcRar_Win32.cpp, which calls these functions:
 	# - GetFileVersionInfoSize()
