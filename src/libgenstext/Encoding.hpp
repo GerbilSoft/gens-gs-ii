@@ -22,13 +22,16 @@
 #ifndef __LIBGENSTEXT_ENCODING_HPP__
 #define __LIBGENSTEXT_ENCODING_HPP__
 
+// C includes.
+#include <stdint.h>
+// C includes. (C++ namespace)
+#include <cwchar>
 // C++ includes.
 #include <string>
 
-// C includes.
-#include <stdint.h>
-
 namespace LibGensText {
+
+/** UTF-16 conversion. **/
 
 /**
  * Convert UTF-16 (host-endian) to UTF-8.
@@ -66,6 +69,46 @@ static inline std::u16string Utf8_to_Utf16(const std::string& src)
 	return Utf8_to_Utf16(src.data(), src.size());
 }
 
+/** wchar_t conversion. **/
+
+/**
+ * Convert wchar_t to UTF-8.
+ * @param src wchar_t string.
+ * @param len Length of wchar_t string, in characters.
+ * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
+ */
+std::string Wchar_to_Utf8(const char16_t *src, size_t len);
+
+/**
+ * Convert wchar_t to UTF-8.
+ * @param src wchar_t string.
+ * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
+ */
+static inline std::string Wchar_to_Utf8(const std::u16string& src)
+{
+	return Wchar_to_Utf8(src.data(), src.size());
+}
+
+/**
+ * Convert UTF-8 to wchar_t.
+ * @param src UTF-8 string.
+ * @param len Length of UTF-8 string, in bytes.
+ * @return wchar_t string, or empty string on error.
+ */
+std::wstring Utf8_to_Wchar(const char *src, size_t len);
+
+/**
+ * Convert UTF-8 to wchar_t.
+ * @param src UTF-8 string.
+ * @return wchar_t string, or empty string on error.
+ */
+static inline std::wstring Utf8_to_Wchar(const std::string& src)
+{
+	return Utf8_to_Wchar(src.data(), src.size());
+}
+
+/** Other conversion. **/
+
 /**
  * Convert Shift-JIS to UTF-8.
  * @param src Shift-JIS string.
@@ -83,6 +126,8 @@ static inline std::string SJIS_to_Utf8(const std::string& src)
 {
 	return SJIS_to_Utf8(src.data(), src.size());
 }
+
+/** Miscellaneous. **/
 
 /**
  * Compare two UTF-16 strings.

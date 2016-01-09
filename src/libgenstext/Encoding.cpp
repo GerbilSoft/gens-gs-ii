@@ -31,8 +31,10 @@
 #  include <iconv.h>
 #  if SYS_BYTEORDER == SYS_BIG_ENDIAN
 #    define UTF16_ENCODING "UTF-16BE"
+#    define WCHAR_ENCODING "UTF-32BE"
 #  else /* SYS_BYTEORDER == SYS_LIL_ENDIAN */
 #    define UTF16_ENCODING "UTF-16LE"
+#    define WCHAR_ENCODING "UTF-32LE"
 #  endif
 #endif
 
@@ -40,6 +42,7 @@
 #include <string>
 using std::string;
 using std::u16string;
+using std::wstring;
 
 // C includes. (C++ namespace)
 #include <cstdlib>
@@ -217,6 +220,8 @@ static char *gens_iconv(const char *src, size_t src_bytes_len,
 }
 #endif /* HAVE_ICONV */
 
+/** UTF-16 conversion. **/
+
 /**
  * Convert UTF-16 (host-endian) to UTF-8.
  * @param src UTF-16 string. (host-endian)
@@ -285,6 +290,82 @@ u16string Utf8_to_Utf16(const char *src, size_t len)
 #endif
 }
 
+/** wchar_t conversion. **/
+
+/**
+ * Convert wchar_t to UTF-8.
+ * @param src wchar_t string.
+ * @param len Length of wchar_t string, in characters.
+ * @return UTF-8 string, or empty string on error. (TODO: Better error handling?)
+ */
+string Wchar_to_Utf8(const wchar_t *src, size_t len)
+{
+#if defined(_WIN32)
+	// Win32 version.
+	static_assert(sizeof(wchar_t) == 2, "wchar_t is the wrong size. (Should be 2 on Win32.)");
+	int cbMbs;
+	char *mbs = W32U_UTF16_to_mbs((wchar_t*)src, (int)len, CP_UTF8, &cbMbs);
+	if (!mbs) {
+		return string();
+	}
+	string ret(mbs, cbMbs);
+	free(mbs);
+	return ret;
+#elif defined(HAVE_ICONV)
+	// iconv version.
+	static_assert(sizeof(wchar_t) == 4, "wchar_t is the wrong size. (Should be 4 on Unix/Linux/Mac.)");
+	char *mbs = gens_iconv((char*)src, len * 2, WCHAR_ENCODING, "UTF-8");
+	if (!mbs) {
+		return string();
+	}
+	string ret(mbs);
+	free(mbs);
+	return ret;
+#else
+	// No translation supported.
+	// TODO: #error?
+	return string();
+#endif
+}
+
+/**
+ * Convert UTF-8 to wchar_t.
+ * @param src UTF-8 string.
+ * @param len Length of UTF-8 string, in bytes.
+ * @return wchar_t string, or empty string on error.
+ */
+wstring Utf8_to_Wchar(const char *src, size_t len)
+{
+#if defined(_WIN32)
+	// Win32 version. Use W32U_mini.
+	static_assert(sizeof(wchar_t) == 2, "wchar_t is the wrong size. (Should be 2 on Win32.)");
+	int cchWcs;
+	wchar_t *wcs = W32U_mbs_to_UTF16(src, len, CP_UTF8, &cchWcs);
+	if (!wcs) {
+		return wstring();
+	}
+	wstring ret(wcs, cchWcs);
+	free(wcs);
+	return ret;
+#elif defined(HAVE_ICONV)
+	// iconv version.
+	static_assert(sizeof(wchar_t) == 4, "wchar_t is the wrong size. (Should be 4 on Unix/Linux/Mac.)");
+	wchar_t *wcs = (wchar_t*)gens_iconv(src, len, "UTF-8", WCHAR_ENCODING);
+	if (!wcs) {
+		return wstring();
+	}
+	wstring ret(wcs);
+	free(wcs);
+	return ret;
+#else
+	// No translation supported.
+	// TODO: #error?
+	return wstring();
+#endif
+}
+
+/** Other conversion. **/
+
 /**
  * Convert Shift-JIS to UTF-8.
  * @param src Shift-JIS string.
@@ -319,6 +400,8 @@ string SJIS_to_Utf8(const char *src, size_t len)
 	free(mbs);
 	return ret;
 }
+
+/** Miscellaneous. **/
 
 #ifdef _WIN32
 /**
