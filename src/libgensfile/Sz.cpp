@@ -92,6 +92,38 @@ Sz::Sz(const char *filename)
 		return;
 	}
 
+	// Check for 7z magic first.
+	// If it's not there, this isn't a 7z file.
+	static const uint8_t _7z_magic[] = {'7', 'z', 0xBC, 0xAF, 0x27, 0x1C};
+	uint8_t header[sizeof(_7z_magic)];
+
+	bool is_7z = false;
+	rewind(m_file);
+	size_t ret = fread(&header, 1, sizeof(header), m_file);
+	if (ret == sizeof(header)) {
+		if (!memcmp(header, _7z_magic, sizeof(header))) {
+			// Header matches.
+			is_7z = true;
+		} else {
+			// TODO: Better error code?
+			m_lastError = EIO;
+		}
+	} else {
+		// Error reading from the file.
+		m_lastError = errno;
+		if (m_lastError == 0) {
+			// Unknown error...
+			m_lastError = EIO; // TODO: MDP error code.
+		}
+	}
+
+	if (!is_7z) {
+		// Not a 7z file.
+		fclose(m_file);
+		m_file = nullptr;
+		return;
+	}
+
 	SRes res;
 #ifdef _WIN32
 	// Convert the filename from UTF-8 to UTF-16.
