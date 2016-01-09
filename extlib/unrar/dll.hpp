@@ -38,6 +38,18 @@
 #define RAR_HASH_BLAKE2       2
 
 
+// Gens/GS II: _UNIX isn't defined on Linux.
+// It's normally defined in raros.hpp, but that's
+// not included outside of the actual UnRAR.dll build.
+// Define it if we're on Linux (or Unix or Mac OS X).
+#ifndef _UNIX
+#if defined(__unix__) || defined(__unix) || defined(unix) || \
+    defined(__linux__) || defined(__linux) || defined(linux) || \
+    (defined(__APPLE__) && defined(__MACH__))
+#define _UNIX
+#endif
+#endif /* !_UNIX */
+
 #ifdef _UNIX
 #define CALLBACK
 #define PASCAL
