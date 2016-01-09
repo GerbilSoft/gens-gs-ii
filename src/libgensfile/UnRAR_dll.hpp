@@ -1,5 +1,5 @@
 /***************************************************************************
- * libgens: Gens Emulation Library.                                        *
+ * libgensfile: Gens file handling library.                                *
  * UnRAR_dll.hpp: UnRAR.dll Management Class.                              *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
