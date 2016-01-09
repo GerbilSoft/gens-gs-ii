@@ -98,7 +98,14 @@ Rar::Rar(const char *filename)
 		// Error opening the file.
 		// openRar() already set m_lastError.
 		m_unrarDll.unload();
+		fclose(m_file);
+		m_file = nullptr;
+		// TODO: Error code?
+		m_lastError = EIO;
+		return;
 	}
+
+	// File is a RAR archive.
 }
 
 /**
