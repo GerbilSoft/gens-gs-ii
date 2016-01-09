@@ -46,10 +46,10 @@ SET(libgensfile_H
 # Gzip, Zip (via zlib)
 IF(HAVE_ZLIB)
 	SET(libgensfile_SRCS ${libgensfile_SRCS} Gzip.cpp)
-	SET(libgensfile_H ${libgensfile_H} Gzip.hpp)
+	SET(libgensfile_H    ${libgensfile_H}    Gzip.hpp)
 	IF(HAVE_MINIZIP)
 		SET(libgensfile_SRCS ${libgensfile_SRCS} Zip.cpp)
-		SET(libgensfile_H ${libgensfile_H} Zip.hpp)
+		SET(libgensfile_H    ${libgensfile_H}    Zip.hpp)
 	ENDIF(HAVE_MINIZIP)
 ENDIF(HAVE_ZLIB)
 
@@ -59,15 +59,20 @@ IF(HAVE_LZMA)
 	INCLUDE_DIRECTORIES(${LZMA_INCLUDE_DIR})
 
 	# 7-Zip archive handler.
-	SET(libgensfile_SRCS
-		${libgensfile_SRCS}
-		Sz.cpp
-		)
-	SET(libgensfile_H
-		${libgensfile_H}
-		Sz.hpp
-		)
+	SET(libgensfile_SRCS ${libgensfile_SRCS} Sz.cpp)
+	SET(libgensfile_H    ${libgensfile_H}    Sz.hpp)
 ENDIF(HAVE_LZMA)
+
+# RAR (UnRAR.dll)
+# TODO: Add an option to disable RAR support?
+SET(libgensfile_SRCS
+	${libgensfile_SRCS}
+	UnRAR_dll.cpp
+	)
+SET(libgensfile_H
+	${libgensfile_H}
+	UnRAR_dll.hpp
+	)
 
 # TODO: Port to the Archive subsystem.
 IF(0)
