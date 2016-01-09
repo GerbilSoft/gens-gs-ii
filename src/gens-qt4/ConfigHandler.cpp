@@ -22,9 +22,6 @@
 #include "ConfigHandler.hpp"
 #include "gqt4_main.hpp"
 
-// LibGens includes.
-#include "libgens/Decompressor/DcRar.hpp"
-
 // Qt includes.
 #include <QtCore/QString>
 #include <QtCore/QVariant>
@@ -34,27 +31,11 @@ namespace GensQt4 {
 ConfigHandler::ConfigHandler(QObject *parent)
 	: super(parent)
 {
-	// Initialize the external programs.
-	extprgUnRAR_changed_slot(gqt4_cfg->get(QLatin1String("External_Programs/UnRAR")));
-	
-	// Connect the notification signals.
-	gqt4_cfg->registerChangeNotification(QLatin1String("External_Programs/UnRAR"),
-					this, SLOT(extprgUnRAR_changed_slot(QVariant)));
-
 	// Boot ROMs.
 	gqt4_cfg->registerChangeNotification(QLatin1String("Genesis/tmssRom"),
 					this, SLOT(tmssRomFilename_changed_slot(QVariant)));
 	gqt4_cfg->registerChangeNotification(QLatin1String("Genesis/tmssEnabled"),
 					this, SLOT(tmssEnabled_changed_slot(QVariant)));
-}
-
-/**
- * UnRAR program filename has changed.
- * @param extprgUnRAR New UnRAR program.
- */
-void ConfigHandler::extprgUnRAR_changed_slot(const QVariant &extprgUnRAR)
-{
-	LibGens::DcRar::SetExtPrg(extprgUnRAR.toString().toUtf8().constData());
 }
 
 void ConfigHandler::tmssRomFilename_changed_slot(const QVariant &tmssRomFilename)

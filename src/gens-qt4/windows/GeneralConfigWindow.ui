@@ -1012,89 +1012,6 @@ This option requires a valid TMSS ROM in order to function properly.</string>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tabExtPrg">
-       <layout class="QVBoxLayout" name="vboxTabExtPrg">
-        <property name="margin">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="QGroupBox" name="grpExtPrg">
-          <property name="title">
-           <string>Data &amp;Compression</string>
-          </property>
-          <property name="flat">
-           <bool>false</bool>
-          </property>
-          <layout class="QGridLayout" name="gridExtPrg">
-           <item row="0" column="0">
-            <widget class="QLabel" name="lblExtPrgUnRAR">
-             <property name="text">
-              <string>Un&amp;RAR:</string>
-             </property>
-             <property name="textFormat">
-              <enum>Qt::PlainText</enum>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-             <property name="buddy">
-              <cstring>txtExtPrgUnRAR</cstring>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2">
-            <widget class="QPushButton" name="btnExtPrgUnRAR">
-             <property name="text">
-              <string>Browse...</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0" colspan="3">
-            <spacer name="vspcExtPrg">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeType">
-              <enum>QSizePolicy::Fixed</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>8</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="3" column="0" colspan="3">
-            <widget class="QLabel" name="lblExtPrgSel">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Selected Program: (none)</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-             </property>
-             <property name="wordWrap">
-              <bool>true</bool>
-             </property>
-             <property name="textInteractionFlags">
-              <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="GensLineEdit" name="txtExtPrgUnRAR"/>
-           </item>
-          </layout>
-         </widget>
-        </item>
-       </layout>
-      </widget>
      </widget>
     </item>
     <item>
@@ -1138,7 +1055,6 @@ This option requires a valid TMSS ROM in order to function properly.</string>
    <addaction name="actionSystem"/>
    <addaction name="actionGenesis"/>
    <addaction name="actionSegaCD"/>
-   <addaction name="actionExternalPrograms"/>
   </widget>
   <action name="actionGeneral">
    <property name="checkable">
@@ -1198,18 +1114,6 @@ This option requires a valid TMSS ROM in order to function properly.</string>
    </property>
    <property name="text">
     <string>Sega &amp;CD</string>
-   </property>
-  </action>
-  <action name="actionExternalPrograms">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../resources/oxygen/oxygen.qrc">
-     <normaloff>:/icons/oxygen/32x32/utilities-terminal.png</normaloff>:/icons/oxygen/32x32/utilities-terminal.png</iconset>
-   </property>
-   <property name="text">
-    <string>&amp;Programs</string>
    </property>
   </action>
   <action name="actionGenesis">
@@ -1277,8 +1181,6 @@ This option requires a valid TMSS ROM in order to function properly.</string>
   <tabstop>btnMcdRomJPN</tabstop>
   <tabstop>txtMcdRomAsia</tabstop>
   <tabstop>btnMcdRomAsia</tabstop>
-  <tabstop>txtExtPrgUnRAR</tabstop>
-  <tabstop>btnExtPrgUnRAR</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources>
