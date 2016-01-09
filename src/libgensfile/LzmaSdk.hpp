@@ -1,6 +1,10 @@
 /***************************************************************************
  * libgensfile: Gens file handling library.                                *
- * Xz.hpp: Xz archive handler.                                             *
+ * LzmaSdk.hpp: LZMA SDK common functions.                                 *
+ *                                                                         *
+ * Do NOT use this class directly. It's intended to be used by LZMA-based  *
+ * archive handlers, since they share a lot of boilerplate code for        *
+ * interfacing with the LZMA SDK.                                          *
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
@@ -21,17 +25,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.           *
  ***************************************************************************/
 
-#ifndef __LIBGENSFILE_XZ_HPP__
-#define __LIBGENSFILE_XZ_HPP__
+#ifndef __LIBGENSFILE_LZMASDK_HPP__
+#define __LIBGENSFILE_LZMASDK_HPP__
 
-#include "LzmaSdk.hpp"
+#include "Archive.hpp"
 
 // LZMA SDK includes.
-#include "lzma/Xz.h"
+#include "lzma/Alloc.h"
+#include "lzma/7zFile.h"
 
 namespace LibGensFile {
 
-class Xz : public LzmaSdk
+class LzmaSdk : public Archive
 {
 	public:
 		/**
@@ -40,27 +45,27 @@ class Xz : public LzmaSdk
 		 * If it wasn't, check lastError() for the POSIX error code.
 		 * @param filename Name of the file to open.
 		 */
-		Xz(const char *filename);
-		virtual ~Xz();
+		LzmaSdk(const char *filename);
+		virtual ~LzmaSdk();
 
 	private:
 		// Q_DISABLE_COPY() equivalent.
 		// TODO: Add LibGens-specific version of Q_DISABLE_COPY().
-		Xz(const Xz &);
-		Xz &operator=(const Xz &);
+		LzmaSdk(const LzmaSdk &);
+		LzmaSdk &operator=(const LzmaSdk &);
 
 	public:
 		/**
 		 * Close the archive file.
 		 */
-		virtual void close(void) final;
+		virtual void close(void) override;
 
 		/**
 		 * Get information about all files in the archive.
 		 * @param z_entry_out Pointer to mdp_z_entry_t*, which will contain an allocated mdp_z_entry_t.
 		 * @return 0 on success; negative POSIX error code on error.
 		 */
-		virtual int getFileInfo(mdp_z_entry_t **z_entry_out) final;
+		virtual int getFileInfo(mdp_z_entry_t **z_entry_out) override;
 
 		/**
 		 * Read all or part of a file from the archive.
@@ -78,13 +83,35 @@ class Xz : public LzmaSdk
 		 */
 		virtual int readFile(const mdp_z_entry_t *z_entry,
 				     file_offset_t start_pos, file_offset_t read_len,
-				     void *buf, file_offset_t siz, file_offset_t *ret_siz) final;
+				     void *buf, file_offset_t siz, file_offset_t *ret_siz) override;
+
+	protected:
+		/**
+		 * Initialize the LZMA SDK.
+		 * This function MUST be called by subclasses after
+		 * checking for file magic.
+		 *
+		 * @return 0 on success; negative POSIX error code on error.
+		 * If an error occurs, the file will NOT be closed;
+		 * the caller must handle this. In addition, m_lastError
+		 * is not set, since this is an internal function.
+		 */
+		int lzmaInit(void);
 
 	private:
-		// Xz archive.
-		CXzs m_xzs;
+		// Set to true if the LZMA SDK CRC tables has been initialized.
+		static bool ms_CrcInit;
+
+	protected:
+		// Memory allocators.
+		ISzAlloc m_allocImp;
+		ISzAlloc m_allocTempImp;
+
+		// File stream wrappers.
+		CFileInStream m_archiveStream;
+		CLookToRead m_lookStream;
 };
 
 }
 
-#endif /* __LIBGENSFILE_XZ_HPP__ */
+#endif /* __LIBGENSFILE_LZMASDK_HPP__ */

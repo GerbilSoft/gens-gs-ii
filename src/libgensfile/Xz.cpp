@@ -32,13 +32,6 @@
 // Byteswapping macros.
 #include "libcompat/byteswap.h"
 
-#ifdef _WIN32
-// Win32 Unicode Translation Layer.
-// Needed for proper Unicode filename support on Windows.
-// Also required for large file support.
-#include "libcompat/W32U/W32U_mini.h"
-#endif /* _WIN32 */
-
 // 7-Zip includes.
 #include "lzma/7zCrc.h"
 #include "lzma/7zAlloc.h"
@@ -47,9 +40,6 @@
 
 namespace LibGensFile {
 
-// Set to true if the 7z CRC table has been initialized.
-bool Xz::ms_CrcInit = false;
-
 /**
  * Open a file with this archive handler.
  * Check isOpen() afterwards to see if the file was opened.
@@ -57,21 +47,8 @@ bool Xz::ms_CrcInit = false;
  * @param filename Name of the file to open.
  */
 Xz::Xz(const char *filename)
-	: Archive(filename)
+	: LzmaSdk(filename)
 {
-	// NOTE: This initialization MUST be done before checking
-	// for a filename error!
-
-	// Initialize the memory allocators.
-	m_allocImp.Alloc = SzAlloc;
-	m_allocImp.Free = SzFree;
-
-	// Initialize the temporary memory allocators.
-	m_allocTempImp.Alloc = SzAllocTemp;
-	m_allocTempImp.Free = SzFreeTemp;
-
-	/** End of basic 7-Zip initialization. **/
-
 	if (!m_file) {
 		return;
 	} else if (!filename) {
@@ -93,43 +70,28 @@ Xz::Xz(const char *filename)
 		return;
 	}
 
-	// TODO: This only works on Unix.
-	// Combine the 7z one into a utility file for LZMA.
-	// Unix system. Use UTF-8 filenames directly.
-	SRes res = InFile_Open(&m_archiveStream.file, filename);
-	if (res != 0) {
-		// Error opening the file.
+	// Initialize the LZMA SDK.
+	ret = lzmaInit();
+	if (ret != 0) {
+		// LZMA SDK initialization failed.
 		fclose(m_file);
-		m_file = nullptr,
-		// TODO: Error code?
-		m_lastError = EIO;
+		m_file = nullptr;
+		// TODO: Consistently set m_lastError immediately before
+		// the return statement in all Archive handlers.
+		m_lastError = -ret;
 		return;
-	}
-
-	// Initialize VTables.
-	FileInStream_CreateVTable(&m_archiveStream);
-	LookToRead_CreateVTable(&m_lookStream, false);
-
-	m_lookStream.realStream = &m_archiveStream.s;
-	LookToRead_Init(&m_lookStream);
-
-	// Generate the CRC table.
-	// TODO: Shared with Sz?
-	if (!ms_CrcInit) {
-		CrcGenerateTable();
-		Crc64GenerateTable();
-		ms_CrcInit = true;
 	}
 
 	// TODO: Only read the first stream?
 	Xzs_Construct(&m_xzs);
 
 	int64_t startPosition;
-	res = Xzs_ReadBackward(&m_xzs, &m_lookStream.s, &startPosition, nullptr, &m_allocImp);
+	SRes res = Xzs_ReadBackward(&m_xzs, &m_lookStream.s, &startPosition, nullptr, &m_allocImp);
 	if (res != SZ_OK || startPosition != 0) {
 		// Error seeking to the beginning of the file.
 		Xzs_Free(&m_xzs, &m_allocImp);
 		File_Close(&m_archiveStream.file);
+
 		fclose(m_file);
 		m_file = nullptr,
 		// TODO: Error code?
@@ -137,7 +99,7 @@ Xz::Xz(const char *filename)
 		return;
 	}
 
-	// Xz file is opened.
+	// Xz archive is opened.
 }
 
 /**
@@ -148,7 +110,7 @@ Xz::~Xz()
 	// Close the Xz file.
 	if (m_file) {
 		Xzs_Free(&m_xzs, &m_allocImp);
-		File_Close(&m_archiveStream.file);
+		// File_Close() is called by LzmaSdk.
 	}
 }
 
@@ -160,9 +122,10 @@ void Xz::close(void)
 	// Close the Xz file.
 	if (m_file) {
 		Xzs_Free(&m_xzs, &m_allocImp);
-		File_Close(&m_archiveStream.file);
+		// File_Close() is called by LzmaSdk.
 	}
 
+	// LzmaSdk class closes m_archiveStream.file.
 	// Base class closes the FILE*.
 	Archive::close();
 }

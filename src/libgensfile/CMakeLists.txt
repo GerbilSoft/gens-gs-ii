@@ -61,11 +61,13 @@ IF(HAVE_LZMA)
 	# 7-Zip archive handler.
 	SET(libgensfile_SRCS
 		${libgensfile_SRCS}
+		LzmaSdk.cpp
 		Sz.cpp
 		Xz.cpp
 		)
 	SET(libgensfile_H
 		${libgensfile_H}
+		LzmaSdk.hpp
 		Sz.hpp
 		Xz.hpp
 		)

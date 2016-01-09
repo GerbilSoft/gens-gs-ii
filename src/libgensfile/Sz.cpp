@@ -40,23 +40,11 @@ using std::u16string;
 
 // 7-Zip includes.
 #include "lzma/7zAlloc.h"
-#include "lzma/7zVersion.h"
-#include "lzma/7zCrc.h"
 
 // Character set conversion.
 #include "libgenstext/Encoding.hpp"
 
-#ifdef _WIN32
-// Win32 Unicode Translation Layer.
-// Needed for proper Unicode filename support on Windows.
-// Also required for large file support.
-#include "libcompat/W32U/W32U_mini.h"
-#endif
-
 namespace LibGensFile {
-
-// Set to true if the 7z CRC table has been initialized.
-bool Sz::ms_CrcInit = false;
 
 /**
  * Open a file with this archive handler.
@@ -65,24 +53,11 @@ bool Sz::ms_CrcInit = false;
  * @param filename Name of the file to open.
  */
 Sz::Sz(const char *filename)
-	: Archive(filename)
+	: LzmaSdk(filename)
 	, m_blockIndex(~0)
 	, m_outBuffer(nullptr)
 	, m_outBufferSize(0)
 {
-	// NOTE: This initialization MUST be done before checking
-	// for a filename error!
-
-	// Initialize the memory allocators.
-	m_allocImp.Alloc = SzAlloc;
-	m_allocImp.Free = SzFree;
-
-	// Initialize the temporary memory allocators.
-	m_allocTempImp.Alloc = SzAllocTemp;
-	m_allocTempImp.Free = SzFreeTemp;
-
-	/** End of basic 7-Zip initialization. **/
-
 	if (!m_file) {
 		return;
 	} else if (!filename) {
@@ -98,71 +73,25 @@ Sz::Sz(const char *filename)
 	int ret = checkMagic(_7z_magic, sizeof(_7z_magic));
 	if (ret != 0) {
 		// Not a 7-Zip archive.
+		fclose(m_file);
+		m_file = nullptr;
 		m_lastError = -ret;
-		fclose(m_file);
-		m_file = nullptr;
 		return;
 	}
 
-	SRes res;
-#ifdef _WIN32
-	// Convert the filename from UTF-8 to UTF-16.
-	u16string filenameW = LibGensText::Utf8_to_Utf16(filename, strlen(filename));
-	if (filenameW.empty()) {
-		// Error converting the filename to UTF-16.
+	// Initialize the LZMA SDK.
+	ret = lzmaInit();
+	if (ret != 0) {
+		// LZMA SDK initialization failed.
 		fclose(m_file);
 		m_file = nullptr;
-		m_lastError = EINVAL;
-		return; // TODO: Figure out an MDP error code for this.
-	}
-
-	if (W32U_IsUnicode()) {
-		res = InFile_OpenW(&m_archiveStream.file, (const wchar_t*)filenameW.c_str());
-	} else {
-		// System doesn't support Unicode.
-		// Convert the filename from UTF-16 to ANSI.
-		// FIXME: LibGensText doesn't support CP_ACP.
-		// TODO: Use W32U_alloca?
-		char *filenameA = W32U_UTF16_to_mbs((const wchar_t*)filenameW.c_str(), CP_ACP);
-		if (!filenameA) {
-			// Error converting the filename to ANSI.
-			fclose(m_file);
-			m_file = nullptr;
-			m_lastError = EINVAL;
-			return; // TODO: Figure out an MDP error code for this.
-		}
-		res = InFile_Open(&m_archiveStream.file, filenameA);
-		free(filenameA);
-	}
-#else
-	// Unix system. Use UTF-8 filenames directly.
-	res = InFile_Open(&m_archiveStream.file, filename);
-#endif
-
-	if (res != 0) {
-		// Error opening the file.
-		fclose(m_file);
-		m_file = nullptr,
-		// TODO: Error code?
-		m_lastError = EIO;
+		m_lastError = -ret;
 		return;
 	}
 
-	// Initialize VTables.
-	FileInStream_CreateVTable(&m_archiveStream);
-	LookToRead_CreateVTable(&m_lookStream, false);
-
-	m_lookStream.realStream = &m_archiveStream.s;
-	LookToRead_Init(&m_lookStream);
-
-	// Generate the CRC table.
-	if (!ms_CrcInit) {
-		CrcGenerateTable();
-		ms_CrcInit = true;
-	}
-
+	// Open the 7z archive.
 	SzArEx_Init(&m_db);
-	res = SzArEx_Open(&m_db, &m_lookStream.s, &m_allocImp, &m_allocTempImp);
+	SRes res = SzArEx_Open(&m_db, &m_lookStream.s, &m_allocImp, &m_allocTempImp);
 	if (res != SZ_OK) {
 		// Error opening the file.
 		SzArEx_Free(&m_db, &m_allocImp);
@@ -175,7 +104,7 @@ Sz::Sz(const char *filename)
 		return;
 	}
 
-	// 7-Zip file is opened.
+	// 7-Zip archive is opened.
 }
 
 /**
@@ -191,7 +120,7 @@ Sz::~Sz()
 	// Close the 7-Zip file.
 	if (m_file) {
 		SzArEx_Free(&m_db, &m_allocImp);
-		File_Close(&m_archiveStream.file);
+		// File_Close() is called by LzmaSdk.
 	}
 }
 
@@ -207,12 +136,13 @@ void Sz::close(void)
 		m_outBufferSize = 0;
 	}
 
-	// Close the 7-Zip file.
+	// Close the 7-Zip archive.
 	if (m_file) {
 		SzArEx_Free(&m_db, &m_allocImp);
-		File_Close(&m_archiveStream.file);
+		// File_Close() is called by LzmaSdk.
 	}
 
+	// LzmaSdk class closes m_archiveStream.file.
 	// Base class closes the FILE*.
 	Archive::close();
 }

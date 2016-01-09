@@ -24,15 +24,14 @@
 #ifndef __LIBGENSFILE_SZ_HPP__
 #define __LIBGENSFILE_SZ_HPP__
 
-#include "Archive.hpp"
+#include "LzmaSdk.hpp"
 
-// 7-Zip includes.
+// LZMA SDK includes.
 #include "lzma/7z.h"
-#include "lzma/7zFile.h"
 
 namespace LibGensFile {
 
-class Sz : public Archive
+class Sz : public LzmaSdk
 {
 	public:
 		/**
@@ -82,14 +81,7 @@ class Sz : public Archive
 				     void *buf, file_offset_t siz, file_offset_t *ret_siz) final;
 
 	private:
-		// Set to true if the 7z CRC table has been initialized.
-		static bool ms_CrcInit;
-
-		ISzAlloc m_allocImp;
-		ISzAlloc m_allocTempImp;
-
-		CFileInStream m_archiveStream;
-		CLookToRead m_lookStream;
+		// 7z archive.
 		CSzArEx m_db;
 
 		// Miscellaneous 7-Zip variables.
