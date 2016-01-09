@@ -4,16 +4,15 @@
  * Gens/GS II: Make functions visible when compiling as a
  * shared library on Linux and other Unix systems.
  */
-#ifdef _UNIX
+#if defined(RARDLL) && defined(_UNIX)
 #ifdef __GNUC__
-#ifdef PASCAL
-#undef PASCAL
-#endif
-#define PASCAL __attribute__ ((visibility ("default")))
+#define DLLEXPORT __attribute__ ((visibility ("default")))
 #else /* !__GNUC__ */
 #error Unable to set visibility on this system. Please update unrar/dll.cpp.
 #endif /* __GNUC__ */
-#endif /* _UNIX */
+#else
+#define DLLEXPORT
+#endif /* defined(RARDLL) && defined(_UNIX) */
 
 static int RarErrorToDll(RAR_EXIT ErrCode);
 
@@ -29,7 +28,7 @@ struct DataSet
 };
 
 
-HANDLE PASCAL RAROpenArchive(struct RAROpenArchiveData *r)
+HANDLE PASCAL DLLEXPORT RAROpenArchive(struct RAROpenArchiveData *r)
 {
   RAROpenArchiveDataEx rx;
   memset(&rx,0,sizeof(rx));
@@ -45,7 +44,7 @@ HANDLE PASCAL RAROpenArchive(struct RAROpenArchiveData *r)
 }
 
 
-HANDLE PASCAL RAROpenArchiveEx(struct RAROpenArchiveDataEx *r)
+HANDLE PASCAL DLLEXPORT RAROpenArchiveEx(struct RAROpenArchiveDataEx *r)
 {
   DataSet *Data=NULL;
   try
@@ -163,7 +162,7 @@ HANDLE PASCAL RAROpenArchiveEx(struct RAROpenArchiveDataEx *r)
 }
 
 
-int PASCAL RARCloseArchive(HANDLE hArcData)
+int PASCAL DLLEXPORT RARCloseArchive(HANDLE hArcData)
 {
   DataSet *Data=(DataSet *)hArcData;
   bool Success=Data==NULL ? false:Data->Arc.Close();
@@ -172,7 +171,7 @@ int PASCAL RARCloseArchive(HANDLE hArcData)
 }
 
 
-int PASCAL RARReadHeader(HANDLE hArcData,struct RARHeaderData *D)
+int PASCAL DLLEXPORT RARReadHeader(HANDLE hArcData,struct RARHeaderData *D)
 {
   struct RARHeaderDataEx X;
   memset(&X,0,sizeof(X));
@@ -197,7 +196,7 @@ int PASCAL RARReadHeader(HANDLE hArcData,struct RARHeaderData *D)
 }
 
 
-int PASCAL RARReadHeaderEx(HANDLE hArcData,struct RARHeaderDataEx *D)
+int PASCAL DLLEXPORT RARReadHeaderEx(HANDLE hArcData,struct RARHeaderDataEx *D)
 {
   DataSet *Data=(DataSet *)hArcData;
   try
@@ -305,7 +304,7 @@ int PASCAL RARReadHeaderEx(HANDLE hArcData,struct RARHeaderDataEx *D)
 }
 
 
-int PASCAL ProcessFile(HANDLE hArcData,int Operation,char *DestPath,char *DestName,wchar *DestPathW,wchar *DestNameW)
+static int PASCAL ProcessFile(HANDLE hArcData,int Operation,char *DestPath,char *DestName,wchar *DestPathW,wchar *DestNameW)
 {
   DataSet *Data=(DataSet *)hArcData;
   try
@@ -400,26 +399,26 @@ int PASCAL ProcessFile(HANDLE hArcData,int Operation,char *DestPath,char *DestNa
 }
 
 
-int PASCAL RARProcessFile(HANDLE hArcData,int Operation,char *DestPath,char *DestName)
+int PASCAL DLLEXPORT RARProcessFile(HANDLE hArcData,int Operation,char *DestPath,char *DestName)
 {
   return(ProcessFile(hArcData,Operation,DestPath,DestName,NULL,NULL));
 }
 
 
-int PASCAL RARProcessFileW(HANDLE hArcData,int Operation,wchar *DestPath,wchar *DestName)
+int PASCAL DLLEXPORT RARProcessFileW(HANDLE hArcData,int Operation,wchar *DestPath,wchar *DestName)
 {
   return(ProcessFile(hArcData,Operation,NULL,NULL,DestPath,DestName));
 }
 
 
-void PASCAL RARSetChangeVolProc(HANDLE hArcData,CHANGEVOLPROC ChangeVolProc)
+void PASCAL DLLEXPORT RARSetChangeVolProc(HANDLE hArcData,CHANGEVOLPROC ChangeVolProc)
 {
   DataSet *Data=(DataSet *)hArcData;
   Data->Cmd.ChangeVolProc=ChangeVolProc;
 }
 
 
-void PASCAL RARSetCallback(HANDLE hArcData,UNRARCALLBACK Callback,LPARAM UserData)
+void PASCAL DLLEXPORT RARSetCallback(HANDLE hArcData,UNRARCALLBACK Callback,LPARAM UserData)
 {
   DataSet *Data=(DataSet *)hArcData;
   Data->Cmd.Callback=Callback;
@@ -427,7 +426,7 @@ void PASCAL RARSetCallback(HANDLE hArcData,UNRARCALLBACK Callback,LPARAM UserDat
 }
 
 
-void PASCAL RARSetProcessDataProc(HANDLE hArcData,PROCESSDATAPROC ProcessDataProc)
+void PASCAL DLLEXPORT RARSetProcessDataProc(HANDLE hArcData,PROCESSDATAPROC ProcessDataProc)
 {
   DataSet *Data=(DataSet *)hArcData;
   Data->Cmd.ProcessDataProc=ProcessDataProc;
@@ -435,7 +434,7 @@ void PASCAL RARSetProcessDataProc(HANDLE hArcData,PROCESSDATAPROC ProcessDataPro
 
 
 #ifndef RAR_NOCRYPT
-void PASCAL RARSetPassword(HANDLE hArcData,char *Password)
+void PASCAL DLLEXPORT RARSetPassword(HANDLE hArcData,char *Password)
 {
   DataSet *Data=(DataSet *)hArcData;
   wchar PasswordW[MAXPASSWORD];
@@ -446,7 +445,7 @@ void PASCAL RARSetPassword(HANDLE hArcData,char *Password)
 #endif
 
 
-int PASCAL RARGetDllVersion()
+int PASCAL DLLEXPORT RARGetDllVersion()
 {
   return RAR_DLL_VERSION;
 }
