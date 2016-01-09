@@ -175,8 +175,6 @@ int Xz::getFileInfo(mdp_z_entry_t **z_entry_out)
 
 	// Set the elements of the list entry.
 	// FIXME: z_entry->filesize should be changed to int64_t.
-	// For filesize, check if zlib is operating on a compressed file.
-	// If it is, use gzsize; otherwise, use filesize.
 	z_entry->filesize = (size_t)Xzs_GetUnpackSize(&m_xzs);
 	z_entry->filename = (!m_filename.empty() ? strdup(m_filename.c_str()) : nullptr);
 	z_entry->next = nullptr;
@@ -226,7 +224,7 @@ int Xz::readFile(const mdp_z_entry_t *z_entry,
 		m_lastError = EIO;
 		return -m_lastError;
 	}
-		
+
 	// Allocate buffers.
 	if (!m_inBuf) {
 		m_inBufSz = (1 << 15);		// 32 KB
@@ -236,7 +234,7 @@ int Xz::readFile(const mdp_z_entry_t *z_entry,
 		m_outBufSz = (1 << 21);		// 2 MB
 		m_outBuf = (uint8_t*)malloc(m_outBufSz);
 	}
-		
+
 	// (Re-)Initialize the XzUnpacker.
 	XzUnpacker_Init(&m_xzu);
 
