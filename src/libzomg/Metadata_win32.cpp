@@ -141,13 +141,13 @@ static string getUserName_unicode(void)
 		}
 	}
 
-	// Remove any trailing NULL characters.
-	if (username[cchUsername-1] == 0) {
-		// Found a trailing NULL characters.
-		cchUsername--;
-	}
-
 	if (cchUsername > 0) {
+		// Remove any trailing NULL characters.
+		if (username[cchUsername-1] == 0) {
+			// Found a trailing NULL characters.
+			cchUsername--;
+		}
+
 		// Try to convert from UTF-16 to UTF-8.
 		// FIXME: If this fails, do a naive low-byte conversion?
 
