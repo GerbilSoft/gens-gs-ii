@@ -98,7 +98,18 @@ TEST_P(MiniZip_iowin32u_Test, iowin32_ANSI)
 	zlib_filefunc64_def ffunc;
 	fill_win32_filefunc64A(&ffunc);
 	m_unzFile = unzOpen2_64(flags.src_filename_ANSI, &ffunc);
-	ASSERT_TRUE(m_unzFile != nullptr);
+	if (!m_unzFile) {
+		// If this filename has a '?', it's Unicode,
+		// so a failure is expected.
+		if (strchr(flags.src_filename_ANSI, '?') == nullptr) {
+			// No '?'. Failure is an error.
+			ASSERT_TRUE(m_unzFile != nullptr);
+		}
+		return;
+	}
+
+	// Make sure the filename doesn't have a '?' in it.
+	ASSERT_EQ(nullptr, strchr(flags.src_filename_ANSI, '?'));
 
 	// Get the first header within the file.
 	ASSERT_EQ(UNZ_OK, unzGoToFirstFile(m_unzFile));
