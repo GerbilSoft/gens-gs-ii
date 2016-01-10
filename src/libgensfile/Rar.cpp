@@ -310,10 +310,6 @@ int Rar::getFileInfo(mdp_z_entry_t **z_entry_out)
 	// Process the archive.
 	struct RARHeaderDataEx rar_header;
 
-	// Filenames in a RAR archive have a maximum length of 1,024 characters.
-	char utf8_buf[1024*4];
-	wchar_t wcs_buf[1024];
-
 	while (m_unrarDll.pRARReadHeaderEx(hRar, &rar_header) == 0) {
 		// Allocate memory for the next file list element.
 		// NOTE: C-style malloc() is used because MDP is a C API.
