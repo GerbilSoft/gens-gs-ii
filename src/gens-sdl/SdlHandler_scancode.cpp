@@ -30,7 +30,7 @@ namespace GensSdl {
  */
 GensKey_t SdlHandler::scancodeToGensKey(SDL_Scancode scancode)
 {
-	static GensKey_t sdlToGens[SDL_NUM_SCANCODES] = {
+	static const GensKey_t sdlToGens[SDL_NUM_SCANCODES] = {
 		// SDL2 scancodes are based on HID usage page 0x07 (USB keyboard).
 		// TODO: Add Gens keycodes for new keys supported in SDL2.
 
