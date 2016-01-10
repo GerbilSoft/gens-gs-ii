@@ -15,6 +15,15 @@ IF(HAVE_ZLIB AND HAVE_MINIZIP)
 	INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 	INCLUDE_DIRECTORIES(${MINIZIP_INCLUDE_DIR})
 
+	# Copy the Zip files to the test directory.
+	FILE(COPY
+		ansi_in_ansi_out.zip
+		ansi_in_unicode_out_♻.zip
+		unicode_in_ansi_out.zip
+		unicode_in_unicode_out_♻.zip
+		DESTINATION "${CMAKE_CURRENT_BINARY_DIR}"
+		)
+
 	# MiniZip iowin32u test.
 	ADD_EXECUTABLE(MiniZip_iowin32u_Test
 		MiniZip_iowin32u_Test.cpp
