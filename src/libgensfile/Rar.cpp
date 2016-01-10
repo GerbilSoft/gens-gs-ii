@@ -214,30 +214,57 @@ HANDLE Rar::openRar(int mode)
 		return nullptr;
 	}
 
+	// RAR handle.
+	HANDLE hRar;
+
 	// Attempt to open the RAR archive using UnRAR.dll.
-	struct RAROpenArchiveDataEx rar_open;
-	memset(&rar_open, 0, sizeof(rar_open));
-	rar_open.OpenMode = mode;
+	if (m_unrarDll.pRAROpenArchive) {
+		// UnRAR.dll v3 or later.
+		struct RAROpenArchiveDataEx rar_open;
+		memset(&rar_open, 0, sizeof(rar_open));
+		rar_open.OpenMode = mode;
 
 #ifdef _WIN32
-	if (!W32U_IsUnicode()) {
-		// System is not Unicode.
-		// Use the ANSI filename.
-		rar_open.ArcName = (char*)m_filenameA.c_str();
-	} else {
-		// System is Unicode.
-		// Use the Unicode filename.
-		rar_open.ArcNameW = (wchar_t*)m_filenameW.c_str();
-	}
+		if (!W32U_IsUnicode()) {
+			// System is not Unicode.
+			// Use the ANSI filename.
+			rar_open.ArcName = (char*)m_filenameA.c_str();
+		} else {
+			// System is Unicode.
+			// Use the Unicode filename.
+			rar_open.ArcNameW = (wchar_t*)m_filenameW.c_str();
+		}
 #else /* !_WIN32 */
-	// Linux/Unix: Use the native 8-bit encoding.
-	// The system locale must be set to UTF-8 for
-	// Unicode to be handled correctly.
-	rar_open.ArcName = (char*)m_filename.c_str();
+		// Linux/Unix: Use the native 8-bit encoding.
+		// The system locale must be set to UTF-8 for
+		// Unicode to be handled correctly.
+		rar_open.ArcName = (char*)m_filename.c_str();
 #endif /* _WIN32 */
 
-	// Open the RAR file.
-	HANDLE hRar = m_unrarDll.pRAROpenArchiveEx(&rar_open);
+		// Open the RAR file.
+		hRar = m_unrarDll.pRAROpenArchiveEx(&rar_open);
+	} else {
+		// UnRAR.dll v2.
+		// RAROpenArchive doesn't support Unicode filenames,
+		// so we have to use ANSI.
+		struct RAROpenArchiveData rar_open;
+		memset(&rar_open, 0, sizeof(rar_open));
+		rar_open.OpenMode = mode;
+
+#ifdef _WIN32
+		// Win32: ANSI filename.
+		rar_open.ArcName = (char*)m_filenameA.c_str();
+#else /* !_WIN32 */
+		// Linux: UTF-8 filename.
+		// TODO: Is v2 even available for Linux, and
+		// does it support UTF-8 correctly?
+		rar_open.ArcName = (char*)m_filename.c_str();
+#endif /* _WIN32 */
+
+		// Open the RAR file.
+		hRar = m_unrarDll.pRAROpenArchive(&rar_open);
+	}
+
 	if (!hRar) {
 		// Error opening the RAR file.
 		// TODO: Correct error code?
