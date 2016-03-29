@@ -225,7 +225,7 @@ void Vdp::updateVdpLines(bool resetCurrent)
 	// the VDP code isn't used at all in Gens/GS II during "idle".
 	if (d->VDP_Mode & VdpTypes::VDP_MODE_M5) {
 		// Mode 5. Must be either 224 lines or 240 lines.
-		if (d->VDP_Mode & VdpTypes::VDP_MODE_M3)
+		if (d->VDP_Mode & VdpTypes::VDP_MODE_M2)
 			LineOffset = 2; // 240 lines.
 		else
 			LineOffset = 1; // 224 lines.

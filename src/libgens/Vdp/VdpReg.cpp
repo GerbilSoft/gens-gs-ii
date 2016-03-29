@@ -47,12 +47,6 @@ void VdpPrivate::updateVdpMode(void)
 		    ((Set1 & 0x04) << 1) |	// M4/PSEL
 		    ((Set2 & 0x04) << 2));	// M5
 
-	if (!(Set2 & 0x08)) {
-		// V28 mode. Reset the NTSC V30 roll values.
-		q->VDP_Lines.NTSC_V30.Offset = 0;
-		q->VDP_Lines.NTSC_V30.VBlank_Div = 0;
-	}
-
 	// If the VDP mode has changed, CRam needs to be updated.
 	if (prevVdpMode != VDP_Mode) {
 		// Update the VDP mode variables.
@@ -67,6 +61,13 @@ void VdpPrivate::updateVdpMode(void)
 		// Set the M5/M4 bits.
 		// NOTE: The AND is probably not necessary...
 		palette.setM5M4bits((VDP_Mode >> 3) & 0x03);
+
+		if (!(VDP_Mode & VdpTypes::VDP_MODE_M2)) {
+			// V28 mode. Reset the NTSC V30 roll values.
+			// TODO: Also if changed from NTSC to PAL?
+			q->VDP_Lines.NTSC_V30.Offset = 0;
+			q->VDP_Lines.NTSC_V30.VBlank_Div = 0;
+		}
 	}
 
 	// Initialize Vdp::VDP_Lines.
