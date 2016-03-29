@@ -176,6 +176,11 @@ const RomCartridgeMDPrivate::MD_RomFixup_t RomCartridgeMDPrivate::MD_RomFixups[]
 		RomCartridgeMD::CHKSUM_DISABLED,
 		RomCartridgeMD::MAPPER_MD_SSF2, {{0}, {0}, {0}}},	// JP
 
+	// Alien Soldier (J): Uses a non-standard checksum.
+	{{"GM G-004130", 0, 0}, {0, 0, true},
+		RomCartridgeMD::CHKSUM_DISABLED,
+		RomCartridgeMD::MAPPER_MD_FLAT, {{0}, {0}, {0}}},
+
 	/**
 	 * Xin Qi Gai Wang Zi (original version of Beggar Prince):
 	 * SRAM is located at 0x400000-0x40FFFF; ROM header is invalid.
