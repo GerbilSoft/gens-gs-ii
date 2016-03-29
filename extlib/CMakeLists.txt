@@ -85,6 +85,13 @@ IF(USE_INTERNAL_POPT)
 	ADD_SUBDIRECTORY(popt)
 ENDIF(USE_INTERNAL_POPT)
 
+# UnRAR.dll
+# TODO: Add an option to control this.
+IF(NOT WIN32)
+	# Build UnRAR.dll (libgensunrar.so)
+	ADD_SUBDIRECTORY(unrar)
+ENDIF(NOT WIN32)
+
 # Google Test
 IF(BUILD_TESTING)
 	# Reference: http://stackoverflow.com/questions/12540970/how-to-make-gtest-build-mdd-instead-of-mtd-by-default-using-cmake

@@ -34,10 +34,10 @@
 #include "Zomg.hpp"
 
 #ifdef _WIN32
-// MiniZip Win32 I/O handler.
-#include "../extlib/minizip/iowin32u.h"
 // Win32 Unicode Translation Layer.
 #include "libcompat/W32U/W32U_mini.h"
+// MiniZip Win32 UTF-8 compatibility library.
+#include "libcompat/W32U/minizip_iowin32u.h"
 #endif
 
 // C includes.

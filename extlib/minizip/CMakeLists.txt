@@ -7,10 +7,20 @@ SET(minizip_SRCS
 	zip.c
 	ioapi.c
 	)
+SET(minizip_H
+	crypt.h
+	ioapi.h
+	iowin32.h
+	unzip.h
+	zip.h
 
-# Platform-specific sources.
+	# Custom headers.
+	mz_of.h
+	)
+
 IF(WIN32)
-	SET(minizip_PLATFORM_SRCS iowin32.c iowin32u.c)
+	# Windows-specific I/O handler.
+	SET(minizip_SRCS ${minizip_SRCS} iowin32.c)
 ENDIF(WIN32)
 
 # ZLIB include directory.
@@ -20,7 +30,7 @@ INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 # Build the library. #
 ######################
 
-ADD_LIBRARY(minizip STATIC ${minizip_SRCS} ${minizip_PLATFORM_SRCS})
+ADD_LIBRARY(minizip STATIC ${minizip_SRCS})
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(minizip)
 TARGET_LINK_LIBRARIES(minizip ${ZLIB_LIBRARY})

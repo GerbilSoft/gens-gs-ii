@@ -84,6 +84,11 @@ IF(WIN32)
 	# - RegQueryValueEx()
 	# - RegCloseKey()
 	TARGET_LINK_LIBRARIES(zomg secur32 advapi32)
+	TARGET_LINK_LIBRARIES(zomg compat_W32U)
+	IF(HAVE_MINIZIP)
+		# MiniZip Win32 UTF-8 compatibility library.
+		TARGET_LINK_LIBRARIES(zomg compat_W32U_minizip)
+	ENDIF(HAVE_MINIZIP)
 ENDIF(WIN32)
 
 # Set the compile definitions.

@@ -70,6 +70,7 @@ using GensSdl::VBackend;
 // C includes. (C++ namespace)
 #include <cstdio>
 #include <cstdlib>
+#include <clocale>
 
 // C++ includes.
 #include <string>
@@ -265,6 +266,9 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 #endif /* _WIN32 */
+
+	// Initialize locale settings.
+	setlocale(LC_ALL, "");
 
 	// Parse command line options.
 	GensSdl::options = new GensSdl::Options();

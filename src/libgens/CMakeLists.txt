@@ -19,9 +19,8 @@ INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/../")
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
-# ZLIB and MINIZIP include directories.
+# zlib is used by Rom for crc32().
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${MINIZIP_INCLUDE_DIR})
 
 # Library checks.
 INCLUDE(CheckLibraryExists)
@@ -199,54 +198,6 @@ SET(libgens_IO_H
 	IO/IoMasterTap.hpp
 	)
 
-# TODO: Completely rework the decompressor subsystem.
-SET(libgens_DECOMPRESSOR_SRCS
-	Decompressor/Decompressor.cpp
-	Decompressor/DcGzip.cpp
-	Decompressor/DcZip.cpp
-	Decompressor/DcMemFake.cpp
-	)
-SET(libgens_DECOMPRESSOR_H
-	Decompressor/Decompressor.hpp
-	Decompressor/DcGzip.hpp
-	Decompressor/DcZip.hpp
-	Decompressor/DcMemFake.hpp
-	)
-
-IF(HAVE_LZMA)
-	SET(libgens_DECOMPRESSOR_SRCS
-		${libgens_DECOMPRESSOR_SRCS}
-		Decompressor/Dc7z.cpp
-		)
-	SET(libgens_DECOMPRESSOR_H
-		${libgens_DECOMPRESSOR_H}
-		Decompressor/Dc7z.hpp
-		)
-ENDIF()
-
-# Platform-specific sources.
-IF(WIN32)
-	SET(libgens_DECOMPRESSOR_SRCS
-		${libgens_DECOMPRESSOR_SRCS}
-		Decompressor/DcRar_Win32.cpp
-		Decompressor/UnRAR_dll.cpp
-		)
-	SET(libgens_DECOMPRESSOR_H
-		${libgens_DECOMPRESSOR_H}
-		Decompressor/DcRar.hpp
-		Decompressor/UnRAR_dll.hpp
-		)
-ELSE()
-	SET(libgens_DECOMPRESSOR_SRCS
-		${libgens_DECOMPRESSOR_SRCS}
-		Decompressor/DcRar_Unix.cpp
-		)
-	SET(libgens_DECOMPRESSOR_H
-		${libgens_DECOMPRESSOR_H}
-		Decompressor/DcRar.hpp
-		)
-ENDIF()
-
 ######################
 # Build the library. #
 ######################
@@ -258,12 +209,13 @@ ADD_LIBRARY(gens STATIC
 	${libgens_EMUCONTEXT_SRCS} ${libgens_EMUCONTEXT_H}
 	${libgens_VDP_SRCS} ${libgens_VDP_H}
 	${libgens_IO_SRCS} ${libgens_IO_H}
-	${libgens_DECOMPRESSOR_SRCS} ${libgens_DECOMPRESSOR_H}
+	${libgens_FILE_SRCS} ${libgens_FILE_H}
 	)
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(gens)
+TARGET_LINK_LIBRARIES(gens compat genstext ${ZLIB_LIBRARY} gensfile zomg)
 
-TARGET_LINK_LIBRARIES(gens compat genstext ${ZLIB_LIBRARY} ${MINIZIP_LIBRARY} zomg)
+# Additional libraries.
 IF(GENS_ENABLE_EMULATION)
 	TARGET_LINK_LIBRARIES(gens starscream mdZ80)
 ENDIF(GENS_ENABLE_EMULATION)
@@ -273,22 +225,9 @@ ENDIF(HAVE_CLOCK_GETTIME_IN_LIBRT)
 IF(HAVE_ICONV)
 	TARGET_LINK_LIBRARIES(gens ${ICONV_LIBRARY})
 ENDIF(HAVE_ICONV)
-IF(HAVE_LZMA)
-	# Link ordering matters:
-	# * 7z depends on lzmabase.
-	# * lzmabase does NOT depend on 7z.
-	TARGET_LINK_LIBRARIES(gens ${7z_LIBRARY} ${LZMA_LIBRARY})
-ENDIF(HAVE_LZMA)
 IF(WIN32)
-	# version.dll is required for DcRar_Win32.cpp, which calls these functions:
-	# - GetFileVersionInfoSize()
-	# - GetFileVersionInfo()
-	# - VerQueryValue()
-	TARGET_LINK_LIBRARIES(gens version)
+	TARGET_LINK_LIBRARIES(gens compat_W32U)
 ENDIF(WIN32)
-
-# Set the compile definitions.
-ADD_DEFINITIONS(${ZLIB_DEFINITIONS} ${MINIZIP_DEFINITIONS})
 
 # Test suite.
 IF(BUILD_TESTING)

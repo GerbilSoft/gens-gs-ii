@@ -140,10 +140,6 @@ class GeneralConfigWindowPrivate
 		 * Update the ROM file status.
 		 */
 		void updateRomFileStatus(void);
-
-		/** External Programs **/
-		QString sExtPrgStatus_UnRAR;
-		void extprgDisplayFileStatus(const QString &file_id, const QString &file_desc);
 };
 
 }

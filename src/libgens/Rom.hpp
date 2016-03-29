@@ -30,8 +30,9 @@
 // C++ includes.
 #include <string>
 
-// Decompressor subsystem.
-#include "Decompressor/Decompressor.hpp"
+// Archive subsystem. (for mdp_z_entry_t)
+// TODO: Move to MDP headers.
+#include "libgensfile/Archive.hpp"
 
 namespace LibGens {
 
@@ -121,8 +122,8 @@ class Rom
 
 		/**
 		 * Load the ROM image into a buffer.
-		 * @param buf Buffer.
-		 * @param siz Buffer size.
+		 * @param buf	[out] Buffer.
+		 * @param siz	[in]  Size of buf.
 		 * @return Positive value indicating amount of data read on success; 0 or negative on error.
 		 */
 		int loadRom(void *buf, size_t siz);

@@ -24,7 +24,12 @@
 #include <libgens/config.libgens.h>
 
 #include "Rom.hpp"
-#include "Decompressor/DcMemFake.hpp"
+#include "libgensfile/Archive.hpp"
+#include "libgensfile/ArchiveFactory.hpp"
+#include "libgensfile/MemFake.hpp"
+using LibGensFile::Archive;
+using LibGensFile::ArchiveFactory;
+using LibGensFile::MemFake;
 
 // C includes. (C++ namespace)
 #include <cstring>
@@ -86,9 +91,9 @@ class RomPrivate
 		// NOTE: 'header' must be deinterleaved.
 		static Rom::MDP_SYSTEM_ID DetectSystem(const uint8_t *header, size_t header_size, Rom::RomFormat fmt);
 
-		// ROM file and decompressor variables.
+		// ROM file and archive variables.
 		FILE *file;
-		Decompressor *decomp;
+		Archive *archive;
 		mdp_z_entry_t *z_entry_list;
 		const mdp_z_entry_t *z_entry_sel;
 
@@ -127,7 +132,7 @@ class RomPrivate
 		static int DetectRegionCodeMD(const char countryCodes[16]);
 
 		/**
-		 * Decode a Super Magic Drive interleaced block.
+		 * Decode a Super Magic Drive interleaved block.
 		 * @param dest Destination block. (Must be 16 KB.)
 		 * @param src Source block. (Must be 16 KB.)
 		 */
@@ -189,7 +194,7 @@ RomPrivate::RomPrivate(Rom *q, const char *filename,
 			Rom::RomFormat fmtOverride)
 	: q(q)
 	, file(nullptr)
-	, decomp(nullptr)
+	, archive(nullptr)
 	, z_entry_list(nullptr)
 	, z_entry_sel(nullptr)
 	, sysId(Rom::MDP_SYSTEM_UNKNOWN)
@@ -216,25 +221,26 @@ RomPrivate::RomPrivate(Rom *q, const char *filename,
 	if (!file)
 		return;
 
-	// Determine which decompressor to use.
-	decomp = Decompressor::GetDecompressor(file, filename);
-	if (!decomp) {
-		// Couldn't find a suitable decompressor.
-		// TODO: Indicate that a suitable decompressor couldn't be found.
+	// Open the ROM file as an archive.
+	// TODO: Open from FILE*? (use dup2 or similar)
+	archive = ArchiveFactory::openArchive(filename);
+	if (!archive) {
+		// Couldn't open the ROM file as an archive.
+		// TODO: Indicate that the archive couldn't be opened.
 		fclose(file);
 		file = nullptr;
 		return;
 	}
 
 	// Get the list of files in the archive.
-	int ret = decomp->getFileInfo(&z_entry_list);
+	int ret = archive->getFileInfo(&z_entry_list);
 	if (ret != 0) { // TODO: MDP_ERR_OK
 		// Error getting the list of files.
 		z_entry_list = nullptr;
 
-		// Delete the decompressor.
-		delete decomp;
-		decomp = nullptr;
+		// Delete the archive handler.
+		delete archive;
+		archive = nullptr;
 
 		// Close the file.
 		fclose(file);
@@ -267,7 +273,7 @@ RomPrivate::RomPrivate(Rom *q, const uint8_t *rom_data, unsigned int rom_size,
 			Rom::RomFormat fmtOverride)
 	: q(q)
 	, file(nullptr)
-	, decomp(nullptr)
+	, archive(nullptr)
 	, z_entry_list(nullptr)
 	, z_entry_sel(nullptr)
 	, sysId(Rom::MDP_SYSTEM_UNKNOWN)
@@ -279,23 +285,23 @@ RomPrivate::RomPrivate(Rom *q, const uint8_t *rom_data, unsigned int rom_size,
 	, rom_crc32(0)
 {
 	// TODO: Support decompression from RAM.
-	// For now, use a pseudo-decompressor that provides the same
+	// For now, use a fake decompressor that provides the same
 	// interface, but just reads from memory.
 	if (!rom_data || rom_size == 0)
 		return;
 
 	// "Open" the file using the fake decompressor.
-	decomp = new DcMemFake(rom_data, rom_size);
+	archive = new MemFake(rom_data, rom_size);
 
 	// Get the list of files in the archive.
-	int ret = decomp->getFileInfo(&z_entry_list);
+	int ret = archive->getFileInfo(&z_entry_list);
 	if (ret != 0) { // TODO: MDP_ERR_OK
 		// Error getting the list of files.
 		z_entry_list = nullptr;
 
-		// Delete the decompressor.
-		delete decomp;
-		decomp = nullptr;
+		// Delete the archive handler.
+		delete archive;
+		archive = nullptr;
 
 		// Close the file.
 		fclose(file);
@@ -321,10 +327,10 @@ RomPrivate::RomPrivate(Rom *q, const uint8_t *rom_data, unsigned int rom_size,
 RomPrivate::~RomPrivate()
 {
 	// Free the mdp_z_entry_t list.
-	Decompressor::z_entry_t_free(z_entry_list);
+	Archive::z_entry_t_free(z_entry_list);
 
-	// Delete the decompressor.
-	delete decomp;
+	// Delete the archive handler.
+	delete archive;
 
 	// If the file is open, close it.
 	if (file) {
@@ -579,9 +585,10 @@ int RomPrivate::loadRomHeader(Rom::MDP_SYSTEM_ID sysOverride, Rom::RomFormat fmt
 		return -2;
 	}
 
-	size_t header_size;
-	int ret = decomp->getFile(z_entry_sel, header, ROM_HEADER_SIZE, &header_size);
-	if (ret != 0 || header_size == 0) {
+	// Read the ROM header.
+	Archive::file_offset_t header_size_fo;
+	int ret = archive->readFile(z_entry_sel, header, ROM_HEADER_SIZE, &header_size_fo);
+	if (ret != 0 || header_size_fo <= 0 || header_size_fo > ROM_HEADER_SIZE) {
 		// File read error.
 		// TODO: Error code constants.
 		free(header);
@@ -590,6 +597,7 @@ int RomPrivate::loadRomHeader(Rom::MDP_SYSTEM_ID sysOverride, Rom::RomFormat fmt
 
 	// If the header size is smaller than the header buffer,
 	// clear the rest of the header buffer.
+	size_t header_size = (size_t)header_size_fo;
 	if (header_size < sizeof(header)) {
 		memset(&header[header_size], 0x00, (ROM_HEADER_SIZE - header_size));
 	}
@@ -741,11 +749,8 @@ Rom::~Rom()
 
 /**
  * Load the ROM image into a buffer.
- * @param buf Buffer.
- * @param siz Buffer size.
- * For most ROM formats, siz should be equal to the ROM size.
- * For SMD format, siz should be ROM size + 512, since the header
- * is read into the buffer as well. It's removed afterwards.
+ * @param buf	[out] Buffer.
+ * @param siz	[in]  Size of buf.
  * @return Positive value indicating amount of data read on success; 0 or negative on error.
  * TODO: Error code constants!
  */
@@ -755,8 +760,8 @@ int Rom::loadRom(void *buf, size_t siz)
 	assert(buf);
 	if (!isOpen())
 		return -1;	// File is closed!
-	else if (!d->decomp)
-		return -2;	// Decompressor error!
+	else if (!d->archive)
+		return -2;	// Archive handler error!
 	else if (!d->z_entry_sel)
 		return -3;	// No file selected!
 
@@ -767,31 +772,26 @@ int Rom::loadRom(void *buf, size_t siz)
 
 	// Load the ROM image.
 	// TODO: Error handling.
-	size_t ret_siz = 0;
+	int ret = -1;
+	Archive::file_offset_t ret_siz = 0;
 	switch (d->romFormat) {
 		case Rom::RFMT_BINARY:
 			// Plain binary ROM file.
- 			d->decomp->getFile(d->z_entry_sel, buf, siz, &ret_siz);
+ 			ret = d->archive->readFile(d->z_entry_sel, buf, siz, &ret_siz);
 			break;
 
 		case RFMT_SMD:
 		case RFMT_SMD_SPLIT: {
 			// TODO: Split SMD isn't supported.
 			// Handling it as plain SMD for now.
-			if (siz < (d->romSize + 512)) {
-				// Not enough space for the SMD header.
-				return -4;
-			}
 
 			// Read the SMD data.
-			d->decomp->getFile(d->z_entry_sel, buf, siz, &ret_siz);
-			if (ret_siz <= 512) {
-				// ROM is too small.
+			// (Skip the 512-byte header.)
+			ret = d->archive->readFile(d->z_entry_sel, 512, d->romSize, buf, siz, &ret_siz);
+			if (ret != 0 || ret_siz == 0 || ret_siz > (Archive::file_offset_t)siz) {
+				// Read error.
 				ret_siz = 0;
 				break;
-			} else {
-				// Skip the header.
-				ret_siz -= 512;
 			}
 
 			// Temporary SMD block buffer.
@@ -800,28 +800,30 @@ int Rom::loadRom(void *buf, size_t siz)
 			// Process 16 KB blocks.
 			// NOTE: If ret_siz isn't a multiple of 16 KB,
 			// the last block will not be decoded properly.
-			size_t remain = ret_siz;
-			const uint8_t *buf_read = &((uint8_t*)buf)[512];
-			uint8_t *buf_write = (uint8_t*)buf;
+			Archive::file_offset_t remain = ret_siz;
+			const uint8_t *buf_read = reinterpret_cast<const uint8_t*>(buf);
+			uint8_t *buf_write = reinterpret_cast<uint8_t*>(buf);
 			for (; remain >= 16384; remain -= 16384, buf_read += 16384, buf_write += 16384) {
 				memcpy(smd_block, buf_read, 16384);
 				d->DecodeSMDBlock(buf_write, smd_block);
 			}
 
-			if (remain > 0) {
-				// SMD isn't a multiple of 16 KB.
-				// The last block will not be decoded properly.
-				// (...or at all.)
-				memmove(buf_write, buf_read, remain);
-			}
-
+			// FIXME: What do we do if remain > 0?
+			// TODO: Verify that the SMD code works with the Archive skip parameter.
 			free(smd_block);
+			ret = 0;
 			break;
-               }
+		}
 
 		default:
 			// Unsupported ROM format.
-			return -5;
+			ret = -1;
+			break;
+	}
+
+	if (ret != 0 || ret_siz > (Archive::file_offset_t)siz) {
+		// Error reading the file.
+		return -6;
 	}
 
 	// Calculate the CRC32.
@@ -829,7 +831,8 @@ int Rom::loadRom(void *buf, size_t siz)
 	d->rom_crc32 = crc32(0, (const Bytef*)buf, siz);
 
 	// Return the number of bytes read.
-	return ret_siz;
+	// TODO: Change return value to Archive::file_offset_t?
+	return (int)ret_siz;
 }
 
 /**
@@ -842,9 +845,9 @@ int Rom::loadRom(void *buf, size_t siz)
  */
 bool Rom::isOpen(void) const
 {
-	// NOTE: We're checking decomp, since DcMemFake is
+	// NOTE: We're checking archive, since MemFake is
 	// memory-backed and doesn't have an actual file.
-	return (d->decomp != nullptr);
+	return (d->archive != nullptr);
 }
 
 /**

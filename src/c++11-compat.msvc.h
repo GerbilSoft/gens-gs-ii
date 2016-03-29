@@ -89,6 +89,8 @@
  */
 #define strcasecmp(s1, s2)     _stricmp(s1, s2)
 #define strncasecmp(s1, s2, n) _strnicmp(s1, s2, n)
+#define wcscasecmp(s1, s2)     _wcsicmp(s1, s2)
+#define wcsncasecmp(s1, s2, n) _wcsnicmp(s1, s2, n)
 
 /** strtoll(), strtoull() **/
 
@@ -100,6 +102,8 @@
 #if _MSC_VER < 1800
 #define strtoll(nptr, endptr, base)  _strtoi64(nptr, endptr, base)
 #define strtoull(nptr, endptr, base) _strtoui64(nptr, endptr, base)
+#define wcstoll(nptr, endptr, base)  _wcstoi64(nptr, endptr, base)
+#define wcstoull(nptr, endptr, base) _wcstoui64(nptr, endptr, base)
 #endif /* _MSC_VER < 1800 */
 
 /**

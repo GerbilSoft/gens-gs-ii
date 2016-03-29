@@ -2,7 +2,7 @@
  * libcompat: Compatibility library.                                       *
  * config.libcompat.h.in: libcompat configuration. (source file)           *
  *                                                                         *
- * Copyright (c) 2015 by David Korth.                                      *
+ * Copyright (c) 2015-2016 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -33,15 +33,6 @@
 
 /* Define to 1 if you have the `getpwuid_r` function. */
 #cmakedefine HAVE_GETPWUID_R 1
-
-/* Define to 1 if you have the `_stati64` function. */
-#cmakedefine HAVE__STATI64 1
-
-/* Define to 1 if you have the `_fseeki64` function. */
-#cmakedefine HAVE__FSEEKI64 1
-
-/* Define to 1 if you have the `_ftelli64` function. */
-#cmakedefine HAVE__FTELLI64 1
 
 /* Define to 1 if you have the MSVC-specific `_aligned_malloc` function. */
 #cmakedefine HAVE_MSVC_ALIGNED_MALLOC 1

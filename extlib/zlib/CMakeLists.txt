@@ -170,7 +170,7 @@ if(MSVC)
 		set(ZLIB_ASMS
 			contrib/masmx64/gvmat64.asm
 			contrib/masmx64/inffasx64.asm
-		)
+			)
 		# Gens/GS II: MSVC amd64 also requires inffas8664.c.
 		set(ZLIB_ASM_C_SRCS
 			contrib/masmx64/inffas8664.c

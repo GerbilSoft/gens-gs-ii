@@ -126,15 +126,18 @@ int TmssReg::loadTmssRom(void)
 	}
 
 	// Clear the empty part of the ROM buffer.
+	// TODO: Clear with 0 or 0xFF? (RomCartridgeMD is cleared with 0.)
 	if (m_tmssRom_size_real < m_tmssRom_size) {
 		const uint32_t diff = m_tmssRom_size - m_tmssRom_size_real;
 		memset(&m_tmssRom[m_tmssRom_size_real], 0xFF, diff);
 	}
 
 	// Byteswap the ROM image.
-	// FIXME: Adjust ROM size if it's odd.
+	// NOTE: If the ROM is an odd number of bytes, the final byte
+	// will be byteswapped with 0xFF.
+	// m_tmssRom_size_real is rounded up to the nearest multiple of two.
 	// TODO: Get rid of the pointer cast?
-	be16_to_cpu_array((uint16_t*)m_tmssRom, m_tmssRom_size_real);
+	be16_to_cpu_array((uint16_t*)m_tmssRom, ((m_tmssRom_size_real + 1) & ~1));
 
 	// TMSS ROM is loaded.
 	return 0;

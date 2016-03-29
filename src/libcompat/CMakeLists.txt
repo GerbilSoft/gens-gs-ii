@@ -51,11 +51,6 @@ CHECK_FUNCTION_EXISTS_OR_INLINE(localtime_r "time.h" "time_t tm; localtime_r(&tm
 # but fails with inline functions like in MinGW-w64.
 CHECK_FUNCTION_EXISTS_OR_INLINE(localtime_s "time.h" "time_t tm; localtime_s(&tm, NULL);" HAVE_LOCALTIME_S)
 CHECK_FUNCTION_EXISTS(getpwuid_r HAVE_GETPWUID_R)
-# NOTE: These should either both be present or both be absent.
-# We'll test for both of them anyway.
-CHECK_FUNCTION_EXISTS(_stati64 HAVE__STATI64)
-CHECK_FUNCTION_EXISTS(_fseeki64 HAVE__FSEEKI64)
-CHECK_FUNCTION_EXISTS(_ftelli64 HAVE__FTELLI64)
 
 # aligned_malloc.h
 # NOTE: MinGW-w64 only has _aligned_malloc().
@@ -97,7 +92,6 @@ ENDIF(NOT DEFINED libcompat_ARCH_SPECIFIC_SRCS)
 SET(libcompat_SRCS
 	${libcompat_ARCH_SPECIFIC_SRCS}
 	)
-
 SET(libcompat_H
 	reentrant.h
 	aligned_malloc.h
@@ -105,28 +99,6 @@ SET(libcompat_H
 	cpuflags_x86.h
 	byteswap.h
 	)
-
-IF(WIN32)
-# W32U sources.
-SET(libcompat_SRCS
-	${libcompat_SRCS}
-	W32U/W32U_mini.c
-	W32U/W32U_libc.c
-	W32U/W32U_argv.c
-	W32U/W32U_shlobj.c
-	)
-
-# W32U headers.
-SET(libcompat_H
-	${libcompat_H}
-	W32U/W32U_mini.h
-	W32U/W32U_libc.h
-	W32U/W32U_argv.h
-	W32U/W32U_shlobj.h
-	W32U/is_unicode.h
-	W32U/W32U_alloca.h
-	)
-ENDIF(WIN32)
 
 ######################
 # Build the library. #
@@ -139,13 +111,12 @@ ADD_LIBRARY(compat STATIC
 INCLUDE(SetMSVCDebugPath)
 SET_MSVC_DEBUG_PATH(compat)
 
-IF(WIN32)
-	# Shell32.dll is required for W32U_shlobj.c, which calls these functions:
-	# - SHGetSpecialFolderPath()
-	TARGET_LINK_LIBRARIES(compat shell32)
-ENDIF(WIN32)
-
 # Test suite.
 IF(BUILD_TESTING)
        ADD_SUBDIRECTORY(tests)
 ENDIF(BUILD_TESTING)
+
+# Win32 Unicode Translation Layer. (Mini Version)
+IF(WIN32)
+	ADD_SUBDIRECTORY(W32U)
+ENDIF(WIN32)
