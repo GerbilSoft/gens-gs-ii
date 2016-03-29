@@ -1680,6 +1680,7 @@ Z80I_LD%1:
 	and	zxHL, 0xFFFF
 	;and	ecx, 0xFFFF	; Not needed since zDE is 16-bit.
 	;and	edx, 0xFFFF	; Not needed since zBC is 16-bit.
+	test	dx, dx		; Check if dx is 0. (Needed due to removal of the above mask.)
 	jz	short %%BC_zero
 	
 	or	zF, FLAG_P
