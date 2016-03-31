@@ -525,7 +525,7 @@ void Vdp::writeCtrlMD(uint16_t ctrl)
 	 * when the second control word is processed.
 	 *
 	 * NOTE 2: CD5 is only updated if DMA Enabled == 1.
-	 * (VDP_Reg.m5.Set2 & 0x04)
+	 * (VDP_Reg.m5.Set2 & 0x10)
 	 *
 	 * NOTE 3: A16 is only used if 128 KB mode is enabled.
 	 */
@@ -542,7 +542,7 @@ void Vdp::writeCtrlMD(uint16_t ctrl)
 	// Update the VDP access code register: CD(4..2)
 	d->VDP_Ctrl.code &= ~0x1C;
 	d->VDP_Ctrl.code |= ((ctrl >> 2) & 0x1C);
-	if (d->VDP_Reg.m5.Set2 & 0x04) {
+	if (d->VDP_Reg.m5.Set2 & 0x10) {
 		// DMA is enabled. Update CD5.
 		d->VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
 		d->VDP_Ctrl.code |= ((ctrl >> 2) & VdpTypes::CD_DMA_ENABLE);
