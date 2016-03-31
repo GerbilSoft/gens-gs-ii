@@ -67,6 +67,7 @@ namespace VdpTypes {
 			#define VDP_REG_M5_SET1_LCB	(1 << 5)
 			#define VDP_REG_M5_SET1_IE1	(1 << 4)
 			#define VDP_REG_M5_SET1_HSTG	(1 << 3)
+			#define VDP_REG_M5_SET1_M4	(1 << 2)
 			#define VDP_REG_M5_SET1_PSEL	(1 << 2)
 			#define VDP_REG_M5_SET1_M3	(1 << 1)
 			#define VDP_REG_M5_SET1_EXTV	(1 << 0)
