@@ -68,7 +68,7 @@ namespace LibGens {
  */
 uint8_t Vdp::Int_Ack(void)
 {
-	if ((d->VDP_Reg.m5.Set2 & 0x20) && (d->VDP_Int & 0x08))
+	if ((d->VDP_Reg.m5.Set2 & VDP_REG_M5_SET2_IE0) && (d->VDP_Int & 0x08))
 	{
 		// VBlank interrupt acknowledge.
 		d->VDP_Int &= ~0x08;
@@ -98,11 +98,11 @@ void Vdp::updateIRQLine(int interrupt)
 	d->VDP_Int |= interrupt;
 
 	// TODO: HBlank interrupt should take priority over VBlank interrupt.
-	if ((d->VDP_Reg.m5.Set2 & 0x20) && (d->VDP_Int & 0x08)) {
+	if ((d->VDP_Reg.m5.Set2 & VDP_REG_M5_SET2_IE0) && (d->VDP_Int & 0x08)) {
 		// VBlank interrupt.
 		M68K::Interrupt(6, -1);
 		return;
-	} else if ((d->VDP_Reg.m5.Set1 & 0x10) && (d->VDP_Int & 0x04)) {
+	} else if ((d->VDP_Reg.m5.Set1 & VDP_REG_M5_SET1_IE1) && (d->VDP_Int & 0x04)) {
 		// HBlank interrupt.
 		M68K::Interrupt(4, -1);
 		return;
@@ -240,7 +240,7 @@ uint16_t Vdp::readCtrlMD(void)
 	d->VDP_Ctrl.ctrl_latch = 0;
 
 	// If the Display is disabled, set the VBlank flag.
-	if (d->VDP_Reg.m5.Set2 & 0x40)
+	if (d->VDP_Reg.m5.Set2 & VDP_REG_M5_SET2_DISP)
 		return status;
 	else
 		return (status | VdpStatus::VDP_STATUS_VBLANK);
@@ -524,8 +524,8 @@ void Vdp::writeCtrlMD(uint16_t ctrl)
 	 * first control word is processed. They are replaced
 	 * when the second control word is processed.
 	 *
-	 * NOTE 2: CD5 is only updated if DMA Enabled == 1.
-	 * (VDP_Reg.m5.Set2 & 0x10)
+	 * NOTE 2: CD5 is only updated if M1 (DMA) == 1.
+	 * (VDP_Reg.m5.Set2 & VDP_REG_M5_SET2_M1)
 	 *
 	 * NOTE 3: A16 is only used if 128 KB mode is enabled.
 	 */
@@ -542,7 +542,7 @@ void Vdp::writeCtrlMD(uint16_t ctrl)
 	// Update the VDP access code register: CD(4..2)
 	d->VDP_Ctrl.code &= ~0x1C;
 	d->VDP_Ctrl.code |= ((ctrl >> 2) & 0x1C);
-	if (d->VDP_Reg.m5.Set2 & 0x10) {
+	if (d->VDP_Reg.m5.Set2 & VDP_REG_M5_SET2_M1) {
 		// DMA is enabled. Update CD5.
 		d->VDP_Ctrl.code &= ~VdpTypes::CD_DMA_ENABLE;
 		d->VDP_Ctrl.code |= ((ctrl >> 2) & VdpTypes::CD_DMA_ENABLE);

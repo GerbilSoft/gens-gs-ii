@@ -292,7 +292,7 @@ void Vdp::updateVdpLines(bool resetCurrent)
 void Vdp::Check_NTSC_V30_VBlank(void)
 {
 	// TODO: Only do this in Mode 5, and maybe Mode 4 if SMS2 is in use.
-	if (d->Reg_Status.isPal() || !(d->VDP_Reg.m5.Set2 & 0x08)) {
+	if (d->Reg_Status.isPal() || !(d->VDP_Reg.m5.Set2 & VDP_REG_M5_SET2_M2)) {
 		// Either we're in PAL mode, where V30 is allowed, or V30 isn't set.
 		// VBlank is always OK.
 		// TODO: Clear the NTSC V30 offset?
