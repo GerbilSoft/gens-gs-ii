@@ -239,9 +239,9 @@ int Options::parse(int argc, const char *argv[])
 		{"no-sprite-limits", '\0', POPT_ARG_VAL, &d->sprite_limits, 0,
 			"  Disable sprite limits.", NULL},
 		{"auto-fix-checksum", '\0', POPT_ARG_VAL, &d->auto_fix_checksum, 1,
-			"* Automatically fix checksums.", NULL},
+			"  Automatically fix checksums.", NULL},
 		{"no-auto-fix-checksum", '\0', POPT_ARG_VAL, &d->auto_fix_checksum, 0,
-			"  Don't automatically fix checksums.", NULL},
+			"* Don't automatically fix checksums.", NULL},
 		POPT_TABLEEND
 	};
 
