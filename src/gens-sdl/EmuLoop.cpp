@@ -96,7 +96,6 @@ class EmuLoopPrivate : public EventLoopPrivate
 	public:
 		Rom *rom;
 		bool isPico;
-		bool frameskip;	// If true, enable frameskip.
 
 		EmuContext *emuContext;
 		KeyManager *keyManager;
@@ -173,7 +172,6 @@ EmuLoopPrivate::EmuLoopPrivate()
 	: EventLoopPrivate()
 	, rom(nullptr)
 	, isPico(false)
-	, frameskip(true)
 	, emuContext(nullptr)
 	, keyManager(nullptr)
 	, saveSlot_selected(0)

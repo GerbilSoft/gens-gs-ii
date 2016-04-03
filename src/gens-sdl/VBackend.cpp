@@ -31,6 +31,7 @@ namespace GensSdl {
 
 VBackend::VBackend()
 	: m_dirty(true)
+	, m_forceFbDirty(true)
 	, m_fullscreen(false)
 	, m_fb(nullptr)
 	, m_int_fb(nullptr)
