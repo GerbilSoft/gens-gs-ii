@@ -188,13 +188,13 @@ static string getUserName_ansi(void)
 		cbUsername = 0;
 	}
 
-	// Remove any trailing NULL bytes.
-	if (username[cbUsername-1] == 0) {
-		// Found a trailing NULL byte.
-		cbUsername--;
-	}
-
 	if (cbUsername > 0) {
+		// Remove any trailing NULL bytes.
+		if (username[cbUsername-1] == 0) {
+			// Found a trailing NULL byte.
+			cbUsername--;
+		}
+
 		// Try to convert from ANSI to UTF-8.
 		// FIXME: If this fails, use the ANSI text as-is?
 
