@@ -133,13 +133,17 @@ inline int SoundMgr::GetSegLength(void)
 // TODO: Bounds checking.
 inline int SoundMgr::GetWritePos(int line)
 {
-	assert(line >= 0 && line <= 311);
+	// NOTE: Line might be 263 or 313 at the end of the frame.
+	// TODO: Figure out why.
+	assert(line >= 0 && line <= 313);
 	return ms_Extrapol[line][0];
 }
 
 inline int SoundMgr::GetWriteLen(int line)
 {
-	assert(line >= 0 && line <= 311);
+	// NOTE: Line might be 263 or 313 at the end of the frame.
+	// TODO: Figure out why.
+	assert(line >= 0 && line <= 313);
 	return ms_Extrapol[line][1];
 }
 
