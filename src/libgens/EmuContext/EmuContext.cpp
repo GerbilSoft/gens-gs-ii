@@ -57,7 +57,7 @@ EmuContext *EmuContext::m_instance = nullptr;
 /**
  * Global settings.
  */
-bool EmuContext::ms_AutoFixChecksum = true;
+bool EmuContext::ms_AutoFixChecksum = false;
 string EmuContext::ms_PathSRam;
 string EmuContext::ms_TmssRomFilename;
 bool EmuContext::ms_TmssEnabled = false;

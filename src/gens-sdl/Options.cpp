@@ -114,7 +114,7 @@ void OptionsPrivate::reset(void)
 
 	// Emulation options.
 	sprite_limits = true;
-	auto_fix_checksum = true;
+	auto_fix_checksum = false;
 
 	// UI options.
 	fps_counter = true;
