@@ -128,6 +128,12 @@ void SoundMgr::ReInit(int rate, bool isPal, bool preserveState)
 		ms_Extrapol[i][0] = ((ms_SegLength * i) / lines);
 		ms_Extrapol[i][1] = (((ms_SegLength * (i+1)) / lines) - ms_Extrapol[i][0]);
 	}
+	// Copy the last extrapolation value to 8 more lines.
+	// This may help at the end of the frame.
+	for (int i = lines; i < lines+8; i++) {
+		ms_Extrapol[i][0] = ms_Extrapol[lines-1][0];
+		ms_Extrapol[i][1] = ms_Extrapol[lines-1][1];
+	}
 
 	// Clear the segment buffers.
 	memset(ms_SegBufL, 0x00, sizeof(ms_SegBufL));
