@@ -406,7 +406,6 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 	// Determine the system region code.
 	const LibGens::SysVersion::RegionCode_t cfg_region =
 				(LibGens::SysVersion::RegionCode_t)gqt4_cfg->getInt(QLatin1String("System/regionCode"));
-
 	const LibGens::SysVersion::RegionCode_t lg_region = GetLgRegionCode(
 				cfg_region, rom->regionCode(),
 				(uint16_t)gqt4_cfg->getUInt(QLatin1String("System/regionCodeOrder")));
@@ -434,7 +433,7 @@ int EmuManager::loadRom_int(LibGens::Rom *rom)
 
 	// Create the emulation context.
 	// TODO: Move the emuContext to GensWindow.
-	gqt4_emuContext = EmuContextFactory::createContext(rom);
+	gqt4_emuContext = EmuContextFactory::createContext(rom, lg_region);
 	rom->close();	// TODO: Let EmuContext handle this...
 
 	if (!gqt4_emuContext || !gqt4_emuContext->isRomOpened()) {
@@ -518,6 +517,7 @@ LibGens::SysVersion::RegionCode_t EmuManager::GetLgRegionCode(
 		LibGens::SysVersion::RegionCode_t confRegionCode,
 		int mdHexRegionCode, uint16_t regionCodeOrder)
 {
+	// FIXME: Move to LibGens::SysVersion?
 	if (confRegionCode >= LibGens::SysVersion::REGION_JP_NTSC &&
 	    confRegionCode <= LibGens::SysVersion::REGION_EU_PAL)
 	{
@@ -528,26 +528,22 @@ LibGens::SysVersion::RegionCode_t EmuManager::GetLgRegionCode(
 	// Attempt to auto-detect the region from the ROM image.
 	int regionMatch = 0;
 	int orderTmp = regionCodeOrder;
-	for (int i = 0; i < 4; i++, orderTmp <<= 4)
-	{
+	for (int i = 0; i < 4; i++, orderTmp <<= 4) {
 		int orderN = ((orderTmp >> 12) & 0xF);
-		if (mdHexRegionCode & orderN)
-		{
+		if (mdHexRegionCode & orderN) {
 			// Found a match.
 			regionMatch = orderN;
 			break;
 		}
 	}
 	
-	if (regionMatch == 0)
-	{
+	if (regionMatch == 0) {
 		// No region matched.
 		// Use the highest-priority region.
 		regionMatch = ((regionCodeOrder >> 12) & 0xF);
 	}
 	
-	switch (regionMatch & 0xF)
-	{
+	switch (regionMatch & 0xF) {
 		default:
 		case 0x4:	return LibGens::SysVersion::REGION_US_NTSC;
 		case 0x8:	return LibGens::SysVersion::REGION_EU_PAL;

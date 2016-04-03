@@ -22,6 +22,10 @@
 #ifndef __LIBGENS_EMUCONTEXT_EMUCONTEXTFACTORY_HPP__
 #define __LIBGENS_EMUCONTEXT_EMUCONTEXTFACTORY_HPP__
 
+// Region code.
+// TODO: Make the region code non-console-specific.
+#include "SysVersion.hpp"
+
 namespace LibGens {
 
 class EmuContext;
@@ -58,9 +62,10 @@ class EmuContextFactory
 		/**
 		 * Create an EmuContext for the given ROM.
 		 * @param rom ROM for the EmuContext.
+		 * @param region Region code. (TODO: Default to REGION_AUTO.)
 		 * @return EmuContext, or nullptr on error.
 		 */
-		static EmuContext *createContext(Rom *rom);
+		static EmuContext *createContext(Rom *rom, SysVersion::RegionCode_t region = SysVersion::REGION_US_NTSC);
 };
 
 }
