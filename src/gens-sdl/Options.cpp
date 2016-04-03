@@ -116,7 +116,7 @@ void OptionsPrivate::reset(void)
 	// Emulation options.
 	sprite_limits = true;
 	auto_fix_checksum = false;
-	region = SysVersion::REGION_US_NTSC;
+	region = SysVersion::REGION_AUTO;
 
 	// UI options.
 	fps_counter = true;
@@ -246,7 +246,7 @@ int Options::parse(int argc, const char *argv[])
 		{"no-auto-fix-checksum", '\0', POPT_ARG_VAL, &d->auto_fix_checksum, 0,
 			"* Don't automatically fix checksums.", NULL},
 		{"region", '\0', POPT_ARG_STRING, &tmp.region, 0,
-			"  Set the region code: J,U,E,Asia (default U)", "REGION"},
+			"  Set the region code: J,U,E,Asia,Auto (default is auto)", "REGION"},
 		POPT_TABLEEND
 	};
 
@@ -411,11 +411,15 @@ int Options::parse(int argc, const char *argv[])
 		{
 			d->region = SysVersion::REGION_ASIA_PAL;
 		}
+		else if (!strcasecmp(tmp.region, "auto"))
+		{
+			d->region = SysVersion::REGION_AUTO;
+		}
 		else
 		{
 			// Invalid region code.
 			fprintf(stderr, "%s: '--region=%s': invalid region code\n"
-				"Valid options are J, U, E, Asia.\n"
+				"Valid options are J, U, E, Asia, and Auto.\n"
 				"Try `%s --help` for more information.\n",
 				argv[0], tmp.region, argv[0]);
 			poptFreeContext(optCon);
