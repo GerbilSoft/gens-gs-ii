@@ -22,8 +22,9 @@
 #ifndef __GENS_SDL_OPTIONS_HPP__
 #define __GENS_SDL_OPTIONS_HPP__
 
-// MdFb
+// LibGens
 #include "libgens/Util/MdFb.hpp"
+#include "libgens/EmuContext/SysVersion.hpp"
 
 // C++ includes.
 #include <string>
@@ -122,6 +123,12 @@ class Options
 		 * @return True to auto-fix; false to not.
 		 */
 		bool auto_fix_checksum(void) const;
+
+		/**
+		 * Region code.
+		 * @return Region code.
+		 */
+		LibGens::SysVersion::RegionCode_t region(void) const;
 
 		/** UI options. **/
 

@@ -42,9 +42,11 @@ using GensSdl::VBackend;
 #include "libgens/Rom.hpp"
 #include "libgens/Util/MdFb.hpp"
 #include "libgens/Vdp/Vdp.hpp"
+#include "libgens/EmuContext/SysVersion.hpp"
 using LibGens::Rom;
 using LibGens::MdFb;
 using LibGens::Vdp;
+using LibGens::SysVersion;
 
 // Emulation Context.
 #include "libgens/EmuContext/EmuContext.hpp"
@@ -678,7 +680,7 @@ int EmuLoop::run(const Options *options)
 	}
 
 	// Create the emulation context.
-	d->emuContext = EmuContextFactory::createContext(d->rom);
+	d->emuContext = EmuContextFactory::createContext(d->rom, options->region());
 	if (!d->emuContext || !d->emuContext->isRomOpened()) {
 		// Error loading the ROM into EmuMD.
 		// TODO: Error code?
@@ -704,8 +706,21 @@ int EmuLoop::run(const Options *options)
 	checkForStartupMessages();
 
 	// Set frame timing.
-	// TODO: Region code?
-	bool isPal = false;
+	// TODO: SysVersion convenience function to check if a RegionCode_t is PAL.
+	bool isPal;
+	switch (options->region()) {
+		case SysVersion::REGION_US_NTSC:
+		case SysVersion::REGION_JP_NTSC:
+		case SysVersion::REGION_AUTO:	// TODO: Auto-detect.
+		default:
+			isPal = false;
+			break;
+
+		case SysVersion::REGION_EU_PAL:
+		case SysVersion::REGION_ASIA_PAL:
+			isPal = true;
+			break;
+	}
 	d->setFrameTiming(isPal ? 50 : 60);
 
 	// Update the window title information.
