@@ -22,7 +22,8 @@
 
 // Size of fetch banks.
 // Default is 4 (16 banks of 4 KB)
-#define CZ80_FETCH_BITS         4	// [4-12]   default = 8
+// Gens/GS II uses 6 (64 banks of 1 KB)
+#define CZ80_FETCH_BITS         6	// [4-12]   default = 8
 #define CZ80_FETCH_SFT          (16 - CZ80_FETCH_BITS)
 #define CZ80_FETCH_BANK         (1 << CZ80_FETCH_BITS)
 

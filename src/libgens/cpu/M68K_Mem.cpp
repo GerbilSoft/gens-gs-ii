@@ -209,7 +209,8 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 
 		// Call the Z80 Read Byte function.
 		// TODO: CPU lockup on accessing 0x7Fxx or >=0x8000.
-		return Z80_MD_Mem::Z80_ReadB(address & 0xFFFF);
+		// TODO: ctx parameter.
+		return Z80_MD_Mem::Z80_ReadB(nullptr, address & 0xFFFF);
 	} else if (address >= 0xA20000) {
 		// Invalid address.
 		// TODO: Fake Fetch?
@@ -552,7 +553,8 @@ inline uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 		// Call the Z80 Read Byte function.
 		// TODO: CPU lockup on accessing 0x7Fxx or >=0x8000.
 		// Genesis Plus duplicates the byte in both halves of the M68K word.
-		uint8_t ret = Z80_MD_Mem::Z80_ReadB(address & 0xFFFF);
+		// TODO: ctx parameter.
+		uint8_t ret = Z80_MD_Mem::Z80_ReadB(nullptr, address & 0xFFFF);
 		return (ret | (ret << 8));
 	} else if (address >= 0xA20000) {
 		// Invalid address.
@@ -896,7 +898,8 @@ inline void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 
 		// Call the Z80 Write Byte function.
 		// TODO: CPU lockup on accessing 0x7Fxx or >=0x8000.
-		Z80_MD_Mem::Z80_WriteB(address & 0xFFFF, data);
+		// TODO: ctx parameter.
+		Z80_MD_Mem::Z80_WriteB(nullptr, address & 0xFFFF, data);
 		return;
 	} else if (address >= 0xA20000) {
 		// Invalid address.
@@ -1201,7 +1204,8 @@ inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 		// TODO: CPU lockup on accessing 0x7Fxx or >=0x8000.
 		// Genesis Plus writes the high byte of the M68K word.
 		// NOTE: Gunstar Heroes uses word write access to the Z80 area on startup.
-		Z80_MD_Mem::Z80_WriteB(address & 0xFFFF, (data >> 8) & 0xFF);
+		// TODO: ctx parameter.
+		Z80_MD_Mem::Z80_WriteB(nullptr, address & 0xFFFF, (data >> 8) & 0xFF);
 		return;
 	} else if (address >= 0xA20000) {
 		// Invalid address.

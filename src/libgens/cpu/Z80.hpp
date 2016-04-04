@@ -26,65 +26,65 @@
 
 #include <libgens/config.libgens.h>
 
-// mdZ80: Z80 CPU emulator.
-#include "../mdZ80/mdZ80.h"
+#include "../cz80/cz80.h"
+#include "libzomg/zomg_z80.h"
 
 // M68K_Mem is needed for Z80_State.
 #include "M68K_Mem.hpp"
-
-// ZOMG Z80 structs.
-#include "libzomg/zomg_z80.h"
 
 // C includes.
 #include <stdint.h>
 #include <stdio.h>
 
-namespace LibGens
-{
+namespace LibGens {
 
 class Z80
 {
 	public:
 		static void Init(void);
 		static void End(void);
-		
+
+	private:
+		Z80();
+		~Z80();
+
+	public:
 		/**
-		 * ReInit(): Reinitialize the Z80.
+		 * Reinitialize the Z80.
 		 * This function should be called when starting emulation.
 		 */
 		static void ReInit(void);
-		
+
 		/** ZOMG savestate functions. **/
 		static void ZomgSaveReg(Zomg_Z80RegSave_t *state);
 		static void ZomgRestoreReg(const Zomg_Z80RegSave_t *state);
-		
-		/** BEGIN: mdZ80 wrapper functions. **/
+
+		/** BEGIN: Cz80 wrapper functions. **/
 		static inline void HardReset(void);
 		static inline void SoftReset(void);
 		static inline void Exec(int cyclesSubtract);
 		static inline void Interrupt(uint8_t irq);
 		static inline void ClearOdometer(void);
 		static inline void SetOdometer(unsigned int odo);
-		/** END: mdZ80 wrapper functions. **/
-	
+		/** END: Cz80 wrapper functions. **/
+
 	protected:
-		static mdZ80_context *ms_Z80;
-	
-	private:
-		Z80() { }
-		~Z80() { }
+		static cz80_struc *ms_Z80;
+
+		// Cz80 uses "run xxx cycles" instead of an odometer.
+		static int ms_odometer;		// Total number of cycles to run.
+		static int ms_cycleCnt;		// Cycles currently run.
 };
 
 /** BEGIN: mdZ80 wrapper functions. **/
 
-#ifdef GENS_ENABLE_EMULATION
 /**
  * Reset the Z80. (Hard Reset)
  * This function should be called when resetting emulation.
  */
 inline void Z80::HardReset(void)
 {
-	mdZ80_hard_reset(ms_Z80);
+	Cz80_Reset(ms_Z80);
 }
 
 /**
@@ -93,7 +93,7 @@ inline void Z80::HardReset(void)
  */
 inline void Z80::SoftReset(void)
 {
-	mdZ80_soft_reset(ms_Z80);
+	Cz80_Soft_Reset(ms_Z80);
 }
 
 /**
@@ -102,13 +102,31 @@ inline void Z80::SoftReset(void)
  */
 inline void Z80::Exec(int cyclesSubtract)
 {
-	int cyclesToRun = (M68K_Mem::Cycles_Z80 - cyclesSubtract);
+	// FIXME: Cycle counting code is likely wrong,
+	// especially for BUSREQ, which sets the odometer.
+	// WARNING: DO NOT MERGE until this is fixed!
+
+	// M68K_Mem::Cycles_Z80 has the total number of cycles that should be run up to this point.
+	// cyclesSubtract is the number of cycles to save.
+	// cyclesTarget is the destination cycle count.
+	int cyclesTarget = (M68K_Mem::Cycles_Z80 - cyclesSubtract);
+	if (ms_cycleCnt > cyclesTarget)
+		return;
+
+	// cyclesToRun is the number of cycles to run right now.
+	// TODO: Where does the 'odometer' come into play?
+	int cyclesToRun = cyclesTarget - ms_cycleCnt;
 
 	// Only run the Z80 if it's enabled and it has the bus.
 	if (M68K_Mem::Z80_State == (Z80_STATE_ENABLED | Z80_STATE_BUSREQ)) {
-		z80_Exec(ms_Z80, cyclesToRun);
+		int ret = Cz80_Exec(ms_Z80, cyclesToRun);
+		if (ret >= 0) {
+			// ret == number of cycles run.
+			ms_cycleCnt += ret;
+		}
 	} else {
-		mdZ80_set_odo(ms_Z80, cyclesToRun);
+		// CPU isn't enabled, so add the cycles without doing anything.
+		ms_cycleCnt += cyclesToRun;
 	}
 }
 
@@ -118,7 +136,7 @@ inline void Z80::Exec(int cyclesSubtract)
  */
 inline void Z80::Interrupt(uint8_t irq)
 {
-	mdZ80_interrupt(ms_Z80, irq);
+	Cz80_Set_IRQ(ms_Z80, irq);
 }
 
 /**
@@ -126,7 +144,7 @@ inline void Z80::Interrupt(uint8_t irq)
  */
 inline void Z80::ClearOdometer(void)
 {
-	mdZ80_clear_odo(ms_Z80);
+	ms_cycleCnt = 0;
 }
 
 /**
@@ -135,19 +153,8 @@ inline void Z80::ClearOdometer(void)
  */
 inline void Z80::SetOdometer(unsigned int odo)
 {
-	mdZ80_set_odo(ms_Z80, odo);
+	ms_odometer = odo;
 }
-
-#else /* !GENS_ENABLE_EMULATION */
-
-inline void Z80::HardReset(void) { }
-inline void Z80::SoftReset(void) { }
-inline void Z80::Exec(int cyclesSubtract) { ((void)cyclesSubtract); }
-inline void Z80::Interrupt(uint8_t irq) { ((void)irq); }
-inline void Z80::ClearOdometer(void) { }
-inline void Z80::SetOdometer(unsigned int odo) { ((void)odo); }
-
-#endif /* GENS_ENABLE_EMULATION */
 
 }
 

@@ -3,8 +3,11 @@ cmake_minimum_required(VERSION 2.6.0)
 
 # LibGens subprojects.
 IF(GENS_ENABLE_EMULATION)
+	# FIXME:
+	# - Replace Starscream with Musashi.
+	# - Add Gens' SH2 core.
+	#   - ...and later find a replacement written in C.
 	ADD_SUBDIRECTORY(starscream)
-	ADD_SUBDIRECTORY(mdZ80)
 ENDIF(GENS_ENABLE_EMULATION)
 ADD_SUBDIRECTORY(cz80)
 
@@ -219,7 +222,7 @@ TARGET_LINK_LIBRARIES(gens compat genstext ${ZLIB_LIBRARY} gensfile zomg)
 
 # Additional libraries.
 IF(GENS_ENABLE_EMULATION)
-	TARGET_LINK_LIBRARIES(gens starscream mdZ80)
+	TARGET_LINK_LIBRARIES(gens starscream cz80)
 ENDIF(GENS_ENABLE_EMULATION)
 IF(HAVE_CLOCK_GETTIME_IN_LIBRT)
 	TARGET_LINK_LIBRARIES(gens ${RT_LIBRARY})

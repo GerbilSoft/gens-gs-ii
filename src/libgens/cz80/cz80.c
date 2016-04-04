@@ -246,6 +246,7 @@ void Cz80_Set_Ctx(cz80_struc *cpu, void *ctx)
     cpu->ctx = ctx;
 }
 
+// FIXME: The Word functions use big-endian memory...
 uint8_t Cz80_Read_Byte(cz80_struc *cpu, uint16_t adr)
 {
     return cpu->Read_Byte(cpu->ctx, adr);

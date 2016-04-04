@@ -52,8 +52,7 @@
 // Move Ram_Z80 back to Z80_MD_Mem once mdZ80 is updated.
 uint8_t Ram_Z80[8 * 1024];
 
-namespace LibGens
-{
+namespace LibGens {
 
 // Static class variables.
 int Z80_MD_Mem::Bank_Z80;
@@ -75,7 +74,7 @@ void Z80_MD_Mem::End(void)
  * @param address Address to read from.
  * @return YM2612 register.
  */
-inline uint8_t Z80_MD_Mem::Z80_ReadB_YM2612(uint32_t address)
+inline uint8_t Z80_MD_Mem::Z80_ReadB_YM2612(uint16_t address)
 {
 	// According to the Genesis Software Manual, all four addresses return
 	// the same value for YM2612_Read().
@@ -95,7 +94,7 @@ inline uint8_t Z80_MD_Mem::Z80_ReadB_YM2612(uint32_t address)
  * @param address Address to read from.
  * @return VDP register.
  */
-inline uint8_t Z80_MD_Mem::Z80_ReadB_VDP(uint32_t address)
+inline uint8_t Z80_MD_Mem::Z80_ReadB_VDP(uint16_t address)
 {
 	if (address < 0x7F00) {
 		// Not in VDP range.
@@ -166,17 +165,17 @@ inline uint8_t Z80_MD_Mem::Z80_ReadB_VDP(uint32_t address)
  * @param address Address to read from.
  * @return Byte from MC68000 ROM.
  */
-inline uint8_t Z80_MD_Mem::Z80_ReadB_68K_Rom(uint32_t address)
+inline uint8_t Z80_MD_Mem::Z80_ReadB_68K_Rom(uint16_t address)
 {
 	// Z80 cannot read from M68K RAM.
 	// If this is attempted, 0xFF will be returned.
 	// Reference: http://gendev.spritesmind.net/forum/viewtopic.php?t=985
 	if (Bank_Z80 >= 0xE00000)
 		return 0xFF;
-	
-	address &= 0x7FFF;
-	address |= Bank_Z80;
-	return M68K_Mem::M68K_RB(address);
+
+	uint32_t M68K_addr = address & 0x7FFF;
+	M68K_addr |= Bank_Z80;
+	return M68K_Mem::M68K_RB(M68K_addr);
 }
 
 /** Z80 Write Byte functions. **/
@@ -186,7 +185,7 @@ inline uint8_t Z80_MD_Mem::Z80_ReadB_68K_Rom(uint32_t address)
  * @param address Address to write to.
  * @param data Byte to write.
  */
-inline void Z80_MD_Mem::Z80_WriteB_Bank(uint32_t address, uint8_t data)
+inline void Z80_MD_Mem::Z80_WriteB_Bank(uint16_t address, uint8_t data)
 {
 	if (address > 0x60FF) {
 		// TODO: Invalid address. This should do something.
@@ -203,12 +202,12 @@ inline void Z80_MD_Mem::Z80_WriteB_Bank(uint32_t address, uint8_t data)
  * @param address Address to write to.
  * @param data Byte to write.
  */
-inline void Z80_MD_Mem::Z80_WriteB_YM2612(uint32_t address, uint8_t data)
+inline void Z80_MD_Mem::Z80_WriteB_YM2612(uint16_t address, uint8_t data)
 {
 	// The YM2612's RESET line is tied to the Z80's RESET line.
 	if (M68K_Mem::Z80_State & Z80_STATE_RESET)
 		return;
-	
+
 	// Write to the YM2612.
 	SoundMgr::ms_Ym2612.write(address & 0x03, data);
 }
@@ -218,7 +217,7 @@ inline void Z80_MD_Mem::Z80_WriteB_YM2612(uint32_t address, uint8_t data)
  * @param address Address to write to.
  * @param data Byte to write.
  */
-inline void Z80_MD_Mem::Z80_WriteB_VDP(uint32_t address, uint8_t data)
+inline void Z80_MD_Mem::Z80_WriteB_VDP(uint16_t address, uint8_t data)
 {
 	if (address < 0x7F00) {
 		// Not in VDP range.
@@ -268,7 +267,7 @@ inline void Z80_MD_Mem::Z80_WriteB_VDP(uint32_t address, uint8_t data)
  * @param address Address to write to.
  * @param data Byte to write.
  */
-inline void Z80_MD_Mem::Z80_WriteB_68K_Rom(uint32_t address, uint8_t data)
+inline void Z80_MD_Mem::Z80_WriteB_68K_Rom(uint16_t address, uint8_t data)
 {
 	// NOTE: Z80 writes to M68K RAM are allowed.
 	// Reference: http://gendev.spritesmind.net/forum/viewtopic.php?t=985
@@ -282,11 +281,13 @@ inline void Z80_MD_Mem::Z80_WriteB_68K_Rom(uint32_t address, uint8_t data)
 
 /**
  * Read a byte from the Z80 address space.
+ * @param ctx Context. (TODO)
  * @param address Address to read from.
  * @return Byte from the Z80 address space.
  */
-uint8_t Z80_MD_Mem::Z80_ReadB(uint32_t address)
+uint8_t CZ80CALL Z80_MD_Mem::Z80_ReadB(void *ctx, uint16_t address)
 {
+	((void)ctx);
 	const uint8_t page = ((address >> 12) & 0x0F);
 	switch (page & 0x0F) {
 		case 0x00: case 0x01:
@@ -320,11 +321,13 @@ uint8_t Z80_MD_Mem::Z80_ReadB(uint32_t address)
 
 /**
  * Write a byte to the Z80 address space.
+ * @param ctx Context. (TODO)
  * @param address Address to write to.
  * @param data Byte to write to the Z80 address space.
  */
-void Z80_MD_Mem::Z80_WriteB(uint32_t address, uint8_t data)
+void CZ80CALL Z80_MD_Mem::Z80_WriteB(void *ctx, uint16_t address, uint8_t data)
 {
+	((void)ctx);
 	const uint8_t page = ((address >> 12) & 0x0F);
 	switch (page & 0x0F) {
 		case 0x00: case 0x01:
