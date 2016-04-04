@@ -23,30 +23,36 @@
 // shared global variable
 //////////////////////////
 
+static uint8_t flags_init = 0;
+
 static uint8_t SZXY[256];            // zero and sign flags
 static uint8_t SZXYP[256];           // zero, sign and parity flags
 static uint8_t SZXY_BIT[256];        // zero, sign and parity/overflow (=zero) flags for BIT opcode
 static uint8_t SZXYHV_inc[256];      // zero, sign, half carry and overflow flags INC R8
 static uint8_t SZXYHV_dec[256];      // zero, sign, half carry and overflow flags DEC R8
 
+// Dummy fetch bank.
+static uint8_t Cz80_dummy_fetch[CZ80_FETCH_BANK];
+
 // prototype
 /////////////
 
-uint8_t CZ80CALL Cz80_Read_Dummy(void *ctx, const uint16_t adr);
-void CZ80CALL Cz80_Write_Dummy(void *ctx, const uint16_t adr, uint8_t data);
+static uint8_t CZ80CALL Cz80_Read_Dummy(void *ctx, const uint16_t adr);
+static void CZ80CALL Cz80_Write_Dummy(void *ctx, const uint16_t adr, uint8_t data);
 
-uint8_t CZ80CALL Cz80_Interrupt_Ack_Dummy(void *ctx, uint8_t param);
-void CZ80CALL Cz80_RetI_Dummy(void *ctx);
+static uint8_t CZ80CALL Cz80_Interrupt_Ack_Dummy(void *ctx, uint8_t param);
+static void CZ80CALL Cz80_RetI_Dummy(void *ctx);
 
 // core main functions
 ///////////////////////
 
-void Cz80_Init(cz80_struc *cpu)
+/**
+ * Initialize global flag variables.
+ */
+static void Cz80_Init_Flags(void)
 {
     unsigned int i, j, p;
 
-    memset(cpu, 0, sizeof(cz80_struc));
-    
     // flags tables initialisation
     for (i = 0; i < 256; i++)
     {
@@ -69,11 +75,29 @@ void Cz80_Init(cz80_struc *cpu)
         if ((i & 0x0F) == 0x0F) SZXYHV_dec[i] |= CZ80_HF;
     }
 
-    Cz80_Set_Fetch(cpu, 0x0000, 0xFFFF, NULL);
+    // Dummy fetch bank.
+    // Contains all HALT opcodes.
+    memset(Cz80_dummy_fetch, 0x76, sizeof(Cz80_dummy_fetch));
+}
+
+void Cz80_Init(cz80_struc *cpu)
+{
+    memset(cpu, 0, sizeof(cz80_struc));
+
+    if (!flags_init)
+    {
+        // Initialize the flag tables and dummy fetch bank.
+        flags_init = 1;
+        Cz80_Init_Flags();
+    }
+
+    Cz80_Set_Fetch(cpu, 0x0000, 0xFFFF, Cz80_dummy_fetch);
 
     Cz80_Set_ReadB(cpu, Cz80_Read_Dummy);
     Cz80_Set_WriteB(cpu, Cz80_Write_Dummy);
-    
+    Cz80_Set_INPort(cpu, Cz80_Read_Dummy);
+    Cz80_Set_OUTPort(cpu, Cz80_Write_Dummy);
+
     cpu->Interrupt_Ack = Cz80_Interrupt_Ack_Dummy;
     cpu->RetI = Cz80_RetI_Dummy;
 }
@@ -174,21 +198,21 @@ void CZ80CALL Cz80_Add_Cycle(cz80_struc *cpu, unsigned int cycle)
 // Read / Write dummy functions
 ////////////////////////////////
 
-uint8_t CZ80CALL Cz80_Read_Dummy(void *ctx, const uint16_t adr)
+static uint8_t CZ80CALL Cz80_Read_Dummy(void *ctx, const uint16_t adr)
 {
     (void)ctx;
     (void)adr;
     return 0;
 }
 
-void CZ80CALL Cz80_Write_Dummy(void *ctx, const uint16_t adr, uint8_t data)
+static void CZ80CALL Cz80_Write_Dummy(void *ctx, const uint16_t adr, uint8_t data)
 {
 	(void)ctx;
 	(void)adr;
 	(void)data;
 }
 
-uint8_t CZ80CALL Cz80_Interrupt_Ack_Dummy(void *ctx, uint8_t param)
+static uint8_t CZ80CALL Cz80_Interrupt_Ack_Dummy(void *ctx, uint8_t param)
 {
     (void)ctx;
     (void)param;
@@ -197,7 +221,7 @@ uint8_t CZ80CALL Cz80_Interrupt_Ack_Dummy(void *ctx, uint8_t param)
     return -1;
 }
 
-void CZ80CALL Cz80_RetI_Dummy(void *ctx)
+static void CZ80CALL Cz80_RetI_Dummy(void *ctx)
 {
     (void)ctx;
 }

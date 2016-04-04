@@ -294,6 +294,13 @@ void    Cz80_Init(cz80_struc *cpu);
 uint8_t Cz80_Reset(cz80_struc *cpu);
 uint8_t Cz80_Soft_Reset(cz80_struc *cpu);
 
+/**
+ * Set an instruction fetch handler.
+ * @param cpu Z80 CPU object.
+ * @param low_adr Low address. (16-bit)
+ * @param high_adr High address. (16-bit)
+ * @param fetch Memory location.
+ */
 void    Cz80_Set_Fetch(cz80_struc *cpu, uint16_t low_adr, uint16_t high_adr, void *fetch_adr);
 
 void    Cz80_Set_Ctx(cz80_struc *cpu, void *ctx);
