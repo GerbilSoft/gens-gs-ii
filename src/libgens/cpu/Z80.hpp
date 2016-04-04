@@ -72,7 +72,6 @@ class Z80
 		static cz80_struc *ms_Z80;
 
 		// Cz80 uses "run xxx cycles" instead of an odometer.
-		static int ms_odometer;		// Total number of cycles to run.
 		static int ms_cycleCnt;		// Cycles currently run.
 };
 
@@ -102,20 +101,14 @@ inline void Z80::SoftReset(void)
  */
 inline void Z80::Exec(int cyclesSubtract)
 {
-	// FIXME: Cycle counting code is likely wrong,
-	// especially for BUSREQ, which sets the odometer.
-	// WARNING: DO NOT MERGE until this is fixed!
-
 	// M68K_Mem::Cycles_Z80 has the total number of cycles that should be run up to this point.
 	// cyclesSubtract is the number of cycles to save.
 	// cyclesTarget is the destination cycle count.
 	int cyclesTarget = (M68K_Mem::Cycles_Z80 - cyclesSubtract);
-	if (ms_cycleCnt > cyclesTarget)
-		return;
-
 	// cyclesToRun is the number of cycles to run right now.
-	// TODO: Where does the 'odometer' come into play?
 	int cyclesToRun = cyclesTarget - ms_cycleCnt;
+	if (cyclesToRun <= 0)
+		return;
 
 	// Only run the Z80 if it's enabled and it has the bus.
 	if (M68K_Mem::Z80_State == (Z80_STATE_ENABLED | Z80_STATE_BUSREQ)) {
@@ -153,7 +146,7 @@ inline void Z80::ClearOdometer(void)
  */
 inline void Z80::SetOdometer(unsigned int odo)
 {
-	ms_odometer = odo;
+	ms_cycleCnt = odo;
 }
 
 }

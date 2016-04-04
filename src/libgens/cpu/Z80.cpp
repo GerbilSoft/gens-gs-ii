@@ -38,7 +38,6 @@ namespace LibGens {
 
 // Static class variables.
 cz80_struc *Z80::ms_Z80 = nullptr;
-int Z80::ms_odometer = 0;
 int Z80::ms_cycleCnt = 0;
 
 /**
