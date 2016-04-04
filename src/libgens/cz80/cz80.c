@@ -11,7 +11,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
+
 #include "cz80.h"
+#include "cz80_int.h"
+#include "cz80_flags.h"
+#include "cz80_context.h"
+
+// Enable Jump Table optimizations on gcc.
+#ifdef __GNUC__
+#define CZ80_USE_JUMPTABLE      1
+#else
+#define CZ80_USE_JUMPTABLE      0
+#endif
 
 
 // include macro file
