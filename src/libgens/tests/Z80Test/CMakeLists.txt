@@ -21,6 +21,5 @@ FILE(COPY
 # Z80 tests.
 ADD_EXECUTABLE(Z80Test Z80Test.cpp)
 TARGET_LINK_LIBRARIES(Z80Test cz80 ${GTEST_LIBRARY})
-# NOTE: Z80Test doesn't actually verify that the ZEXDOC/ZEXALL tests pass.
-#ADD_TEST(NAME Z80Test
-#	COMMAND Z80Test)
+ADD_TEST(NAME Z80Test
+	COMMAND Z80Test)
