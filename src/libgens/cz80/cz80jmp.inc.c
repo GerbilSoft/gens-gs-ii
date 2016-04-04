@@ -10,9 +10,21 @@
 #error Do not compile this file by itself - compile cz80.c instead
 #endif
 
+#ifdef __MSC_VER
+#error MSVC does not support computed goto
+#endif
+
 // NOTE: Only enable on 64-bit or shared library builds.
 // Otherwise, this just adds overhead.
+#if defined(__LP64__) || defined(__LLP64__) || defined(__aarch64__) || \
+    defined(__pic__) || defined(__PIC__)
+// 64-bit architecture and/or compiling as PIC.
+// Use a relative jumptable to reduce overhead.
+#define CZ80_USE_RELATIVE_JUMPTABLE 1
+#else
+// 32-bit architecture and not compiling as PIC.
 #define CZ80_USE_RELATIVE_JUMPTABLE 0
+#endif
 
 #if CZ80_USE_RELATIVE_JUMPTABLE
 typedef int CZ80_JMPTYPE;
