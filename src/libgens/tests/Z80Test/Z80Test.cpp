@@ -25,6 +25,9 @@
 #include "lg_main.hpp"
 
 #include "cz80/cz80.h"
+#include "cz80/cz80_flags.h"
+// FIXME: Don't access cz80_struc data directly.
+#include "cz80/cz80_context.h"
 
 // C includes.
 #include <stdlib.h>
