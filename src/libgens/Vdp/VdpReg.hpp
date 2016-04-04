@@ -64,6 +64,13 @@ namespace VdpTypes {
 			 *       If enabled and nothing is connected to CSync, screen will blank.
 			 */
 			uint8_t Set1;
+			#define VDP_REG_M5_SET1_LCB	(1 << 5)
+			#define VDP_REG_M5_SET1_IE1	(1 << 4)
+			#define VDP_REG_M5_SET1_HSTG	(1 << 3)
+			#define VDP_REG_M5_SET1_M4	(1 << 2)
+			#define VDP_REG_M5_SET1_PSEL	(1 << 2)
+			#define VDP_REG_M5_SET1_M3	(1 << 1)
+			#define VDP_REG_M5_SET1_EXTV	(1 << 0)
 
 			/**
 			 * Register 1: Mode Set 2.
@@ -77,6 +84,12 @@ namespace VdpTypes {
 			 * M5: Mode 4/5 toggle. (1 == M5; 0 == M4)
 			 */
 			uint8_t Set2;
+			#define VDP_REG_M5_SET2_128K	(1 << 7)
+			#define VDP_REG_M5_SET2_DISP	(1 << 6)
+			#define VDP_REG_M5_SET2_IE0	(1 << 5)
+			#define VDP_REG_M5_SET2_M1	(1 << 4)
+			#define VDP_REG_M5_SET2_M2	(1 << 3)
+			#define VDP_REG_M5_SET2_M5	(1 << 2)
 
 			/**
 			 * Register 2: Pattern name table base address for Scroll A.
@@ -159,6 +172,12 @@ namespace VdpTypes {
 			 * LOCK: Locks up the system when set to 1.
 			 */
 			uint8_t Set3;
+			#define VDP_REG_M5_SET3_PBUS	(1 << 7)
+			#define VDP_REG_M5_SET3_LOCK	(1 << 6)
+			#define VDP_REG_M5_SET3_IE2	(1 << 3)
+			#define VDP_REG_M5_SET3_VSCR	(1 << 2)
+			#define VDP_REG_M5_SET3_HSCR	(1 << 1)
+			#define VDP_REG_M5_SET3_LSCR	(1 << 0)
 
 			/**
 			 * Register 12: Mode Set 4.
@@ -181,6 +200,14 @@ namespace VdpTypes {
 			 * VSY: 1 == Replaces the VSync signal with the pixel clock.
 			 */
 			uint8_t Set4;
+			#define VDP_REG_M5_SET4_RS0	(1 << 7)
+			#define VDP_REG_M5_SET4_VSY	(1 << 6)
+			#define VDP_REG_M5_SET4_HSY	(1 << 5)
+			#define VDP_REG_M5_SET4_SPR	(1 << 4)
+			#define VDP_REG_M5_SET4_STE	(1 << 3)
+			#define VDP_REG_M5_SET4_LSM1	(1 << 2)
+			#define VDP_REG_M5_SET4_LSM0	(1 << 1)
+			#define VDP_REG_M5_SET4_RS1	(1 << 0)
 
 			/**
 			 * Register 13: H Scroll Data Table base address.
@@ -198,6 +225,8 @@ namespace VdpTypes {
 			 * PB16: When this and PA16 are set, layer B is rebased to the upper 64KB.
 			 */
 			uint8_t Pat_Data_Adr;
+			#define VDP_REG_M5_PAT_DATA_PB16	(1 << 4)
+			#define VDP_REG_M5_PAT_DATA_PA16	(1 << 0)
 
 			/**
 			 * Register 15: Auto Increment Data.
@@ -225,12 +254,14 @@ namespace VdpTypes {
 			 * [RIGT    0    0 WHP5 WHP4 WHP3 WHP2 WHP1]
 			 */
 			uint8_t Win_H_Pos;
+			#define VDP_REG_M5_WIN_H_RIGT	(1 << 7)
 
 			/**
 			 * Register 18: Window V position.
 			 * [DOWN    0    0 WVP5 WVP4 WVP3 WVP2 WVP1]
 			 */
 			uint8_t Win_V_Pos;
+			#define VDP_REG_M5_WIN_V_DOWN	(1 << 7)
 
 			/**
 			 * Registers 19, 20: DMA Length counter.
@@ -259,7 +290,7 @@ namespace VdpTypes {
 
 			/**
 			 * Register 0: Mode Set 1.
-			 * [ VSI  HSI   LCB  IE1   EC   M4   M3    0]
+			 * [ VSI  HSI   LCB  IE1   EC   M4   M3 EXTV]
 			 *
 			 * VSI: Vertical Scroll Inhibit. Disables vertical scrolling for
 			 *      columns 24-31. (Similar to MD "Window" plane.)
@@ -270,10 +301,19 @@ namespace VdpTypes {
 			 * IE1: Enable H interrupt. (1 == on; 0 == off)
 			 * M4: Mode 4 enable. Set to 1 for Mode 4; set to 0 for TMS9918 modes.
 			 * M3: M3 bit for TMS9918A modes. Also used for screen height on SMS2.
-			 * D0: If set to 1, causes loss of sync and color. Leftover EXTVID bit
-			 *     from TMS9918A; always set to 0 on SMS.
+			 * EXTV: If set to 1, causes loss of sync and color. Leftover EXTVID bit
+			 *       from TMS9918A; always set to 0 on SMS.
+			 *       (TODO: May function the same as on MD?)
 			 */
 			uint8_t Set1;
+			#define VDP_REG_M4_SET1_VSI	(1 << 7)
+			#define VDP_REG_M4_SET1_HSI	(1 << 6)
+			#define VDP_REG_M4_SET1_LCB	(1 << 5)
+			#define VDP_REG_M4_SET1_IE1	(1 << 4)
+			#define VDP_REG_M4_SET1_EC	(1 << 3)
+			#define VDP_REG_M4_SET1_M4	(1 << 2)
+			#define VDP_REG_M4_SET1_M3	(1 << 1)
+			#define VDP_REG_M4_SET1_EXTV	(1 << 0)
 
 			/**
 			 * Register 1: Mode Set 2.
@@ -298,6 +338,13 @@ namespace VdpTypes {
 			 * on the line will be zoomed both horizontally and vertically.
 			 */
 			uint8_t Set2;
+			#define VDP_REG_M4_SET2_128K	(1 << 7)
+			#define VDP_REG_M4_SET2_DISP	(1 << 6)
+			#define VDP_REG_M4_SET2_IE0	(1 << 5)
+			#define VDP_REG_M4_SET2_M1	(1 << 4)
+			#define VDP_REG_M4_SET2_M2	(1 << 3)
+			#define VDP_REG_M4_SET2_SIZE	(1 << 1)
+			#define VDP_REG_M4_SET2_MAG	(1 << 0)
 
 			/**
 			 * Register 2: Name Table base address.
@@ -396,6 +443,8 @@ namespace VdpTypes {
 			 *       will result in loss of color and sync.
 			 */
 			uint8_t Set1;
+			#define VDP_REG_TMS_SET1_M3	(1 << 1)
+			#define VDP_REG_TMS_SET1_EXTV	(1 << 0)
 
 			/**
 			 * Register 1: Mode Set 2.
@@ -413,6 +462,13 @@ namespace VdpTypes {
 			 * See tms9918a.txt for more information.
 			 */
 			uint8_t Set2;
+			#define VDP_REG_TMS_SET2_128K	(1 << 7)
+			#define VDP_REG_TMS_SET2_DISP	(1 << 6)
+			#define VDP_REG_TMS_SET2_IE0	(1 << 5)
+			#define VDP_REG_TMS_SET2_M1	(1 << 4)
+			#define VDP_REG_TMS_SET2_M2	(1 << 3)
+			#define VDP_REG_TMS_SET2_SIZE	(1 << 1)
+			#define VDP_REG_TMS_SET2_MAG	(1 << 0)
 
 			/**
 			 * Register 2: Name Table base address.

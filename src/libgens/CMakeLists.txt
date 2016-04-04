@@ -103,6 +103,7 @@ SET(libgens_EMUCONTEXT_SRCS
 	# MD
 	EmuContext/EmuMD.cpp
 	EmuContext/EmuMD_zomg.cpp
+	EmuContext/SysVersion.cpp
 	EmuContext/TmssReg.cpp
 
 	# Pico

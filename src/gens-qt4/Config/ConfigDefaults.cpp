@@ -45,7 +45,7 @@ const ConfigDefaults::DefaultSetting ConfigDefaults::DefaultSettings[] =
 	{"iKnowWhatImDoingAndWillVoidTheWarranty", "false", 0, DefaultSetting::DEF_NO_SAVE, DefaultSetting::VT_BOOL, 0, 0},
 
 	/** General settings. **/
-	{"autoFixChecksum",		"true", 0, 0,		DefaultSetting::VT_BOOL, 0, 0},
+	{"autoFixChecksum",		"false", 0, 0,		DefaultSetting::VT_BOOL, 0, 0},
 	{"autoPause",			"false", 0, 0,		DefaultSetting::VT_BOOL, 0, 0},
 	{"pauseTint",			"true", 0, 0,		DefaultSetting::VT_BOOL, 0, 0},
 

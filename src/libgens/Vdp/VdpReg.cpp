@@ -41,17 +41,11 @@ void VdpPrivate::updateVdpMode(void)
 	// this mode was not present in the original TMS9918,
 	// and was added in the TMS9918A.
 	VDP_Mode = (VdpTypes::VDP_Mode_t)
-		   (((Set2 & 0x10) >> 4) |	// M1 (Text)
-		    ((Set2 & 0x08) >> 2) |	// M2 (Multicolor)
-		    ((Set1 & 0x02) << 1) |	// M3 (Graphic II)
-		    ((Set1 & 0x04) << 1) |	// M4/PSEL
-		    ((Set2 & 0x04) << 2));	// M5
-
-	if (!(Set2 & 0x08)) {
-		// V28 mode. Reset the NTSC V30 roll values.
-		q->VDP_Lines.NTSC_V30.Offset = 0;
-		q->VDP_Lines.NTSC_V30.VBlank_Div = 0;
-	}
+		   (((Set2 & VDP_REG_M5_SET2_M1) >> 4) |	// M1 (Text)
+		    ((Set2 & VDP_REG_M5_SET2_M2) >> 2) |	// M2 (Multicolor)
+		    ((Set1 & VDP_REG_M5_SET1_M3) << 1) |	// M3 (Graphic II)
+		    ((Set1 & VDP_REG_M5_SET1_M4) << 1) |	// M4/PSEL
+		    ((Set2 & VDP_REG_M5_SET2_M5) << 2));	// M5
 
 	// If the VDP mode has changed, CRam needs to be updated.
 	if (prevVdpMode != VDP_Mode) {
@@ -67,6 +61,13 @@ void VdpPrivate::updateVdpMode(void)
 		// Set the M5/M4 bits.
 		// NOTE: The AND is probably not necessary...
 		palette.setM5M4bits((VDP_Mode >> 3) & 0x03);
+
+		if (!(VDP_Mode & VdpTypes::VDP_MODE_M2)) {
+			// V28 mode. Reset the NTSC V30 roll values.
+			// TODO: Also if changed from NTSC to PAL?
+			q->VDP_Lines.NTSC_V30.Offset = 0;
+			q->VDP_Lines.NTSC_V30.VBlank_Div = 0;
+		}
 	}
 
 	// Initialize Vdp::VDP_Lines.
@@ -153,10 +154,10 @@ void VdpPrivate::updateVdpAddrCache_m5(unsigned int updateMask)
 		Spr_Gen_Addr = 0;
 	} else {
 		// TODO: Cache ScrA_A16?
-		const uint32_t ScrA_A16 = ((VDP_Reg.m5.Pat_Data_Adr & 0x01) << 16);
+		const uint32_t ScrA_A16 = ((VDP_Reg.m5.Pat_Data_Adr & VDP_REG_M5_PAT_DATA_PA16) << 16);
 		ScrA_Gen_Addr = ScrA_A16;
 		if (ScrA_A16) {
-			ScrB_Gen_Addr = ((VDP_Reg.m5.Pat_Data_Adr & 0x10) << 12);
+			ScrB_Gen_Addr = ((VDP_Reg.m5.Pat_Data_Adr & VDP_REG_M5_PAT_DATA_PB16) << 12);
 		}
 		Spr_Gen_Addr = ((VDP_Reg.m5.Spr_Pat_Adr & 0x20) << 11);	// Update the Window and Sprite Attribute Table base addresses.
 	}
@@ -275,8 +276,8 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 		case 0:	// Mode Set 1
 			q->updateIRQLine(0);
 
-			if (diff & 0x06) {
-				// PSEL and/or M3 have changed.
+			if (diff & (VDP_REG_M5_SET1_M4 | VDP_REG_M5_SET1_M3)) {
+				// M4/PSEL and/or M3 have changed.
 				// TODO: Handle them separately?
 				updateVdpMode();
 				updateVdpAddrCache_m5(1);
@@ -284,8 +285,12 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 			break;
 
 		case 1:	// Mode Set 2
-			if (diff & 0x8C) {
-				// VRAM, M1, M2, and/or M5 have changed.
+			if (diff & (VDP_REG_M5_SET2_128K |
+				    VDP_REG_M5_SET2_M1 |
+				    VDP_REG_M5_SET2_M2 |
+				    VDP_REG_M5_SET2_M5))
+			{
+				// 128K, M1, M2, and/or M5 have changed.
 				updateVdpMode();
 			}
 			// TODO: If emulating TMS9918A, and VRAM bit has changed,
@@ -344,10 +349,10 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 			// Mode Set 3.
 			static const uint8_t H_Scroll_Mask_Table[4] = {0x00, 0x07, 0xF8, 0xFF};
 
-			// Check the Vertical Scroll mode. (Bit 3)
+			// Check the Vertical Scroll mode. (Bit 2)
 			// 0: Full scrolling. (Mask == 0)
 			// 1: 2CELL scrolling. (Mask == 0x7E)
-			V_Scroll_MMask = ((val & 4) ? 0x7E : 0);
+			V_Scroll_MMask = ((val & VDP_REG_M5_SET3_VSCR) ? 0x7E : 0);
 
 			// Horizontal Scroll mode
 			H_Scroll_Mask = H_Scroll_Mask_Table[val & 3];
@@ -359,7 +364,7 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 			// Mode Set 4.
 			if (diff & 0x08) {
 				// Update the Shadow/Highlight setting.
-				palette.setMdShadowHighlight(!!(VDP_Reg.m5.Set4 & 0x08));
+				palette.setMdShadowHighlight(!!(VDP_Reg.m5.Set4 & VDP_REG_M5_SET4_STE));
 			}
 			if (diff & 0x81) {
 				// H32/H40 mode has changed.
@@ -383,10 +388,10 @@ void VdpPrivate::setReg(int reg_num, uint8_t val)
 			} else {
 				// 128 KB mode.
 				// TODO: Cache ScrA_A16?
-				const uint32_t ScrA_A16 = ((VDP_Reg.m5.Pat_Data_Adr & 0x01) << 16);
+				const uint32_t ScrA_A16 = ((VDP_Reg.m5.Pat_Data_Adr & VDP_REG_M5_PAT_DATA_PA16) << 16);
 				ScrA_Gen_Addr = ScrA_A16;
 				if (ScrA_A16) {
-					ScrB_Gen_Addr = ((VDP_Reg.m5.Pat_Data_Adr & 0x10) << 12);
+					ScrB_Gen_Addr = ((VDP_Reg.m5.Pat_Data_Adr & VDP_REG_M5_PAT_DATA_PB16) << 12);
 				}
 			}
 			break;

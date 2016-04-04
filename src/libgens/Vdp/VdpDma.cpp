@@ -600,7 +600,7 @@ unsigned int Vdp::updateDMA(void)
 
 	// Check if we're in VBlank or if the VDP is disabled.
 	if (VDP_Lines.currentLine >= VDP_Lines.totalVisibleLines ||
-	    (!(d->VDP_Reg.m5.Set2 & 0x40)))
+	    (!(d->VDP_Reg.m5.Set2 & VDP_REG_M5_SET2_DISP)))
 	{
 		// In VBlank, or VDP is disabled.
 		offset |= 1;

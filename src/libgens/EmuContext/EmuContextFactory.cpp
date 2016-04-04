@@ -76,15 +76,19 @@ bool EmuContextFactory::isRomSystemSupported(const Rom *rom)
 /**
  * Create an EmuContext for the given ROM.
  * @param rom ROM for the EmuContext.
+ * @param region Region code. (TODO: Default to REGION_AUTO.)
  * @return EmuContext, or nullptr on error.
  */
-EmuContext *EmuContextFactory::createContext(Rom *rom)
+EmuContext *EmuContextFactory::createContext(Rom *rom, SysVersion::RegionCode_t region)
 {
+	// TODO: Implement REGION_AUTO.
+	assert(region != SysVersion::REGION_AUTO);
+
 	switch (rom->sysId()) {
 		case Rom::MDP_SYSTEM_MD:
-			return new EmuMD(rom);
+			return new EmuMD(rom, region);
 		case Rom::MDP_SYSTEM_PICO:
-			return new EmuPico(rom);
+			return new EmuPico(rom, region);
 
 		default:
 			break;

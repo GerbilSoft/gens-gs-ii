@@ -21,9 +21,9 @@
 
 #include "Options.hpp"
 
-// MdFb
-#include "libgens/Util/MdFb.hpp"
+// LibGens
 using LibGens::MdFb;
+using LibGens::SysVersion;
 
 // C includes. (C++ namespace)
 #include <cstring>
@@ -78,6 +78,7 @@ class OptionsPrivate
 		// Emulation options.
 		int sprite_limits;		// Enable sprite limits?
 		int auto_fix_checksum;		// Auto fix checksum?
+		SysVersion::RegionCode_t region;	// Region code.
 
 		// UI options.
 		int fps_counter;		// Enable FPS counter?
@@ -114,7 +115,8 @@ void OptionsPrivate::reset(void)
 
 	// Emulation options.
 	sprite_limits = true;
-	auto_fix_checksum = true;
+	auto_fix_checksum = false;
+	region = SysVersion::REGION_AUTO;
 
 	// UI options.
 	fps_counter = true;
@@ -205,6 +207,7 @@ int Options::parse(int argc, const char *argv[])
 	struct {
 		const char *rom_filename;
 		const char *tmss_rom_filename;
+		const char *region;
 		int bpp;
 	} tmp;
 	memset(&tmp, 0, sizeof(tmp));
@@ -239,9 +242,11 @@ int Options::parse(int argc, const char *argv[])
 		{"no-sprite-limits", '\0', POPT_ARG_VAL, &d->sprite_limits, 0,
 			"  Disable sprite limits.", NULL},
 		{"auto-fix-checksum", '\0', POPT_ARG_VAL, &d->auto_fix_checksum, 1,
-			"* Automatically fix checksums.", NULL},
+			"  Automatically fix checksums.", NULL},
 		{"no-auto-fix-checksum", '\0', POPT_ARG_VAL, &d->auto_fix_checksum, 0,
-			"  Don't automatically fix checksums.", NULL},
+			"* Don't automatically fix checksums.", NULL},
+		{"region", '\0', POPT_ARG_STRING, &tmp.region, 0,
+			"  Set the region code: J,U,E,Asia,Auto (default is auto)", "REGION"},
 		POPT_TABLEEND
 	};
 
@@ -374,6 +379,69 @@ int Options::parse(int argc, const char *argv[])
 		d->tmss_rom_filename = string(tmp.tmss_rom_filename);
 	}
 
+	// Region code.
+	if (tmp.region != nullptr) {
+		// Region code specified.
+		// TODO: Auto-detect; region code order.
+		if (!strcasecmp(tmp.region, "u") ||
+		    !strcasecmp(tmp.region, "usa"))
+		{
+			d->region = SysVersion::REGION_US_NTSC;
+		}
+		else if (!strcasecmp(tmp.region, "j") ||
+			 !strcasecmp(tmp.region, "jp") ||
+			 !strcasecmp(tmp.region, "ja") ||
+			 !strcasecmp(tmp.region, "jpn") ||
+			 !strcasecmp(tmp.region, "jap") ||
+			 !strcasecmp(tmp.region, "japan") ||
+			 !strcasecmp(tmp.region, "japanese"))
+		{
+			d->region = SysVersion::REGION_JP_NTSC;
+		}
+		else if (!strcasecmp(tmp.region, "e") ||
+			 !strcasecmp(tmp.region, "eu") ||
+			 !strcasecmp(tmp.region, "eur") ||
+			 !strcasecmp(tmp.region, "euro") ||
+			 !strcasecmp(tmp.region, "europe") ||
+			 !strcasecmp(tmp.region, "pal"))
+		{
+			d->region = SysVersion::REGION_EU_PAL;
+		}
+		else if (!strcasecmp(tmp.region, "asia"))
+		{
+			d->region = SysVersion::REGION_ASIA_PAL;
+		}
+		else if (!strcasecmp(tmp.region, "auto"))
+		{
+			d->region = SysVersion::REGION_AUTO;
+		}
+		else
+		{
+			// Invalid region code.
+			fprintf(stderr, "%s: '--region=%s': invalid region code\n"
+				"Valid options are J, U, E, Asia, and Auto.\n"
+				"Try `%s --help` for more information.\n",
+				argv[0], tmp.region, argv[0]);
+			poptFreeContext(optCon);
+			return -EINVAL;
+		}
+	}
+
+	// Verify certain options.
+	d->bpp = MdFb::bppToColorDepth(tmp.bpp);
+	if (d->bpp < 0 || d->bpp >= MdFb::BPP_MAX) {
+		// Invalid color depth.
+		fprintf(stderr, "%s: '--bpp=%d': invalid color depth\n"
+			"Valid options are 15, 16, and 32.\n"
+			"Try `%s --help` for more information.\n",
+			argv[0], tmp.bpp, argv[0]);
+		poptFreeContext(optCon);
+		return -EINVAL;
+	}
+
+	// Check the ROM filename last so we can verify that the other
+	// arguments are correct.
+
 	// Get the ROM filename.
 	// ROM filename is *not* required here.
 	// If the frontend can't run without a ROM,
@@ -398,18 +466,6 @@ int Options::parse(int argc, const char *argv[])
 		fprintf(stderr, "%s: too many parameters\n"
 			"Try `%s --help` for more information.\n",
 			argv[0], argv[0]);
-		poptFreeContext(optCon);
-		return -EINVAL;
-	}
-
-	// Verify certain options.
-	d->bpp = MdFb::bppToColorDepth(tmp.bpp);
-	if (d->bpp < 0 || d->bpp >= MdFb::BPP_MAX) {
-		// Invalid color depth.
-		fprintf(stderr, "%s: '--bpp=%d': invalid color depth\n"
-			"Valid options are 15, 16, and 32.\n"
-			"Try `%s --help` for more information.\n",
-			argv[0], tmp.bpp, argv[0]);
 		poptFreeContext(optCon);
 		return -EINVAL;
 	}
@@ -474,6 +530,7 @@ ACCESSOR_BOOL(stereo)
 /** Emulation options. **/
 ACCESSOR_BOOL(sprite_limits)
 ACCESSOR_BOOL(auto_fix_checksum)
+ACCESSOR(SysVersion::RegionCode_t, region);
 
 /** UI options. **/
 ACCESSOR_BOOL(fps_counter)

@@ -4,7 +4,7 @@
  *                                                                         *
  * Copyright (c) 1999-2002 by Stéphane Dallongeville.                      *
  * Copyright (c) 2003-2004 by Stéphane Akhoun.                             *
- * Copyright (c) 2008-2011 by David Korth.                                 *
+ * Copyright (c) 2008-2016 by David Korth.                                 *
  *                                                                         *
  * This program is free software; you can redistribute it and/or modify it *
  * under the terms of the GNU General Public License as published by the   *
@@ -43,8 +43,7 @@
 // C includes.
 #include <stdint.h>
 
-namespace LibGens
-{
+namespace LibGens {
 
 class SysVersion
 {
@@ -88,6 +87,28 @@ class SysVersion
 		 */
 		uint8_t version(void) const;
 		void setVersion(uint8_t newVersion);
+
+	public:
+		/** Region code auto-detection. **/
+
+		/**
+		 * Detect the region code for an MD ROM.
+		 * @param mdHexRegionCode MD hex region code. (0x0-0xF)
+		 * @param regionCodeOrder Region code order.
+		 * @return RegionCode_t. (Returns REGION_AUTO if a parameter is invalid.)
+		 */
+		static RegionCode_t DetectRegion(int mdHexRegionCode, uint16_t regionCodeOrder);
+
+		/**
+		 * Is a region code auto-detect order valid?
+		 * @param regionCodeOrder Region code order.
+		 * @return True if valid; false if not.
+		 */
+		static bool IsRegionCodeOrderValid(uint16_t regionCodeOrder);
+
+	protected:
+		// Valid region code auto-detect orders.
+		static const uint16_t RegionCodeOrder_tbl[24];
 
 	private:
 		RegionCode_t m_region;

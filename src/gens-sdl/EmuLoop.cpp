@@ -42,9 +42,11 @@ using GensSdl::VBackend;
 #include "libgens/Rom.hpp"
 #include "libgens/Util/MdFb.hpp"
 #include "libgens/Vdp/Vdp.hpp"
+#include "libgens/EmuContext/SysVersion.hpp"
 using LibGens::Rom;
 using LibGens::MdFb;
 using LibGens::Vdp;
+using LibGens::SysVersion;
 
 // Emulation Context.
 #include "libgens/EmuContext/EmuContext.hpp"
@@ -94,7 +96,6 @@ class EmuLoopPrivate : public EventLoopPrivate
 	public:
 		Rom *rom;
 		bool isPico;
-		bool frameskip;	// If true, enable frameskip.
 
 		EmuContext *emuContext;
 		KeyManager *keyManager;
@@ -171,7 +172,6 @@ EmuLoopPrivate::EmuLoopPrivate()
 	: EventLoopPrivate()
 	, rom(nullptr)
 	, isPico(false)
-	, frameskip(true)
 	, emuContext(nullptr)
 	, keyManager(nullptr)
 	, saveSlot_selected(0)
@@ -677,8 +677,25 @@ int EmuLoop::run(const Options *options)
 		EmuContext::SetTmssEnabled(true);
 	}
 
+	// Detect the ROM region.
+	SysVersion::RegionCode_t region = options->region();
+	SysVersion::RegionCode_t region_auto = SysVersion::REGION_AUTO;
+	if (region == SysVersion::REGION_AUTO) {
+		// Auto-detect the region code.
+		// Using region code order 0x4812.
+		// (US, Europe, Japan, Asia)
+		region = SysVersion::DetectRegion(d->rom->regionCode(), 0x4812);
+		if (region == SysVersion::REGION_AUTO) {
+			// Detection failed.
+			// Default to US/NTSC.
+			region = SysVersion::REGION_US_NTSC;
+		}
+
+		region_auto = region;
+	}
+
 	// Create the emulation context.
-	d->emuContext = EmuContextFactory::createContext(d->rom);
+	d->emuContext = EmuContextFactory::createContext(d->rom, region);
 	if (!d->emuContext || !d->emuContext->isRomOpened()) {
 		// Error loading the ROM into EmuMD.
 		// TODO: Error code?
@@ -703,9 +720,34 @@ int EmuLoop::run(const Options *options)
 	// Check for startup messages.
 	checkForStartupMessages();
 
+	// If the ROM region was auto-detected, print a message.
+	if (region_auto != SysVersion::REGION_AUTO) {
+		static const char *const region_tbl[4] = {
+			"Japan (NTSC)",
+			"Asia (PAL)",
+			"USA (NTSC)",
+			"Europe (PAL)"
+		};
+
+		const char *region_str = region_tbl[region_auto & 3];
+		d->vBackend->osd_printf(1500, "ROM region detected as %s.", region_str);
+	}
+
 	// Set frame timing.
-	// TODO: Region code?
-	bool isPal = false;
+	// TODO: SysVersion convenience function to check if a RegionCode_t is PAL.
+	bool isPal;
+	switch (region) {
+		case SysVersion::REGION_US_NTSC:
+		case SysVersion::REGION_JP_NTSC:
+		default:
+			isPal = false;
+			break;
+
+		case SysVersion::REGION_EU_PAL:
+		case SysVersion::REGION_ASIA_PAL:
+			isPal = true;
+			break;
+	}
 	d->setFrameTiming(isPal ? 50 : 60);
 
 	// Update the window title information.

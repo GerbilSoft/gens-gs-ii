@@ -100,6 +100,6 @@
  */
 #define ARRAY_SIZE(x) \
 	((int)(((sizeof(x) / sizeof(x[0]))) / \
-	       (size_t)(!(sizeof(x) % sizeof(x[0])))))
+	       (int)(!(sizeof(x) % sizeof(x[0])))))
 
 #endif /* __LIBGENS_MACROS_COMMON_H__ */

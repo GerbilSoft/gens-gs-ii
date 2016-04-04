@@ -163,9 +163,14 @@ static const char *getSysMenuVersion(uint16_t sysMenu_version)
 		case 518:	return "4.3K";
 
 		// vWii
-		// Reference: http://wiiubrew.org/wiki/Title_database
+		// References:
+		// - http://wiiubrew.org/wiki/Title_database
+		// - https://yls8.mtheall.com/ninupdates/reports.php
 		// NOTE: These are all listed as 4.3.
 		// NOTE 2: vWii also has 512, 513, and 514.
+		case 544:	return "4.3J";
+		case 545:	return "4.3U";
+		case 546:	return "4.3E";
 		case 608:	return "4.3J";
 		case 609:	return "4.3U";
 		case 610:	return "4.3E";

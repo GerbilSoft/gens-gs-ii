@@ -30,6 +30,8 @@
 #include "libgens/lg_main.hpp"
 #include "libgens/macros/common.h"
 #include "libgens/macros/log_msg.h"
+#include "libgens/EmuContext/SysVersion.hpp"
+using LibGens::SysVersion;
 
 // Qt includes.
 #include <QtCore/QSettings>
@@ -78,13 +80,6 @@ class ConfigStorePrivate
 		Q_DISABLE_COPY(ConfigStorePrivate)
 
 	public:
-		/**
-		 * Check if a region code order is valid.
-		 * @param regionCodeOrder Region code order to check.
-		 * @return True if valid; false if invalid.
-		 */
-		static bool IsRegionCodeOrderValid(uint16_t regionCodeOrder);
-
 		/**
 		 * Validate a property.
 		 * @param key Property name.
@@ -163,30 +158,6 @@ ConfigStorePrivate::~ConfigStorePrivate()
 }
 
 /**
- * Check if a region code order is valid.
- * @param regionCodeOrder Region code order to check.
- * @return True if valid; false if invalid.
- */
-bool ConfigStorePrivate::IsRegionCodeOrderValid(uint16_t regionCodeOrder)
-{
-	static const uint16_t RegionCodeOrder_tbl[24] =
-	{
-		0x4812, 0x4821, 0x4182, 0x4128, 0x4281, 0x4218, 
-		0x8412, 0x8421, 0x8124, 0x8142, 0x8241, 0x8214,
-		0x1482, 0x1428, 0x1824, 0x1842, 0x1248, 0x1284,
-		0x2481, 0x2418,	0x2814, 0x2841, 0x2148, 0x2184
-	};
-
-	for (size_t i = 0; i < ARRAY_SIZE(RegionCodeOrder_tbl); i++) {
-		if (regionCodeOrder == RegionCodeOrder_tbl[i])
-			return true;
-	}
-
-	// Region code order is not valid.
-	return false;
-}
-
-/**
  * Validate a property.
  * @param key Property name.
  * @param value Property value. (May be edited for validation.)
@@ -231,7 +202,7 @@ QVariant ConfigStorePrivate::Validate(const QString &name, const QVariant &value
 			if (!value.canConvert(QVariant::UInt))
 				return QVariant();
 			uint16_t rc_order = (uint16_t)value.toString().toUInt(nullptr, 0);
-			if (!IsRegionCodeOrderValid(rc_order))
+			if (!SysVersion::IsRegionCodeOrderValid(rc_order))
 				return QVariant();
 			return QVariant(rc_order);
 		}

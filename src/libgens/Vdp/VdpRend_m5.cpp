@@ -797,7 +797,7 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_ScrollA_Window(void)
 	// Check if the entire line is part of the window.
 	// TODO: Verify interlaced operation!
 	const unsigned int vdp_cells = (q->VDP_Lines.currentLine >> 3);
-	if (VDP_Reg.m5.Win_V_Pos & 0x80) {
+	if (VDP_Reg.m5.Win_V_Pos & VDP_REG_M5_WIN_V_DOWN) {
 		// Window starts from the bottom.
 		if (vdp_cells >= Win_Y_Pos) {
 			// Current line is >= starting line.
@@ -818,7 +818,7 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_ScrollA_Window(void)
 
 	if (Win_Length == 0) {
 		// Determine the cell starting position and length.
-		if (VDP_Reg.m5.Win_H_Pos & 0x80) {
+		if (VDP_Reg.m5.Win_H_Pos & VDP_REG_M5_WIN_H_RIGT) {
 			// Window is right-aligned.
 			ScrA_Start = 0;
 			ScrA_Length = Win_X_Pos;
@@ -1265,7 +1265,7 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_m5(void)
 	// Clear the line first.
 	memset(&LineBuf, (h_s ? LINEBUF_SHAD_B : 0), sizeof(LineBuf));
 
-	if (VDP_Reg.m5.Set3 & 0x04) {
+	if (VDP_Reg.m5.Set3 & VDP_REG_M5_SET3_VSCR) {
 		// 2-cell VScroll.
 		T_Render_Line_Scroll<false, interlaced, true, h_s>(0, H_Cell);	// Scroll B
 		T_Render_Line_ScrollA_Window<interlaced, true, h_s>();		// Scroll A
@@ -1377,7 +1377,7 @@ void VdpPrivate::renderLine_m5(void)
 
 	// TODO: This check needs to be optimized.
 	if (lineNum == (q->VDP_Lines.totalDisplayLines - 1) &&
-	    (VDP_Reg.m5.Set2 & 0x40))
+	    (VDP_Reg.m5.Set2 & VDP_REG_M5_SET2_DISP))
 	{
 		// Clear the sprite dot overflow variable.
 		// (TODO: Is this correct?)
@@ -1411,7 +1411,7 @@ void VdpPrivate::renderLine_m5(void)
 
 	// Determine the starting line in MD_Screen.
 	if (Reg_Status.isNtsc() &&
-	    (VDP_Reg.m5.Set2 & 0x08) &&
+	    (VDP_Reg.m5.Set2 & VDP_REG_M5_SET2_M2) &&
 	    q->options.ntscV30Rolling)
 	{
 		// NTSC V30 mode. Simulate screen rolling.
@@ -1440,7 +1440,7 @@ void VdpPrivate::renderLine_m5(void)
 	}
 
 	// Check if the VDP is enabled.
-	if (!(VDP_Reg.m5.Set2 & 0x40) || in_border) {
+	if (!(VDP_Reg.m5.Set2 & VDP_REG_M5_SET2_DISP) || in_border) {
 		// VDP is disabled, or this is the border region.
 		// Clear the line buffer.
 
@@ -1454,8 +1454,8 @@ void VdpPrivate::renderLine_m5(void)
 		// VDP is enabled.
 
 		// Determine how to render the image.
-		int RenderMode = ((VDP_Reg.m5.Set4 & 0x08) >> 2);	// Shadow/Highlight
-		RenderMode |= !!im2_flag;				// Interlaced.
+		int RenderMode = ((VDP_Reg.m5.Set4 & VDP_REG_M5_SET4_STE) >> 2);	// Shadow/Highlight
+		RenderMode |= !!im2_flag;						// Interlaced.
 		switch (RenderMode & 3) {
 			case 0:
 				// H/S disabled; normal display.
@@ -1506,7 +1506,7 @@ void VdpPrivate::renderLine_m5(void)
 		uint16_t *lineBuf16 = q->MD_Screen->lineBuf16(lineNum);
 		T_Render_LineBuf<uint16_t>(lineBuf16, palette.m_palActive.u16);
 
-		if (VDP_Reg.m5.Set1 & 0x20) {
+		if (VDP_Reg.m5.Set1 & VDP_REG_M5_SET1_LCB) {
 			// SMS left-column blanking bit is set.
 			// FIXME: Should borderColorEmulation apply here?
 			T_Apply_SMS_LCB<uint16_t>(lineBuf16, 
@@ -1516,7 +1516,7 @@ void VdpPrivate::renderLine_m5(void)
 		uint32_t *lineBuf32 = q->MD_Screen->lineBuf32(lineNum);
 		T_Render_LineBuf<uint32_t>(lineBuf32, palette.m_palActive.u32);
 
-		if (VDP_Reg.m5.Set1 & 0x20) {
+		if (VDP_Reg.m5.Set1 & VDP_REG_M5_SET1_LCB) {
 			// SMS left-column blanking bit is set.
 			// FIXME: Should borderColorEmulation apply here?
 			T_Apply_SMS_LCB<uint32_t>(lineBuf32, 
@@ -1793,7 +1793,7 @@ void VDP_Render_Line_m5_32X(void)
 		VDP_Flags.VRam_Spr = 0;
 
 		// Determine how to render the image.
-		const int RenderMode = ((VDP_Reg.m5.Set4 & 0x08) >> 2) | VDP_Reg.Interlaced.DoubleRes;
+		const int RenderMode = ((VDP_Reg.m5.Set4 & VDP_REG_M5_SET4_STE) >> 2) | VDP_Reg.Interlaced.DoubleRes;
 		switch (RenderMode & 3) {
 			case 0:
 				// H/S disabled; interlaced disabled.
@@ -1820,7 +1820,7 @@ void VDP_Render_Line_m5_32X(void)
 	// Check if the palette was modified.
 	if (VDP_Flags.CRam) {
 		// Update the palette.
-		if (VDP_Reg.m5.Set4 & 0x08)
+		if (VDP_Reg.m5.Set4 & VDP_REG_M5_SET4_STE)
 			VDP_Update_Palette_HS();
 		else
 			VDP_Update_Palette();
