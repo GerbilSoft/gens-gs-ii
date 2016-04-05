@@ -26,18 +26,18 @@ extern "C" {
 /* Compiler dependant defines */
 /******************************/
 
-#ifdef _MSC_VER
-
 // MSVC: Enable FASTCALL on i386.
 // (Copied from MinGW-w64's winnt.h.)
-#if defined (_M_IX86)
-#define CZ80CALL __fastcall
+#if defined(__i386__) || defined(_M_IX86)
+# if defined(_MSC_VER)
+#  define CZ80CALL __fastcall
+# elif defined(__GNUC__)
+// Use regparm(3) on gcc.
+#  define CZ80CALL __attribute__ ((regparm (3)))
+# endif
 #else
-#define CZ80CALL
-#endif
-
-#else
-#define CZ80CALL
+// Non-i386: don't use fastcall/regparm.
+# define CZ80CALL
 #endif
 
 
