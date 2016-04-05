@@ -12,6 +12,7 @@
 #define _CZ80_CONTEXT_H_
 
 #include "cz80_conf.h"
+#include "cz80_byteorder.h"
 
 typedef union _union16 {
 	struct {

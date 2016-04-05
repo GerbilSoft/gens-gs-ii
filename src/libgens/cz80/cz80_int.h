@@ -12,6 +12,7 @@
 #define _CZ80_INT_H_
 
 #include "cz80_conf.h"
+#include "cz80_byteorder.h"
 
 // use zR8 for B/C/D/E/H/L registers only
 // use zR16 for BC/DE/HL registers only

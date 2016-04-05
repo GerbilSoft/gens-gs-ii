@@ -13,13 +13,6 @@
 
 // Emulator Configuration
 
-// TODO: Set this somewhere.
-#ifdef WORDS_BIGENDIAN
-#define CZ80_LITTLE_ENDIAN	0
-#else
-#define CZ80_LITTLE_ENDIAN      1
-#endif
-
 // Size of fetch banks.
 // Default is 4 (16 banks of 4 KB)
 // Gens/GS II uses 6 (64 banks of 1 KB)
