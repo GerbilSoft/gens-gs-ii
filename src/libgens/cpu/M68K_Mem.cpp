@@ -29,7 +29,6 @@
 
 // Z80 CPU emulator and memory space.
 #include "Z80.hpp"
-#include "Z80_MD_Mem.hpp"
 
 // ROM cartridge.
 #include "Cartridge/RomCartridgeMD.hpp"
@@ -86,11 +85,13 @@ void Gens_M68K_WW(uint32_t address, uint16_t data)
 }
 #endif
 
-namespace LibGens
-{
+namespace LibGens {
 
 /** ROM and RAM variables. **/
 //M68K_Mem::Ram_68k_t M68K_Mem::Ram_68k;	// TODO: Fix Starscream!
+
+// Z80 emulator.
+Z80 *M68K_Mem::ms_Z80 = nullptr;
 
 // ROM cartridge.
 RomCartridgeMD *M68K_Mem::ms_RomCartridge = nullptr;
@@ -209,8 +210,7 @@ inline uint8_t M68K_Mem::M68K_Read_Byte_Misc(uint32_t address)
 
 		// Call the Z80 Read Byte function.
 		// TODO: CPU lockup on accessing 0x7Fxx or >=0x8000.
-		// TODO: ctx parameter.
-		return Z80_MD_Mem::Z80_ReadB(nullptr, address & 0xFFFF);
+		return ms_Z80->Z80_MD_ReadB(address & 0xFFFF);
 	} else if (address >= 0xA20000) {
 		// Invalid address.
 		// TODO: Fake Fetch?
@@ -553,8 +553,7 @@ inline uint16_t M68K_Mem::M68K_Read_Word_Misc(uint32_t address)
 		// Call the Z80 Read Byte function.
 		// TODO: CPU lockup on accessing 0x7Fxx or >=0x8000.
 		// Genesis Plus duplicates the byte in both halves of the M68K word.
-		// TODO: ctx parameter.
-		uint8_t ret = Z80_MD_Mem::Z80_ReadB(nullptr, address & 0xFFFF);
+		uint8_t ret = ms_Z80->Z80_MD_ReadB(address & 0xFFFF);
 		return (ret | (ret << 8));
 	} else if (address >= 0xA20000) {
 		// Invalid address.
@@ -898,8 +897,7 @@ inline void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 
 		// Call the Z80 Write Byte function.
 		// TODO: CPU lockup on accessing 0x7Fxx or >=0x8000.
-		// TODO: ctx parameter.
-		Z80_MD_Mem::Z80_WriteB(nullptr, address & 0xFFFF, data);
+		ms_Z80->Z80_MD_WriteB(address & 0xFFFF, data);
 		return;
 	} else if (address >= 0xA20000) {
 		// Invalid address.
@@ -935,13 +933,12 @@ inline void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 					
 					int edx = Cycles_Z80;
 					edx -= ebx;
-					Z80::Exec(edx);
+					ms_Z80->exec(edx);
 				}
 			} else {
 				// M68K releases the bus.
 				// Enable the Z80.
-				if (!(Z80_State & Z80_STATE_BUSREQ))
-				{
+				if (!(Z80_State & Z80_STATE_BUSREQ)) {
 					// Z80 is stopped. Enable it.
 					Z80_State |= Z80_STATE_BUSREQ;
 					
@@ -954,7 +951,7 @@ inline void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 					edx -= ebx;
 					
 					// Set the Z80 odometer.
-					Z80::SetOdometer((unsigned int)edx);
+					ms_Z80->setOdometer((unsigned int)edx);
 				}
 			}
 
@@ -971,7 +968,7 @@ inline void M68K_Mem::M68K_Write_Byte_Misc(uint32_t address, uint8_t data)
 				Z80_State &= ~Z80_STATE_RESET;
 			} else {
 				// RESET is low. Stop the Z80.
-				Z80::SoftReset();
+				ms_Z80->softReset();
 				Z80_State |= Z80_STATE_RESET;
 
 				// YM2612's RESET line is tied to the Z80's RESET line.
@@ -1204,8 +1201,7 @@ inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 		// TODO: CPU lockup on accessing 0x7Fxx or >=0x8000.
 		// Genesis Plus writes the high byte of the M68K word.
 		// NOTE: Gunstar Heroes uses word write access to the Z80 area on startup.
-		// TODO: ctx parameter.
-		Z80_MD_Mem::Z80_WriteB(nullptr, address & 0xFFFF, (data >> 8) & 0xFF);
+		ms_Z80->Z80_MD_WriteB(address & 0xFFFF, (data >> 8) & 0xFF);
 		return;
 	} else if (address >= 0xA20000) {
 		// Invalid address.
@@ -1240,7 +1236,7 @@ inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 
 					int edx = Cycles_Z80;
 					edx -= ebx;
-					Z80::Exec(edx);
+					ms_Z80->exec(edx);
 				}
 			} else {
 				// M68K releases the bus.
@@ -1258,7 +1254,7 @@ inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 					edx -= ebx;
 
 					// Set the Z80 odometer.
-					Z80::SetOdometer((unsigned int)edx);
+					ms_Z80->setOdometer((unsigned int)edx);
 				}
 			}
 
@@ -1274,7 +1270,7 @@ inline void M68K_Mem::M68K_Write_Word_Misc(uint32_t address, uint16_t data)
 				Z80_State &= ~Z80_STATE_RESET;
 			} else {
 				// RESET is low. Stop the Z80.
-				Z80::SoftReset();
+				ms_Z80->softReset();
 				Z80_State |= Z80_STATE_RESET;
 
 				// YM2612's RESET line is tied to the Z80's RESET line.

@@ -52,6 +52,7 @@ extern Ram_68k_t Ram_68k;
 namespace LibGens {
 
 class RomCartridgeMD;
+class Z80;
 
 class M68K_Mem
 {
@@ -69,6 +70,9 @@ class M68K_Mem
 		};
 		static Ram_68k_t Ram_68k;
 #endif
+		// Z80 emulator.
+		static Z80 *ms_Z80;
+
 		// ROM cartridge.
 		static RomCartridgeMD *ms_RomCartridge;
 

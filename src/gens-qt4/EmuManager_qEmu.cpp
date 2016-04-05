@@ -846,7 +846,7 @@ void EmuManager::doResetCpu(EmuManager::ResetCpuIndex cpu_idx)
 			break;
 
 		case RQT_CPU_Z80:
-			LibGens::Z80::SoftReset();
+			gqt4_emuContext->m_z80->softReset();
 			// TODO: Add Z80 hard reset option?
 			//: OSD message indicating the Z80 CPU was reset.
 			msg = tr("Z80 reset.", "osd");

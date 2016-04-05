@@ -39,6 +39,7 @@ namespace LibGens {
 class Rom;
 class MdFb;
 class Vdp;
+class Z80;
 
 class EmuContext
 {
@@ -166,6 +167,9 @@ class EmuContext
 
 		/** VDP (TODO: Make this non-public?) **/
 		Vdp *m_vdp;
+
+		/** Z80 (TODO: Make this non-public?) **/
+		Z80 *m_z80;
 
 		/**
 		 * Get the Rom class being used by this emulator context.

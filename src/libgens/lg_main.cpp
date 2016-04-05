@@ -32,7 +32,6 @@
 #include "cpu/M68K.hpp"
 #include "cpu/M68K_Mem.hpp"
 #include "cpu/Z80.hpp"
-#include "cpu/Z80_MD_Mem.hpp"
 
 // Sound Manager.
 #include "sound/SoundMgr.hpp"
@@ -133,8 +132,6 @@ int Init(void)
 	// Initialize LibGens subsystems.
 	M68K::Init();
 	M68K_Mem::Init();
-	Z80::Init();
-	Z80_MD_Mem::Init();
 
 	SoundMgr::Init();
 
@@ -165,8 +162,6 @@ int End(void)
 	// Shut down LibGens subsystems.
 	M68K::End();
 	M68K_Mem::End();
-	Z80::End();
-	Z80_MD_Mem::End();
 	
 	SoundMgr::End();
 	

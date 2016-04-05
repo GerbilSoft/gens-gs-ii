@@ -97,10 +97,11 @@ EmuMD::EmuMD(Rom *rom, SysVersion::RegionCode_t region )
 	// Initialize the M68K.
 	M68K::InitSys(M68K::SYSID_MD);
 
-	// Reinitialize the Z80.
+	// Initialize the Z80.
 	// Z80's initial state is RESET.
 	M68K_Mem::Z80_State = (Z80_STATE_ENABLED | Z80_STATE_RESET);	// TODO: "Sound, Z80" setting.
-	Z80::ReInit();
+	m_z80 = new Z80();
+	M68K_Mem::ms_Z80 = m_z80;	// TODO: Better way to cross-reference CPUs.
 
 	// Initialize the system status.
 	// TODO: Move Vdp::SysStatus to EmuContext.
@@ -148,7 +149,7 @@ int EmuMD::softReset(void)
 
 	// Reset the M68K, Z80, and YM2612.
 	M68K::Reset();
-	Z80::SoftReset();
+	m_z80->softReset();
 	SoundMgr::ms_Ym2612.reset();
 
 	// Z80 state should be reset to the default value.
@@ -185,7 +186,7 @@ int EmuMD::hardReset(void)
 	// Hard-Reset the M68K, Z80, VDP, PSG, and YM2612.
 	// This includes clearing RAM.
 	M68K::InitSys(M68K::SYSID_MD);
-	Z80::ReInit();
+	m_z80->reinit();
 	SoundMgr::ms_Psg.reset();
 	SoundMgr::ms_Ym2612.reset();
 
@@ -384,7 +385,7 @@ FORCE_INLINE void EmuMD::T_execLine(void)
 				m_vdp->setStatusBit(VdpStatus::VDP_STATUS_VBLANK, false);
 
 			M68K::Exec(M68K_Mem::Cycles_M68K - 360);
-			Z80::Exec(168);
+			m_z80->exec(168);
 #if 0
 			// TODO: Congratulations! (LibGens)
 			CONGRATULATIONS_POSTCHECK();
@@ -398,7 +399,7 @@ FORCE_INLINE void EmuMD::T_execLine(void)
 				// Z80 interrupt.
 				// TODO: Does this trigger on all VBlanks,
 				// or only if VINTs are enabled in the VDP?
-				Z80::Interrupt(0xFF);
+				m_z80->interrupt(0xFF);
 			}
 
 			break;
@@ -415,7 +416,7 @@ FORCE_INLINE void EmuMD::T_execLine(void)
 	}
 
 	M68K::Exec(M68K_Mem::Cycles_M68K);
-	Z80::Exec(0);
+	m_z80->exec(0);
 }
 
 /**
@@ -443,7 +444,7 @@ FORCE_INLINE void EmuMD::T_execFrame(void)
 	M68K_Mem::Cycles_Z80 = 0;
 	M68K_Mem::Last_BUS_REQ_Cnt = -1000;
 	M68K::TripOdometer();
-	Z80::ClearOdometer();
+	m_z80->clearOdometer();
 
 	// TODO: MDP. (LibGens)
 #if 0

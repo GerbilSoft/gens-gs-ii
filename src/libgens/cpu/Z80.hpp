@@ -41,10 +41,6 @@ namespace LibGens {
 class Z80
 {
 	public:
-		static void Init(void);
-		static void End(void);
-
-	private:
 		Z80();
 		~Z80();
 
@@ -53,26 +49,62 @@ class Z80
 		 * Reinitialize the Z80.
 		 * This function should be called when starting emulation.
 		 */
-		static void ReInit(void);
+		void reinit(void);
 
 		/** ZOMG savestate functions. **/
-		static void ZomgSaveReg(Zomg_Z80RegSave_t *state);
-		static void ZomgRestoreReg(const Zomg_Z80RegSave_t *state);
+		void zomgSaveReg(Zomg_Z80RegSave_t *state);
+		void zomgRestoreReg(const Zomg_Z80RegSave_t *state);
 
 		/** BEGIN: Cz80 wrapper functions. **/
-		static inline void HardReset(void);
-		static inline void SoftReset(void);
-		static inline void Exec(int cyclesSubtract);
-		static inline void Interrupt(uint8_t irq);
-		static inline void ClearOdometer(void);
-		static inline void SetOdometer(unsigned int odo);
+		inline void hardReset(void);
+		inline void softReset(void);
+		inline void exec(int cyclesSubtract);
+		inline void interrupt(uint8_t irq);
+		inline void clearOdometer(void);
+		inline void setOdometer(unsigned int odo);
 		/** END: Cz80 wrapper functions. **/
 
 	protected:
-		static cz80_struc *ms_Z80;
+		cz80_struc *m_z80;
 
 		// Cz80 uses "run xxx cycles" instead of an odometer.
-		static int ms_cycleCnt;		// Cycles currently run.
+		int m_cycleCnt;		// Cycles currently run.
+
+	public:
+		// Z80 memory.
+		// TODO: Add accessors and make this protected.
+		uint8_t m_ramZ80[8192];
+
+	protected:
+		/** Memory access functions. **/
+		// ctx == Z80*
+		static uint8_t CZ80CALL Z80_MD_ReadB_static(void *ctx, uint16_t address);
+		static void CZ80CALL Z80_MD_WriteB_static(void *ctx, uint16_t address, uint8_t data);
+
+	public:
+		// Non-static versions.
+		inline uint8_t CZ80CALL Z80_MD_ReadB(uint16_t address);
+		inline void CZ80CALL Z80_MD_WriteB(uint16_t address, uint8_t data);
+
+	protected:
+		/** Z80 memory functions: MD mode. **/
+
+	public:
+		// M68K ROM banking address.
+		// TODO: Add accessors and make this protected.
+		uint32_t m_bankZ80;
+
+	protected:
+		/** Read Byte functions. **/
+		uint8_t Z80_MD_ReadB_YM2612(uint16_t address);
+		uint8_t Z80_MD_ReadB_VDP(uint16_t address);
+		uint8_t Z80_MD_ReadB_68K_Rom(uint16_t address);
+
+		/** Write Byte functions. **/
+		void Z80_MD_WriteB_Bank(uint16_t address, uint8_t data);
+		void Z80_MD_WriteB_YM2612(uint16_t address, uint8_t data);
+		void Z80_MD_WriteB_VDP(uint16_t address, uint8_t data);
+		void Z80_MD_WriteB_68K_Rom(uint16_t address, uint8_t data);
 };
 
 /** BEGIN: mdZ80 wrapper functions. **/
@@ -81,45 +113,45 @@ class Z80
  * Reset the Z80. (Hard Reset)
  * This function should be called when resetting emulation.
  */
-inline void Z80::HardReset(void)
+inline void Z80::hardReset(void)
 {
-	Cz80_Reset(ms_Z80);
+	Cz80_Reset(m_z80);
 }
 
 /**
  * Reset the Z80. (Soft Reset)
  * This function should be called when the Z80 !RESET line is asserted.
  */
-inline void Z80::SoftReset(void)
+inline void Z80::softReset(void)
 {
-	Cz80_Soft_Reset(ms_Z80);
+	Cz80_Soft_Reset(m_z80);
 }
 
 /**
  * Run the Z80.
  * @param cyclesSubtract Cycles to subtract from the Z80 cycles counter.
  */
-inline void Z80::Exec(int cyclesSubtract)
+inline void Z80::exec(int cyclesSubtract)
 {
 	// M68K_Mem::Cycles_Z80 has the total number of cycles that should be run up to this point.
 	// cyclesSubtract is the number of cycles to save.
 	// cyclesTarget is the destination cycle count.
 	int cyclesTarget = (M68K_Mem::Cycles_Z80 - cyclesSubtract);
 	// cyclesToRun is the number of cycles to run right now.
-	int cyclesToRun = cyclesTarget - ms_cycleCnt;
+	int cyclesToRun = cyclesTarget - m_cycleCnt;
 	if (cyclesToRun <= 0)
 		return;
 
 	// Only run the Z80 if it's enabled and it has the bus.
 	if (M68K_Mem::Z80_State == (Z80_STATE_ENABLED | Z80_STATE_BUSREQ)) {
-		int ret = Cz80_Exec(ms_Z80, cyclesToRun);
+		int ret = Cz80_Exec(m_z80, cyclesToRun);
 		if (ret >= 0) {
 			// ret == number of cycles run.
-			ms_cycleCnt += ret;
+			m_cycleCnt += ret;
 		}
 	} else {
 		// CPU isn't enabled, so add the cycles without doing anything.
-		ms_cycleCnt += cyclesToRun;
+		m_cycleCnt += cyclesToRun;
 	}
 }
 
@@ -127,26 +159,38 @@ inline void Z80::Exec(int cyclesSubtract)
  * Assert an interrupt. (IRQ)
  * @param irq Interrupt request.
  */
-inline void Z80::Interrupt(uint8_t irq)
+inline void Z80::interrupt(uint8_t irq)
 {
-	Cz80_Set_IRQ(ms_Z80, irq);
+	Cz80_Set_IRQ(m_z80, irq);
 }
 
 /**
  * Clear the odometer.
  */
-inline void Z80::ClearOdometer(void)
+inline void Z80::clearOdometer(void)
 {
-	ms_cycleCnt = 0;
+	m_cycleCnt = 0;
 }
 
 /**
  * Set the odometer.
  * @param odo New odometer value.
  */
-inline void Z80::SetOdometer(unsigned int odo)
+inline void Z80::setOdometer(unsigned int odo)
 {
-	ms_cycleCnt = odo;
+	m_cycleCnt = odo;
+}
+
+/** Memory access functions. **/
+
+inline uint8_t CZ80CALL Z80::Z80_MD_ReadB(uint16_t address)
+{
+	return Z80_MD_ReadB_static(this, address);
+}
+
+inline void CZ80CALL Z80::Z80_MD_WriteB(uint16_t address, uint8_t data)
+{
+	Z80_MD_WriteB_static(this, address, data);
 }
 
 }

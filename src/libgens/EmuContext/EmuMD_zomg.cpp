@@ -34,7 +34,6 @@
 #include "sound/SoundMgr.hpp"
 #include "cpu/M68K_Mem.hpp"
 #include "cpu/M68K.hpp"
-#include "cpu/Z80_MD_Mem.hpp"
 #include "cpu/Z80.hpp"
 #include "Cartridge/RomCartridgeMD.hpp"
 
@@ -129,12 +128,12 @@ int EmuMD::zomgLoad(const char *filename)
 
 	// Load the Z80 memory.
 	// TODO: Use the correct size based on system.
-	zomg.loadZ80Mem(Ram_Z80, 8192);
+	zomg.loadZ80Mem(m_z80->m_ramZ80, 8192);
 
 	// Load the Z80 registers.
 	Zomg_Z80RegSave_t z80_reg_save;
 	zomg.loadZ80Reg(&z80_reg_save);
-	Z80::ZomgRestoreReg(&z80_reg_save);
+	m_z80->zomgRestoreReg(&z80_reg_save);
 
 	/** MD: M68K **/
 
@@ -167,7 +166,7 @@ int EmuMD::zomgLoad(const char *filename)
 		M68K_Mem::Z80_State |= Z80_STATE_BUSREQ;
 	if (!md_z80_ctrl_save.reset)
 		M68K_Mem::Z80_State |= Z80_STATE_RESET;
-	Z80_MD_Mem::Bank_Z80 = ((md_z80_ctrl_save.m68k_bank & 0x1FF) << 15);
+	m_z80->m_bankZ80 = ((md_z80_ctrl_save.m68k_bank & 0x1FF) << 15);
 
 	// Load the cartridge data.
 	// This includes:
@@ -276,11 +275,11 @@ int EmuMD::zomgSave(const char *filename) const
 	
 	// Save the Z80 memory.
 	// TODO: Use the correct size based on system.
-	zomg.saveZ80Mem(Ram_Z80, 8192);
+	zomg.saveZ80Mem(m_z80->m_ramZ80, 8192);
 	
 	// Save the Z80 registers.
 	Zomg_Z80RegSave_t z80_reg_save;
-	Z80::ZomgSaveReg(&z80_reg_save);
+	m_z80->zomgSaveReg(&z80_reg_save);
 	zomg.saveZ80Reg(&z80_reg_save);
 	
 	/** MD: M68K **/
@@ -306,7 +305,7 @@ int EmuMD::zomgSave(const char *filename) const
 	Zomg_MD_Z80CtrlSave_t md_z80_ctrl_save;
 	md_z80_ctrl_save.busreq    = !(M68K_Mem::Z80_State & Z80_STATE_BUSREQ);
 	md_z80_ctrl_save.reset     = !(M68K_Mem::Z80_State & Z80_STATE_RESET);
-	md_z80_ctrl_save.m68k_bank = ((Z80_MD_Mem::Bank_Z80 >> 15) & 0x1FF);
+	md_z80_ctrl_save.m68k_bank = ((m_z80->m_bankZ80 >> 15) & 0x1FF);
 	zomg.saveMD_Z80Ctrl(&md_z80_ctrl_save);
 	
 	// Save the cartridge data.

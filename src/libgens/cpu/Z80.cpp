@@ -24,7 +24,6 @@
 #include <config.libgens.h>
 
 #include "Z80.hpp"
-#include "Z80_MD_Mem.hpp"
 #include "M68K_Mem.hpp"
 
 #include "cz80/cz80_context.h"
@@ -36,62 +35,59 @@
 
 namespace LibGens {
 
-// Static class variables.
-cz80_struc *Z80::ms_Z80 = nullptr;
-int Z80::ms_cycleCnt = 0;
-
 /**
  * Initialize the Z80 CPU emulator.
  */
-void Z80::Init(void)
+Z80::Z80()
+	: m_cycleCnt(0)
 {
 	// Allocate the Z80 context.
 	// TODO: Error handling.
 	// FIXME: Cz80_alloc(), Cz80_free()?
-	ms_Z80 = (cz80_struc*)malloc(sizeof(*ms_Z80));
-	Cz80_Init(ms_Z80);
+	m_z80 = (cz80_struc*)malloc(sizeof(*m_z80));
+	Cz80_Init(m_z80);
 
-	// TODO: Set context and make this class non-static.
-	//Cz80_Set_Ctx(ms_Z80, ???);
+	// Set the Cz80 context pointer.
+	Cz80_Set_Ctx(m_z80, this);
+
+	// FIXME: This is MD only.
 
 	// Set instruction fetch handlers.
-	Cz80_Set_Fetch(ms_Z80, 0x0000, 0x1FFF, &Ram_Z80[0]);
-	Cz80_Set_Fetch(ms_Z80, 0x2000, 0x3FFF, &Ram_Z80[0]);
+	Cz80_Set_Fetch(m_z80, 0x0000, 0x1FFF, &m_ramZ80[0]);
+	Cz80_Set_Fetch(m_z80, 0x2000, 0x3FFF, &m_ramZ80[0]);
 	// TODO: Add insn fetch for the 68000 banking area?
 
 	// Set memory read/write handlers.
-	Cz80_Set_ReadB(ms_Z80, Z80_MD_Mem::Z80_ReadB);
-	Cz80_Set_WriteB(ms_Z80, Z80_MD_Mem::Z80_WriteB);
+	Cz80_Set_ReadB(m_z80, Z80_MD_ReadB_static);
+	Cz80_Set_WriteB(m_z80, Z80_MD_WriteB_static);
 
 	// Reinitialize the Z80.
-	ReInit();
+	reinit();
 }
 
 /**
  * Shut down the Z80 CPU emulator.
  */
-void Z80::End(void)
+Z80::~Z80()
 {
 	// Free the Z80 context.
 	// FIXME: Cz80_free()
-	free(ms_Z80);
-	ms_Z80 = nullptr;
-
-	// TODO: Other shutdown stuff.
+	free(m_z80);
+	m_z80 = nullptr;
 }
 
 /**
  * Reinitialize the Z80 CPU.
  */
-void Z80::ReInit(void)
+void Z80::reinit(void)
 {
 	// Clear Z80 memory.
-	memset(Ram_Z80, 0x00, sizeof(Ram_Z80));
+	memset(m_ramZ80, 0x00, sizeof(m_ramZ80));
 
 	// Reset the M68K banking register.
 	// TODO: 0xFF8000 or 0x000000?
-	Z80_MD_Mem::Bank_Z80 = 0x000000;
-	Z80_MD_Mem::Bank_Z80 = 0xFF8000;
+	//m_bankZ80 = 0x000000;
+	m_bankZ80 = 0xFF8000;
 
 	// Disable the Z80 initially.
 	// NOTE: Bit 0 is used for the "Sound, Z80" option.
@@ -102,7 +98,7 @@ void Z80::ReInit(void)
 	M68K_Mem::Last_BUS_REQ_St = 0;
 
 	// Hard-reset the Z80.
-	HardReset();
+	hardReset();
 }
 
 /** ZOMG savestate functions. **/
@@ -111,31 +107,31 @@ void Z80::ReInit(void)
  * Save the Z80 registers.
  * @param state Zomg_Z80RegSave_t struct to save to.
  */
-void Z80::ZomgSaveReg(Zomg_Z80RegSave_t *state)
+void Z80::zomgSaveReg(Zomg_Z80RegSave_t *state)
 {
 	// NOTE: Byteswapping is done in libzomg.
 
 	// Main register set.
-	state->AF = Cz80_Get_AF(ms_Z80);
-	state->BC = Cz80_Get_BC(ms_Z80);
-	state->DE = Cz80_Get_DE(ms_Z80);
-	state->HL = Cz80_Get_HL(ms_Z80);
-	state->IX = Cz80_Get_IX(ms_Z80);
-	state->IY = Cz80_Get_IY(ms_Z80);
-	state->PC = Cz80_Get_PC(ms_Z80);
-	state->SP = Cz80_Get_SP(ms_Z80);
+	state->AF = Cz80_Get_AF(m_z80);
+	state->BC = Cz80_Get_BC(m_z80);
+	state->DE = Cz80_Get_DE(m_z80);
+	state->HL = Cz80_Get_HL(m_z80);
+	state->IX = Cz80_Get_IX(m_z80);
+	state->IY = Cz80_Get_IY(m_z80);
+	state->PC = Cz80_Get_PC(m_z80);
+	state->SP = Cz80_Get_SP(m_z80);
 
 	// Shadow register set.
-	state->AF2 = Cz80_Get_AF2(ms_Z80);
-	state->BC2 = Cz80_Get_BC2(ms_Z80);
-	state->DE2 = Cz80_Get_DE2(ms_Z80);
-	state->HL2 = Cz80_Get_HL2(ms_Z80);
+	state->AF2 = Cz80_Get_AF2(m_z80);
+	state->BC2 = Cz80_Get_BC2(m_z80);
+	state->DE2 = Cz80_Get_DE2(m_z80);
+	state->HL2 = Cz80_Get_HL2(m_z80);
 
 	// Other registers.
-	state->IFF = Cz80_Get_IFF(ms_Z80);
-	state->R = Cz80_Get_R(ms_Z80);
-	state->I = Cz80_Get_I(ms_Z80);
-	state->IM = Cz80_Get_IM(ms_Z80);
+	state->IFF = Cz80_Get_IFF(m_z80);
+	state->R = Cz80_Get_R(m_z80);
+	state->I = Cz80_Get_I(m_z80);
+	state->IM = Cz80_Get_IM(m_z80);
 
 	// TODO: Remove this once we switch to CZ80,
 	// since CZ80 supports WZ.
@@ -143,8 +139,8 @@ void Z80::ZomgSaveReg(Zomg_Z80RegSave_t *state)
 
 	// Status.
 	// FIXME: Add Cz80_Get_Status() wrapper.
-	//uint8_t z80_status = Cz80_Get_Status(ms_Z80);
-	uint8_t z80_status = ms_Z80->Status;
+	//uint8_t z80_status = Cz80_Get_Status(m_z80);
+	uint8_t z80_status = m_z80->Status;
 	uint8_t zomg_status = 0;
 	if (z80_status & CZ80_HALTED) {
 		zomg_status |= ZOMG_Z80_STATUS_HALTED;
@@ -162,39 +158,39 @@ void Z80::ZomgSaveReg(Zomg_Z80RegSave_t *state)
 	state->Status = zomg_status;
 
 	// TODO: Cz80_Get_IntVect() wrapper.
-	//state->IntVect = Cz80_Get_IntVect(ms_Z80);
-	state->IntVect = ms_Z80->IntVect;
+	//state->IntVect = Cz80_Get_IntVect(m_z80);
+	state->IntVect = m_z80->IntVect;
 }
 
 /**
  * Restore the Z80 registers.
  * @param state Zomg_Z80RegSave_t struct to restore from.
  */
-void Z80::ZomgRestoreReg(const Zomg_Z80RegSave_t *state)
+void Z80::zomgRestoreReg(const Zomg_Z80RegSave_t *state)
 {
 	// NOTE: Byteswapping is done in libzomg.
 
 	// Main register set.
-	Cz80_Set_AF(ms_Z80, state->AF);
-	Cz80_Set_BC(ms_Z80, state->BC);
-	Cz80_Set_DE(ms_Z80, state->DE);
-	Cz80_Set_HL(ms_Z80, state->HL);
-	Cz80_Set_IX(ms_Z80, state->IX);
-	Cz80_Set_IY(ms_Z80, state->IY);
-	Cz80_Set_PC(ms_Z80, state->PC);
-	Cz80_Set_SP(ms_Z80, state->SP);
+	Cz80_Set_AF(m_z80, state->AF);
+	Cz80_Set_BC(m_z80, state->BC);
+	Cz80_Set_DE(m_z80, state->DE);
+	Cz80_Set_HL(m_z80, state->HL);
+	Cz80_Set_IX(m_z80, state->IX);
+	Cz80_Set_IY(m_z80, state->IY);
+	Cz80_Set_PC(m_z80, state->PC);
+	Cz80_Set_SP(m_z80, state->SP);
 
 	// Shadow register set.
-	Cz80_Set_AF2(ms_Z80, state->AF2);
-	Cz80_Set_BC2(ms_Z80, state->BC2);
-	Cz80_Set_DE2(ms_Z80, state->DE2);
-	Cz80_Set_HL2(ms_Z80, state->HL2);
+	Cz80_Set_AF2(m_z80, state->AF2);
+	Cz80_Set_BC2(m_z80, state->BC2);
+	Cz80_Set_DE2(m_z80, state->DE2);
+	Cz80_Set_HL2(m_z80, state->HL2);
 
 	// Other registers.
-	Cz80_Set_IFF(ms_Z80, state->IFF);
-	Cz80_Set_R(ms_Z80, state->R);
-	Cz80_Set_I(ms_Z80, state->I);
-	Cz80_Set_IM(ms_Z80, state->IM);
+	Cz80_Set_IFF(m_z80, state->IFF);
+	Cz80_Set_R(m_z80, state->R);
+	Cz80_Set_I(m_z80, state->I);
+	Cz80_Set_IM(m_z80, state->IM);
 
 	// TODO: Load WZ.
 
@@ -215,13 +211,13 @@ void Z80::ZomgRestoreReg(const Zomg_Z80RegSave_t *state)
 	}
 
 	// FIXME: Add Cz80_Set_Status() wrapper.
-	//Cz80_Set_Status(ms_Z80, mdZ80_status);
-	ms_Z80->Status = z80_status;
+	//Cz80_Set_Status(m_z80, mdZ80_status);
+	m_z80->Status = z80_status;
 
 	// Interrupt Vector. (IM 2)
 	// TODO: Cz80_Set_IntVect() wrapper.
-	//Cz80_Set_IntVect(ms_Z80, state->IntVect);
-	ms_Z80->IntVect = state->IntVect;
+	//Cz80_Set_IntVect(m_z80, state->IntVect);
+	m_z80->IntVect = state->IntVect;
 }
 
 }
