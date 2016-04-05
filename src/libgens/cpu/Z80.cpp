@@ -135,9 +135,7 @@ void Z80::zomgSaveReg(Zomg_Z80RegSave_t *state)
 	state->WZ = Cz80_Get_WZ(m_z80);
 
 	// Status.
-	// FIXME: Add Cz80_Get_Status() wrapper.
-	//uint8_t z80_status = Cz80_Get_Status(m_z80);
-	uint8_t z80_status = m_z80->Status;
+	uint8_t z80_status = Cz80_Get_Status(m_z80);
 	uint8_t zomg_status = 0;
 	if (z80_status & CZ80_HALTED) {
 		zomg_status |= ZOMG_Z80_STATUS_HALTED;
