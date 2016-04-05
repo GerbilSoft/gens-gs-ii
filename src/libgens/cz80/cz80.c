@@ -44,7 +44,7 @@ static uint8_t SZXYHV_inc[256];      // zero, sign, half carry and overflow flag
 static uint8_t SZXYHV_dec[256];      // zero, sign, half carry and overflow flags DEC R8
 
 // Dummy fetch bank.
-static uint8_t Cz80_dummy_fetch[CZ80_FETCH_BANK];
+static uint8_t Cz80_dummy_fetch[CZ80_FETCH_BANK_SIZE];
 
 // prototype
 /////////////
