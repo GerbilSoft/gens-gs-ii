@@ -343,7 +343,6 @@ uint16_t CZ80CALL Z80::Z80_MD_ReadW_static(void *ctx, uint16_t address)
 	// TODO: unlikely()
 	if ((address & (CZ80_FETCH_BANK-1)) == (CZ80_FETCH_BANK-1)) {
 		// End of bank. Use 8-bit reads.
-		printf("end of bank\n");
 		return Z80_MD_ReadB_static(ctx, address) |
 			(Z80_MD_ReadB_static(ctx, address+1) << 8);
 	}
