@@ -132,10 +132,7 @@ void Z80::zomgSaveReg(Zomg_Z80RegSave_t *state)
 	state->R = Cz80_Get_R(m_z80);
 	state->I = Cz80_Get_I(m_z80);
 	state->IM = Cz80_Get_IM(m_z80);
-
-	// TODO: Remove this once we switch to CZ80,
-	// since CZ80 supports WZ.
-	state->WZ = 0;
+	state->WZ = Cz80_Get_WZ(m_z80);
 
 	// Status.
 	// FIXME: Add Cz80_Get_Status() wrapper.
@@ -191,8 +188,7 @@ void Z80::zomgRestoreReg(const Zomg_Z80RegSave_t *state)
 	Cz80_Set_R(m_z80, state->R);
 	Cz80_Set_I(m_z80, state->I);
 	Cz80_Set_IM(m_z80, state->IM);
-
-	// TODO: Load WZ.
+	Cz80_Set_WZ(m_z80, state->WZ);
 
 	// Status.
 	uint8_t z80_status = 0;
