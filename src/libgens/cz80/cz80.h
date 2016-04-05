@@ -135,6 +135,9 @@ uint16_t     CZ80CALL Cz80_Get_IFF(cz80_struc *cpu);
 uint8_t      CZ80CALL Cz80_Get_IM(cz80_struc *cpu);
 uint8_t      CZ80CALL Cz80_Get_I(cz80_struc *cpu);
 
+uint8_t      CZ80CALL Cz80_Get_IntVect(cz80_struc *cpu);
+uint8_t      CZ80CALL Cz80_Get_Status(cz80_struc *cpu);
+
 void    CZ80CALL Cz80_Set_BC(cz80_struc *cpu, uint16_t value);
 void    CZ80CALL Cz80_Set_DE(cz80_struc *cpu, uint16_t value);
 void    CZ80CALL Cz80_Set_HL(cz80_struc *cpu, uint16_t value);
@@ -158,6 +161,9 @@ void    CZ80CALL Cz80_Set_R(cz80_struc *cpu, uint8_t value);
 void    CZ80CALL Cz80_Set_IFF(cz80_struc *cpu, uint16_t value);
 void    CZ80CALL Cz80_Set_IM(cz80_struc *cpu, uint8_t value);
 void    CZ80CALL Cz80_Set_I(cz80_struc *cpu, uint8_t value);
+
+void    CZ80CALL Cz80_Set_IntVect(cz80_struc *cpu, uint8_t value);
+void    CZ80CALL Cz80_Set_Status(cz80_struc *cpu, uint8_t value);
 
 #ifdef __cplusplus
 }

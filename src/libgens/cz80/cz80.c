@@ -449,6 +449,16 @@ uint8_t CZ80CALL Cz80_Get_I(cz80_struc *cpu)
     return zI;
 }
 
+uint8_t CZ80CALL Cz80_Get_IntVect(cz80_struc *cpu)
+{
+    return cpu->IntVect;
+}
+
+uint8_t CZ80CALL Cz80_Get_Status(cz80_struc *cpu)
+{
+    return cpu->Status;
+}
+
 
 void CZ80CALL Cz80_Set_BC(cz80_struc *cpu, uint16_t value)
 {
@@ -558,6 +568,16 @@ void CZ80CALL Cz80_Set_I(cz80_struc *cpu, uint8_t value)
 {
     cz80_struc *CPU = cpu;
     zI = value & 0xFF;
+}
+
+void CZ80CALL Cz80_Set_IntVect(cz80_struc *cpu, uint8_t value)
+{
+    cpu->IntVect = value;
+}
+
+void CZ80CALL Cz80_Set_Status(cz80_struc *cpu, uint8_t value)
+{
+    cpu->Status = value;
 }
 
 //#endif // CPUZ80_CZ80_CORE

@@ -154,9 +154,8 @@ void Z80::zomgSaveReg(Zomg_Z80RegSave_t *state)
 	}
 	state->Status = zomg_status;
 
-	// TODO: Cz80_Get_IntVect() wrapper.
-	//state->IntVect = Cz80_Get_IntVect(m_z80);
-	state->IntVect = m_z80->IntVect;
+	// Interrupt Vector (IM2)
+	state->IntVect = Cz80_Get_IntVect(m_z80);
 }
 
 /**
@@ -206,14 +205,10 @@ void Z80::zomgRestoreReg(const Zomg_Z80RegSave_t *state)
 		z80_status |= CZ80_HAS_NMI;
 	}
 
-	// FIXME: Add Cz80_Set_Status() wrapper.
-	//Cz80_Set_Status(m_z80, mdZ80_status);
-	m_z80->Status = z80_status;
-
-	// Interrupt Vector. (IM 2)
-	// TODO: Cz80_Set_IntVect() wrapper.
-	//Cz80_Set_IntVect(m_z80, state->IntVect);
-	m_z80->IntVect = state->IntVect;
+	// Status
+	Cz80_Set_Status(m_z80, z80_status);
+	// Interrupt Vector (IM2)
+	Cz80_Set_IntVect(m_z80, state->IntVect);
 }
 
 }
