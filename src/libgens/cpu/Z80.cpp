@@ -57,6 +57,8 @@ Z80::Z80()
 	// Set memory read/write handlers.
 	Cz80_Set_ReadB(m_z80, Z80_MD_ReadB_static);
 	Cz80_Set_WriteB(m_z80, Z80_MD_WriteB_static);
+	Cz80_Set_ReadW(m_z80, Z80_MD_ReadW_static);
+	Cz80_Set_WriteW(m_z80, Z80_MD_WriteW_static);
 
 	// Reinitialize the Z80.
 	reinit();

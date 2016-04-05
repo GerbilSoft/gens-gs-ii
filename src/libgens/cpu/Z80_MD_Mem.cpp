@@ -51,12 +51,12 @@ inline uint8_t Z80::Z80_MD_ReadB_YM2612(uint16_t address)
 	// According to the Genesis Software Manual, all four addresses return
 	// the same value for YM2612_Read().
 	UNUSED(address);
-	
+
 	// The YM2612's RESET line is tied to the Z80's RESET line.
 	// TODO: Determine the correct return value.
 	if (M68K_Mem::Z80_State & Z80_STATE_RESET)
 		return 0xFF;
-	
+
 	// Return the YM2612 status register.
 	return SoundMgr::ms_Ym2612.read();
 }
@@ -327,6 +327,118 @@ void CZ80CALL Z80::Z80_MD_WriteB_static(void *ctx, uint16_t address, uint8_t dat
 		case 0x0C: case 0x0D: case 0x0E: case 0x0F:
 			// 0x8000-0xFFFF: 68K ROM bank.
 			z80->Z80_MD_WriteB_68K_Rom(address, data);
+			break;
+	}
+}
+
+/**
+ * Read a word from the Z80 address space.
+ * @param ctx Context. (TODO)
+ * @param address Address to read from.
+ * @return Word from the Z80 address space.
+ */
+uint16_t CZ80CALL Z80::Z80_MD_ReadW_static(void *ctx, uint16_t address)
+{
+	// NOTE: May have issues at the end of the 1 KB bank.
+	// TODO: unlikely()
+	if ((address & (CZ80_FETCH_BANK-1)) == (CZ80_FETCH_BANK-1)) {
+		// End of bank. Use 8-bit reads.
+		printf("end of bank\n");
+		return Z80_MD_ReadB_static(ctx, address) |
+			(Z80_MD_ReadB_static(ctx, address+1) << 8);
+	}
+
+	Z80 *const z80 = (Z80*)ctx;
+	const uint8_t page = ((address >> 12) & 0x0F);
+	switch (page & 0x0F) {
+		case 0x00: case 0x01:
+		case 0x02: case 0x03:
+			// 0x0000-0x1FFF: Z80 RAM.
+			// 0x2000-0x3FFF: Z80 RAM. (mirror)
+			// TODO: Use 16-bit read on unaligned LE.
+			return z80->m_ramZ80[address & 0x1FFF] |
+				(z80->m_ramZ80[(address + 1) & 0x1FFF] << 8);
+
+		case 0x04: case 0x05:
+			// 0x4000-0x5FFF: YM2612.
+			return z80->Z80_MD_ReadB_YM2612(address) |
+				(z80->Z80_MD_ReadB_YM2612(address + 1) << 8);
+
+		case 0x06:
+			// 0x6000-0x6FFF: Bank.
+			// NOTE: Reading from the bank register is undefined...
+			return 0xFFFF;
+
+		case 0x07:
+			// 0x7000-0x7FFF: VDP.
+			return z80->Z80_MD_ReadB_VDP(address) |
+				(z80->Z80_MD_ReadB_VDP(address + 1) << 8);
+
+		case 0x08: case 0x09: case 0x0A: case 0x0B:
+		case 0x0C: case 0x0D: case 0x0E: case 0x0F:
+			// 0x8000-0xFFFF: 68K ROM bank.
+			// TODO: ReadW version?
+			return z80->Z80_MD_ReadB_68K_Rom(address) |
+				(z80->Z80_MD_ReadB_68K_Rom(address + 1) << 8);
+	}
+
+	// Should not get here...
+	return 0xFFFF;
+}
+
+/**
+ * Write a word to the Z80 address space.
+ * @param ctx Context. (TODO)
+ * @param address Address to write to.
+ * @param data Word to write to the Z80 address space.
+ */
+void CZ80CALL Z80::Z80_MD_WriteW_static(void *ctx, uint16_t address, uint16_t data)
+{
+	// NOTE: May have issues at the end of the 1 KB bank.
+	// TODO: unlikely()
+	if ((address & (CZ80_FETCH_BANK-1)) == (CZ80_FETCH_BANK-1)) {
+		// End of bank. Use 8-bit writes.
+		Z80_MD_WriteW_static(ctx, address, data & 0xFF);
+		Z80_MD_WriteW_static(ctx, address+1, data >> 8);
+		return;
+	}
+
+	Z80 *const z80 = (Z80*)ctx;
+	const uint8_t page = ((address >> 12) & 0x0F);
+	switch (page & 0x0F) {
+		case 0x00: case 0x01:
+		case 0x02: case 0x03:
+			// 0x0000-0x1FFF: Z80 RAM.
+			// 0x2000-0x3FFF: Z80 RAM. (mirror)
+			// TODO: Use 16-bit write on unaligned LE.
+			z80->m_ramZ80[address & 0x1FFF] = data & 0xFF;
+			z80->m_ramZ80[(address + 1) & 0x1FFF] = data >> 8;
+			break;
+
+		case 0x04: case 0x05:
+			// 0x4000-0x5FFF: YM2612.
+			z80->Z80_MD_WriteB_YM2612(address, data & 0xFF);
+			z80->Z80_MD_WriteB_YM2612(address + 1, data >> 8);
+			break;
+
+		case 0x06:
+			// 0x6000-0x6FFF: Bank.
+			z80->Z80_MD_WriteB_Bank(address, data & 0xFF);
+			z80->Z80_MD_WriteB_Bank(address + 1, data >> 8);
+			break;
+
+		case 0x07:
+			// 0x7000-0x7FFF: VDP.
+			z80->Z80_MD_WriteB_VDP(address, data & 0xFF);
+			z80->Z80_MD_WriteB_VDP(address + 1, data >> 8);
+			break;
+
+		case 0x08: case 0x09: case 0x0A: case 0x0B:
+		case 0x0C: case 0x0D: case 0x0E: case 0x0F:
+			// 0x8000-0xFFFF: 68K ROM bank.
+			// TODO: WriteW version?
+			z80->Z80_MD_WriteB_68K_Rom(address, data & 0xFF);
+			z80->Z80_MD_WriteB_68K_Rom(address + 1, data >> 8);
 			break;
 	}
 }

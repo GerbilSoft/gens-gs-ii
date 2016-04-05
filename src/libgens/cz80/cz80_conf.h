@@ -32,7 +32,7 @@
 
 // Use separate functions for 16-bit accesses.
 // May improve performance.
-#define CZ80_USE_WORD_HANDLER   0
+#define CZ80_USE_WORD_HANDLER   1
 
 // TODO: Remove this.
 #define CZ80_DEBUG              0

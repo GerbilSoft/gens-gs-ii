@@ -80,11 +80,15 @@ class Z80
 		// ctx == Z80*
 		static uint8_t CZ80CALL Z80_MD_ReadB_static(void *ctx, uint16_t address);
 		static void CZ80CALL Z80_MD_WriteB_static(void *ctx, uint16_t address, uint8_t data);
+		static uint16_t CZ80CALL Z80_MD_ReadW_static(void *ctx, uint16_t address);
+		static void CZ80CALL Z80_MD_WriteW_static(void *ctx, uint16_t address, uint16_t data);
 
 	public:
 		// Non-static versions.
 		inline uint8_t CZ80CALL Z80_MD_ReadB(uint16_t address);
 		inline void CZ80CALL Z80_MD_WriteB(uint16_t address, uint8_t data);
+		inline uint16_t CZ80CALL Z80_MD_ReadW(uint16_t address);
+		inline void CZ80CALL Z80_MD_WriteW(uint16_t address, uint16_t data);
 
 	protected:
 		/** Z80 memory functions: MD mode. **/
@@ -191,6 +195,16 @@ inline uint8_t CZ80CALL Z80::Z80_MD_ReadB(uint16_t address)
 inline void CZ80CALL Z80::Z80_MD_WriteB(uint16_t address, uint8_t data)
 {
 	Z80_MD_WriteB_static(this, address, data);
+}
+
+inline uint16_t CZ80CALL Z80::Z80_MD_ReadW(uint16_t address)
+{
+	return Z80_MD_ReadW_static(this, address);
+}
+
+inline void CZ80CALL Z80::Z80_MD_WriteW(uint16_t address, uint16_t data)
+{
+	Z80_MD_WriteW_static(this, address, data);
 }
 
 }
