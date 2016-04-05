@@ -26,7 +26,6 @@
 #include "Z80.hpp"
 #include "M68K_Mem.hpp"
 
-#include "cz80/cz80_context.h"
 #include "cz80/cz80_flags.h"
 
 // C includes.
@@ -43,9 +42,7 @@ Z80::Z80()
 {
 	// Allocate the Z80 context.
 	// TODO: Error handling.
-	// FIXME: Cz80_alloc(), Cz80_free()?
-	m_z80 = (cz80_struc*)malloc(sizeof(*m_z80));
-	Cz80_Init(m_z80);
+	m_z80 = Cz80_Alloc();
 
 	// Set the Cz80 context pointer.
 	Cz80_Set_Ctx(m_z80, this);
@@ -71,9 +68,7 @@ Z80::Z80()
 Z80::~Z80()
 {
 	// Free the Z80 context.
-	// FIXME: Cz80_free()
-	free(m_z80);
-	m_z80 = nullptr;
+	Cz80_Free(m_z80);
 }
 
 /**

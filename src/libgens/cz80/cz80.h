@@ -71,6 +71,18 @@ uint8_t Cz80_Reset(cz80_struc *cpu);
 uint8_t Cz80_Soft_Reset(cz80_struc *cpu);
 
 /**
+ * Allocate and initialize a CZ80 structure.
+ * @return CZ80 structure.
+ */
+cz80_struc *Cz80_Alloc(void);
+
+/**
+ * Free a CZ80 structure.
+ * @param cpu CZ80 structure.
+ */
+void Cz80_Free(cz80_struc *cpu);
+
+/**
  * Set an instruction fetch handler.
  * @param cpu Z80 CPU object.
  * @param low_adr Low address. (16-bit)

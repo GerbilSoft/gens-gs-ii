@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 #include "cz80.h"
 #include "cz80_int.h"
@@ -140,6 +141,26 @@ uint8_t Cz80_Soft_Reset(cz80_struc *cpu)
     zIM = 0;
 
     return CPU->Status;
+}
+
+/**
+ * Allocate and initialize a CZ80 structure.
+ * @return CZ80 structure.
+ */
+cz80_struc *Cz80_Alloc(void)
+{
+    cz80_struc *cpu = (cz80_struc*)malloc(sizeof(*cpu));
+    Cz80_Init(cpu);
+    return cpu;
+}
+
+/**
+ * Free a CZ80 structure.
+ * @param cpu CZ80 structure.
+ */
+void Cz80_Free(cz80_struc *cpu)
+{
+    free(cpu);
 }
 
 /////////////////////////////////
