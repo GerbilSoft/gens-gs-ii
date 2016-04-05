@@ -28,8 +28,9 @@
 #include "EmuContext.hpp"
 #include "Rom.hpp"
 
-// C includes.
-#include <stdlib.h>
+// C includes. (C++ namespace)
+#include <cstdlib>
+#include <cstring>
 
 // C++ includes.
 #include <memory>

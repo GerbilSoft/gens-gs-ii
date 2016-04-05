@@ -27,20 +27,18 @@
 // Controller I/O manager.
 #include "../IO/IoManager.hpp"
 
-// ROM image class.
-#include "../Rom.hpp"
-
 // Region code.
 // TODO: Make the region code non-console-specific.
 #include "SysVersion.hpp"
-
-// VDP.
-#include "../Vdp/Vdp.hpp"
 
 // C++ includes.
 #include <string>
 
 namespace LibGens {
+
+class Rom;
+class MdFb;
+class Vdp;
 
 class EmuContext
 {
@@ -166,7 +164,7 @@ class EmuContext
 		static void SetTmssEnabled(bool tmssEnabled)
 			{ ms_TmssEnabled = tmssEnabled; }
 
-		/** VDP (TODO) **/
+		/** VDP (TODO: Make this non-public?) **/
 		Vdp *m_vdp;
 
 		/**

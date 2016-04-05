@@ -23,8 +23,11 @@
 
 #include "EmuMD.hpp"
 
-// VDP.
+#include "Rom.hpp"
 #include "Vdp/Vdp.hpp"
+
+// ROM cartridge.
+#include "Cartridge/RomCartridgeMD.hpp"
 
 // CPU emulators.
 #include "cpu/M68K.hpp"
@@ -35,9 +38,6 @@
 
 // LibGens OSD handler.
 #include "lg_osd.h"
-
-// ROM cartridge.
-#include "Cartridge/RomCartridgeMD.hpp"
 
 // C includes. (C++ namespace)
 #include <cstdio>

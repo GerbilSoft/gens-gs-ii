@@ -29,6 +29,7 @@
 #include "EmuMD.hpp"
 #include "lg_main.hpp"
 
+#include "Rom.hpp"
 #include "Vdp/Vdp.hpp"
 #include "sound/SoundMgr.hpp"
 #include "cpu/M68K_Mem.hpp"

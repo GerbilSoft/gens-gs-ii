@@ -34,14 +34,16 @@ using std::string;
 
 #include "lg_osd.h"
 
+// Objects.
+#include "Vdp/Vdp.hpp"
+
 // ROM data access.
 // TODO: Move ROM data to a cartridge class?
 // NOTE: Currently only needed for fixChecksum() / restoreChecksum().
 // Maybe fixChecksum() / restoreChecksum() should be moved to EmuMD.
 #include "cpu/M68K_Mem.hpp"
 
-namespace LibGens
-{
+namespace LibGens {
 
 // Reference counter.
 // We're only allowing one emulation context at the moment.

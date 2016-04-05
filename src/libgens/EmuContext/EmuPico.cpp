@@ -29,10 +29,17 @@
 
 #include "EmuPico.hpp"
 
-#include "Cartridge/RomCartridgeMD.hpp"
+#include "Rom.hpp"
 #include "Vdp/Vdp.hpp"
+
+// ROM cartridge.
+#include "Cartridge/RomCartridgeMD.hpp"
+
+// CPU emulators.
 #include "cpu/M68K.hpp"
 #include "cpu/M68K_Mem.hpp"
+
+// Sound Manager.
 #include "sound/SoundMgr.hpp"
 
 // LibGens OSD handler.

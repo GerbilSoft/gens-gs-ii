@@ -28,6 +28,9 @@
 #include "EmuMD.hpp"
 #include "EmuPico.hpp"
 
+// C includes. (C++ namespace)
+#include <cassert>
+
 namespace LibGens {
 
 /**

@@ -43,6 +43,7 @@
 
 // C includes. (C++ namespace)
 #include <cstdlib>
+#include <cstring>
 
 // C++ includes.
 #include <string>
