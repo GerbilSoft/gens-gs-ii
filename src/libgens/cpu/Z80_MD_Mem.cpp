@@ -271,10 +271,9 @@ inline void Z80_MD_Mem::Z80_WriteB_68K_Rom(uint16_t address, uint8_t data)
 {
 	// NOTE: Z80 writes to M68K RAM are allowed.
 	// Reference: http://gendev.spritesmind.net/forum/viewtopic.php?t=985
-	
-	address &= 0x7FFF;
-	address |= Bank_Z80;
-	M68K_Mem::M68K_WB(address, data);
+	uint32_t M68K_addr = address & 0x7FFF;
+	M68K_addr |= Bank_Z80;
+	M68K_Mem::M68K_WB(M68K_addr, data);
 }
 
 /** Z80 General Read/Write functions. **/
