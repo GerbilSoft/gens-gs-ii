@@ -435,14 +435,17 @@ class VdpPrivate
 
 		// Line buffer for current line.
 		union LineBuf_t {
-			struct LineBuf_px_t {
+			union LineBuf_px_t {
+				struct {
 #if SYS_BYTEORDER == SYS_LIL_ENDIAN
-				uint8_t pixel;
-				uint8_t layer;
+					uint8_t pixel;
+					uint8_t layer;
 #else /* SYS_BYTEORDER == SYS_BIG_ENDIAN */
-				uint8_t layer;
-				uint8_t pixel;
+					uint8_t layer;
+					uint8_t pixel;
 #endif
+				};
+				uint16_t w;
 			};
 			LineBuf_px_t px[336];
 			uint8_t  u8[336<<1];
@@ -528,12 +531,6 @@ class VdpPrivate
 
 		template<bool interlaced>
 		FORCE_INLINE int T_GetLineNumber(void) const;
-
-		template<bool plane, bool h_s, int pat_pixnum, uint32_t mask, int shift>
-		FORCE_INLINE void T_PutPixel_P0(int disp_pixnum, uint32_t pattern, unsigned int palette);
-
-		template<bool plane, bool h_s, int pat_pixnum, uint32_t mask, int shift>
-		FORCE_INLINE void T_PutPixel_P1(int disp_pixnum, uint32_t pattern, unsigned int palette);
 
 		template<bool priority, bool h_s, int pat_pixnum, uint32_t mask, int shift>
 		FORCE_INLINE uint8_t T_PutPixel_Sprite(int disp_pixnum, uint32_t pattern, unsigned int palette);

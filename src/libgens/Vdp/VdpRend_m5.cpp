@@ -131,93 +131,6 @@ FORCE_INLINE int VdpPrivate::T_GetLineNumber(void) const
 }
 
 /**
- * Put a pixel in background graphics layer 0. (low-priority)
- * @param plane		[in] True for Scroll A; false for Scroll B.
- * @param h_s		[in] Highlight/Shadow enable.
- * @param pat_pixnum	[in] Pattern pixel number.
- * @param mask		[in] Mask to isolate the good pixel.
- * @param shift		[in] Shift.
- * @param disp_pixnum	[in] Display pixel number.
- * @param pattern	[in] Pattern data.
- * @param palette	[in] Palette number * 16.
- */
-template<bool plane, bool h_s, int pat_pixnum, uint32_t mask, int shift>
-FORCE_INLINE void VdpPrivate::T_PutPixel_P0(int disp_pixnum, uint32_t pattern, unsigned int palette)
-{
-	// Check if this is a transparent pixel.
-	if (!(pattern & mask))
-		return;
-
-	// Check the layer bits of the current pixel.
-	const unsigned int LineBuf_pixnum = (disp_pixnum + pat_pixnum);
-	uint8_t layer_bits = LineBuf.px[LineBuf_pixnum].layer;
-
-	// Check if this pixel is masked.
-	if (plane && (layer_bits & (LINEBUF_PRIO_B | LINEBUF_WIN_B))) {
-		// Scroll A: Either the pixel has priority set,
-		// or the pixel is a window pixel.
-		return;
-	}
-
-	// Shift the pattern data.
-	uint8_t pat8 = (pattern >> shift) & 0x0F;
-
-	// Apply palette data.
-	pat8 |= palette;
-
-	// If Highlight/Shadow is enabled, adjust the shadow flags.
-	if (h_s) {
-		// Scroll A: Mark as shadow if the layer is marked as shadow.
-		// Scroll B: Always mark as shadow.
-		if (plane)
-			pat8 |= (layer_bits & LINEBUF_SHAD_B);
-		else
-			pat8 |= LINEBUF_SHAD_B;
-	}
-
-	// Write the new pixel to the line buffer.
-	LineBuf.px[LineBuf_pixnum].pixel = pat8;
-}
-
-/**
- * Put a pixel in background graphics layer 1. (high-priority)
- * @param plane		[in] True for Scroll A; false for Scroll B.
- * @param h_s		[in] Highlight/Shadow enable.
- * @param pat_pixnum	[in] Pattern pixel number.
- * @param mask		[in] Mask to isolate the good pixel.
- * @param shift		[in] Shift.
- * @param disp_pixnum	[in] Display pixel number.
- * @param pattern	[in] Pattern data.
- * @param palette	[in] Palette number * 16.
- */
-template<bool plane, bool h_s, int pat_pixnum, uint32_t mask, int shift>
-FORCE_INLINE void VdpPrivate::T_PutPixel_P1(int disp_pixnum, uint32_t pattern, unsigned int palette)
-{
-	// Check if this is a transparent pixel.
-	unsigned int px = (pattern & mask);
-	if (px == 0)
-		return;
-
-	const unsigned int LineBuf_pixnum = (disp_pixnum + pat_pixnum);
-
-	if (plane) {
-		// Scroll A: If the pixel is a Window pixel, don't do anything.
-		if (LineBuf.px[LineBuf_pixnum].layer & LINEBUF_WIN_B)
-			return;
-	}
-
-	// Shift the pixel.
-	px >>= shift;
-
-	// Update the pixel:
-	// - Add palette information.
-	// - Mark the pixel as priority.
-	// - Save it to the linebuffer.
-	px |= palette | LINEBUF_PRIO_W;
-	LineBuf.u16[LineBuf_pixnum] = (uint16_t)px;
-}
-
-/**
  * Put a pixel in the sprite layer.
  * @param priority	[in] Sprite priority.
  * @param h_s		[in] Highlight/Shadow enable.
@@ -332,16 +245,42 @@ FORCE_INLINE void VdpPrivate::T_PutLine_P0(int disp_pixnum, uint32_t pattern, in
 	if (pattern == 0)
 		return;
 
-	// Put the pixels.
-	// TODO: Use a 'for' loop with shifting?
-	T_PutPixel_P0<plane, h_s, 0, 0xF0000000, 28>(disp_pixnum, pattern, palette);
-	T_PutPixel_P0<plane, h_s, 1, 0x0F000000, 24>(disp_pixnum, pattern, palette);
-	T_PutPixel_P0<plane, h_s, 2, 0x00F00000, 20>(disp_pixnum, pattern, palette);
-	T_PutPixel_P0<plane, h_s, 3, 0x000F0000, 16>(disp_pixnum, pattern, palette);
-	T_PutPixel_P0<plane, h_s, 4, 0x0000F000, 12>(disp_pixnum, pattern, palette);
-	T_PutPixel_P0<plane, h_s, 5, 0x00000F00,  8>(disp_pixnum, pattern, palette);
-	T_PutPixel_P0<plane, h_s, 6, 0x000000F0,  4>(disp_pixnum, pattern, palette);
-	T_PutPixel_P0<plane, h_s, 7, 0x0000000F,  0>(disp_pixnum, pattern, palette);
+	// Put the pixels, right to left.
+	LineBuf_t::LineBuf_px_t *px = &LineBuf.px[disp_pixnum + 7];
+	for (int i = 7; i >= 0; i--, px--, pattern >>= 4) {
+		uint8_t pat8 = (pattern & 0x0F);
+		if (!pat8) {
+			// Transparent pixel.
+			continue;
+		}
+
+		const uint8_t layer_bits = px->layer;
+		if (plane) {
+			// Scroll A: Check if this pixel is masked.
+			if (layer_bits & (LINEBUF_PRIO_B | LINEBUF_WIN_B)) {
+				// Either the pixel has priority set,
+				// or the pixel is a window pixel.
+				continue;
+			}
+		}
+
+		// Add palette information to the pixel.
+		pat8 |= palette;
+
+		// If Shadow/Highlight is enabled, adjust the shadow flags.
+		if (h_s) {
+			// Scroll A: Mark as shadow if the layer is marked as shadow.
+			// Scroll B: Always mark as shadow.
+			if (plane) {
+				pat8 |= (layer_bits & LINEBUF_SHAD_B);
+			} else {
+				pat8 |= LINEBUF_SHAD_B;
+			}
+		}
+
+		// Write the new pixel to the line buffer.
+		px->pixel = pat8;
+	}
 }
 
 /**
@@ -385,16 +324,30 @@ FORCE_INLINE void VdpPrivate::T_PutLine_P1(int disp_pixnum, uint32_t pattern, in
 	if (pattern == 0)
 		return;
 
-	// Put the pixels.
-	// TODO: Use a 'for' loop with shifting?
-	T_PutPixel_P1<plane, h_s, 0, 0xF0000000, 28>(disp_pixnum, pattern, palette);
-	T_PutPixel_P1<plane, h_s, 1, 0x0F000000, 24>(disp_pixnum, pattern, palette);
-	T_PutPixel_P1<plane, h_s, 2, 0x00F00000, 20>(disp_pixnum, pattern, palette);
-	T_PutPixel_P1<plane, h_s, 3, 0x000F0000, 16>(disp_pixnum, pattern, palette);
-	T_PutPixel_P1<plane, h_s, 4, 0x0000F000, 12>(disp_pixnum, pattern, palette);
-	T_PutPixel_P1<plane, h_s, 5, 0x00000F00,  8>(disp_pixnum, pattern, palette);
-	T_PutPixel_P1<plane, h_s, 6, 0x000000F0,  4>(disp_pixnum, pattern, palette);
-	T_PutPixel_P1<plane, h_s, 7, 0x0000000F,  0>(disp_pixnum, pattern, palette);
+	// Put the pixels, right to left.
+	LineBuf_t::LineBuf_px_t *px = &LineBuf.px[disp_pixnum + 7];
+	for (int i = 7; i >= 0; i--, px--, pattern >>= 4) {
+		unsigned int pat8 = (pattern & 0x0F);
+		if (!pat8) {
+			// Transparent pixel.
+			continue;
+		}
+
+		if (plane) {
+			// Scroll A: Check if this pixel is masked.
+			if (px->layer & LINEBUF_WIN_B) {
+				// Window pixel. Don't do anything.
+				continue;
+			}
+		}
+
+		// Update the pixel:
+		// - Add palette information.
+		// - Mark the pixel as priority.
+		// - Save it to the linebuffer.
+		pat8 |= palette | LINEBUF_PRIO_W;
+		px->w = pat8;
+	}
 }
 
 /**
