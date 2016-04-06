@@ -181,6 +181,15 @@ class VdpCache {
 			uint32_t x8[2][2048][8];
 
 			/**
+			 * Line access. (8x16 cell)
+			 * Indexes:
+			 * - idx0: H flip. (0=normal, 1=H)
+			 * - idx1: Tile number.
+			 * - idx2: Line number.
+			 */
+			uint32_t x16[2][1024][16];
+
+			/**
 			 * DWORD access.
 			 * Indexes:
 			 * - idx0: H flip. (0=normal, 1=H)
@@ -273,7 +282,7 @@ inline uint32_t VdpCache::pattern_line_m5_nt_8x8(uint16_t attr, int y)
 		// V-flip.
 		y ^= 7;
 	}
-	// TODO: 128 KB support.
+
 	// FIXME: Verify the assembly output. If it isn't that good,
 	// use a struct without a separate HV dimension.
 	return cache.x8[(attr >> 11) & 1][attr & 0x7FF][y];
@@ -293,7 +302,7 @@ inline uint32_t VdpCache::pattern_line_m5_spr_8x8(uint16_t attr, int adj, int y)
 		// V-flip.
 		y ^= 7;
 	}
-	// TODO: 128 KB support.
+
 	// FIXME: Verify the assembly output. If it isn't that good,
 	// use a struct without a separate HV dimension.
 	return cache.x8[(attr >> 11) & 1][tile][y];
@@ -307,20 +316,17 @@ inline uint32_t VdpCache::pattern_line_m5_spr_8x8(uint16_t attr, int adj, int y)
 inline uint32_t VdpCache::pattern_line_m5_nt_8x16(uint16_t attr, int y)
 {
 	assert(y >= 0 && y <= 15);
-	// TODO: 128 KB support.
 
-	// Interlaced Mode: Convert to non-interlaced tile number.
+	const uint16_t tile16 = (attr & 0x3FF);
 	// FIXME: Verify vflip behavior.
-	uint16_t tile = (attr & 0x3FF) << 1 | (y >> 3);
 	if (attr & 0x1000) {
 		// V-flip.
 		y ^= 15;
-		tile ^= 1;
 	}
 
 	// FIXME: Verify the assembly output. If it isn't that good,
 	// use a struct without a separate HV dimension.
-	return cache.x8[(attr >> 11) & 1][tile][y & 7];
+	return cache.x16[(attr >> 11) & 1][tile16][y];
 }
 
 /**
@@ -332,20 +338,17 @@ inline uint32_t VdpCache::pattern_line_m5_nt_8x16(uint16_t attr, int y)
 inline uint32_t VdpCache::pattern_line_m5_spr_8x16(uint16_t attr, int adj, int y)
 {
 	assert(y >= 0 && y <= 15);
-	// TODO: 128 KB support.
 
-	// Interlaced Mode: Convert to non-interlaced tile number.
+	const uint16_t tile16 = ((attr + adj) & 0x3FF);
 	// FIXME: Verify vflip behavior.
-	uint16_t tile = ((attr + adj) & 0x3FF) << 1 | (y >> 3);
 	if (attr & 0x1000) {
 		// V-flip.
 		y ^= 15;
-		tile ^= 1;
 	}
 
 	// FIXME: Verify the assembly output. If it isn't that good,
 	// use a struct without a separate HV dimension.
-	return cache.x8[(attr >> 11) & 1][tile][y & 7];
+	return cache.x16[(attr >> 11) & 1][tile16][y];
 }
 
 }
