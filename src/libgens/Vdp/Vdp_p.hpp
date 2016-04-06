@@ -532,9 +532,6 @@ class VdpPrivate
 		template<bool interlaced>
 		FORCE_INLINE int T_GetLineNumber(void) const;
 
-		template<bool priority, bool h_s, int pat_pixnum, uint32_t mask, int shift>
-		FORCE_INLINE uint8_t T_PutPixel_Sprite(int disp_pixnum, uint32_t pattern, unsigned int palette);
-
 		template<bool plane, bool h_s>
 		FORCE_INLINE void T_PutLine_P0(int disp_pixnum, uint32_t pattern, int palette);
 

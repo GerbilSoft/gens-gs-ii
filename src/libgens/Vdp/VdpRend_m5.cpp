@@ -130,88 +130,6 @@ FORCE_INLINE int VdpPrivate::T_GetLineNumber(void) const
 	return vdp_line;
 }
 
-/**
- * Put a pixel in the sprite layer.
- * @param priority	[in] Sprite priority.
- * @param h_s		[in] Highlight/Shadow enable.
- * @param pat_pixnum	[in] Pattern pixel number.
- * @param mask		[in] Mask to isolate the good pixel.
- * @param shift		[in] Shift.
- * @param disp_pixnum	[in] Display pixel number.
- * @param pattern	[in] Pattern data.
- * @param palette	[in] Palette number * 16.
- * @return Linebuffer byte.
- */
-template<bool priority, bool h_s, int pat_pixnum, uint32_t mask, int shift>
-FORCE_INLINE uint8_t VdpPrivate::T_PutPixel_Sprite(int disp_pixnum, uint32_t pattern, unsigned int palette)
-{
-	// Check if this is a transparent pixel.
-	unsigned int px = (pattern & mask);
-	if (px == 0)
-		return 0;
-
-	// Get the pixel number in the linebuffer.
-	const unsigned int LineBuf_pixnum = (disp_pixnum + pat_pixnum + 8);
-	uint8_t layer_bits = LineBuf.px[LineBuf_pixnum].layer;
-
-	if (layer_bits & ((LINEBUF_PRIO_B | LINEBUF_SPR_B) - priority)) {
-		// Priority bit is set. (TODO: Is that what this means?)
-		if (!priority) {
-			// Set the sprite bit in the linebuffer.
-			LineBuf.px[LineBuf_pixnum].layer |= LINEBUF_SPR_B;
-		}
-
-		// Return the original linebuffer priority data.
-		return layer_bits;
-	} else if (h_s && (layer_bits & LINEBUF_SPRSH_B)) {
-		// A sprite shadow/highlight operator has already been applied.
-		// This pixel is masked.
-		return layer_bits;
-	}
-
-	// Shift the pixel and apply the palette.
-	px = ((px >> shift) | palette);
-
-	if (h_s) {
-		// Shadow/Highlight enabled.
-		// NOTE: S/H operators not only mask this sprite,
-		// they mask all other sprites as well.
-		if (px == 0x3E) {
-			// Palette 3, color 14: Highlight. (Sprite pixel doesn't show up.)
-			LineBuf.u16[LineBuf_pixnum] |= (LINEBUF_HIGH_W | LINEBUF_SPRSH_W);
-			return 0;
-		} else if (px == 0x3F) {
-			// Palette 3, color 15: Shadow. (Sprite pixel doesn't show up.)
-			LineBuf.u16[LineBuf_pixnum] |= (LINEBUF_SHAD_W | LINEBUF_SPRSH_W);
-			return 0;
-		}
-
-		// Apply highlight/shadow based on priority.
-		if (!priority) {
-			// Low priority. Pixel can be normal, shadowed, or highlighted.
-			layer_bits &= (LINEBUF_SHAD_B | LINEBUF_HIGH_B);
-
-			if ((px & 0x0F) == 0x0E) {
-				// Color 14 in palettes 0-2 are never shadowed.
-				layer_bits &= ~LINEBUF_SHAD_B;
-			}
-		} else {
-			// High priority. Pixel can either be normal or highlighted.
-			layer_bits &= LINEBUF_HIGH_B;
-		}
-
-		// Apply the layer bits.
-		px |= layer_bits;
-	}
-
-	// Mark the pixel as a sprite pixel.
-	px |= LINEBUF_SPR_W;
-
-	// Save the pixel in the linebuffer.
-	LineBuf.u16[LineBuf_pixnum] = px;
-	return 0;
-}
-
 #define LINEBUF_HIGH_D	0x80808080
 #define LINEBUF_SHAD_D	0x40404040
 #define LINEBUF_PRIO_D	0x01000100
@@ -279,7 +197,7 @@ FORCE_INLINE void VdpPrivate::T_PutLine_P0(int disp_pixnum, uint32_t pattern, in
 		}
 
 		// Write the new pixel to the line buffer.
-		px->pixel = pat8;
+		px->pixel = (uint16_t)pat8;
 	}
 }
 
@@ -370,19 +288,85 @@ FORCE_INLINE void VdpPrivate::T_PutLine_Sprite(int disp_pixnum, uint32_t pattern
 		return;
 	}
 
-	// Put the sprite pixels.
+	// If the sprite pattern is empty, don't do anything.
+	// This won't affect collisions, since collisions only
+	// occur on non-transparent pixels.
+	if (pattern == 0)
+		return;
+
+	// Put the pixels, right to left.
+	// NOTE: 8px offset is required for writing sprite pixels.
 	uint8_t status = 0;
-	// NOTE: VdpCache rotates the tile components so it's
-	// always in the right order, so system-specific shifting
-	// isn't needed here.
-	status |= T_PutPixel_Sprite<priority, h_s, 0, 0xF0000000, 28>(disp_pixnum, pattern, palette);
-	status |= T_PutPixel_Sprite<priority, h_s, 1, 0x0F000000, 24>(disp_pixnum, pattern, palette);
-	status |= T_PutPixel_Sprite<priority, h_s, 2, 0x00F00000, 20>(disp_pixnum, pattern, palette);
-	status |= T_PutPixel_Sprite<priority, h_s, 3, 0x000F0000, 16>(disp_pixnum, pattern, palette);
-	status |= T_PutPixel_Sprite<priority, h_s, 4, 0x0000F000, 12>(disp_pixnum, pattern, palette);
-	status |= T_PutPixel_Sprite<priority, h_s, 5, 0x00000F00,  8>(disp_pixnum, pattern, palette);
-	status |= T_PutPixel_Sprite<priority, h_s, 6, 0x000000F0,  4>(disp_pixnum, pattern, palette);
-	status |= T_PutPixel_Sprite<priority, h_s, 7, 0x0000000F,  0>(disp_pixnum, pattern, palette);
+	LineBuf_t::LineBuf_px_t *px = &LineBuf.px[disp_pixnum + 8 + 7];
+	for (int i = 7; i >= 0; i--, px--, pattern >>= 4) {
+		unsigned int pat8 = (pattern & 0x0F);
+		if (!pat8) {
+			// Transparent pixel.
+			continue;
+		}
+
+		uint8_t layer_bits = px->layer;
+		if (layer_bits & ((LINEBUF_PRIO_B | LINEBUF_SPR_B) - priority)) {
+			// Priority bit is set. (TODO: Is that what this means?)
+			if (!priority) {
+				// Set the sprite bit in the linebuffer.
+				px->layer |= LINEBUF_SPR_B;
+			}
+
+			// OR the status and continue.
+			status |= layer_bits;
+			continue;
+		}
+
+		// Add palette information to the pixel.
+		// NOTE: This must be done before S/H processing.
+		pat8 |= palette;
+
+		if (h_s) {
+			// Shadow/Highlight is enabled.
+			if (layer_bits & LINEBUF_SPRSH_B) {
+				// A shadow/highlight operator has already
+				// been applied. This sprite pixel is masked.
+				status |= layer_bits;
+				continue;
+			}
+
+			// Check if this sprite pixel is an operator.
+			// If it is, set the operator flag and mask the pixel.
+			if (pat8 == 0x3E) {
+				// Palette 3, color 14: Highlight.
+				px->w |= (LINEBUF_HIGH_W | LINEBUF_SPRSH_W);
+				continue;
+			} else if (pat8 == 0x3F) {
+				// Palette 3, color 15: Shadow.
+				px->w |= (LINEBUF_SHAD_W | LINEBUF_SPRSH_W);
+				continue;
+			}
+
+			// Apply shadow/highlight based on priority.
+			if (!priority) {
+				// Low priority. Pixel can be normal, shadowed, or highlighted.
+				layer_bits &= (LINEBUF_SHAD_B | LINEBUF_HIGH_B);
+
+				if ((pat8 & 0x0F) == 0x0E) {
+					// Color 14 in palettes 0-2 are never shadowed.
+					layer_bits &= ~LINEBUF_SHAD_B;
+				}
+			} else {
+				// High priority. Pixel can either be normal or highlighted.
+				layer_bits &= LINEBUF_HIGH_B;
+			}
+
+			// Apply the layer bits.
+			pat8 |= layer_bits;
+		}
+
+		// Mark the pixel as a sprite pixel.
+		pat8 |= LINEBUF_SPR_W;
+
+		// Write the new pixel to the line buffer.
+		px->w = (uint16_t)pat8;
+	}
 
 	// Check for sprite collision.
 	if (status & LINEBUF_SPR_B)
