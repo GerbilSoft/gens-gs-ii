@@ -40,10 +40,8 @@ namespace VdpTypes {
 }
 
 class VdpCache {
-	// NOTE: This class isn't currently in use.
-	private:
+	public:
 		VdpCache();
-		~VdpCache();
 
 	private:
 		// Q_DISABLE_COPY() equivalent.
@@ -53,11 +51,23 @@ class VdpCache {
 
 	public:
 		/**
-		 * Invalidate the pattern cache.
+		 * Clear the entire pattern cache.
+		 * This is used when resetting the VDP.
+		 */
+		void clear(void);
+
+		/**
+		 * Invalidate the entire pattern cache.
 		 * This needs to be done when switching modes
 		 * and/or loading a savestate.
 		 */
 		void invalidate(void);
+
+		/**
+		 * Mark an area of VRAM as dirty.
+		 * @param addr Address written to.
+		 */
+		inline void mark_dirty(uint32_t address);
 
 		/**
 		 * Update the pattern cache. (Mode 4)
@@ -185,6 +195,28 @@ class VdpCache {
 		uint16_t dirty_list[2048];
 		unsigned int dirty_idx;
 };
+
+/* FIXME: Make sure these are actually forced inline. */
+
+/**
+ * Mark an area of VRAM as dirty.
+ * @param addr Address written to.
+ */
+inline void VdpCache::mark_dirty(uint32_t address)
+{
+	// FIXME: 128 KB VRAM support.
+	// Convert the VRAM address to line and tile numbers.
+	// Each tile is 32 bytes; eacn line is 4 bytes.
+	const uint32_t tile = (address >> 5) & 0x7FF;
+	if (!dirty_flags[tile]) {
+		// Mark the tile as dirty.
+		dirty_list[dirty_idx++] = tile;
+	}
+
+	// Mark the line as dirty.
+	const unsigned int line = (address >> 2) & 7;
+	dirty_flags[tile] |= (1 << line);
+}
 
 /**
  * Get a pattern line. (Mode 4, nametable, 8x8 cell)

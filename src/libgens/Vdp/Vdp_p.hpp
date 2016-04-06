@@ -36,6 +36,7 @@
 #include "VdpPalette.hpp"
 #include "VdpStatus.hpp"
 #include "VdpStructs.hpp"
+#include "VdpCache.hpp"
 
 #include "VdpRend_Err_p.hpp"
 
@@ -428,6 +429,9 @@ class VdpPrivate
 
 		// VDP layer control.
 		unsigned int VDP_Layers;
+
+		// Tile and line cache.
+		VdpCache cache;
 
 		// Line buffer for current line.
 		union LineBuf_t {

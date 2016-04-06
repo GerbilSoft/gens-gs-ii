@@ -382,10 +382,15 @@ void VdpPrivate::vdpDataWrite_int(uint16_t data)
 				// Data is written normally.
 				tmp_data = data;
 			}
-			VRam.u16[address>>1] = tmp_data;
-			if ((address & Spr_Tbl_Mask) == Spr_Tbl_Addr) {
-				// Sprite Attribute Table.
-				SprAttrTbl_m5.w[(address & ~Spr_Tbl_Mask) >> 1] = tmp_data;
+
+			if (VRam.u16[address>>1] != tmp_data) {
+				VRam.u16[address>>1] = tmp_data;
+				if ((address & Spr_Tbl_Mask) == Spr_Tbl_Addr) {
+					// Sprite Attribute Table.
+					SprAttrTbl_m5.w[(address & ~Spr_Tbl_Mask) >> 1] = tmp_data;
+				}
+				// Mark the address as dirty in the pattern cache.
+				cache.mark_dirty(address);
 			}
 			break;
 		}
@@ -401,6 +406,9 @@ void VdpPrivate::vdpDataWrite_int(uint16_t data)
 			// the address wraps around. Ignore addresses over 0x80 for now.
 			// Note that this breaks a test in VDPFIFOTesting:
 			// #22. DMA Transfer to CRAM Wrapping
+
+			// TODO: Don't do anything if the new value is the
+			// same as the old value.
 
 			// Write the word to CRam.
 			// CRam is 128 bytes. (64 words)

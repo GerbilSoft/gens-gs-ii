@@ -34,11 +34,7 @@ VdpCache::VdpCache()
 	: dirty_idx(0)
 {
 	// Clear the pattern cache and dirty flags.
-	memset(&cache, 0, sizeof(cache));
-	memset(dirty_flags, 0, sizeof(dirty_flags));
-
-	// Dirty list can be left alone, since it's
-	// only checked if dirty_idx > 0.
+	clear();
 
 	// Initialize the Mode 4 lookup table.
 	init_m4_lut();
@@ -94,7 +90,21 @@ void VdpCache::init_m4_lut(void)
 }
 
 /**
- * Invalidate the pattern cache.
+ * Clear the entire pattern cache.
+ * This is used when resetting the VDP.
+ */
+void VdpCache::clear(void)
+{
+	// Reset the dirty flags.
+	dirty_idx = 0;
+	memset(dirty_flags, 0, sizeof(dirty_flags));
+
+	// Clear the cache.
+	memset(&cache, 0, sizeof(cache));
+}
+
+/**
+ * Invalidate the entire pattern cache.
  * This needs to be done when switching modes
  * and/or loading a savestate.
  */
@@ -102,7 +112,7 @@ void VdpCache::invalidate(void)
 {
 	// TODO: Only update patterns 0-511 in TMS/SMS modes.
 	dirty_idx = 2048;
-	for (unsigned int i = 0; i < dirty_idx; i++) {
+	for (int i = dirty_idx-1; i >= 0; i--) {
 		dirty_flags[i] = 0xFF;
 		dirty_list[i] = i;
 	}
@@ -148,7 +158,7 @@ inline uint32_t VdpCache::H_flip(uint32_t src)
  */
 void VdpCache::update_m4(const VRam_t *vram)
 {
-	for (int i = dirty_idx - 1; i >= 0; i--) {
+	for (int i = dirty_idx-1; i >= 0; i--) {
 		// Get the tile VRAM address.
 		uint16_t tile = dirty_list[i];
 		uint8_t flag = dirty_flags[tile];

@@ -143,6 +143,9 @@ void Vdp::reset(void)
 	// Reset the palette. (Includes CRam.)
 	d->palette.reset();
 
+	// Clear the pattern cache.
+	d->cache.clear();
+
 	// Reset the DMA variables.
 	DMAT_Length = 0;
 	d->DMAT_Type = VdpPrivate::DMAT_MEM_TO_VRAM;
@@ -485,6 +488,9 @@ void Vdp::zomgRestoreMD(LibZomg::Zomg *zomg)
 
 	// Load VRam.
 	zomg->loadVRam(d->VRam.u16, sizeof(d->VRam.u16), ZOMG_BYTEORDER_16H);
+	// Invalidate the pattern cache.
+	// TODO: Only patterns that have actually changed?
+	d->cache.invalidate();
 
 	// Load CRam.
 	Zomg_CRam_t cram;

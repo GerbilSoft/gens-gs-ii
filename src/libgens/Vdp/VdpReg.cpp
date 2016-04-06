@@ -49,13 +49,21 @@ void VdpPrivate::updateVdpMode(void)
 
 	// If the VDP mode has changed, CRam needs to be updated.
 	if (prevVdpMode != VDP_Mode) {
-		// Update the VDP mode variables.
-		if (VDP_Mode & VdpTypes::VDP_MODE_M5) {
-			// Mode 5.
-			// TODO: Only if we weren't in Mode 5 before?
-			palette.setPalMode(VdpPalette::PALMODE_MD);
-		} else {
-			// TODO: Support other palette modes.
+		uint32_t diff = (prevVdpMode ^ VDP_Mode);
+		if (diff & VdpTypes::VDP_MODE_M5) {
+			// Mode 5 was toggled.
+			// Pattern cache needs to be invalidated, since
+			// Mode 4 and Mode 5 use different formats.
+			// (NOTE: Modes 0-3 don't use the pattern cache.)
+			cache.invalidate();
+
+			if (VDP_Mode & VdpTypes::VDP_MODE_M5) {
+				// Mode 5.
+				// TODO: Only if we weren't in Mode 5 before?
+				palette.setPalMode(VdpPalette::PALMODE_MD);
+			} else {
+				// TODO: Support other palette modes.
+			}
 		}
 
 		// Set the M5/M4 bits.
