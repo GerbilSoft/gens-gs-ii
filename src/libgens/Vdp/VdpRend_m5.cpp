@@ -401,12 +401,11 @@ FORCE_INLINE void VdpPrivate::T_PutLine_P1(int disp_pixnum, uint32_t pattern, in
  * Put a line in the sprite layer.
  * @param priority	[in] Sprite priority. (false == low, true == high)
  * @param h_s		[in] Highlight/Shadow enable.
- * @param flip		[in] True to flip the line horizontally.
  * @param disp_pixnum	[in] Display pixel nmber.
  * @param pattern	[in] Pattern data.
  * @param palette	[in] Palette number * 16.
  */
-template<bool priority, bool h_s, bool flip>
+template<bool priority, bool h_s>
 FORCE_INLINE void VdpPrivate::T_PutLine_Sprite(int disp_pixnum, uint32_t pattern, int palette)
 {
 	// Check if the sprite layer is disabled.
@@ -420,27 +419,17 @@ FORCE_INLINE void VdpPrivate::T_PutLine_Sprite(int disp_pixnum, uint32_t pattern
 
 	// Put the sprite pixels.
 	uint8_t status = 0;
-	if (!flip) {
-		// No flip.
-		status |= T_PutPixel_Sprite<priority, h_s, 0, TILE_PX0, TILE_SHIFT0>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 1, TILE_PX1, TILE_SHIFT1>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 2, TILE_PX2, TILE_SHIFT2>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 3, TILE_PX3, TILE_SHIFT3>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 4, TILE_PX4, TILE_SHIFT4>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 5, TILE_PX5, TILE_SHIFT5>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 6, TILE_PX6, TILE_SHIFT6>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 7, TILE_PX7, TILE_SHIFT7>(disp_pixnum, pattern, palette);
-	} else {
-		// Horizontal flip.
-		status |= T_PutPixel_Sprite<priority, h_s, 0, TILE_PX7, TILE_SHIFT7>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 1, TILE_PX6, TILE_SHIFT6>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 2, TILE_PX5, TILE_SHIFT5>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 3, TILE_PX4, TILE_SHIFT4>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 4, TILE_PX3, TILE_SHIFT3>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 5, TILE_PX2, TILE_SHIFT2>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 6, TILE_PX1, TILE_SHIFT1>(disp_pixnum, pattern, palette);
-		status |= T_PutPixel_Sprite<priority, h_s, 7, TILE_PX0, TILE_SHIFT0>(disp_pixnum, pattern, palette);
-	}
+	// NOTE: VdpCache rotates the tile components so it's
+	// always in the right order, so system-specific shifting
+	// isn't needed here.
+	status |= T_PutPixel_Sprite<priority, h_s, 0, 0xF0000000, 28>(disp_pixnum, pattern, palette);
+	status |= T_PutPixel_Sprite<priority, h_s, 1, 0x0F000000, 24>(disp_pixnum, pattern, palette);
+	status |= T_PutPixel_Sprite<priority, h_s, 2, 0x00F00000, 20>(disp_pixnum, pattern, palette);
+	status |= T_PutPixel_Sprite<priority, h_s, 3, 0x000F0000, 16>(disp_pixnum, pattern, palette);
+	status |= T_PutPixel_Sprite<priority, h_s, 4, 0x0000F000, 12>(disp_pixnum, pattern, palette);
+	status |= T_PutPixel_Sprite<priority, h_s, 5, 0x00000F00,  8>(disp_pixnum, pattern, palette);
+	status |= T_PutPixel_Sprite<priority, h_s, 6, 0x000000F0,  4>(disp_pixnum, pattern, palette);
+	status |= T_PutPixel_Sprite<priority, h_s, 7, 0x0000000F,  0>(disp_pixnum, pattern, palette);
 
 	// Check for sprite collision.
 	if (status & LINEBUF_SPR_B)
@@ -1006,7 +995,7 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 
 	// Get the sprite line cache for the current line.
 	const int cacheId = (interlaced ? (line >> 1) : line) & 1;
-	const SprLineCache_t *cache = &sprLineCache[cacheId][0];
+	const SprLineCache_t *sprCache = &sprLineCache[cacheId][0];
 
 	// Pixel count for sprite limit.
 	// NOTE: If the user disabled sprite limit, then there's no maximum.
@@ -1023,10 +1012,10 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 	bool sprites_masked = false;		// If true, remaining sprites will not be drawn.
 
 	// Process all sprites on this line.
-	for (int i = sprCountCache[cacheId]; i > 0; i--, cache++) {
+	for (int i = sprCountCache[cacheId]; i > 0; i--, sprCache++) {
 		// Check for a masked sprite.
 		// NOTE: Pos_X is screen-relative.
-		if (cache->Pos_X > -128) {
+		if (sprCache->Pos_X > -128) {
 			// Found a sprite with x > -128.
 			found_valid_x = true;
 		} else if (found_valid_x) {
@@ -1037,11 +1026,11 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 		}
 
 		// Get the X positions.
-		int H_Pos_Min = cache->Pos_X;
-		int H_Pos_Max = H_Pos_Min + (cache->Size_X * 8) - 1;
+		int H_Pos_Min = sprCache->Pos_X;
+		int H_Pos_Max = H_Pos_Min + (sprCache->Size_X * 8) - 1;
 
 		// NOTE: Masked sprites still count towards the sprite dot limit.
-		pixel_count += (cache->Size_X * 8);
+		pixel_count += (sprCache->Size_X * 8);
 		if (pixel_count > pixel_count_max) {
 			// Sprite dot overflow.
 			H_Pos_Max -= (pixel_count - pixel_count_max);
@@ -1057,69 +1046,39 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 		}
 
 		// Determine the cell and line offsets.
-		unsigned int cell_offset = (line - cache->Pos_Y);
-		unsigned int line_offset;
+		const int spr_line = (line - sprCache->Pos_Y);
 
+		unsigned int cell_offset, line_offset;
 		if (interlaced) {
 			// Interlaced.
-			line_offset = (cell_offset & 15);
-			cell_offset &= 0x1F0;
+			line_offset = spr_line & 15;
+			cell_offset = (spr_line & ~15) >> 4;
 		} else {
 			// Non-Interlaced.
-			line_offset = (cell_offset & 7);
-			cell_offset &= 0xF8;
+			line_offset = spr_line & 7;
+			cell_offset = (spr_line & ~7) >> 3;
 		}
 
 		// Get the Y cell size.
-		unsigned int Y_cell_size = cache->Size_Y;
+		unsigned int Y_cell_size = (sprCache->Size_Y + 1);
 
 		// Get the sprite information.
 		// Also, check for swapped sprite layer priority.
-		uint16_t spr_info = cache->Num_Tile;
+		uint16_t spr_info = sprCache->Num_Tile;
 		if (VDP_Layers & VdpTypes::VDP_LAYER_SPRITE_SWAP)
 			spr_info ^= 0x8000;
 
 		// Get the palette number, multiplied by 16.
 		const unsigned int palette = ((spr_info >> 9) & 0x30);
 
-		// Get the pattern number.
-		unsigned int tile_num;
-		if (interlaced) {
-			tile_num = (spr_info & 0x3FF) << 6;	// point on the contents of the pattern
-			Y_cell_size <<= 6;	// Size_Y * 64
-			cell_offset *= 4;	// Num_Pattern * 64
-		} else {
-			tile_num = (spr_info & 0x7FF) << 5;	// point on the contents of the pattern
-			Y_cell_size <<= 5;	// Size_Y * 32
-			cell_offset *= 4;	// Num_Pattern * 32
-		}
-
 		// Check for V Flip.
 		if (spr_info & 0x1000) {
 			// V Flip enabled.
-			tile_num += (Y_cell_size - cell_offset);
-			if (interlaced) {
-				line_offset ^= 15;
-				Y_cell_size += 64;
-				tile_num += (line_offset * 4);
-			} else {
-				line_offset ^= 7;
-				Y_cell_size += 32;
-				tile_num += (line_offset * 4);
-			}
-		} else {
-			// V Flip disabled.
-			tile_num += cell_offset;
-			if (interlaced) {
-				Y_cell_size += 64;
-				tile_num += (line_offset * 4);
-			} else {
-				Y_cell_size += 32;
-				tile_num += (line_offset * 4);
-			}
+			cell_offset = (Y_cell_size - 1 - cell_offset);
 		}
 
 		// Check for H Flip.
+		uint32_t pattern;
 		if (spr_info & 0x800) {
 			// H Flip enabled.
 			// Check the minimum edge of the sprite.
@@ -1129,23 +1088,31 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 			H_Pos_Max -= 7;				// to post the last pattern in first
 			while (H_Pos_Max >= H_Pix) {
 				H_Pos_Max -= 8;			// move back to the preceding pattern (screen)
-				tile_num += Y_cell_size;	// go to the next pattern (VRam)
+				cell_offset += Y_cell_size;	// go to the next pattern (VRam)
 			}
 
 			// Draw the sprite.
 			if ((VDP_Layers & VdpTypes::VDP_LAYER_SPRITE_ALWAYSONTOP) || (spr_info & 0x8000)) {
 				// High priority.
 				for (; H_Pos_Max >= H_Pos_Min; H_Pos_Max -= 8) {
-					uint32_t pattern = Spr_Gen_Addr_u32(tile_num);
-					T_PutLine_Sprite<true, h_s, true>(H_Pos_Max, pattern, palette);
-					tile_num += Y_cell_size;
+					if (interlaced) {
+						pattern = cache.pattern_line_m5_spr_8x16(spr_info, cell_offset, line_offset);
+					} else {
+						pattern = cache.pattern_line_m5_spr_8x8(spr_info, cell_offset, line_offset);
+					}
+					T_PutLine_Sprite<true, h_s>(H_Pos_Max, pattern, palette);
+					cell_offset += Y_cell_size;
 				}
 			} else {
 				// Low priority.
 				for (; H_Pos_Max >= H_Pos_Min; H_Pos_Max -= 8) {
-					uint32_t pattern = Spr_Gen_Addr_u32(tile_num);
-					T_PutLine_Sprite<false, h_s, true>(H_Pos_Max, pattern, palette);
-					tile_num += Y_cell_size;
+					if (interlaced) {
+						pattern = cache.pattern_line_m5_spr_8x16(spr_info, cell_offset, line_offset);
+					} else {
+						pattern = cache.pattern_line_m5_spr_8x8(spr_info, cell_offset, line_offset);
+					}
+					T_PutLine_Sprite<false, h_s>(H_Pos_Max, pattern, palette);
+					cell_offset += Y_cell_size;
 				}
 			}
 		} else {
@@ -1155,23 +1122,31 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Sprite(void)
 
 			while (H_Pos_Min < -7) {
 				H_Pos_Min += 8;			// advance to the next pattern (screen)
-				tile_num += Y_cell_size;	// go to the next pattern (VRam)
+				cell_offset += Y_cell_size;	// go to the next pattern (VRam)
 			}
 
 			// Draw the sprite.
 			if ((VDP_Layers & VdpTypes::VDP_LAYER_SPRITE_ALWAYSONTOP) || (spr_info & 0x8000)) {
 				// High priority.
 				for (; H_Pos_Min < H_Pos_Max; H_Pos_Min += 8) {
-					uint32_t pattern = Spr_Gen_Addr_u32(tile_num);
-					T_PutLine_Sprite<true, h_s, false>(H_Pos_Min, pattern, palette);
-					tile_num += Y_cell_size;
+					if (interlaced) {
+						pattern = cache.pattern_line_m5_spr_8x16(spr_info, cell_offset, line_offset);
+					} else {
+						pattern = cache.pattern_line_m5_spr_8x8(spr_info, cell_offset, line_offset);
+					}
+					T_PutLine_Sprite<true, h_s>(H_Pos_Min, pattern, palette);
+					cell_offset += Y_cell_size;
 				}
 			} else {
 				// Low priority.
 				for (; H_Pos_Min < H_Pos_Max; H_Pos_Min += 8) {
-					uint32_t pattern = Spr_Gen_Addr_u32(tile_num);
-					T_PutLine_Sprite<false, h_s, false>(H_Pos_Min, pattern, palette);
-					tile_num += Y_cell_size;
+					if (interlaced) {
+						pattern = cache.pattern_line_m5_spr_8x16(spr_info, cell_offset, line_offset);
+					} else {
+						pattern = cache.pattern_line_m5_spr_8x8(spr_info, cell_offset, line_offset);
+					}
+					T_PutLine_Sprite<false, h_s>(H_Pos_Min, pattern, palette);
+					cell_offset += Y_cell_size;
 				}
 			}
 		}

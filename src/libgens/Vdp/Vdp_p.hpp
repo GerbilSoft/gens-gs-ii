@@ -544,7 +544,7 @@ class VdpPrivate
 		template<bool plane, bool h_s>
 		FORCE_INLINE void T_PutLine_P1(int disp_pixnum, uint32_t pattern, int palette);
 
-		template<bool priority, bool h_s, bool flip>
+		template<bool priority, bool h_s>
 		FORCE_INLINE void T_PutLine_Sprite(int disp_pixnum, uint32_t pattern, int palette);
 
 		template<bool plane>

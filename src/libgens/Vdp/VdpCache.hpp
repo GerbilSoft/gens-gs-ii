@@ -33,6 +33,8 @@
 // C includes. (C++ namespace)
 #include <cassert>
 
+// TODO: 128 KB support?
+
 namespace LibGens {
 
 namespace VdpTypes {
@@ -81,6 +83,8 @@ class VdpCache {
 		 */
 		void update_m5(const VdpTypes::VRam_t *vram);
 
+		/** Mode 4: Pattern retrieval functions. **/
+
 		/**
 		 * Get a pattern line. (Mode 4, nametable, 8x8 cell)
 		 * @param attr Nametable attribute word.
@@ -95,6 +99,8 @@ class VdpCache {
 		 */
 		inline uint32_t pattern_line_m4_spr_8x8(uint8_t tile, int y);
 
+		/** Mode 5: Pattern retrieval functions. **/
+
 		/**
 		 * Get a pattern line. (Mode 5, nametable, 8x8 cell)
 		 * @param attr Nametable attribute word.
@@ -105,9 +111,10 @@ class VdpCache {
 		/**
 		 * Get a pattern line. (Mode 5, sprite, 8x8 cell)
 		 * @param attr Sprite table attribute word.
+		 * @param adj Tile number within the sprite.
 		 * @param y Y offset.
 		 */
-		inline uint32_t pattern_line_m5_spr_8x8(uint16_t attr, int y);
+		inline uint32_t pattern_line_m5_spr_8x8(uint16_t attr, int adj, int y);
 
 		/**
 		 * Get a pattern line. (Mode 5, nametable, 8x16 cell)
@@ -119,9 +126,10 @@ class VdpCache {
 		/**
 		 * Get a pattern line. (Mode 5, sprite, 8x16 cell)
 		 * @param attr Sprite table attribute word.
+		 * @param adj Tile number within the sprite.
 		 * @param y Y offset.
 		 */
-		inline uint32_t pattern_line_m5_spr_8x16(uint16_t attr, int y);
+		inline uint32_t pattern_line_m5_spr_8x16(uint16_t attr, int adj, int y);
 
 	protected:
 		/**
@@ -218,6 +226,8 @@ inline void VdpCache::mark_dirty(uint32_t address)
 	dirty_flags[tile] |= (1 << line);
 }
 
+/** Mode 4: Pattern retrieval functions. **/
+
 /**
  * Get a pattern line. (Mode 4, nametable, 8x8 cell)
  * @param attr Nametable attribute word.
@@ -249,6 +259,8 @@ inline uint32_t VdpCache::pattern_line_m4_spr_8x8(uint8_t tile, int y)
 	return cache.x8[0][tile][y];
 }
 
+/** Mode 5: Pattern retrieval functions. **/
+
 /**
  * Get a pattern line. (Mode 5, nametable, 8x8 cell)
  * @param attr Nametable attribute word.
@@ -270,11 +282,13 @@ inline uint32_t VdpCache::pattern_line_m5_nt_8x8(uint16_t attr, int y)
 /**
  * Get a pattern line. (Mode 5, sprite, 8x8 cell)
  * @param attr Sprite table attribute word.
+ * @param adj Tile number within the sprite.
  * @param y Y offset.
  */
-inline uint32_t VdpCache::pattern_line_m5_spr_8x8(uint16_t attr, int y)
+inline uint32_t VdpCache::pattern_line_m5_spr_8x8(uint16_t attr, int adj, int y)
 {
 	assert(y >= 0 && y <= 7);
+	const uint16_t tile = (attr + adj) & 0x7FF;
 	if (attr & 0x1000) {
 		// V-flip.
 		y ^= 7;
@@ -282,7 +296,7 @@ inline uint32_t VdpCache::pattern_line_m5_spr_8x8(uint16_t attr, int y)
 	// TODO: 128 KB support.
 	// FIXME: Verify the assembly output. If it isn't that good,
 	// use a struct without a separate HV dimension.
-	return cache.x8[(attr >> 11) & 1][attr & 0x7FF][y];
+	return cache.x8[(attr >> 11) & 1][tile][y];
 }
 
 /**
@@ -312,16 +326,17 @@ inline uint32_t VdpCache::pattern_line_m5_nt_8x16(uint16_t attr, int y)
 /**
  * Get a pattern line. (Mode 5, sprite, 8x16 cell)
  * @param attr Sprite table attribute word.
+ * @param adj Tile number within the sprite.
  * @param y Y offset.
  */
-inline uint32_t VdpCache::pattern_line_m5_spr_8x16(uint16_t attr, int y)
+inline uint32_t VdpCache::pattern_line_m5_spr_8x16(uint16_t attr, int adj, int y)
 {
 	assert(y >= 0 && y <= 15);
 	// TODO: 128 KB support.
 
 	// Interlaced Mode: Convert to non-interlaced tile number.
 	// FIXME: Verify vflip behavior.
-	uint16_t tile = (attr & 0x3FF) << 1 | (y >> 3);
+	uint16_t tile = ((attr + adj) & 0x3FF) << 1 | (y >> 3);
 	if (attr & 0x1000) {
 		// V-flip.
 		y ^= 15;
