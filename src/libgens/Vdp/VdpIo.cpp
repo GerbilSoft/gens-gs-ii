@@ -385,12 +385,16 @@ void VdpPrivate::vdpDataWrite_int(uint16_t data)
 
 			if (VRam.u16[address>>1] != tmp_data) {
 				VRam.u16[address>>1] = tmp_data;
-				if ((address & Spr_Tbl_Mask) == Spr_Tbl_Addr) {
-					// Sprite Attribute Table.
-					SprAttrTbl_m5.w[(address & ~Spr_Tbl_Mask) >> 1] = tmp_data;
-				}
 				// Mark the address as dirty in the pattern cache.
 				cache.mark_dirty(address);
+			}
+
+			// Always update the Sprite Attribute Table.
+			// This is needed because it might be inconsistent
+			// with VRAM if the table address is changed.
+			if ((address & Spr_Tbl_Mask) == Spr_Tbl_Addr) {
+				// Sprite Attribute Table.
+				SprAttrTbl_m5.w[(address & ~Spr_Tbl_Mask) >> 1] = tmp_data;
 			}
 			break;
 		}

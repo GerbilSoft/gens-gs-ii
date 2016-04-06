@@ -73,7 +73,10 @@ void VdpPrivate::DMA_Fill(uint16_t data)
 			// Write to VRAM.
 			do {
 				// NOTE: DMA FILL writes to the adjacent byte.
-				VRam.u8[address ^ 1 ^ U16DATA_U8_INVERT] = fill_hi;
+				if (VRam.u8[address ^ 1 ^ U16DATA_U8_INVERT] != fill_hi) {
+					VRam.u8[address ^ 1 ^ U16DATA_U8_INVERT] = fill_hi;
+					cache.mark_dirty(address ^ 1 ^ U16DATA_U8_INVERT);
+				}
 				if ((address & Spr_Tbl_Mask) == Spr_Tbl_Addr) {
 					// Sprite Attribute Table.
 					SprAttrTbl_m5.b[(address & ~Spr_Tbl_Mask) ^ U16DATA_U8_INVERT] = fill_hi;
@@ -368,7 +371,10 @@ void VdpPrivate::processDmaCtrlWrite(void)
 		// TODO: Do DMA COPY line-by-line instead of all at once.
 		do {
 			uint8_t src = VRam.u8[src_address];
-			VRam.u8[dest_address] = src;
+			if (VRam.u8[dest_address] != src) {
+				VRam.u8[dest_address] = src;
+				cache.mark_dirty(dest_address);
+			}
 			if ((dest_address & Spr_Tbl_Mask) == Spr_Tbl_Addr) {
 				// Sprite Attribute Table.
 				SprAttrTbl_m5.b[(dest_address & ~Spr_Tbl_Mask) ^ U16DATA_U8_INVERT] = src;

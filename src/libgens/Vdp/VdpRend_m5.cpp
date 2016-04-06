@@ -1341,9 +1341,6 @@ void VdpPrivate::renderLine_m5(void)
 		return;
 	}
 
-	// Update the pattern cache.
-	cache.update_m5(&VRam);
-
 	// Determine the starting line in MD_Screen.
 	if (Reg_Status.isNtsc() &&
 	    (VDP_Reg.m5.Set2 & VDP_REG_M5_SET2_M2) &&
@@ -1373,6 +1370,9 @@ void VdpPrivate::renderLine_m5(void)
 		// ...and we're done here.
 		return;
 	}
+
+	// Update the pattern cache.
+	cache.update_m5(&VRam);
 
 	// Check if the VDP is enabled.
 	if (!(VDP_Reg.m5.Set2 & VDP_REG_M5_SET2_DISP) || in_border) {

@@ -24,8 +24,8 @@
 // In addition, a lookup table is used to convert Mode 4 planar patterns
 // to Mode 5 packed patterns.
 
-#ifndef __LIBGENS_MD_VDPCACHE_HPP__
-#define __LIBGENS_MD_VDPCACHE_HPP__
+#ifndef __LIBGENS_VDP_VDPCACHE_HPP__
+#define __LIBGENS_VDP_VDPCACHE_HPP__
 
 // C includes.
 #include <stdint.h>
@@ -206,7 +206,7 @@ inline void VdpCache::mark_dirty(uint32_t address)
 {
 	// FIXME: 128 KB VRAM support.
 	// Convert the VRAM address to line and tile numbers.
-	// Each tile is 32 bytes; eacn line is 4 bytes.
+	// Each tile is 32 bytes; each line is 4 bytes.
 	const uint32_t tile = (address >> 5) & 0x7FF;
 	if (!dirty_flags[tile]) {
 		// Mark the tile as dirty.
@@ -335,4 +335,4 @@ inline uint32_t VdpCache::pattern_line_m5_spr_8x16(uint16_t attr, int y)
 
 }
 
-#endif /* __LIBGENS_MD_VDPCACHE_HPP__ */
+#endif /* __LIBGENS_VDP_VDPCACHE_HPP__ */

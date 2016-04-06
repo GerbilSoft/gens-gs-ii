@@ -194,7 +194,7 @@ void VdpCache::update_m4(const VRam_t *vram)
  */
 void VdpCache::update_m5(const VRam_t *vram)
 {
-	for (int i = dirty_idx - 1; i >= 0; i--) {
+	for (int i = dirty_idx-1; i >= 0; i--) {
 		// Get the tile VRAM address.
 		// Note that we're assuming 8x8 tiles.
 		// Interlaced mode is handled on cache lookup.
