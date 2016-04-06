@@ -309,12 +309,11 @@ FORCE_INLINE uint8_t VdpPrivate::T_PutPixel_Sprite(int disp_pixnum, uint32_t pat
  * Put a line in background graphics layer 0. (low-priority)
  * @param plane		[in] True for Scroll A; false for Scroll B.
  * @param h_s		[in] Highlight/Shadow enable.
- * @param flip		[in] True to flip the line horizontally.
  * @param disp_pixnum	[in] Display pixel nmber.
  * @param pattern	[in] Pattern data.
  * @param palette	[in] Palette number * 16.
  */
-template<bool plane, bool h_s, bool flip>
+template<bool plane, bool h_s>
 FORCE_INLINE void VdpPrivate::T_PutLine_P0(int disp_pixnum, uint32_t pattern, int palette)
 {
 	if (!plane) {
@@ -334,39 +333,26 @@ FORCE_INLINE void VdpPrivate::T_PutLine_P0(int disp_pixnum, uint32_t pattern, in
 		return;
 
 	// Put the pixels.
-	if (!flip) {
-		// No flip.
-		T_PutPixel_P0<plane, h_s, 0, TILE_PX0, TILE_SHIFT0>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 1, TILE_PX1, TILE_SHIFT1>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 2, TILE_PX2, TILE_SHIFT2>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 3, TILE_PX3, TILE_SHIFT3>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 4, TILE_PX4, TILE_SHIFT4>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 5, TILE_PX5, TILE_SHIFT5>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 6, TILE_PX6, TILE_SHIFT6>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 7, TILE_PX7, TILE_SHIFT7>(disp_pixnum, pattern, palette);
-	} else {
-		// Horizontal flip.
-		T_PutPixel_P0<plane, h_s, 0, TILE_PX7, TILE_SHIFT7>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 1, TILE_PX6, TILE_SHIFT6>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 2, TILE_PX5, TILE_SHIFT5>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 3, TILE_PX4, TILE_SHIFT4>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 4, TILE_PX3, TILE_SHIFT3>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 5, TILE_PX2, TILE_SHIFT2>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 6, TILE_PX1, TILE_SHIFT1>(disp_pixnum, pattern, palette);
-		T_PutPixel_P0<plane, h_s, 7, TILE_PX0, TILE_SHIFT0>(disp_pixnum, pattern, palette);
-	}
+	// TODO: Use a 'for' loop with shifting?
+	T_PutPixel_P0<plane, h_s, 0, 0xF0000000, 28>(disp_pixnum, pattern, palette);
+	T_PutPixel_P0<plane, h_s, 1, 0x0F000000, 24>(disp_pixnum, pattern, palette);
+	T_PutPixel_P0<plane, h_s, 2, 0x00F00000, 20>(disp_pixnum, pattern, palette);
+	T_PutPixel_P0<plane, h_s, 3, 0x000F0000, 16>(disp_pixnum, pattern, palette);
+	T_PutPixel_P0<plane, h_s, 4, 0x0000F000, 12>(disp_pixnum, pattern, palette);
+	T_PutPixel_P0<plane, h_s, 5, 0x00000F00,  8>(disp_pixnum, pattern, palette);
+	T_PutPixel_P0<plane, h_s, 6, 0x000000F0,  4>(disp_pixnum, pattern, palette);
+	T_PutPixel_P0<plane, h_s, 7, 0x0000000F,  0>(disp_pixnum, pattern, palette);
 }
 
 /**
  * Put a line in background graphics layer 1. (high-priority)
  * @param plane		[in] True for Scroll A; false for Scroll B.
  * @param h_s		[in] Highlight/Shadow enable.
- * @param flip		[in] True to flip the line horizontally.
  * @param disp_pixnum	[in] Display pixel nmber.
  * @param pattern	[in] Pattern data.
  * @param palette	[in] Palette number * 16.
  */
-template<bool plane, bool h_s, bool flip>
+template<bool plane, bool h_s>
 FORCE_INLINE void VdpPrivate::T_PutLine_P1(int disp_pixnum, uint32_t pattern, int palette)
 {
 	if (!plane) {
@@ -400,27 +386,15 @@ FORCE_INLINE void VdpPrivate::T_PutLine_P1(int disp_pixnum, uint32_t pattern, in
 		return;
 
 	// Put the pixels.
-	if (!flip) {
-		// No flip.
-		T_PutPixel_P1<plane, h_s, 0, TILE_PX0, TILE_SHIFT0>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 1, TILE_PX1, TILE_SHIFT1>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 2, TILE_PX2, TILE_SHIFT2>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 3, TILE_PX3, TILE_SHIFT3>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 4, TILE_PX4, TILE_SHIFT4>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 5, TILE_PX5, TILE_SHIFT5>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 6, TILE_PX6, TILE_SHIFT6>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 7, TILE_PX7, TILE_SHIFT7>(disp_pixnum, pattern, palette);
-	} else {
-		// Horizontal flip.
-		T_PutPixel_P1<plane, h_s, 0, TILE_PX7, TILE_SHIFT7>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 1, TILE_PX6, TILE_SHIFT6>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 2, TILE_PX5, TILE_SHIFT5>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 3, TILE_PX4, TILE_SHIFT4>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 4, TILE_PX3, TILE_SHIFT3>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 5, TILE_PX2, TILE_SHIFT2>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 6, TILE_PX1, TILE_SHIFT1>(disp_pixnum, pattern, palette);
-		T_PutPixel_P1<plane, h_s, 7, TILE_PX0, TILE_SHIFT0>(disp_pixnum, pattern, palette);
-	}
+	// TODO: Use a 'for' loop with shifting?
+	T_PutPixel_P1<plane, h_s, 0, 0xF0000000, 28>(disp_pixnum, pattern, palette);
+	T_PutPixel_P1<plane, h_s, 1, 0x0F000000, 24>(disp_pixnum, pattern, palette);
+	T_PutPixel_P1<plane, h_s, 2, 0x00F00000, 20>(disp_pixnum, pattern, palette);
+	T_PutPixel_P1<plane, h_s, 3, 0x000F0000, 16>(disp_pixnum, pattern, palette);
+	T_PutPixel_P1<plane, h_s, 4, 0x0000F000, 12>(disp_pixnum, pattern, palette);
+	T_PutPixel_P1<plane, h_s, 5, 0x00000F00,  8>(disp_pixnum, pattern, palette);
+	T_PutPixel_P1<plane, h_s, 6, 0x000000F0,  4>(disp_pixnum, pattern, palette);
+	T_PutPixel_P1<plane, h_s, 7, 0x0000000F,  0>(disp_pixnum, pattern, palette);
 }
 
 /**
@@ -625,40 +599,6 @@ FORCE_INLINE uint16_t VdpPrivate::T_Get_Nametable_Word(unsigned int x, unsigned 
 }
 
 /**
- * Get pattern data for a given tile for the current line.
- * @param interlaced True for interlaced; false for non-interlaced.
- * @param pattern Pattern info.
- * @param y_fine_offset Y fine offset.
- * @return Pattern data.
- */
-template<bool interlaced>
-FORCE_INLINE uint32_t VdpPrivate::T_Get_Pattern_Data(uint16_t pattern, unsigned int y_fine_offset)
-{
-	// Get the tile address.
-	unsigned int TileAddr;
-	if (interlaced) {
-		// FIXME: High bit may be usable for 128 KB mode.
-		TileAddr = (pattern & 0x3FF) << 6;
-	} else {
-		// Non-interlaced, or Interlaced Mode 1.
-		TileAddr = (pattern & 0x7FF) << 5;
-	}
-
-	if (pattern & 0x1000) {
-		// V Flip enabled. Flip the tile vertically.
-		if (interlaced) {
-			y_fine_offset ^= 15;
-		} else {
-			y_fine_offset ^= 7;
-		}
-	}
-
-	// Return the pattern data.
-	// FIXME: Rebase to upper 64 KB if necessary. (128 KB VRAM mode)
-	return VRam.u32[(TileAddr + (y_fine_offset * 4)) >> 2];
-}
-
-/**
  * Render a scroll line.
  * @param plane		[in] True for Scroll A / Window; false for Scroll B.
  * @param interlaced	[in] True for interlaced; false for non-interlaced.
@@ -748,7 +688,12 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Scroll(int cell_start, int cell_leng
 		}
 
 		// Get the pattern data for the current tile.
-		uint32_t pattern_data = T_Get_Pattern_Data<interlaced>(nametable_word, y_fine_offset);
+		uint32_t pattern_data;
+		if (interlaced) {
+			pattern_data = cache.pattern_line_m5_nt_8x16(nametable_word, y_fine_offset);
+		} else {
+			pattern_data = cache.pattern_line_m5_nt_8x8(nametable_word, y_fine_offset);
+		}
 
 		// Extract the palette number.
 		// Resulting number is palette * 16.
@@ -758,20 +703,11 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_Scroll(int cell_start, int cell_leng
 		if (VDP_Layers & VdpTypes::VDP_LAYER_SCROLLB_SWAP)
 			nametable_word ^= 0x8000;
 
-		// Check for horizontal flip.
-		if (nametable_word & 0x0800) {
-			// Pattern has H-Flip enabled.
-			if (nametable_word & 0x8000)
-				T_PutLine_P1<plane, h_s, true>(disp_pixnum, pattern_data, palette);
-			else
-				T_PutLine_P0<plane, h_s, true>(disp_pixnum, pattern_data, palette);
-		} else {
-			// Pattern doesn't have flip enabled.
-			if (nametable_word & 0x8000)
-				T_PutLine_P1<plane, h_s, false>(disp_pixnum, pattern_data, palette);
-			else
-				T_PutLine_P0<plane, h_s, false>(disp_pixnum, pattern_data, palette);
-		}
+		// Check the priority bit.
+		if (nametable_word & 0x8000)
+			T_PutLine_P1<plane, h_s>(disp_pixnum, pattern_data, palette);
+		else
+			T_PutLine_P0<plane, h_s>(disp_pixnum, pattern_data, palette);
 
 		// Go to the next H cell.
 		x_cell_offset = (x_cell_offset + 1) & H_Scroll_CMask;
@@ -857,7 +793,12 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_ScrollA_Window(void)
 		for (int x = Win_Length; x > 0; x--, disp_pixnum += 8) {
 			// Get the pattern info and data for the current tile.
 			register uint16_t pattern_info = *Win_Row_Addr++;
-			uint32_t pattern_data = T_Get_Pattern_Data<interlaced>(pattern_info, y_fine_offset);
+			uint32_t pattern_data;
+			if (interlaced) {
+				pattern_data = cache.pattern_line_m5_nt_8x16(pattern_info, y_fine_offset);
+			} else {
+				pattern_data = cache.pattern_line_m5_nt_8x8(pattern_info, y_fine_offset);
+			}
 
 			// Extract the palette number.
 			// Resulting number is palette * 16.
@@ -867,20 +808,11 @@ FORCE_INLINE void VdpPrivate::T_Render_Line_ScrollA_Window(void)
 			if (VDP_Layers & VdpTypes::VDP_LAYER_SCROLLA_SWAP)
 				pattern_info ^= 0x8000;
 
-			// Check for horizontal flip.
-			if (pattern_info & 0x0800) {
-				// Pattern has H-Flip enabled.
-				if (pattern_info & 0x8000)
-					T_PutLine_P1<true, h_s, true>(disp_pixnum, pattern_data, palette);
-				else
-					T_PutLine_P0<true, h_s, true>(disp_pixnum, pattern_data, palette);
-			} else {
-				// Pattern doesn't have flip enabled.
-				if (pattern_info & 0x8000)
-					T_PutLine_P1<true, h_s, false>(disp_pixnum, pattern_data, palette);
-				else
-					T_PutLine_P0<true, h_s, false>(disp_pixnum, pattern_data, palette);
-			}
+			// Check the priority bit.
+			if (pattern_info & 0x8000)
+				T_PutLine_P1<true, h_s>(disp_pixnum, pattern_data, palette);
+			else
+				T_PutLine_P0<true, h_s>(disp_pixnum, pattern_data, palette);
 		}
 
 		// Mark window pixels.
@@ -1408,6 +1340,9 @@ void VdpPrivate::renderLine_m5(void)
 		// Off screen.
 		return;
 	}
+
+	// Update the pattern cache.
+	cache.update_m5(&VRam);
 
 	// Determine the starting line in MD_Screen.
 	if (Reg_Status.isNtsc() &&

@@ -538,10 +538,10 @@ class VdpPrivate
 		template<bool priority, bool h_s, int pat_pixnum, uint32_t mask, int shift>
 		FORCE_INLINE uint8_t T_PutPixel_Sprite(int disp_pixnum, uint32_t pattern, unsigned int palette);
 
-		template<bool plane, bool h_s, bool flip>
+		template<bool plane, bool h_s>
 		FORCE_INLINE void T_PutLine_P0(int disp_pixnum, uint32_t pattern, int palette);
 
-		template<bool plane, bool h_s, bool flip>
+		template<bool plane, bool h_s>
 		FORCE_INLINE void T_PutLine_P1(int disp_pixnum, uint32_t pattern, int palette);
 
 		template<bool priority, bool h_s, bool flip>
@@ -561,9 +561,6 @@ class VdpPrivate
 
 		template<bool plane>
 		FORCE_INLINE uint16_t T_Get_Nametable_Word(unsigned int x, unsigned int y);
-
-		template<bool interlaced>
-		FORCE_INLINE uint32_t T_Get_Pattern_Data(uint16_t pattern, unsigned int y_fine_offset);
 
 		template<bool plane, bool interlaced, bool vscroll, bool h_s>
 		FORCE_INLINE void T_Render_Line_Scroll(int cell_start, int cell_length);
