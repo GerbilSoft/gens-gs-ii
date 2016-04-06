@@ -29,6 +29,13 @@
 #include <cstdlib>
 #include <cstring>
 
+#ifdef _WIN32
+// Win32 Unicode Translation Layer.
+// Needed for proper Unicode filename support on Windows.
+// Also required for large file support.
+#include "libcompat/W32U/W32U_mini.h"
+#endif
+
 // Byteswapping macros.
 #include "libcompat/byteswap.h"
 
