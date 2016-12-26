@@ -497,7 +497,7 @@ static void gen_variables(void) {
 	emit("__io_fetchbased_pc     dd 0\n");
 	emit("__access_address       dd 0\n");
 	context_size += (3*1)+(4*4);
-
+	
 	emit("\n\n");
 	emit("; Dirty variable (Gens)\n\n");	// Added by Stef for Gens.
 	emit("save_01				dd 0\n");
@@ -784,7 +784,7 @@ emit("js near execquit\n");
 /*	emit("xor ebx,ebx\n");suffice to say, bits 16-31 should be zero... */
 	emit("mov bx,[esi]\n");
 	emit("add esi,byte 2\n");
-
+	
 // TODO: Port from Gens Rerecording
 #if 0
 	emit("pushad\n");
@@ -794,7 +794,7 @@ emit("js near execquit\n");
 	emit("call _GensTrace_cd\n");
 	emit("popad\n");
 #endif
-
+			     
 	emit("jmp dword[__jmptbl+ebx*4]\n");
 	/* Traditional loop - used when hog mode is off */
 	if(!hog) {
@@ -832,6 +832,7 @@ emit("js near execquit\n");
 	emit("jz short execquit_nointerrupt\n");
 	emit("execquit_yesinterrupt:\n");
 	emit("call flush_interrupts\n");
+
 	/*
 	** Force an uncached re-base.
 	** This fulfills the "Hardware interrupt" case.
@@ -990,6 +991,7 @@ emit("js near execquit\n");
 		emit("mov eax,[esp+8]\n");  /* eax = level  */
 		emit("mov edx,[esp+12]\n"); /* edx = vector */
 	}
+	
 	/*
 	** Verify parameters.
 	*/
@@ -1110,7 +1112,7 @@ emit("js near execquit\n");
 **  Exit:  Nothing
 */
 	begin_source_proc("GetContext");
-
+	
 	// Context size preprocessor macros.
 	snprintf(rep_csize, sizeof(rep_csize), "%%%%rep(%d / 8)\n", context_size);
 	snprintf(if_csize,  sizeof(if_csize),  "%%%%if (%d %%%% 8)!=0\n", context_size);
@@ -1120,6 +1122,7 @@ emit("js near execquit\n");
 	if(use_stack) emit("mov edi,[esp+12]\n");
 	else          emit("mov edi,eax\n");
 	emit("%%assign i 0\n");
+	
 	//emit("%%rep ((contextend-contextbegin) / 8)\n");
 	emit(rep_csize);
 	emit("  mov eax,[contextbegin+i+0]\n");
@@ -1399,7 +1402,7 @@ static void ret_timing(int n) {
 		emit("js near execquit\n");
 		emit("mov bx,[esi]\n");
 		emit("add esi,byte 2\n");
-
+		
 // TODO: Port from Gens Rerecording
 #if 0
 		emit("pushad\n");
@@ -1418,7 +1421,7 @@ static void ret_timing(int n) {
 		emit("call _GensTrace_cd\n");
 		emit("popad\n");
 #endif
-
+			
 		emit("jmp dword[__jmptbl+ebx*4]\n");
 	}
 }
@@ -1690,7 +1693,7 @@ static void gen_readbw(int size)
 		emit("\tmov esi, [__io_fetchbased_pc]\n");
 		emit("\tmov edx, [__access_address]\n");
 		emit("\tpop eax\n");
-
+		
 // TODO: Port from Gens Rerecording
 #if 0
 		emit("pushad\n");
@@ -1702,7 +1705,7 @@ static void gen_readbw(int size)
 		emit("call _hook_read_byte_cd\n");
 		emit("popad\n");
 #endif
-
+		
 		emit("\tret\n");
 	}
 
@@ -1725,7 +1728,7 @@ static void gen_readbw(int size)
 		emit("\tmov esi, [__io_fetchbased_pc]\n");
 		emit("\tmov edx, [__access_address]\n");
 		emit("\tpop eax\n");
-
+			
 // TODO: Port from Gens Rerecording
 #if 0		
 		emit("pushad\n");
@@ -1922,6 +1925,7 @@ static void gen_group_12_exception(void) {
 	if(cputype >= 68010) {
 		emit("pop edx\n");
 	}
+
 	emit("push ecx\n");/* dest. PC */
 	sr2cx();
 	emit("push ecx\n");/* old SR */
@@ -1985,8 +1989,7 @@ static void selective_usereg(void) {
 	case aind: case ainc: case adec:
 	case adsp: case axdp:
 		usereg();
-	default:
-		;
+	default:;
 	}
 }
 
@@ -3077,29 +3080,42 @@ static void flick_reg(char*op,int needxf,int affectx,int asl,int rotate){
 			emit("mov edx,[__dreg+ebx*4]\n");
 			if(needxf){
 				emit("mov al,[__xflag]\n");
-				emit("shr al,1\n");
 			}else{
 				emit("mov al,0\n");
 			}
 
-/*****************/
+			/*****************/
 
-	switch(tmps[0])
-	{
-		case 'c':/* register shift count */
-			emit("cmp cl, 32\n");
-			emit("jb short ln%d\n",linenum);
-			emit("%s%c %s, 16\n", op,direction[main_dr],x86dx[main_size]);
-			emit("sub cl, 31\n");
-			emit("%s%c %s, 15\n", op,direction[main_dr],x86dx[main_size]);
-			emit("ln%d:\n",linenum); linenum++;
-			emit("%s%c %s,%s\n", op,direction[main_dr],x86dx[main_size],tmps);
-			break;
+			switch(tmps[0])
+			{
+				case 'c':/* register shift count */
+					emit("cmp cl, 32\n");
+					emit("jb short ln%d\n",linenum);
+					if(needxf){
+						emit("shr al, 1\n");
+					}
+					emit("ln%d:\n",linenum + 1);
+					emit("%s%c %s, 31\n", op,direction[main_dr],x86dx[main_size]);
+					emit("sub cl, 31\n");
+					emit("cmp cl, 32\n");
+					emit("jnb short ln%d\n",linenum + 1);
+					emit("%s%c %s,%s\n", op,direction[main_dr],x86dx[main_size],tmps);
+					emit("jmp short ln%d\n",linenum + 2);
+					emit("ln%d:\n",linenum); linenum += 2;
+					if(needxf){
+						emit("shr al, 1\n");
+					}
+					emit("%s%c %s,%s\n", op,direction[main_dr],x86dx[main_size],tmps);
+					emit("ln%d:\n",linenum); linenum++;
+					break;
 
-		default:/* immediate shift count >1 */
-			emit("%s%c %s,%s\n", op,direction[main_dr],x86dx[main_size],tmps);
-			break;
-	}
+				default:/* immediate shift count >1 */
+					if(needxf){
+						emit("shr al,1\n");
+					}
+					emit("%s%c %s,%s\n", op,direction[main_dr],x86dx[main_size],tmps);
+					break;
+			}
 
 /*****************/
 
@@ -3120,7 +3136,6 @@ static void flick_reg(char*op,int needxf,int affectx,int asl,int rotate){
 		}else{
 			if(needxf){
 				emit("mov al,[__xflag]\n");
-				emit("shr al,1\n");
 			}else{
 				emit("mov al,0\n");
 			}
@@ -3132,14 +3147,28 @@ static void flick_reg(char*op,int needxf,int affectx,int asl,int rotate){
 		case 'c':/* register shift count */
 			emit("cmp cl, 32\n");
 			emit("jb short ln%d\n",linenum);
-			emit("%s%c %s[__dreg+ebx*4], 16\n", op,direction[main_dr],sizename[main_size]);
+			if(needxf){
+				emit("shr al, 1\n");
+			}
+			emit("ln%d:\n",linenum + 1);
+			emit("%s%c %s[__dreg+ebx*4], 31\n", op,direction[main_dr],sizename[main_size]);
 			emit("sub cl, 31\n");
-			emit("%s%c %s[__dreg+ebx*4], 15\n", op,direction[main_dr],sizename[main_size]);
-			emit("ln%d:\n",linenum); linenum++;
+			emit("cmp cl, 32\n");
+			emit("jnb short ln%d\n",linenum + 1);
 			emit("%s%c %s[__dreg+ebx*4],%s\n", op,direction[main_dr],sizename[main_size],tmps);
+			emit("jmp short ln%d\n",linenum + 2);
+			emit("ln%d:\n",linenum); linenum += 2;
+			if(needxf){
+				emit("shr al, 1\n");
+			}
+			emit("%s%c %s[__dreg+ebx*4],%s\n", op,direction[main_dr],sizename[main_size],tmps);
+			emit("ln%d:\n",linenum); linenum++;
 			break;
 
 		default:/* immediate shift count >1 */
+			if(needxf){
+				emit("shr al, 1\n");
+			}
 			emit("%s%c %s[__dreg+ebx*4],%s\n", op,direction[main_dr],sizename[main_size],tmps);
 			break;
 	}
@@ -4110,6 +4139,7 @@ static void i_tas(void){
 	main_ea_rmw_load();
 	selftest(1);
 	flags_v0();
+	/* Note: TAS works on all locations on Sega CD-side */
 	emit("or cl,80h\n");
 	main_ea_rmw_store();
 	if((main_eamode==dreg)||(main_eamode==areg)){
@@ -4355,6 +4385,7 @@ static void i_chk(void){
 	cycles=10;
 	if(cputype==68010)cycles=8;
 	ret_timing(cycles+main_ea_cycles());
+
 	/* Out of bounds, so generate CHK exception */
 	emit("ln%d:",myline);
 	emit("mov edx,18h\n");
@@ -4889,8 +4920,8 @@ static void decode4(int n) {
 
 //	main_size=2;for(main_reg=0;main_reg<8;main_reg++)eadef_data(n,0xFFC0,0x4100|(main_reg<<9),i_chk);
 
-	/* bug fixed in code generation */
-
+	/* Bug fixed in code generation for CHK instruction */
+	
 	main_size=2;for(main_reg=0;main_reg<8;main_reg++)eadef_data(n,0xFFC0,0x4180|(main_reg<<9),i_chk);
 
 	eadef_control(n,0xFFC0,0x4840,i_pea);
