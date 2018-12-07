@@ -47,6 +47,7 @@
 #include <cstdio>
 // C++ includes.
 #include <algorithm>
+#include <string>
 
 // TODO: Use the MDP headers for mdp_z_entry_t.
 #ifdef __cplusplus
