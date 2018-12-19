@@ -2116,8 +2116,6 @@ static void gen_writedecl(void)
 	emit("\tret\n");
 }
 
-
-
 /***************************************************************************/
 /*
 ** Group 1 and 2 exceptions
@@ -3308,35 +3306,38 @@ static void flick_reg(char*op,int needxf,int affectx,int asl,int rotate){
 				emit("mov al,0\n");
 			}
 
-/*****************/
+			/*****************/
 
-	switch(tmps[0])
-	{
-		case 'c':/* register shift count */
-			emit("cmp cl, 32\n");
-			emit("jb short ln%d\n",linenum);
-			emit("sub cl, 31\n");
-			if(needxf){
-				emit("shr al, 1\n");
-			}
-			emit("%s%c %s, 31\n", op,direction[main_dr],x86dx[main_size]);
-			emit("%s%c %s,%s\n", op,direction[main_dr],x86dx[main_size],tmps);
-			emit("jmp short ln%d\n",linenum + 1);
-			emit("ln%d:\n",linenum); linenum++;
-			if(needxf){
-				emit("shr al, 1\n");
-			}
-			emit("%s%c %s,%s\n", op,direction[main_dr],x86dx[main_size],tmps);
-			emit("ln%d:\n",linenum); linenum++;
-			break;
+			switch(tmps[0])
+			{
+				case 'c':/* register shift count */
+					emit("cmp cl, 32\n");
+					emit("jb short ln%d\n",linenum);
+					if(needxf){
+						emit("shr al, 1\n");
+					}
+					emit("ln%d:\n",linenum + 1);
+					emit("%s%c %s, 31\n", op,direction[main_dr],x86dx[main_size]);
+					emit("sub cl, 31\n");
+					emit("cmp cl, 32\n");
+					emit("jnb short ln%d\n",linenum + 1);
+					emit("%s%c %s,%s\n", op,direction[main_dr],x86dx[main_size],tmps);
+					emit("jmp short ln%d\n",linenum + 2);
+					emit("ln%d:\n",linenum); linenum += 2;
+					if(needxf){
+						emit("shr al, 1\n");
+					}
+					emit("%s%c %s,%s\n", op,direction[main_dr],x86dx[main_size],tmps);
+					emit("ln%d:\n",linenum); linenum++;
+					break;
 
-		default:/* immediate shift count >1 */
-			if(needxf){
-				emit("shr al,1\n");
+				default:/* immediate shift count >1 */
+					if(needxf){
+						emit("shr al,1\n");
+					}
+					emit("%s%c %s,%s\n", op,direction[main_dr],x86dx[main_size],tmps);
+					break;
 			}
-			emit("%s%c %s,%s\n", op,direction[main_dr],x86dx[main_size],tmps);
-			break;
-	}
 
 /*****************/
 
@@ -3368,13 +3369,17 @@ static void flick_reg(char*op,int needxf,int affectx,int asl,int rotate){
 		case 'c':/* register shift count */
 			emit("cmp cl, 32\n");
 			emit("jb short ln%d\n",linenum);
-			emit("sub cl, 31\n");
 			if(needxf){
 				emit("shr al, 1\n");
 			}
+			emit("ln%d:\n",linenum + 1);
 			emit("%s%c %s[__dreg+ebx*4], 31\n", op,direction[main_dr],sizename[main_size]);
-			emit("jmp short ln%d\n",linenum + 1);
-			emit("ln%d:\n",linenum); linenum++;
+			emit("sub cl, 31\n");
+			emit("cmp cl, 32\n");
+			emit("jnb short ln%d\n",linenum + 1);
+			emit("%s%c %s[__dreg+ebx*4],%s\n", op,direction[main_dr],sizename[main_size],tmps);
+			emit("jmp short ln%d\n",linenum + 2);
+			emit("ln%d:\n",linenum); linenum += 2;
 			if(needxf){
 				emit("shr al, 1\n");
 			}
@@ -4314,9 +4319,7 @@ static void i_tas(void){
 	main_ea_rmw_load();
 	selftest(1);
 	flags_v0();
-
-	/* Gens changes */
-	
+	/* Note: TAS only works on data registers on Genesis */
 	if((main_eamode==dreg)||(main_eamode==areg)){
 		emit("or cl,80h\n");
 		main_ea_rmw_store();
