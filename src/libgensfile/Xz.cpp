@@ -93,7 +93,7 @@ Xz::Xz(const char *filename)
 	Xzs_Construct(&m_xzs);
 
 	// Read the Xz footer.
-	int64_t startPosition;
+	Int64 startPosition;
 	SRes res = Xzs_ReadBackward(&m_xzs, &m_lookStream.s, &startPosition, nullptr, &m_allocImp);
 	if (res != SZ_OK || startPosition != 0) {
 		// Error reading the Xz footer.
@@ -224,7 +224,7 @@ int Xz::readFile(const mdp_z_entry_t *z_entry,
 	// Seek to the beginning of the file.
 	// TODO: Use startPosition from the header?
 	// TODO: Check return value?
-	int64_t startPosition = 0;
+	Int64 startPosition = 0;
 	m_lookStream.s.Seek(&m_lookStream, &startPosition, SZ_SEEK_SET);
 	if (startPosition != 0) {
 		// Error seeking in the file.
@@ -253,7 +253,7 @@ int Xz::readFile(const mdp_z_entry_t *z_entry,
 	// Read the file into the buffer.
 	// Based on LZMA SDK 15.14's XzHandler.cpp: CDecoder::Decode()
 	SRes res;
-	uint32_t inSize = 0;
+	size_t inSize = 0;
 	size_t inPos = 0;
 	size_t outPos = 0;
 	*ret_siz = 0;
